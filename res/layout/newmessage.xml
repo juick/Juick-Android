@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tabNewPost"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/editTo"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:singleLine="true"
+            android:enabled="false"
+            android:text="@string/To__All"/>
+        <Button
+            android:id="@+id/buttonSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send"/>
+        <ProgressBar
+            android:id="@+id/progressSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:indeterminateOnly="true"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/editMessage"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="top"/>
+
+    <Button
+        android:id="@+id/buttonLocationHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:visibility="gone"
+        android:textSize="16dip"
+        android:textColor="#FF000000"
+        android:background="@drawable/balloon"
+        android:paddingBottom="25dip"
+        android:paddingLeft="15dip"
+        android:paddingTop="10dip"
+        android:paddingRight="15dip"/>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0">
+        <ImageButton
+            android:id="@+id/buttonTags"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_menu_tags"/>
+        <ImageButton
+            android:id="@+id/buttonLocation"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_button_location"/>
+        <ImageButton
+            android:id="@+id/buttonAttachment"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_button_attachment"/>
+    </LinearLayout>
+
+</LinearLayout>

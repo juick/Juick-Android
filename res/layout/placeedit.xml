@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/tabhost"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+        <FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+            <include android:id="@+id/tabDetails" layout="@layout/placeedit_form"/>
+            <FrameLayout
+                android:id="@+id/tabMap"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+                <com.google.android.maps.MapView
+                    android:id="@+id/mapView"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:clickable="true"
+                    android:apiKey="@string/maps_key"/>
+                <ImageView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:src="@drawable/pushpin_center"
+                    android:scaleType="center"/>
+            </FrameLayout>
+        </FrameLayout>
+    </LinearLayout>
+</TabHost>

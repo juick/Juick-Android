@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="maps_key">0DjDjZPPUT1SCsxeIxkduemcXUkYnxtPSw7s0lQ</string>
+    <!--<string name="maps_key">0DjDjZPPUT1RBx4LNrOlllz_EVOwnO83nJFq_xA</string>-->
+    <string name="com_juick">com.juick</string>
+
+    <string name="Juick">Juick</string>
+    <string name="Loading___">Loading...</string>
+    <string name="Please_wait___">Please wait...</string>
+    <string name="OK">OK</string>
+    <string name="Cancel">Cancel</string>
+    <string name="Save">Save</string>
+    <string name="Create">Create</string>
+    <string name="Send">Send</string>
+    <string name="Settings">Settings</string>
+    <string name="Signout">Signout</string>
+    <string name="Error">Error</string>
+    <string name="blog">blog</string>
+    <string name="Refresh">Refresh</string>
+    <string name="Share">Share</string>
+    <string name="Map">Map</string>
+    <string name="Details">Details</string>
+    <string name="Search">Search</string>
+    <string name="Find">Find</string>
+    <string name="Tag">Tag</string>
+    <string name="Tags">Tags</string>
+    <string name="Replies">Replies</string>
+    <string name="Enter_a_message">Enter a message</string>
+    <string name="Message_posted">Message posted</string>
+    <string name="Enter_a_name">Enter a name</string>
+    <string name="Your_messages">Your messages</string>
+    <string name="Juick_profile">Juick profile</string>
+
+    <!-- ExploreActivity -->
+    <string name="Juick__Explore">Juick: Explore</string>
+    <string name="Popular_tags">Popular tags</string>
+    <string name="All_messages">All messages</string>
+    <string name="Nearby_places">Nearby places</string>
+
+    <!-- JuickMessageMenu -->
+    <string name="Recommend_message">Recommend message</string>
+    <string name="Subscribe_to">Subscribe to</string>
+    <string name="Blacklist">Blacklist</string>
+    <string name="Recommended">Recommended</string>
+    <string name="Subscribed">Subscribed</string>
+    <string name="Added_to_BL">Added to BL</string>
+
+    <!-- JuickMessagesAdapter -->
+    <string name="Replies_">Replies:</string>
+
+    <!-- NewMessageActivity -->
+    <string name="Juick__New_message">Juick: New message</string>
+    <string name="To__All">To: All</string>
+    <string name="Attach">Attach</string>
+    <string name="Photo_from_gallery">Photo from gallery</string>
+    <string name="New_photo">New photo</string>
+    <string name="Video_from_gallery">Video from gallery</string>
+    <string name="New_video">New video</string>
+    <string name="Location_">Location:</string>
+    <string name="Attachment__photo">Attachment: Photo</string>
+    <string name="Attachment__video">Attachment: Video</string>
+
+    <!-- PickLocationActivity -->
+    <string name="Pick_a_location">Pick a location</string>
+
+    <!-- PlaceEditActivity -->
+    <string name="Place_name_">Place name:</string>
+    <string name="Impersonal_description_">Impersonal description:</string>
+    <string name="Tags__separated_by_spaces__">Tags (separated by spaces):</string>
+    <string name="Website_">Website:</string>
+
+    <!-- PlacesActivity -->
+    <string name="New_place">New place</string>
+    <string name="Without_name">Without name</string>
+    <string name="Determining_your_location___">Determining your location...</string>
+    <string name="Location_determination_is_disabled">Location determination is disabled. Check settings.</string>
+    <string name="Specify_a_location">Specify a location</string>
+
+    <!-- SignIn / SignUp -->
+    <string name="Nick_latin_letters_and_numbers_">Nick (latin letters and numbers):</string>
+    <string name="Password_">Password:</string>
+    <string name="Enter_symbols_from_this_image_">Enter symbols from this image:</string>
+    <string name="Enter_nick_and_password">Enter nick and password</string>
+    <string name="Unknown_nick_or_wrong_password">Unknown nick or wrong password</string>
+    <string name="Wrong_captcha">Wrong captcha</string>
+    <string name="Nick_is_already_exists">Nick is already exists</string>
+    <string name="Only_one_account">You can use only one account at time</string>
+
+    <!-- Preferences -->
+    <string name="Account">Account</string>
+    <string name="Nickname">Nickname</string>
+    <string name="Password">Password</string>
+    <string name="Notifications">Notifications</string>
+    <string name="Refresh_interval">Refresh interval</string>
+
+    <!-- ThreadActivity -->
+    <string name="In_reply_to_">In reply to:</string>
+
+</resources>

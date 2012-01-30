@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <!-- Main -->
+
+    <style name="JuickMainTheme" parent="android:Theme.Light">
+        <item name="android:windowTitleSize">44dip</item>
+        <item name="android:windowTitleStyle">@style/JuickMainWindowTitle</item>
+        <item name="android:windowTitleBackgroundStyle">@style/JuickMainWindowTitleBackground</item>
+    </style>
+
+    <style name="JuickMainWindowTitle">
+        <item name="android:textAppearance">@style/JuickMainWindowTitleText</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowRadius">0</item>
+    </style>
+
+    <style name="JuickMainWindowTitleText" parent="android:TextAppearance.WindowTitle">
+          <item name="android:textSize">0dip</item>
+          <item name="android:textColor">#C3C394</item>
+          <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="JuickMainWindowTitleBackground">
+        <item name="android:background">@drawable/main_title_bg</item>
+    </style>
+
+    <style name="JuickMainTitleButton" parent="android:Widget.Button">
+        <item name="android:layout_marginTop">0px</item>
+        <item name="android:layout_marginRight">0px</item>
+        <item name="android:layout_marginBottom">0px</item>
+        <item name="android:layout_marginLeft">0px</item>
+        <item name="android:paddingTop">5dip</item>
+        <item name="android:paddingRight">0dip</item>
+        <item name="android:paddingBottom">0px</item>
+        <item name="android:paddingLeft">2dip</item>
+        <item name="android:background">@drawable/main_title_button_bg</item>
+    </style>
+
+    <!-- Thread -->
+
+    <style name="JuickThreadTheme" parent="android:Theme.Light">
+        <item name="android:windowTitleSize">48dip</item>
+        <item name="android:windowTitleStyle">@style/JuickThreadWindowTitle</item>
+    </style>
+
+    <style name="JuickThreadWindowTitle">
+        <item name="android:textAppearance">@style/JuickThreadWindowTitleText</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:shadowColor">#BB000000</item>
+        <item name="android:shadowRadius">2.75</item>
+    </style>
+
+    <style name="JuickThreadWindowTitleText" parent="android:TextAppearance.WindowTitle">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+</resources>
