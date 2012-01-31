@@ -95,6 +95,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
             args.putBoolean("home", true);
         } else if (itemPosition == 2) {
             args.putBoolean("popular", true);
+        } else if (itemPosition == 3) {
+            args.putBoolean("media", true);
         }
         mf.setArguments(args);
         ft.replace(R.id.messagesfragment, mf);

@@ -4,6 +4,7 @@
         <item>Subscriptions</item>
         <item>Last messages</item>
         <item>Top messages</item>
+        <item>With photos</item>
     </string-array>
     <string-array name="prefsRefreshIntervalTitles">
         <item>Never</item>

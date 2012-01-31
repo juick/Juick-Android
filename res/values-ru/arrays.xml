@@ -4,6 +4,7 @@
         <item>Подписки</item>
         <item>Все сообщения</item>
         <item>Популярные</item>
+        <item>С фотографиями</item>
     </string-array>
     <string-array name="prefsRefreshIntervalTitles">
         <item>Никогда</item>
