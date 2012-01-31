@@ -21,7 +21,9 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.ListPreference;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceGroup;
 import com.juick.R;
 
 /**
@@ -30,22 +32,18 @@ import com.juick.R;
  */
 public class PreferencesActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
-    private ListPreference prefRefresh;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.preferences);
-
-        prefRefresh = (ListPreference) getPreferenceScreen().findPreference("refresh");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        updateSummaries();
+        updateSummaries(getPreferenceScreen());
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -57,22 +55,21 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
     }
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        updateSummaries();
+        updateSummaries(getPreferenceScreen());
         if (key.equals("refresh")) {
             MainActivity.startCheckUpdates(this);
         }
     }
 
-    private void updateSummaries() {
-        SharedPreferences sp = getPreferenceScreen().getSharedPreferences();
-        String refresh = sp.getString("refresh", "5");
-        String vals[] = getResources().getStringArray(R.array.prefsRefreshIntervalValues);
-        int id = 1;
-        for (int i = 0; i < vals.length; i++) {
-            if (vals[i].equals(refresh)) {
-                id = i;
+    private void updateSummaries(PreferenceGroup pg) {
+        for (int i = 0; i < pg.getPreferenceCount(); i++) {
+            Preference p = pg.getPreference(i);
+            if (p instanceof PreferenceGroup) {
+                updateSummaries((PreferenceGroup) p);
+            } else if (p instanceof ListPreference) {
+                ListPreference lp = (ListPreference) p;
+                lp.setSummary(lp.getEntry());
             }
         }
-        prefRefresh.setSummary(getResources().getStringArray(R.array.prefsRefreshIntervalTitles)[id]);
     }
 }
