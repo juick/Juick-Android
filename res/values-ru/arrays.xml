@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+    <string-array name="messagesLists">
+        <item>Подписки</item>
+        <item>Все сообщения</item>
+    </string-array>
     <string-array name="prefsRefreshIntervalTitles">
         <item>Никогда</item>
         <item>5 минут</item>
