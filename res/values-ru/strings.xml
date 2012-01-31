@@ -92,6 +92,8 @@
     <string name="Password">Пароль</string>
     <string name="Notifications">Уведомления</string>
     <string name="Refresh_interval">Интервал обновления</string>
+    <string name="Appearance">Внешний вид</string>
+    <string name="Theme">Тема оформления</string>
 
     <!-- ThreadActivity -->
     <string name="In_reply_to_">В ответ на:</string>

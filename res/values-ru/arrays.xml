@@ -14,4 +14,18 @@
         <item>2 часа</item>
         <item>4 часа</item>
     </string-array>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <string-array name="prefsThemesTitles">
+        <item>Светлая</item>
+        <item>Тёмная</item>
+    </string-array>
 </resources>

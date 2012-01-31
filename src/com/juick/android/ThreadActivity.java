@@ -47,8 +47,9 @@ public class ThreadActivity extends FragmentActivity implements View.OnClickList
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Utils.updateTheme(this);
         super.onCreate(savedInstanceState);
-
+        
         Intent i = getIntent();
         mid = i.getIntExtra("mid", 0);
         if (mid == 0) {

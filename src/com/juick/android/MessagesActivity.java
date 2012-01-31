@@ -32,6 +32,7 @@ public class MessagesActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Utils.updateTheme(this);
         super.onCreate(savedInstanceState);
 
         Intent i = getIntent();

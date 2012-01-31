@@ -65,6 +65,7 @@ public class PickPlaceActivity extends ListActivity implements OnClickListener, 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Utils.updateTheme(this);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.pickplace);

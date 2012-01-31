@@ -19,9 +19,12 @@ package com.juick.android;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import com.juick.R;
 import java.io.BufferedReader;
@@ -38,6 +41,20 @@ import org.json.JSONObject;
  * @author Ugnich Anton
  */
 public class Utils {
+
+    public static void updateTheme(Activity activity) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activity);
+        if (sp.getString("theme", "0").equals("0")) {
+            activity.setTheme(android.R.style.Theme_Light);
+        }
+    }
+    
+    public static void updateThemeHolo(Activity activity) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activity);
+        if (sp.getString("theme", "0").equals("0")) {
+            activity.setTheme(R.style.Theme_Sherlock_Light);
+        }
+    }
 
     public static int doHttpGetRequest(String url) {
         try {

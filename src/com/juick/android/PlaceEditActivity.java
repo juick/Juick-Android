@@ -53,6 +53,7 @@ public class PlaceEditActivity extends MapActivity implements OnClickListener, T
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Utils.updateTheme(this);
         super.onCreate(savedInstanceState);
 
         Intent i = getIntent();

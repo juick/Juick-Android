@@ -45,6 +45,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Utils.updateThemeHolo(this);
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
@@ -108,6 +109,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
             } else {
                 finish();
             }
+        } else if (requestCode == ACTIVITY_PREFERENCES) {
+            if (resultCode == RESULT_OK) {
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
         }
     }
 
@@ -122,7 +129,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menuitem_preferences:
-                startActivity(new Intent(this, PreferencesActivity.class));
+                startActivityForResult(new Intent(this, PreferencesActivity.class), ACTIVITY_PREFERENCES);
                 return true;
             case R.id.menuitem_newmessage:
                 startActivity(new Intent(this, NewMessageActivity.class));

@@ -92,6 +92,8 @@
     <string name="Password">Password</string>
     <string name="Notifications">Notifications</string>
     <string name="Refresh_interval">Refresh interval</string>
+    <string name="Appearance">Appearance</string>
+    <string name="Theme">Theme</string>
 
     <!-- ThreadActivity -->
     <string name="In_reply_to_">In reply to:</string>

@@ -34,6 +34,7 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Utils.updateTheme(this);
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.preferences);
@@ -59,6 +60,7 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
         if (key.equals("refresh")) {
             MainActivity.startCheckUpdates(this);
         }
+        setResult(RESULT_OK);
     }
 
     private void updateSummaries(PreferenceGroup pg) {
