@@ -18,7 +18,7 @@
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     <application android:icon="@drawable/ic_launcher" android:label="@string/Juick" android:theme="@android:style/Theme.Light">
         <uses-library android:name="com.google.android.maps"/>
-        <activity android:name=".MainActivity" android:theme="@style/JuickMainTheme" android:configChanges="keyboard|keyboardHidden|orientation">
+        <activity android:name="com.juick.android.MainActivity" android:theme="@style/JuickMainTheme" android:configChanges="keyboard|keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -29,14 +29,14 @@
                 <data android:scheme="http" android:host="juick.com"/>
             </intent-filter>
         </activity>
-        <activity android:name=".MessagesActivity" android:configChanges="keyboard|keyboardHidden|orientation">
+        <activity android:name="com.juick.android.MessagesActivity" android:configChanges="keyboard|keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="vnd.android.cursor.item/vnd.com.juick.profile"/>
             </intent-filter>
         </activity>
-        <activity android:name=".NewMessageActivity" android:label="@string/Juick__New_message" android:configChanges="keyboard|keyboardHidden|orientation">
+        <activity android:name="com.juick.android.NewMessageActivity" android:label="@string/Juick__New_message" android:configChanges="keyboard|keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -46,29 +46,29 @@
                 <data android:mimeType="video/mp4"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ExploreActivity" android:label="@string/Juick__Explore" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <activity android:name=".ThreadActivity" android:theme="@style/JuickThreadTheme" android:label="" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <activity android:name=".PlacesActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <activity android:name=".PickPlaceActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <activity android:name=".PlaceEditActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <activity android:name=".SignInActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <activity android:name=".SignUpActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <activity android:name=".PreferencesActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <activity android:name=".TagsActivity" android:label="@string/Tags" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <activity android:name=".PickLocationActivity" android:label="@string/Pick_a_location" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <receiver android:name=".OnBootReceiver">
+        <activity android:name="com.juick.android.ExploreActivity" android:label="@string/Juick__Explore" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="com.juick.android.ThreadActivity" android:theme="@style/JuickThreadTheme" android:label="" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="com.juick.android.PlacesActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="com.juick.android.PickPlaceActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="com.juick.android.PlaceEditActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="com.juick.android.SignInActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="com.juick.android.SignUpActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="com.juick.android.PreferencesActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="com.juick.android.TagsActivity" android:label="@string/Tags" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="com.juick.android.PickLocationActivity" android:label="@string/Pick_a_location" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <receiver android:name="com.juick.android.OnBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".CheckUpdatesReceiver"></receiver>
-        <service android:name=".AuthenticationService" android:exported="true" android:process=":auth">
+        <receiver android:name="com.juick.android.CheckUpdatesReceiver"></receiver>
+        <service android:name="com.juick.android.AuthenticationService" android:exported="true" android:process=":auth">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>
             <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/authenticator"/>
         </service>
-        <service android:name=".ContactsSyncService" android:exported="true" android:process=":contacts">
+        <service android:name="com.juick.android.ContactsSyncService" android:exported="true" android:process=":contacts">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter"/>
             </intent-filter>
