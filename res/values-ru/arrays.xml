@@ -3,6 +3,7 @@
     <string-array name="messagesLists">
         <item>Подписки</item>
         <item>Все сообщения</item>
+        <item>Популярные</item>
     </string-array>
     <string-array name="prefsRefreshIntervalTitles">
         <item>Никогда</item>

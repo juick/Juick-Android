@@ -53,6 +53,7 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
         String search = null;
         String tag = null;
         int place_id = 0;
+        boolean popular = false;
 
         Bundle args = getArguments();
         if (args != null) {
@@ -62,6 +63,7 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
             search = args.getString("search");
             tag = args.getString("tag");
             place_id = args.getInt("place_id", 0);
+            popular = args.getBoolean("popular", false);
         }
 
         if (home) {
@@ -87,6 +89,8 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
                 }
             } else if (place_id > 0) {
                 apiurl += "&place_id=" + place_id;
+            } else if (popular) {
+                apiurl += "&popular=1";
             }
         }
     }

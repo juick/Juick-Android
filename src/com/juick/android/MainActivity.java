@@ -93,6 +93,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
         Bundle args = new Bundle();
         if (itemPosition == 0) {
             args.putBoolean("home", true);
+        } else if (itemPosition == 2) {
+            args.putBoolean("popular", true);
         }
         mf.setArguments(args);
         ft.replace(R.id.messagesfragment, mf);

@@ -3,6 +3,7 @@
     <string-array name="messagesLists">
         <item>Subscriptions</item>
         <item>Last messages</item>
+        <item>Top messages</item>
     </string-array>
     <string-array name="prefsRefreshIntervalTitles">
         <item>Never</item>
