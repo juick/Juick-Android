@@ -30,6 +30,12 @@
     <string name="Enter_a_name">Entrez un nom</string>
     <string name="Your_messages">Vos messages</string>
     <string name="Juick_profile">Profil Juick</string>
+    
+    <!-- Pull-to-refresh -->
+
+
+
+
 
     <!-- ExploreActivity -->
     <string name="Juick__Explore">Juick: Explorer</string>

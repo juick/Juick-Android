@@ -31,6 +31,12 @@
     <string name="Your_messages">Ваши сообщения</string>
     <string name="Juick_profile">Профайл в Juick</string>
 
+    <!-- Pull-to-refresh -->
+    <string name="pull_to_refresh_pull_label">Тяните, чтобы обновить...</string>
+    <string name="pull_to_refresh_release_label">Отпустите, чтобы обновить...</string>
+    <string name="pull_to_refresh_refreshing_label">Загрузка...</string>
+    <string name="pull_to_refresh_tap_label">Нажмите, чтобы обновить...</string>
+
     <!-- ExploreActivity -->
     <string name="Juick__Explore">Джуик: Обзор</string>
     <string name="Popular_tags">Популярные теги</string>

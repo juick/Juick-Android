@@ -30,7 +30,13 @@
     <string name="Enter_a_name">Enter a name</string>
     <string name="Your_messages">Your messages</string>
     <string name="Juick_profile">Juick profile</string>
-
+    
+    <!-- Pull-to-refresh -->
+    <string name="pull_to_refresh_pull_label">Pull to refresh...</string>
+    <string name="pull_to_refresh_release_label">Release to refresh...</string>
+    <string name="pull_to_refresh_refreshing_label">Loading...</string>
+    <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
+    
     <!-- ExploreActivity -->
     <string name="Juick__Explore">Juick: Explore</string>
     <string name="Popular_tags">Popular tags</string>
