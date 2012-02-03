@@ -109,7 +109,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == ACTIVITY_SIGNIN) {
             if (resultCode == RESULT_OK) {
-                onCreate(Bundle.EMPTY);
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
             } else {
                 finish();
             }

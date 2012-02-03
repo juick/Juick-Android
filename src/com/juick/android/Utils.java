@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import com.juick.R;
@@ -48,7 +49,7 @@ public class Utils {
             activity.setTheme(android.R.style.Theme_Light);
         }
     }
-    
+
     public static void updateThemeHolo(Activity activity) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activity);
         if (sp.getString("theme", "0").equals("0")) {
@@ -93,12 +94,19 @@ public class Utils {
     public static String getBasicAuthString(Context context) {
         AccountManager am = AccountManager.get(context);
         Account accs[] = am.getAccountsByType(context.getString(R.string.com_juick));
-        if (accs.length == 1) {
-            String authStr = accs[0].name + ":" + am.getPassword(accs[0]);
-            return "Basic " + Base64.encodeToString(authStr.getBytes(), Base64.NO_WRAP);
-        } else {
-            return "";
+        if (accs.length > 0) {
+            Bundle b = null;
+            try {
+                b = am.getAuthToken(accs[0], "", null, null, null, null).getResult();
+            } catch (Exception e) {
+                Log.e("Juick", e.toString());
+            }
+            if (b != null) {
+                String authStr = b.getString(AccountManager.KEY_ACCOUNT_NAME) + ":" + b.getString(AccountManager.KEY_AUTHTOKEN);
+                return "Basic " + Base64.encodeToString(authStr.getBytes(), Base64.NO_WRAP);
+            }
         }
+        return "";
     }
 
     public static String getJSON(Context context, String url) {

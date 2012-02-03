@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import com.juick.R;
 
 /**
  *
@@ -72,12 +73,11 @@ public class AuthenticationService extends Service {
 
         @Override
         public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
-//            final Bundle result = new Bundle();
-//            result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
-//            result.putString(AccountManager.KEY_ACCOUNT_TYPE, mContext.getString(R.string.com_juick));
-//            result.putString(AccountManager.KEY_AUTHTOKEN, AccountManager.get(mContext).getPassword(account));
-//            return result;
-            return null;
+            final Bundle result = new Bundle();
+            result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE, mContext.getString(R.string.com_juick));
+            result.putString(AccountManager.KEY_AUTHTOKEN, AccountManager.get(mContext).getPassword(account));
+            return result;
         }
 
         @Override
