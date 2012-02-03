@@ -20,14 +20,11 @@ package com.juick.android;
 import android.app.Activity;
 import android.support.v4.app.SupportActivity;
 import com.juick.android.api.JuickMessage;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v4.app.ListFragment;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.HeaderViewListAdapter;
 import com.juick.R;
 import com.juick.android.api.JuickUser;
 
@@ -40,7 +37,6 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
     private ThreadFragmentListener parentActivity;
     private JuickMessagesAdapter listAdapter;
     private WsClient ws = null;
-    private View viewLoading;
     private int mid = 0;
 
     @Override
@@ -86,13 +82,7 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
     }
 
     private void initAdapter() {
-        setListAdapter(new HeaderViewListAdapter(null, null, null));
-
-        viewLoading = ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.listitem_loading, null);
-        getListView().addFooterView(viewLoading, null, false);
-
         listAdapter = new JuickMessagesAdapter(getActivity(), JuickMessagesAdapter.TYPE_THREAD);
-        setListAdapter(listAdapter);
 
         getListView().setOnItemClickListener(this);
         getListView().setOnItemLongClickListener(new JuickMessageMenu(getActivity()));
@@ -107,11 +97,11 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
                         public void run() {
                             if (jsonStr != null) {
                                 listAdapter.parseJSON(jsonStr);
+                                setListAdapter(listAdapter);
                                 if (listAdapter.getCount() > 0) {
                                     initAdapterStageTwo();
                                 }
                             }
-                            ThreadFragment.this.getListView().removeFooterView(viewLoading);
                         }
                     });
                 }

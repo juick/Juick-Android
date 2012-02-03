@@ -17,18 +17,15 @@
  */
 package com.juick.android;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.SupportActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import com.juick.R;
 import org.json.JSONArray;
 
 /**
@@ -38,8 +35,6 @@ import org.json.JSONArray;
 public class TagsFragment extends ListFragment implements OnItemClickListener, OnItemLongClickListener {
 
     private TagsFragmentListener parentActivity;
-    private ArrayAdapter<String> listAdapter;
-    private View viewLoading;
     private int uid = 0;
 
     @Override
@@ -61,12 +56,6 @@ public class TagsFragment extends ListFragment implements OnItemClickListener, O
             uid = args.getInt("uid", 0);
         }
 
-        viewLoading = ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.listitem_loading, null);
-        getListView().addFooterView(viewLoading, null, false);
-
-        listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1);
-        setListAdapter(listAdapter);
-
         getListView().setOnItemClickListener(this);
         getListView().setOnItemLongClickListener(this);
 
@@ -84,16 +73,18 @@ public class TagsFragment extends ListFragment implements OnItemClickListener, O
                         public void run() {
                             if (jsonStr != null) {
                                 try {
+                                    ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1);
+
                                     JSONArray json = new JSONArray(jsonStr);
                                     int cnt = json.length();
                                     for (int i = 0; i < cnt; i++) {
                                         listAdapter.add(json.getJSONObject(i).getString("tag"));
                                     }
+                                    setListAdapter(listAdapter);
                                 } catch (Exception e) {
                                     Log.e("initTagsAdapter", e.toString());
                                 }
                             }
-                            TagsFragment.this.getListView().removeFooterView(viewLoading);
                         }
                     });
                 }
@@ -103,11 +94,11 @@ public class TagsFragment extends ListFragment implements OnItemClickListener, O
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        parentActivity.onTagClick(listAdapter.getItem(position));
+        parentActivity.onTagClick((String) getListAdapter().getItem(position));
     }
 
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        parentActivity.onTagLongClick(listAdapter.getItem(position));
+        parentActivity.onTagLongClick((String) getListAdapter().getItem(position));
         return true;
     }
 
