@@ -44,17 +44,21 @@ import org.json.JSONObject;
 public class Utils {
 
     public static void updateTheme(Activity activity) {
+        /*
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activity);
         if (sp.getString("theme", "0").equals("0")) {
-            activity.setTheme(android.R.style.Theme_Light);
+        activity.setTheme(android.R.style.Theme_Light);
         }
+         */
     }
 
     public static void updateThemeHolo(Activity activity) {
+        /*
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activity);
         if (sp.getString("theme", "0").equals("0")) {
-            activity.setTheme(R.style.Theme_Sherlock_Light);
+        activity.setTheme(R.style.Theme_Sherlock_Light);
         }
+         */
     }
 
     public static int doHttpGetRequest(String url) {
@@ -74,7 +78,7 @@ public class Utils {
     public static boolean hasAuth(Context context) {
         AccountManager am = AccountManager.get(context);
         Account accs[] = am.getAccountsByType(context.getString(R.string.com_juick));
-        return accs.length == 1;
+        return accs.length > 0;
     }
 
     public static String getAuthHash(Context context) {

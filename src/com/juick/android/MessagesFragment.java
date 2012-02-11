@@ -236,6 +236,8 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
 
     // Refresh
     public void onClick(View view) {
+        mRefreshState = REFRESHING;
+        prepareForRefresh();
         init();
     }
 
@@ -295,8 +297,6 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
                             || mRefreshView.getTop() >= 0)
                             && mRefreshState == RELEASE_TO_REFRESH) {
                         // Initiate the refresh
-                        mRefreshState = REFRESHING;
-                        prepareForRefresh();
                         onClick(getListView());
                     } else if (mRefreshView.getBottom() < mRefreshViewHeight
                             || mRefreshView.getTop() <= 0) {
