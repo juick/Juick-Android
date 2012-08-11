@@ -27,6 +27,7 @@ import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
@@ -66,6 +67,7 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
     private int mRefreshOriginalTopPadding;
     private int mLastMotionY;
     private boolean mBounceHack;
+    private ScaleGestureDetector mScaleDetector;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -134,6 +136,8 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
         mReverseFlipAnimation.setInterpolator(new LinearInterpolator());
         mReverseFlipAnimation.setDuration(250);
         mReverseFlipAnimation.setFillAfter(true);
+
+        mScaleDetector = new ScaleGestureDetector(getActivity(), new ScaleListener());
     }
 
     @Override
@@ -284,6 +288,9 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
     }
 
     public boolean onTouch(View view, MotionEvent event) {
+
+        mScaleDetector.onTouchEvent(event);
+
         final int y = (int) event.getY();
         mBounceHack = false;
 
@@ -415,5 +422,15 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
         mRefreshViewText.setText(R.string.pull_to_refresh_refreshing_label);
 
         mRefreshState = REFRESHING;
+    }
+
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            listAdapter.setScale(detector.getScaleFactor());
+            listAdapter.notifyDataSetChanged();
+            return true;
+        }
     }
 }

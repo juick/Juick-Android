@@ -20,7 +20,9 @@ package com.juick.android;
 import android.text.Layout.Alignment;
 import com.juick.android.api.JuickMessage;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.AlignmentSpan;
@@ -48,6 +50,7 @@ import org.json.JSONArray;
  */
 public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
 
+    private static final String PREFERENCES_SCALE = "MessagesListScale";
     public static final int TYPE_THREAD = 1;
     public static Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
     public static Pattern msgPattern = Pattern.compile("#[0-9]+");
@@ -55,11 +58,19 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
     private String Replies;
     private int type;
     private boolean allItemsEnabled = true;
+    private SharedPreferences sp;
+    private float defaultTextSize;
+    private float textScale;
 
     public JuickMessagesAdapter(Context context, int type) {
         super(context, R.layout.listitem_juickmessage);
         Replies = context.getResources().getString(R.string.Replies_) + " ";
         this.type = type;
+
+        defaultTextSize = new TextView(context).getTextSize();
+
+        sp = PreferenceManager.getDefaultSharedPreferences(context);
+        textScale = sp.getFloat(PREFERENCES_SCALE, 1);
     }
 
     public int parseJSON(String jsonStr) {
@@ -88,6 +99,7 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
                 v = vi.inflate(R.layout.listitem_juickmessage, null);
             }
             TextView t = (TextView) v.findViewById(R.id.text);
+            t.setTextSize(defaultTextSize * textScale);
 
             if (type == TYPE_THREAD && jmsg.RID == 0) {
                 t.setText(formatFirstMessageText(jmsg));
@@ -110,6 +122,8 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
                 v = vi.inflate(R.layout.preference_category, null);
             }
 
+            ((TextView) v).setTextSize(defaultTextSize * textScale);
+
             if (jmsg.Text != null) {
                 ((TextView) v).setText(jmsg.Text);
             } else {
@@ -131,6 +145,12 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         JuickMessage jmsg = new JuickMessage();
         jmsg.Text = txt;
         insert(jmsg, position);
+    }
+
+    public void setScale(float scale) {
+        textScale *= scale;
+        textScale = Math.max(0.5f, Math.min(textScale, 2.0f));
+        sp.edit().putFloat(PREFERENCES_SCALE, textScale).commit();
     }
 
     private SpannableStringBuilder formatMessageText(JuickMessage jmsg) {
