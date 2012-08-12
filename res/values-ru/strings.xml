@@ -9,6 +9,7 @@
     <string name="Please_wait___">Пожалуйста, ждите...</string>
     <string name="OK">ОК</string>
     <string name="Cancel">Отмена</string>
+    <string name="Yes">Да</string>
     <string name="Save">Сохранить</string>
     <string name="Create">Создать</string>
     <string name="Send">Отправить</string>
@@ -50,6 +51,9 @@
     <string name="Recommended">Рекомендовано</string>
     <string name="Subscribed">Подписано</string>
     <string name="Added_to_BL">Добавлено в черный список</string>
+    <string name="Are_you_sure_recommend">Вы уверены, что хотите рекомендовать?</string>
+    <string name="Are_you_sure_subscribe">Вы уверены, что хотите подписаться?</string>
+    <string name="Are_you_sure_blacklist">Вы уверены, что хотите добавить в черный список?</string>
 
     <!-- JuickMessagesAdapter -->
     <string name="Replies_">Ответов:</string>

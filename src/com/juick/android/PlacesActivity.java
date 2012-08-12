@@ -91,7 +91,7 @@ public class PlacesActivity extends ListActivity implements OnItemClickListener,
                     PlacesActivity.this.finish();
                 }
             });
-            builder.create().show();
+            builder.show();
             return;
         }
         lm.requestLocationUpdates(bestProvider, 0, 0, this);

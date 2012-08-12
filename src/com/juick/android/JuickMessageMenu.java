@@ -103,7 +103,7 @@ public class JuickMessageMenu implements OnItemLongClickListener, OnClickListene
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setItems(items, this);
-        builder.create().show();
+        builder.show();
         return true;
     }
 
@@ -131,7 +131,12 @@ public class JuickMessageMenu implements OnItemLongClickListener, OnClickListene
         }
         switch (which) {
             case 0:
-                postMessage("! #" + listSelectedItem.MID, activity.getResources().getString(R.string.Recommended));
+                confirmAction(R.string.Are_you_sure_recommend, new Runnable() {
+
+                    public void run() {
+                        postMessage("! #" + listSelectedItem.MID, activity.getResources().getString(R.string.Recommended));
+                    }
+                });
                 break;
             case 1:
                 Intent i = new Intent(activity, MessagesActivity.class);
@@ -140,10 +145,20 @@ public class JuickMessageMenu implements OnItemLongClickListener, OnClickListene
                 activity.startActivity(i);
                 break;
             case 2:
-                postMessage("S @" + listSelectedItem.User.UName, activity.getResources().getString(R.string.Subscribed));
+                confirmAction(R.string.Are_you_sure_subscribe, new Runnable() {
+
+                    public void run() {
+                        postMessage("S @" + listSelectedItem.User.UName, activity.getResources().getString(R.string.Subscribed));
+                    }
+                });
                 break;
             case 3:
-                postMessage("BL @" + listSelectedItem.User.UName, activity.getResources().getString(R.string.Added_to_BL));
+                confirmAction(R.string.Are_you_sure_blacklist, new Runnable() {
+
+                    public void run() {
+                        postMessage("BL @" + listSelectedItem.User.UName, activity.getResources().getString(R.string.Added_to_BL));
+                    }
+                });
                 break;
             case 4:
                 Intent intent = new Intent(Intent.ACTION_SEND);
@@ -152,6 +167,21 @@ public class JuickMessageMenu implements OnItemLongClickListener, OnClickListene
                 activity.startActivity(intent);
                 break;
         }
+    }
+
+    private void confirmAction(final int resId, final Runnable action) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setIcon(android.R.drawable.ic_dialog_alert);
+        builder.setMessage(activity.getResources().getString(resId));
+        builder.setPositiveButton(R.string.Yes, new OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                action.run();
+            }
+        });
+        builder.setNegativeButton(R.string.Cancel, null);
+        builder.show();
     }
 
     private void postMessage(final String body, final String ok) {

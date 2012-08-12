@@ -9,6 +9,7 @@
     <string name="Please_wait___">Please wait...</string>
     <string name="OK">OK</string>
     <string name="Cancel">Cancel</string>
+    <string name="Yes">Yes</string>
     <string name="Save">Save</string>
     <string name="Create">Create</string>
     <string name="Send">Send</string>
@@ -50,6 +51,9 @@
     <string name="Recommended">Recommended</string>
     <string name="Subscribed">Subscribed</string>
     <string name="Added_to_BL">Added to BL</string>
+    <string name="Are_you_sure_recommend">Are you sure you want to recommend?</string>
+    <string name="Are_you_sure_subscribe">Are you sure you want to subscribe?</string>
+    <string name="Are_you_sure_blacklist">Are you sure you want to blacklist?</string>
 
     <!-- JuickMessagesAdapter -->
     <string name="Replies_">Replies:</string>

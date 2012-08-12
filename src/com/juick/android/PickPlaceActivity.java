@@ -101,7 +101,7 @@ public class PickPlaceActivity extends ListActivity implements OnClickListener, 
                     PickPlaceActivity.this.finish();
                 }
             });
-            builder.create().show();
+            builder.show();
             return;
         }
         lm.requestLocationUpdates(bestProvider, 0, 0, this);
