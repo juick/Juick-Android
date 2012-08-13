@@ -14,7 +14,7 @@
         android:scaleType="fitXY"
         android:gravity="fill_horizontal"
         android:src="@android:drawable/divider_horizontal_bright"/>
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
@@ -23,22 +23,33 @@
             android:id="@+id/textReplyTo"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="0"
             android:singleLine="true"
             android:visibility="gone"
             android:paddingBottom="2dip"
             android:textColor="#000"/>
-        <Button
-            android:id="@+id/buttonSend"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/textReplyTo"
-            android:text="Send"/>
-        <EditText
-            android:id="@+id/editMessage"
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textReplyTo"
-            android:layout_toLeftOf="@id/buttonSend"/>
-    </RelativeLayout>
+            android:layout_weight="0"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/buttonAttachment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:src="@drawable/ic_button_attachment_small"/>
+            <EditText
+                android:id="@+id/editMessage"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+            <Button
+                android:id="@+id/buttonSend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="Send"/>
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

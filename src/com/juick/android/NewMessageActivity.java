@@ -23,7 +23,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -32,17 +31,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.juick.R;
 import java.io.FileInputStream;
@@ -79,12 +74,16 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
     private String attachmentUri = null;
     private String attachmentMime = null;
     private ProgressDialog progressDialog = null;
-    private static boolean progressDialogCancel;
+    private BooleanReference progressDialogCancel = new BooleanReference(false);
     private Handler progressHandler = new Handler() {
 
         @Override
         public void handleMessage(Message msg) {
-            progressDialog.setProgress(msg.what);
+            if (progressDialog.getMax() < msg.what) {
+                progressDialog.setMax(msg.what);
+            } else {
+                progressDialog.setProgress(msg.what);
+            }
         }
     };
 
@@ -174,7 +173,7 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
         attachmentUri = null;
         attachmentMime = null;
         progressDialog = null;
-        progressDialogCancel = false;
+        progressDialogCancel.bool = false;
         etMessage.requestFocus();
 
         Thread thr = new Thread(new Runnable() {
@@ -299,20 +298,21 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
             setFormEnabled(false);
             if (attachmentUri != null) {
                 progressDialog = new ProgressDialog(this);
-                progressDialogCancel = false;
+                progressDialogCancel.bool = false;
                 progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
                     public void onCancel(DialogInterface arg0) {
-                        NewMessageActivity.progressDialogCancel = true;
+                        NewMessageActivity.this.progressDialogCancel.bool = true;
                     }
                 });
                 progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                progressDialog.setMax(0);
                 progressDialog.show();
             }
             Thread thr = new Thread(new Runnable() {
 
                 public void run() {
-                    final boolean res = sendMessage(msg);
+                    final boolean res = sendMessage(NewMessageActivity.this, msg, pid, lat, lon, acc, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
                     NewMessageActivity.this.runOnUiThread(new Runnable() {
 
                         public void run() {
@@ -345,7 +345,7 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
         }
     }
 
-    private boolean sendMessage(String txt) {
+    public static boolean sendMessage(Context context, String txt, int pid, double lat, double lon, int acc, String attachmentUri, String attachmentMime, final ProgressDialog progressDialog, Handler progressHandler, BooleanReference progressDialogCancel) {
         try {
             final String end = "\r\n";
             final String twoHyphens = "--";
@@ -359,7 +359,7 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Connection", "Keep-Alive");
             conn.setRequestProperty("Charset", "UTF-8");
-            conn.setRequestProperty("Authorization", Utils.getBasicAuthString(this));
+            conn.setRequestProperty("Authorization", Utils.getBasicAuthString(context));
             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
             String outStr = twoHyphens + boundary + end;
@@ -394,19 +394,14 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
 
             FileInputStream fileInput = null;
             if (attachmentUri != null && attachmentUri.length() > 0) {
-                fileInput = getContentResolver().openAssetFileDescriptor(Uri.parse(attachmentUri), "r").createInputStream();
+                fileInput = context.getContentResolver().openAssetFileDescriptor(Uri.parse(attachmentUri), "r").createInputStream();
                 size += fileInput.available();
                 size += 2; // \r\n (end)
             }
 
             if (progressDialog != null) {
                 final int fsize = size;
-                NewMessageActivity.this.runOnUiThread(new Runnable() {
-
-                    public void run() {
-                        progressDialog.setMax(fsize);
-                    }
-                });
+                progressHandler.sendEmptyMessage(fsize);
             }
 
             conn.setFixedLengthStreamingMode(size);
@@ -419,7 +414,7 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
                 int length = -1;
                 int total = 0;
                 int totallast = 0;
-                while ((length = fileInput.read(buffer, 0, 4096)) != -1 && progressDialogCancel == false) {
+                while ((length = fileInput.read(buffer, 0, 4096)) != -1 && progressDialogCancel.bool == false) {
                     out.write(buffer, 0, length);
                     total += length;
                     if (((int) (total / 102400)) != totallast) {
@@ -427,19 +422,19 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
                         progressHandler.sendEmptyMessage(total);
                     }
                 }
-                if (progressDialogCancel == false) {
+                if (progressDialogCancel.bool == false) {
                     out.write(end.getBytes());
                 }
                 fileInput.close();
                 progressHandler.sendEmptyMessage(size);
             }
-            if (progressDialogCancel == false) {
+            if (progressDialogCancel.bool == false) {
                 out.write(outStrEndB);
                 out.flush();
             }
             out.close();
 
-            if (progressDialogCancel) {
+            if (progressDialogCancel.bool) {
                 return false;
             } else {
                 return (conn.getResponseCode() == 200);
@@ -498,57 +493,12 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
         }
     }
 
-    class AttachAdapter extends BaseAdapter {
+    public static class BooleanReference {
 
-        private Context context;
-        private final int icons[] = {
-            R.drawable.ic_attach_photo,
-            R.drawable.ic_attach_photo_new,
-            R.drawable.ic_attach_video,
-            R.drawable.ic_attach_video_new
-        };
-        private final int labels[] = {
-            R.string.Photo_from_gallery,
-            R.string.New_photo,
-            R.string.Video_from_gallery,
-            R.string.New_video
-        };
+        public boolean bool;
 
-        public AttachAdapter(Context context) {
-            super();
-            this.context = context;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            TextView tv = (TextView) convertView;
-            if (tv == null) {
-                LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                tv = (TextView) vi.inflate(android.R.layout.simple_list_item_1, null);
-                tv.setCompoundDrawablePadding(10);
-                tv.setTextColor(Color.BLACK);
-            }
-            if (position >= 0 && position < 4) {
-                tv.setText(labels[position]);
-                tv.setCompoundDrawablesWithIntrinsicBounds(icons[position], 0, 0, 0);
-            }
-            return tv;
-        }
-
-        public int getCount() {
-            return labels.length;
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public Object getItem(int position) {
-            if (position >= 0 && position < 4) {
-                return context.getResources().getString(labels[position]);
-            } else {
-                return "";
-            }
+        public BooleanReference(boolean bool) {
+            this.bool = bool;
         }
     }
 }
