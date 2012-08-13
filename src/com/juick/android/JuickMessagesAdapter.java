@@ -167,7 +167,9 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         ssb.append(name + ' ' + tags + "\n" + txt);
         ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         ssb.setSpan(new ForegroundColorSpan(0xFFC8934E), 0, name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        ssb.setSpan(new ForegroundColorSpan(0xFF0000CC), name.length() + 1, name.length() + tags.length() + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        if (tags.length() > 0)
+            ssb.setSpan(new ForegroundColorSpan(0xFF0000CC), name.length() + 1, 
+                    name.length() + tags.length() + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         int paddingt = name.length() + 1 + tags.length() + 1;
 
@@ -196,7 +198,7 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         pos = m.end();
         }
          */
-
+        
         DateFormat df = new SimpleDateFormat("HH:mm dd/MMM/yy");
         df.setTimeZone(TimeZone.getDefault());
         String date = df.format(jmsg.Timestamp);
