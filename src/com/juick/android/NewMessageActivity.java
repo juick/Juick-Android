@@ -323,8 +323,8 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
                             if (res) {
                                 resetForm();
                             }
-                            if (res && attachmentUri == null) {
-                                Toast.makeText(NewMessageActivity.this, R.string.Message_posted, Toast.LENGTH_LONG).show();
+                            if ((res && attachmentUri == null) || NewMessageActivity.this.isFinishing()) {
+                                Toast.makeText(NewMessageActivity.this, res ? R.string.Message_posted : R.string.Error, Toast.LENGTH_LONG).show();
                             } else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(NewMessageActivity.this);
                                 builder.setNeutralButton(R.string.OK, null);

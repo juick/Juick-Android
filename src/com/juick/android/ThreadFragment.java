@@ -18,6 +18,7 @@
 package com.juick.android;
 
 import android.app.Activity;
+import android.os.Build;
 import android.support.v4.app.SupportActivity;
 import android.view.MotionEvent;
 import com.juick.android.api.JuickMessage;
@@ -38,14 +39,16 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
 
     private ThreadFragmentListener parentActivity;
     private JuickMessagesAdapter listAdapter;
-    private ScaleGestureDetector mScaleDetector;
+    private ScaleGestureDetector mScaleDetector = null;
     private WsClient ws = null;
     private int mid = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mScaleDetector = new ScaleGestureDetector(getActivity(), new ScaleListener());
+        if (Build.VERSION.SDK_INT >= 8) {
+            mScaleDetector = new ScaleGestureDetector(getActivity(), new ScaleListener());
+        }
     }
 
     @Override
@@ -122,6 +125,9 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
     }
 
     private void initAdapterStageTwo() {
+        if (!isAdded()) {
+            return;
+        }
         String replies = getResources().getString(R.string.Replies) + " (" + Integer.toString(listAdapter.getCount() - 1) + ")";
         listAdapter.addDisabledItem(replies, 1);
 
@@ -139,18 +145,19 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
     }
 
     public void onWebSocketTextFrame(final String jsonStr) {
-        ((Vibrator) getActivity().getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(250);
-        if (isAdded()) {
-            getActivity().runOnUiThread(new Runnable() {
-
-                public void run() {
-                    if (jsonStr != null) {
-                        listAdapter.parseJSON("[" + jsonStr + "]");
-                        listAdapter.getItem(1).Text = getResources().getString(R.string.Replies) + " (" + Integer.toString(listAdapter.getCount() - 2) + ")";
-                    }
-                }
-            });
+        if (!isAdded()) {
+            return;
         }
+        ((Vibrator) getActivity().getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(250);
+        getActivity().runOnUiThread(new Runnable() {
+
+            public void run() {
+                if (jsonStr != null) {
+                    listAdapter.parseJSON("[" + jsonStr + "]");
+                    listAdapter.getItem(1).Text = getResources().getString(R.string.Replies) + " (" + Integer.toString(listAdapter.getCount() - 2) + ")";
+                }
+            }
+        });
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -159,7 +166,9 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
     }
 
     public boolean onTouch(View view, MotionEvent event) {
-        mScaleDetector.onTouchEvent(event);
+        if (mScaleDetector != null) {
+            mScaleDetector.onTouchEvent(event);
+        }
         return false;
     }
 
