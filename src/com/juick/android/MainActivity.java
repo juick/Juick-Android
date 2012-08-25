@@ -26,9 +26,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.*;
-import android.support.v4.view.*;
-import android.view.MenuInflater;
 import android.widget.ArrayAdapter;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.juick.R;
 import java.util.Calendar;
 import java.util.List;
@@ -37,7 +40,7 @@ import java.util.List;
  *
  * @author Ugnich Anton
  */
-public class MainActivity extends FragmentActivity implements ActionBar.OnNavigationListener {
+public class MainActivity extends SherlockFragmentActivity implements ActionBar.OnNavigationListener {
 
     public static final int ACTIVITY_SIGNIN = 2;
     public static final int ACTIVITY_PREFERENCES = 3;
@@ -126,7 +129,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+        MenuInflater inflater = getSupportMenuInflater();
         inflater.inflate(R.menu.main, menu);
         return true;
     }
