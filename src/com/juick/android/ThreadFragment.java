@@ -19,7 +19,6 @@ package com.juick.android;
 
 import android.app.Activity;
 import android.os.Build;
-import android.support.v4.app.SupportActivity;
 import android.view.MotionEvent;
 import com.juick.android.api.JuickMessage;
 import android.os.Bundle;
@@ -52,7 +51,7 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
     }
 
     @Override
-    public void onAttach(SupportActivity activity) {
+    public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
             parentActivity = (ThreadFragmentListener) activity;
