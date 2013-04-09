@@ -17,9 +17,9 @@
  */
 package com.juick.android;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.support.v4.app.SupportActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -38,7 +38,7 @@ public class TagsFragment extends ListFragment implements OnItemClickListener, O
     private int uid = 0;
 
     @Override
-    public void onAttach(SupportActivity activity) {
+    public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
             parentActivity = (TagsFragmentListener) activity;
