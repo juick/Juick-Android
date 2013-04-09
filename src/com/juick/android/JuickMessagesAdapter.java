@@ -21,7 +21,9 @@ import android.text.Layout.Alignment;
 import com.juick.android.api.JuickMessage;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -37,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.juick.R;
+import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -55,6 +58,7 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
     public static Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
     public static Pattern msgPattern = Pattern.compile("#[0-9]+");
 //    public static Pattern usrPattern = Pattern.compile("@[a-zA-Z0-9\\-]{2,16}");
+    private ImageCache photos;
     private String Replies;
     private int type;
     private boolean allItemsEnabled = true;
@@ -70,7 +74,9 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         defaultTextSize = new TextView(context).getTextSize();
 
         sp = PreferenceManager.getDefaultSharedPreferences(context);
-        textScale = sp.getFloat(PREFERENCES_SCALE, 1);
+        textScale = sp.getFloat(PREFERENCES_SCALE, 0.8f);
+
+        photos = new ImageCache(context, "photos-small", 1024 * 1024 * 5);
     }
 
     public int parseJSON(String jsonStr) {
@@ -105,6 +111,14 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
                 t.setText(formatFirstMessageText(jmsg));
             } else {
                 t.setText(formatMessageText(jmsg));
+            }
+
+            ImageView p = (ImageView) v.findViewById(R.id.photo);
+            if (jmsg.Photo != null) {
+                PhotoLoaderTask task = new PhotoLoaderTask(p);
+                task.execute(Integer.toString(jmsg.MID) + "-" + Integer.toString(jmsg.RID), jmsg.Photo);
+            } else {
+                p.setVisibility(View.GONE);
             }
 
             /*
@@ -250,5 +264,33 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         }
 
         return ssb;
+    }
+
+    class PhotoLoaderTask extends AsyncTask<String, Void, Bitmap> {
+
+        private final WeakReference<ImageView> imageViewReference;
+
+        public PhotoLoaderTask(ImageView imageView) {
+            // Use a WeakReference to ensure the ImageView can be garbage collected
+            imageViewReference = new WeakReference<ImageView>(imageView);
+        }
+
+        // Decode image in background.
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            return photos.getImage(params[0], params[1]);
+        }
+
+        // Once complete, see if ImageView is still around and set bitmap.
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            if (imageViewReference != null && bitmap != null) {
+                final ImageView imageView = imageViewReference.get();
+                if (imageView != null) {
+                    imageView.setImageBitmap(bitmap);
+                    imageView.setVisibility(View.VISIBLE);
+                }
+            }
+        }
     }
 }

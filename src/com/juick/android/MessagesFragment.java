@@ -175,7 +175,7 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
 
             public void run() {
                 final String jsonStr = Utils.getJSON(getActivity(), apiurl);
-                if (isAdded()) {
+                if (isAdded()) {  //FIX ContentView not yet created
                     getActivity().runOnUiThread(new Runnable() {
 
                         public void run() {
