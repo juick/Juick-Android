@@ -9,15 +9,20 @@
             android:defaultValue="5"
             android:persistent="true"/>
     </PreferenceCategory>
-<!--    
     <PreferenceCategory android:title="@string/Appearance">
         <ListPreference
+            android:key="loadphotos"
+            android:title="@string/LoadPhotos"
+            android:entries="@array/prefsLoadImages"
+            android:entryValues="@array/prefsLoadImagesValues"
+            android:defaultValue="Always"
+            android:persistent="true"/>
+<!--        <ListPreference
             android:key="theme"
             android:title="@string/Theme"
             android:entries="@array/prefsThemesTitles"
             android:entryValues="@array/prefsThemesValues"
             android:defaultValue="0"
-            android:persistent="true"/>
+            android:persistent="true"/>-->
     </PreferenceCategory>
--->
 </PreferenceScreen>

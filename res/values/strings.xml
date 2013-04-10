@@ -103,6 +103,7 @@
     <string name="Notifications">Notifications</string>
     <string name="Refresh_interval">Refresh interval</string>
     <string name="Appearance">Appearance</string>
+    <string name="LoadPhotos">Load photos automatically</string>
     <string name="Theme">Theme</string>
 
     <!-- ThreadActivity -->

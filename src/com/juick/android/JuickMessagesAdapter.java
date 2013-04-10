@@ -59,6 +59,7 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
     public static Pattern msgPattern = Pattern.compile("#[0-9]+");
 //    public static Pattern usrPattern = Pattern.compile("@[a-zA-Z0-9\\-]{2,16}");
     private ImageCache photos;
+    private boolean usenetwork = false;
     private String Replies;
     private int type;
     private boolean allItemsEnabled = true;
@@ -75,6 +76,11 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
 
         sp = PreferenceManager.getDefaultSharedPreferences(context);
         textScale = sp.getFloat(PREFERENCES_SCALE, 0.8f);
+
+        String loadphotos = sp.getString("loadphotos", "Always");
+        if (loadphotos.charAt(0) == 'A' || (loadphotos.charAt(0) == 'W' && Utils.isWiFiConnected(context))) {
+            usenetwork = true;
+        }
 
         photos = new ImageCache(context, "photos-small", 1024 * 1024 * 5);
     }
@@ -115,8 +121,16 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
 
             ImageView p = (ImageView) v.findViewById(R.id.photo);
             if (jmsg.Photo != null) {
-                PhotoLoaderTask task = new PhotoLoaderTask(p);
-                task.execute(Integer.toString(jmsg.MID) + "-" + Integer.toString(jmsg.RID), jmsg.Photo);
+                String key = Integer.toString(jmsg.MID) + "-" + Integer.toString(jmsg.RID);
+                Bitmap bitmap = photos.getImageMemory(key);
+                if (bitmap != null) {
+                    p.setImageBitmap(bitmap);
+                    p.setVisibility(View.VISIBLE);
+                } else {
+                    p.setVisibility(View.GONE);
+                    ImageLoaderTask task = new ImageLoaderTask(photos, p, usenetwork);
+                    task.execute(key, jmsg.Photo);
+                }
             } else {
                 p.setVisibility(View.GONE);
             }
@@ -266,19 +280,27 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         return ssb;
     }
 
-    class PhotoLoaderTask extends AsyncTask<String, Void, Bitmap> {
+    class ImageLoaderTask extends AsyncTask<String, Void, Bitmap> {
 
+        private ImageCache cache;
         private final WeakReference<ImageView> imageViewReference;
+        private boolean usenetwork;
 
-        public PhotoLoaderTask(ImageView imageView) {
+        public ImageLoaderTask(ImageCache cache, ImageView imageView, boolean usenetwork) {
             // Use a WeakReference to ensure the ImageView can be garbage collected
+            this.cache = cache;
+            this.usenetwork = usenetwork;
             imageViewReference = new WeakReference<ImageView>(imageView);
         }
 
         // Decode image in background.
         @Override
         protected Bitmap doInBackground(String... params) {
-            return photos.getImage(params[0], params[1]);
+            Bitmap b = cache.getImageDisk(params[0]);
+            if (b == null && usenetwork && cache.getImageNetwork(params[0], params[1])) {
+                b = cache.getImageDisk(params[0]);
+            }
+            return b;
         }
 
         // Once complete, see if ImageView is still around and set bitmap.

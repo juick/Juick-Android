@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import com.jakewharton.DiskLruCache;
 import java.io.BufferedInputStream;
@@ -41,6 +42,7 @@ public class ImageCache {
 
     public static final int IO_BUFFER_SIZE = 8 * 1024;
     private DiskLruCache mDiskCache;
+    private LruCache<String, Bitmap> mMemoryCache;
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
 
@@ -53,20 +55,28 @@ public class ImageCache {
                     : context.getCacheDir().getPath();
             final File diskCacheDir = new File(cachePath + File.separator + uniqueName);
             mDiskCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize);
+
+            final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+            final int cacheSize = maxMemory / 8;
+
+            mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+
+                @Override
+                protected int sizeOf(String key, Bitmap bitmap) {
+                    return bitmap.getRowBytes() * bitmap.getHeight() / 1024;
+                }
+            };
+
         } catch (IOException e) {
             Log.e("ImageCache.ImageCache", e.toString());
         }
     }
 
-    public Bitmap getImage(String key, String url) {
-        Bitmap b = get(key);
-        if (b == null && downloadImage(key, url)) {
-            b = get(key);
-        }
-        return b;
+    public Bitmap getImageMemory(String key) {
+        return mMemoryCache.get(key);
     }
 
-    private Bitmap get(String key) {
+    public Bitmap getImageDisk(String key) {
         Bitmap bitmap = null;
         DiskLruCache.Snapshot snapshot = null;
         try {
@@ -76,6 +86,9 @@ public class ImageCache {
                 if (in != null) {
                     final BufferedInputStream buffIn = new BufferedInputStream(in, IO_BUFFER_SIZE);
                     bitmap = BitmapFactory.decodeStream(buffIn);
+                    if (bitmap != null) {
+                        mMemoryCache.put(key, bitmap);
+                    }
                 }
             }
         } catch (IOException e) {
@@ -88,7 +101,7 @@ public class ImageCache {
         return bitmap;
     }
 
-    private boolean downloadImage(String key, String url) {
+    public boolean getImageNetwork(String key, String url) {
         boolean ret = false;
         DiskLruCache.Editor editor = null;
         BufferedInputStream in = null;

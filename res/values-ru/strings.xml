@@ -103,6 +103,7 @@
     <string name="Notifications">Уведомления</string>
     <string name="Refresh_interval">Интервал обновления</string>
     <string name="Appearance">Внешний вид</string>
+    <string name="LoadPhotos">Загружать фото автоматически</string>
     <string name="Theme">Тема оформления</string>
 
     <!-- ThreadActivity -->

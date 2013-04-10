@@ -24,6 +24,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -197,5 +199,11 @@ public class Utils {
             Log.e("downloadImage", e.toString());
         }
         return null;
+    }
+
+    public static boolean isWiFiConnected(Context context) {
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWiFi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        return mWiFi.isConnected();
     }
 }

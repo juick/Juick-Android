@@ -26,6 +26,16 @@
         <item>120</item>
         <item>240</item>
     </string-array>
+    <string-array name="prefsLoadImages">
+        <item>Never</item>
+        <item>Always</item>
+        <item>Over WiFi only</item>
+    </string-array>
+    <string-array name="prefsLoadImagesValues">
+        <item>Never</item>
+        <item>Always</item>
+        <item>WiFi</item>
+    </string-array>
     <string-array name="prefsThemesTitles">
         <item>Light</item>
         <item>Dark</item>

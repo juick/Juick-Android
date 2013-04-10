@@ -25,7 +25,17 @@
     
     
     
-    
+
+    <string-array name="prefsLoadImages">
+        <item>Никогда</item>
+        <item>Всегда</item>
+        <item>Только через WiFi</item>
+    </string-array>
+
+
+
+
+
     <string-array name="prefsThemesTitles">
         <item>Светлая</item>
         <item>Тёмная</item>
