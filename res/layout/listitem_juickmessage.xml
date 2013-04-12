@@ -27,4 +27,9 @@
         android:layout_marginTop="5dip"
         android:visibility="gone"
         android:src="@drawable/ic_attach_photo"/>
+    <TextView
+            android:id="@+id/summary"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
 </LinearLayout>
