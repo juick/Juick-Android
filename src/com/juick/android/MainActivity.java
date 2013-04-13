@@ -17,6 +17,7 @@
  */
 package com.juick.android;
 
+import com.juick.GCMIntentService;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -26,12 +27,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.android.gcm.GCMRegistrar;
 import com.juick.R;
 import java.util.Calendar;
 import java.util.List;
@@ -64,7 +67,18 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
             return;
         }
 
-        startCheckUpdates(this);
+        try {
+            GCMRegistrar.checkDevice(this);
+            GCMRegistrar.checkManifest(this);
+            final String regId = GCMRegistrar.getRegistrationId(this);
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+            String prefRegId = sp.getString("gcm_regid", null);
+            if (regId.isEmpty() || !regId.equals(prefRegId)) {
+                GCMRegistrar.register(this, GCMIntentService.SENDER_ID);
+            }
+        } catch (Exception e) {
+            Log.e("Juick.GCM", e.toString());
+        }
 
         ActionBar bar = getSupportActionBar();
         bar.setDisplayShowHomeEnabled(false);
@@ -72,22 +86,6 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
         bar.setListNavigationCallbacks(ArrayAdapter.createFromResource(this, R.array.messagesLists, android.R.layout.simple_list_item_1), this);
 
         setContentView(R.layout.messages);
-    }
-
-    public static void startCheckUpdates(Context context) {
-        Intent intent = new Intent(context, CheckUpdatesReceiver.class);
-        PendingIntent sender = PendingIntent.getBroadcast(context, PENDINGINTENT_CONSTANT, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        int interval = Integer.parseInt(sp.getString("refresh", "5"));
-        if (interval > 0) {
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.SECOND, 5);
-            am.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), interval * 60000, sender);
-        } else {
-            am.cancel(sender);
-        }
     }
 
     public boolean onNavigationItemSelected(int itemPosition, long itemId) {

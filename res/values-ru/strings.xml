@@ -101,7 +101,7 @@
     <string name="Nickname">Ник</string>
     <string name="Password">Пароль</string>
     <string name="Notifications">Уведомления</string>
-    <string name="Refresh_interval">Интервал обновления</string>
+    <string name="NotificationPublic">Новая запись в блогах</string>
     <string name="Appearance">Внешний вид</string>
     <string name="LoadPhotos">Загружать фото автоматически</string>
     <string name="Theme">Тема оформления</string>

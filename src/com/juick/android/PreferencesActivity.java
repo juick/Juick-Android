@@ -57,9 +57,6 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         updateSummaries(getPreferenceScreen());
-        if (key.equals("refresh")) {
-            MainActivity.startCheckUpdates(this);
-        }
         setResult(RESULT_OK);
     }
 

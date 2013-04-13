@@ -6,25 +6,17 @@
         <item>Популярные</item>
         <item>С фотографиями</item>
     </string-array>
-    <string-array name="prefsRefreshIntervalTitles">
-        <item>Никогда</item>
-        <item>5 минут</item>
-        <item>10 минут</item>
-        <item>15 минут</item>
-        <item>30 минут</item>
-        <item>1 час</item>
-        <item>2 часа</item>
-        <item>4 часа</item>
+    <string-array name="prefsNotificationTypes">
+        <item>Без уведомления</item>
+        <item>Лампочка</item>
+        <item>Вибрировать</item>
+        <item>Звук</item>
     </string-array>
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
 
     <string-array name="prefsLoadImages">
         <item>Никогда</item>

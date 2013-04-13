@@ -98,7 +98,10 @@
     <string name="Nickname">Pseudo</string>
     <string name="Password">Mot de passe</string>
     <string name="Notifications">Notifications</string>
-    <string name="Refresh_interval">Intervalle de rafraîchissement</string>
+    <string name="NotificationPublic">New public message</string>
+
+
+
 
     <!-- ThreadActivity -->
     <string name="In_reply_to_">En réponse à:</string>

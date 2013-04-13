@@ -43,18 +43,26 @@ public class JuickMessage {
 
     public static JuickMessage parseJSON(JSONObject json) throws JSONException {
         JuickMessage jmsg = new JuickMessage();
-        jmsg.MID = json.getInt("mid");
+        if (json.has("mid")) {
+            jmsg.MID = json.getInt("mid");
+        }
         if (json.has("rid")) {
             jmsg.RID = json.getInt("rid");
         }
-        jmsg.Text = json.getString("body").replace("&quot;", "\"");
-        jmsg.User = JuickUser.parseJSON(json.getJSONObject("user"));
+        if (json.has("body")) {
+            jmsg.Text = json.getString("body").replace("&quot;", "\"");
+        }
+        if (json.has("user")) {
+            jmsg.User = JuickUser.parseJSON(json.getJSONObject("user"));
+        }
 
-        try {
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            df.setTimeZone(TimeZone.getTimeZone("UTC"));
-            jmsg.Timestamp = df.parse(json.getString("timestamp"));
-        } catch (ParseException e) {
+        if (json.has("timestamp")) {
+            try {
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                jmsg.Timestamp = df.parse(json.getString("timestamp"));
+            } catch (ParseException e) {
+            }
         }
 
         if (json.has("tags")) {
@@ -82,7 +90,7 @@ public class JuickMessage {
         String t = new String();
         for (Enumeration e = tags.elements(); e.hasMoreElements();) {
             String tag = (String) e.nextElement();
-            if (t.length() > 0) {
+            if (!t.isEmpty()) {
                 t += ' ';
             }
             t += '*' + tag;

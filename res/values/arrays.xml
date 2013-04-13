@@ -6,25 +6,17 @@
         <item>Top messages</item>
         <item>With photos</item>
     </string-array>
-    <string-array name="prefsRefreshIntervalTitles">
-        <item>Never</item>
-        <item>5 minutes</item>
-        <item>10 minutes</item>
-        <item>15 minutes</item>
-        <item>30 minutes</item>
-        <item>1 hour</item>
-        <item>2 hours</item>
-        <item>4 hours</item>
+    <string-array name="prefsNotificationTypes">
+        <item>No notification</item>
+        <item>Lights</item>
+        <item>Vibrate</item>
+        <item>Sound</item>
     </string-array>
-    <string-array name="prefsRefreshIntervalValues">
+    <string-array name="prefsNotificationTypesValues">
         <item>0</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-        <item>240</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
     <string-array name="prefsLoadImages">
         <item>Never</item>
