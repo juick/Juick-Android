@@ -1,6 +1,6 @@
 /*
  * Juick
- * Copyright (C) 2008-2012, Ugnich Anton
+ * Copyright (C) 2008-2013, Ugnich Anton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Utils.updateTheme(this);
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.preferences);

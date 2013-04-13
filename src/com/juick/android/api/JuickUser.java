@@ -1,6 +1,6 @@
 /*
  * Juick
- * Copyright (C) 2008-2012, Ugnich Anton
+ * Copyright (C) 2008-2013, Ugnich Anton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,12 @@ public class JuickUser {
 
     public static JuickUser parseJSON(JSONObject json) throws JSONException {
         JuickUser juser = new JuickUser();
-        juser.UID = json.getInt("uid");
-        juser.UName = json.getString("uname");
+        if (json.has("uid")) {
+            juser.UID = json.getInt("uid");
+        }
+        if (json.has("uname")) {
+            juser.UName = json.getString("uname");
+        }
         if (json.has("fullname")) {
             juser.FullName = json.getString("fullname");
         }

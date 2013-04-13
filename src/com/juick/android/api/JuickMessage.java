@@ -1,6 +1,6 @@
 /*
  * Juick
- * Copyright (C) 2008-2012, Ugnich Anton
+ * Copyright (C) 2008-2013, Ugnich Anton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,10 @@ package com.juick.android.api;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,7 +38,7 @@ public class JuickMessage {
     public int RID = 0;
     public String Text = null;
     public JuickUser User = null;
-    public Vector<String> tags = new Vector<String>();
+    public ArrayList<String> tags = new ArrayList<String>();
     public Date Timestamp = null;
     public int replies = 0;
     public String Photo = null;
@@ -88,8 +91,8 @@ public class JuickMessage {
 
     public String getTags() {
         String t = new String();
-        for (Enumeration e = tags.elements(); e.hasMoreElements();) {
-            String tag = (String) e.nextElement();
+        for (Iterator i = tags.iterator(); i.hasNext();) {
+            String tag = (String) i.next();
             if (!t.isEmpty()) {
                 t += ' ';
             }

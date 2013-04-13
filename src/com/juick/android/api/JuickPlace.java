@@ -1,6 +1,6 @@
 /*
  * Juick
- * Copyright (C) 2008-2012, Ugnich Anton
+ * Copyright (C) 2008-2013, Ugnich Anton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  */
 package com.juick.android.api;
 
-import java.util.Vector;
+import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,15 +36,23 @@ public class JuickPlace {
     public int users = 0;
     public int messages = 0;
     public int distance = 0;
-    public Vector<String> tags = new Vector<String>();
+    public ArrayList<String> tags = new ArrayList<String>();
 
     public static JuickPlace parseJSON(JSONObject json) throws JSONException {
         JuickPlace jplace = new JuickPlace();
 
-        jplace.pid = json.getInt("pid");
-        jplace.lat = json.getDouble("lat");
-        jplace.lon = json.getDouble("lon");
-        jplace.name = json.getString("name").replace("&quot;", "\"");
+        if (json.has("pid")) {
+            jplace.pid = json.getInt("pid");
+        }
+        if (json.has("lat")) {
+            jplace.lat = json.getDouble("lat");
+        }
+        if (json.has("lon")) {
+            jplace.lon = json.getDouble("lon");
+        }
+        if (json.has("name")) {
+            jplace.name = json.getString("name").replace("&quot;", "\"");
+        }
         if (json.has("description")) {
             jplace.description = json.getString("description").replace("&quot;", "\"");
         }

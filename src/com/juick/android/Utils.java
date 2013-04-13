@@ -1,6 +1,6 @@
 /*
  * Juick
- * Copyright (C) 2008-2012, Ugnich Anton
+ * Copyright (C) 2008-2013, Ugnich Anton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,12 @@ package com.juick.android;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import com.juick.R;
 import java.io.BufferedReader;
@@ -36,8 +33,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  *
@@ -45,56 +40,10 @@ import org.json.JSONObject;
  */
 public class Utils {
 
-    public static void updateTheme(Activity activity) {
-        /*
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activity);
-        if (sp.getString("theme", "0").equals("0")) {
-        activity.setTheme(android.R.style.Theme_Light);
-        }
-         */
-    }
-
-    public static void updateThemeHolo(Activity activity) {
-        /*
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activity);
-        if (sp.getString("theme", "0").equals("0")) {
-        activity.setTheme(R.style.Theme_Sherlock_Light);
-        }
-         */
-    }
-
-    public static int doHttpGetRequest(String url) {
-        try {
-            HttpURLConnection conn = (HttpURLConnection) (new URL(url)).openConnection();
-            conn.setUseCaches(false);
-            conn.connect();
-            int status = conn.getResponseCode();
-            conn.disconnect();
-            return status;
-        } catch (Exception e) {
-            Log.e("doHttpGetRequest", e.toString());
-        }
-        return 0;
-    }
-
     public static boolean hasAuth(Context context) {
         AccountManager am = AccountManager.get(context);
         Account accs[] = am.getAccountsByType(context.getString(R.string.com_juick));
         return accs.length > 0;
-    }
-
-    public static String getAuthHash(Context context) {
-        String jsonStr = getJSON(context, "http://api.juick.com/auth");
-        if (jsonStr != null && !jsonStr.equals("")) {
-            try {
-                JSONObject json = new JSONObject(jsonStr);
-                if (json.has("hash")) {
-                    return json.getString("hash");
-                }
-            } catch (JSONException e) {
-            }
-        }
-        return null;
     }
 
     public static String getBasicAuthString(Context context) {
