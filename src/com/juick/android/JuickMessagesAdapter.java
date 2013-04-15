@@ -135,6 +135,9 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
                 p.setVisibility(View.GONE);
             }
 
+            TextView s = (TextView) v.findViewById(R.id.summary);
+            s.setText(formatSummaryText(jmsg));
+
             /*
             ImageView i = (ImageView) v.findViewById(R.id.icon);
             if (jmsg.User != null && jmsg.User.Avatar != null) {
@@ -186,9 +189,9 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         String name = '@' + jmsg.User.UName;
         String tags = jmsg.getTags();
         String txt = jmsg.Text;
-        if (jmsg.Photo != null) {
+        /*if (jmsg.Photo != null) {
             txt = jmsg.Photo + "\n" + txt;
-        }
+        } */
         if (jmsg.Video != null) {
             txt = jmsg.Video + "\n" + txt;
         }
@@ -228,25 +231,7 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         }
          */
 
-        DateFormat df = new SimpleDateFormat("HH:mm dd/MMM/yy");
-        df.setTimeZone(TimeZone.getDefault());
-        String date = df.format(jmsg.Timestamp);
-        ssb.append("\n" + date + " ");
 
-        int padding = name.length() + 1 + tags.length() + 1 + txt.length() + 1;
-        int end = padding + date.length() + 1;
-
-        ssb.setSpan(new ForegroundColorSpan(0xFFAAAAAA), padding, padding + date.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        if (jmsg.replies > 0) {
-            String replies = Replies + jmsg.replies;
-            ssb.append("  " + replies + " ");
-            end += 2 + replies.length() + 1;
-            int padding2 = padding + date.length() + 1 + 2;
-            ssb.setSpan(new ForegroundColorSpan(0xFFC8934E), padding2, padding2 + replies.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-
-        ssb.setSpan(new AlignmentSpan.Standard(Alignment.ALIGN_OPPOSITE), padding, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         return ssb;
     }
@@ -258,9 +243,9 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
             tags += "\n";
         }
         String txt = jmsg.Text;
-        if (jmsg.Photo != null) {
+        /*if (jmsg.Photo != null) {
             txt = jmsg.Photo + "\n" + txt;
-        }
+        } */
         if (jmsg.Video != null) {
             txt = jmsg.Video + "\n" + txt;
         }
@@ -277,6 +262,30 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
             pos = m.end();
         }
 
+        return ssb;
+    }
+
+    private SpannableStringBuilder formatSummaryText(JuickMessage jmsg) {
+        SpannableStringBuilder ssb = new SpannableStringBuilder();
+        DateFormat df = new SimpleDateFormat("HH:mm dd/MMM/yy");
+        df.setTimeZone(TimeZone.getDefault());
+        String date = df.format(jmsg.Timestamp);
+        ssb.append("\n" + date + " ");
+
+        int padding = 0;
+        int end = padding + date.length() + 1;
+
+        ssb.setSpan(new ForegroundColorSpan(0xFFAAAAAA), padding, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        if (jmsg.replies > 0) {
+            String replies = Replies + jmsg.replies;
+            ssb.append("  " + replies + " ");
+            end += 2 + replies.length() + 1;
+            int padding2 = padding + date.length() + 1 + 2;
+            ssb.setSpan(new ForegroundColorSpan(0xFFC8934E), padding2, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        ssb.setSpan(new AlignmentSpan.Standard(Alignment.ALIGN_OPPOSITE), padding, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         return ssb;
     }
 
