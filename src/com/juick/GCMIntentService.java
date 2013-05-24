@@ -27,6 +27,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import com.google.android.gcm.GCMBaseIntentService;
 import com.juick.android.MainActivity;
+import com.juick.android.ThreadActivity;
 import com.juick.android.Utils;
 import com.juick.android.api.JuickMessage;
 import java.net.URLEncoder;
@@ -95,7 +96,8 @@ public class GCMIntentService extends GCMBaseIntentService {
                     }
 
                     if (notifpublic > 0) {
-                        Intent i = new Intent(context, MainActivity.class);
+                        Intent i = new Intent(context, ThreadActivity.class);
+                        i.putExtra("mid", jmsg.MID);
                         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
                         Notification notification = new Notification(R.drawable.ic_notification, title, System.currentTimeMillis());
                         notification.setLatestEventInfo(context.getApplicationContext(), title, body, contentIntent);
