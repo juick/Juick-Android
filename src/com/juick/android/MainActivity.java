@@ -68,7 +68,7 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
             final String regId = GCMRegistrar.getRegistrationId(this);
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
             String prefRegId = sp.getString("gcm_regid", null);
-            if (regId.isEmpty() || !regId.equals(prefRegId)) {
+            if (regId.length()==0 || !regId.equals(prefRegId)) {
                 GCMRegistrar.register(this, GCMIntentService.SENDER_ID);
             }
         } catch (Exception e) {

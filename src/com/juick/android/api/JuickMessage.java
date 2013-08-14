@@ -93,7 +93,7 @@ public class JuickMessage {
         String t = new String();
         for (Iterator i = tags.iterator(); i.hasNext();) {
             String tag = (String) i.next();
-            if (!t.isEmpty()) {
+            if (t.length() > 0) {
                 t += ' ';
             }
             t += '*' + tag;
