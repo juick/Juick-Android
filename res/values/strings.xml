@@ -26,6 +26,7 @@
     <string name="Tag">Tag</string>
     <string name="Tags">Tags</string>
     <string name="Replies">Replies</string>
+    <string name="Groups">Groups</string>
     <string name="Enter_a_message">Enter a message</string>
     <string name="Message_posted">Message posted</string>
     <string name="Enter_a_name">Enter a name</string>
@@ -37,6 +38,12 @@
     <string name="pull_to_refresh_release_label">Release to refresh...</string>
     <string name="pull_to_refresh_refreshing_label">Loading...</string>
     <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
+    
+    <!-- MainActivity -->
+    <string name="Subscriptions">Subscriptions</string>
+    <string name="Last_messages">Last messages</string>
+    <string name="Top_messages">Top messages</string>
+    <string name="With_photos">With photos</string>
     
     <!-- ExploreActivity -->
     <string name="Juick__Explore">Juick: Explore</string>

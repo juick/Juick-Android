@@ -25,12 +25,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.google.android.gcm.GCMRegistrar;
 import com.juick.R;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.List;
  *
  * @author Ugnich Anton
  */
-public class MainActivity extends SherlockFragmentActivity implements ActionBar.OnNavigationListener {
+public class MainActivity extends SherlockFragmentActivity implements MainFragment.MainFragmentListener {
 
     public static final int ACTIVITY_SIGNIN = 2;
     public static final int ACTIVITY_PREFERENCES = 3;
@@ -48,6 +48,8 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -68,7 +70,7 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
             final String regId = GCMRegistrar.getRegistrationId(this);
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
             String prefRegId = sp.getString("gcm_regid", null);
-            if (regId.length()==0 || !regId.equals(prefRegId)) {
+            if (regId.length() == 0 || !regId.equals(prefRegId)) {
                 GCMRegistrar.register(this, GCMIntentService.SENDER_ID);
             }
         } catch (Exception e) {
@@ -76,28 +78,33 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
         }
 
         ActionBar bar = getSupportActionBar();
-        bar.setDisplayShowHomeEnabled(false);
-        bar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        bar.setListNavigationCallbacks(ArrayAdapter.createFromResource(this, R.array.messagesLists, android.R.layout.simple_list_item_1), this);
+        bar.setHomeButtonEnabled(false);
 
-        setContentView(R.layout.messages);
+        setContentView(R.layout.main);
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        MainFragment mf = new MainFragment();
+        ft.add(R.id.mainfragment, mf);
+        ft.commit();
     }
 
-    public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        MessagesFragment mf = new MessagesFragment();
-        Bundle args = new Bundle();
-        if (itemPosition == 0) {
-            args.putBoolean("home", true);
-        } else if (itemPosition == 2) {
-            args.putBoolean("popular", true);
-        } else if (itemPosition == 3) {
-            args.putBoolean("media", true);
+    public void onGroupClick(int group_id) {
+        Intent i = new Intent(this, MessagesActivity.class);
+        if (group_id == 1) {
+            i.putExtra("home", true);
+        } else if (group_id == 3) {
+            i.putExtra("popular", true);
+        } else if (group_id == 4) {
+            i.putExtra("media", true);
         }
-        mf.setArguments(args);
-        ft.replace(R.id.messagesfragment, mf);
-        ft.commit();
-        return true;
+        startActivity(i);
+    }
+
+    public void onPMClick(String uname, int uid) {
+        Intent i = new Intent(this, PMActivity.class);
+        i.putExtra("uname", uname);
+        i.putExtra("uid", uid);
+        startActivity(i);
     }
 
     @Override
@@ -163,5 +170,9 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
             //TODO show user
         }
         return false;
+    }
+
+    public void setProgressWheelEnabled(boolean isEnabled) {
+        setSupportProgressBarIndeterminateVisibility(isEnabled ? Boolean.TRUE : Boolean.FALSE);
     }
 }

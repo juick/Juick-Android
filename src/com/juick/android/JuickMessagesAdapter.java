@@ -22,8 +22,6 @@ import com.juick.android.api.JuickMessage;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -39,7 +37,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.juick.R;
-import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -278,41 +275,5 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         }
 
         return ssb;
-    }
-
-    class ImageLoaderTask extends AsyncTask<String, Void, Bitmap> {
-
-        private ImageCache cache;
-        private final WeakReference<ImageView> imageViewReference;
-        private boolean usenetwork;
-
-        public ImageLoaderTask(ImageCache cache, ImageView imageView, boolean usenetwork) {
-            // Use a WeakReference to ensure the ImageView can be garbage collected
-            this.cache = cache;
-            this.usenetwork = usenetwork;
-            imageViewReference = new WeakReference<ImageView>(imageView);
-        }
-
-        // Decode image in background.
-        @Override
-        protected Bitmap doInBackground(String... params) {
-            Bitmap b = cache.getImageDisk(params[0]);
-            if (b == null && usenetwork && cache.getImageNetwork(params[0], params[1])) {
-                b = cache.getImageDisk(params[0]);
-            }
-            return b;
-        }
-
-        // Once complete, see if ImageView is still around and set bitmap.
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            if (imageViewReference != null && bitmap != null) {
-                final ImageView imageView = imageViewReference.get();
-                if (imageView != null) {
-                    imageView.setImageBitmap(bitmap);
-                    imageView.setVisibility(View.VISIBLE);
-                }
-            }
-        }
     }
 }

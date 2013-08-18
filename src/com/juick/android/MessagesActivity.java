@@ -40,6 +40,9 @@ public class MessagesActivity extends FragmentActivity {
         String search = i.getStringExtra("search");
         String tag = i.getStringExtra("tag");
         int place_id = i.getIntExtra("place_id", 0);
+        boolean home = i.getBooleanExtra("home", false);
+        boolean popular = i.getBooleanExtra("popular", false);
+        boolean media = i.getBooleanExtra("media", false);
 
         if (i.getData() != null) {
             Cursor cursor = managedQuery(getIntent().getData(), null, null, null, null);
@@ -61,8 +64,14 @@ public class MessagesActivity extends FragmentActivity {
             setTitle(title);
         } else if (place_id > 0) {
             setTitle("Location");
+        } else if (home) {
+            setTitle(getResources().getString(R.string.Subscriptions));
+        } else if (popular) {
+            setTitle(getResources().getString(R.string.Top_messages));
+        } else if (media) {
+            setTitle(getResources().getString(R.string.With_photos));
         } else {
-            setTitle(getResources().getString(R.string.All_messages));
+            setTitle(getResources().getString(R.string.Last_messages));
         }
 
         setContentView(R.layout.messages);
@@ -75,6 +84,9 @@ public class MessagesActivity extends FragmentActivity {
         args.putString("search", search);
         args.putString("tag", tag);
         args.putInt("place_id", place_id);
+        args.putBoolean("home", home);
+        args.putBoolean("popular", popular);
+        args.putBoolean("media", media);
 
         mf.setArguments(args);
         ft.replace(R.id.messagesfragment, mf);

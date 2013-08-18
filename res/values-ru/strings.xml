@@ -26,6 +26,7 @@
     <string name="Tag">Тег</string>
     <string name="Tags">Теги</string>
     <string name="Replies">Ответы</string>
+    <string name="Groups">Группы</string>
     <string name="Enter_a_message">Введите сообщение</string>
     <string name="Message_posted">Сообщение отправлено</string>
     <string name="Enter_a_name">Введите название</string>
@@ -38,8 +39,14 @@
     <string name="pull_to_refresh_refreshing_label">Загрузка...</string>
     <string name="pull_to_refresh_tap_label">Нажмите, чтобы обновить...</string>
 
+    <!-- MainActivity -->
+    <string name="Subscriptions">Подписки</string>
+    <string name="Last_messages">Последние сообщения</string>
+    <string name="Top_messages">Топ-сообщения</string>
+    <string name="With_photos">С фотографиями</string>
+
     <!-- ExploreActivity -->
-    <string name="Juick__Explore">Джуик: Обзор</string>
+    <string name="Juick__Explore">Juick: Обзор</string>
     <string name="Popular_tags">Популярные теги</string>
     <string name="All_messages">Все сообщения</string>
     <string name="Nearby_places">Места поблизости</string>
