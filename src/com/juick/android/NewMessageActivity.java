@@ -17,14 +17,11 @@
  */
 package com.juick.android;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,40 +30,36 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.Toast;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.juick.R;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  *
  * @author Ugnich Anton
  */
-public class NewMessageActivity extends Activity implements OnClickListener, DialogInterface.OnClickListener {
+public class NewMessageActivity extends SherlockActivity implements OnClickListener, DialogInterface.OnClickListener {
 
     private static final int ACTIVITY_LOCATION = 1;
     public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
     public static final int ACTIVITY_ATTACHMENT_VIDEO = 3;
     private static final int ACTIVITY_TAGS = 4;
-    private EditText etTo;
     private EditText etMessage;
-    private Button bLocationHint;
     private ImageButton bTags;
     private ImageButton bLocation;
     private ImageButton bAttachment;
-    private Button bSend;
-    private ProgressBar progressSend;
     private int pid = 0;
-    private int pidHint = 0;
     private String pname = null;
     private double lat = 0;
     private double lon = 0;
@@ -93,78 +86,29 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
 
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
+        ActionBar bar = getSupportActionBar();
+        bar.setDisplayHomeAsUpEnabled(true);
+
         setContentView(R.layout.newmessage);
 
-        etTo = (EditText) findViewById(R.id.editTo);
         etMessage = (EditText) findViewById(R.id.editMessage);
-        bLocationHint = (Button) findViewById(R.id.buttonLocationHint);
         bTags = (ImageButton) findViewById(R.id.buttonTags);
         bLocation = (ImageButton) findViewById(R.id.buttonLocation);
         bAttachment = (ImageButton) findViewById(R.id.buttonAttachment);
-        bSend = (Button) findViewById(R.id.buttonSend);
-        progressSend = (ProgressBar) findViewById(R.id.progressSend);
 
-        bLocationHint.setOnClickListener(this);
         bTags.setOnClickListener(this);
         bLocation.setOnClickListener(this);
         bAttachment.setOnClickListener(this);
-        bSend.setOnClickListener(this);
 
         resetForm();
-        /*
-        if (savedInstanceState!=null) {
-        if (savedInstanceState.containsKey("msg")) {
-        etMessage.setText(savedInstanceState.getString("msg"));
-        }
-        pid = savedInstanceState.getInt("pid", 0);
-        pname = savedInstanceState.getString("pname");
-        lat = savedInstanceState.getDouble("lat", 0);
-        lon = savedInstanceState.getDouble("lon", 0);
-        attachmentUri = savedInstanceState.getString("auri");
-        attachmentMime = savedInstanceState.getString("amime");
-        if (pid > 0 && pname != null) {
-        tvLocation.setText(getResources().getString(R.string.label_location) + " " + pname);
-        tvLocation.setVisibility(View.VISIBLE);
-        }
-        if (attachmentUri != null && attachmentMime != null) {
-        tvAttachment.setText(attachmentMime.equals("image/jpeg") ? R.string.attachment_photo : R.string.attachment_video);
-        tvAttachment.setVisibility(View.VISIBLE);
-        }
-        }
-         */
         handleIntent(getIntent());
     }
-    /*
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    if (etMessage.getText().toString().length() > 0) {
-    outState.putString("msg", etMessage.getText().toString());
-    }
-    if (pid > 0 && pname != null) {
-    outState.putInt("pid", pid);
-    outState.putString("pname", tvLocation.getText().toString());
-    }
-    if (lat != 0 && lon != 0 && pname != null) {
-    outState.putDouble("lat", lat);
-    outState.putDouble("lon", lon);
-    outState.putString("pname", tvLocation.getText().toString());
-    }
-    if (attachmentUri != null && attachmentMime != null) {
-    outState.putString("auri", attachmentUri);
-    outState.putString("amime", attachmentMime);
-    }
-    }
-     */
 
     private void resetForm() {
-        setProgressBarIndeterminateVisibility(true);
         etMessage.setText("");
-        bLocationHint.setVisibility(View.GONE);
         bLocation.setSelected(false);
         bAttachment.setSelected(false);
         pid = 0;
-        pidHint = 0;
         pname = null;
         lat = 0;
         lon = 0;
@@ -174,59 +118,61 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
         progressDialog = null;
         progressDialogCancel.bool = false;
         etMessage.requestFocus();
+        setSupportProgressBarIndeterminateVisibility(Boolean.FALSE);
 
+        /*
+        setProgressBarIndeterminateVisibility(true);
         Thread thr = new Thread(new Runnable() {
-
-            public void run() {
-                String jsonUrl = "http://api.juick.com/postform";
-
-                LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                Location loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                if (loc != null) {
-                    jsonUrl += "?lat=" + loc.getLatitude() + "&lon=" + loc.getLongitude() + "&acc=" + loc.getAccuracy() + "&fixage=" + Math.round((System.currentTimeMillis() - loc.getTime()) / 1000);
-                }
-
-                final String jsonStr = Utils.getJSON(NewMessageActivity.this, jsonUrl);
-
-                NewMessageActivity.this.runOnUiThread(new Runnable() {
-
-                    public void run() {
-                        if (jsonStr != null) {
-
-                            try {
-                                JSONObject json = new JSONObject(jsonStr);
-                                if (json.has("facebook")) {
-                                    etTo.setText(etTo.getText() + ", Facebook");
-                                }
-                                if (json.has("twitter")) {
-                                    etTo.setText(etTo.getText() + ", Twitter");
-                                }
-                                if (json.has("place")) {
-                                    JSONObject jsonPlace = json.getJSONObject("place");
-                                    pidHint = jsonPlace.getInt("pid");
-                                    bLocationHint.setVisibility(View.VISIBLE);
-                                    bLocationHint.setText(jsonPlace.getString("name"));
-                                }
-                            } catch (JSONException e) {
-                                System.err.println(e);
-                            }
-                        }
-                        NewMessageActivity.this.setProgressBarIndeterminateVisibility(false);
-                    }
-                });
-            }
+        
+        public void run() {
+        String jsonUrl = "http://api.juick.com/postform";
+        
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Location loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        if (loc != null) {
+        jsonUrl += "?lat=" + loc.getLatitude() + "&lon=" + loc.getLongitude() + "&acc=" + loc.getAccuracy() + "&fixage=" + Math.round((System.currentTimeMillis() - loc.getTime()) / 1000);
+        }
+        
+        final String jsonStr = Utils.getJSON(NewMessageActivity.this, jsonUrl);
+        
+        NewMessageActivity.this.runOnUiThread(new Runnable() {
+        
+        public void run() {
+        if (jsonStr != null) {
+        
+        try {
+        JSONObject json = new JSONObject(jsonStr);
+        if (json.has("facebook")) {
+        etTo.setText(etTo.getText() + ", Facebook");
+        }
+        if (json.has("twitter")) {
+        etTo.setText(etTo.getText() + ", Twitter");
+        }
+        if (json.has("place")) {
+        JSONObject jsonPlace = json.getJSONObject("place");
+        pidHint = jsonPlace.getInt("pid");
+        bLocationHint.setVisibility(View.VISIBLE);
+        bLocationHint.setText(jsonPlace.getString("name"));
+        }
+        } catch (JSONException e) {
+        System.err.println(e);
+        }
+        }
+        NewMessageActivity.this.setProgressBarIndeterminateVisibility(false);
+        }
+        });
+        }
         });
         thr.start();
+         */
     }
 
     private void setFormEnabled(boolean state) {
         etMessage.setEnabled(state);
-        bLocationHint.setEnabled(state);
         bTags.setEnabled(state);
         bLocation.setEnabled(state);
         bAttachment.setEnabled(state);
-        bSend.setVisibility(state ? View.VISIBLE : View.GONE);
-        progressSend.setVisibility(state ? View.GONE : View.VISIBLE);
+        setSupportProgressBarIndeterminateVisibility(state ? Boolean.FALSE : Boolean.TRUE);
     }
 
     @Override
@@ -257,16 +203,8 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
             i.setAction(Intent.ACTION_PICK);
             i.putExtra("uid", (int) -1);
             startActivityForResult(i, ACTIVITY_TAGS);
-        } else if (v == bLocationHint) {
-            bLocationHint.setVisibility(View.GONE);
-            pid = pidHint;
-            pname = null;
-            lat = 0;
-            lon = 0;
-            acc = 0;
-            bLocation.setSelected(true);
+
         } else if (v == bLocation) {
-            bLocationHint.setVisibility(View.GONE);
             if (pid == 0 && lat == 0) {
                 startActivityForResult(new Intent(this, PickPlaceActivity.class), ACTIVITY_LOCATION);
             } else {
@@ -288,11 +226,23 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
                 attachmentMime = null;
                 bAttachment.setSelected(false);
             }
-        } else if (v == bSend) {
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.newmessage, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menuitem_send) {
             final String msg = etMessage.getText().toString();
             if (msg.length() < 3) {
                 Toast.makeText(this, R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
-                return;
+                return false;
             }
             setFormEnabled(false);
             if (attachmentUri != null) {
@@ -341,6 +291,12 @@ public class NewMessageActivity extends Activity implements OnClickListener, Dia
                 }
             });
             thr.start();
+            return true;
+        } else if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 

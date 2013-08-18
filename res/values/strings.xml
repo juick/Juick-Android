@@ -66,8 +66,7 @@
     <string name="Replies_">Replies:</string>
 
     <!-- NewMessageActivity -->
-    <string name="Juick__New_message">Juick: New message</string>
-    <string name="To__All">To: All</string>
+    <string name="New_message">New message</string>
     <string name="Attach">Attach</string>
     <string name="Photo_from_gallery">Photo from gallery</string>
     <string name="New_photo">New photo</string>

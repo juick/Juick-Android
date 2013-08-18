@@ -42,7 +42,6 @@ public class PMActivity extends SherlockFragmentActivity implements PMFragment.P
 
         ActionBar bar = getSupportActionBar();
         bar.setDisplayHomeAsUpEnabled(true);
-        bar.setDisplayUseLogoEnabled(false);
         bar.setTitle(uname);
 
         setContentView(R.layout.pm);
