@@ -17,21 +17,55 @@
  */
 package com.juick.android;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.juick.GCMIntentService;
 import com.juick.R;
+import java.net.URLEncoder;
+import org.json.JSONObject;
 
 /**
  *
  * @author ugnich
  */
-public class PMActivity extends SherlockFragmentActivity implements PMFragment.PMFragmentListener {
+public class PMActivity extends SherlockFragmentActivity implements PMFragment.PMFragmentListener, View.OnClickListener {
 
+    private static final String PMFRAGMENTID = "PMFRAGMENT";
     private String uname;
     private int uid;
+    private EditText etMessage;
+    private Button bSend;
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ((Vibrator) context.getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(250);
+            String message = intent.getStringExtra("message");
+            PMFragment pmf = (PMFragment) getSupportFragmentManager().findFragmentByTag(PMFRAGMENTID);
+            if (message.charAt(0) == '{') {
+                pmf.onNewMessages("[" + message + "]");
+            } else {
+                pmf.onNewMessages(message);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +80,78 @@ public class PMActivity extends SherlockFragmentActivity implements PMFragment.P
 
         setContentView(R.layout.pm);
 
+        etMessage = (EditText) findViewById(R.id.editMessage);
+        bSend = (Button) findViewById(R.id.buttonSend);
+        bSend.setOnClickListener(this);
+
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         PMFragment pf = new PMFragment();
         Bundle args = new Bundle();
         args.putString("uname", uname);
         args.putInt("uid", uid);
         pf.setArguments(args);
-        ft.add(R.id.pmfragment, pf);
+        ft.add(R.id.pmfragment, pf, PMFRAGMENTID);
         ft.commit();
+    }
+
+    public void onClick(View view) {
+        if (view == bSend) {
+            String msg = etMessage.getText().toString();
+            if (msg.length() > 0) {
+                postText(msg);
+            } else {
+                Toast.makeText(this, R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public void postText(final String body) {
+        Thread thr = new Thread(new Runnable() {
+
+            public void run() {
+                try {
+                    final String ret = Utils.postJSON(PMActivity.this, "http://api.juick.com/pm", "uname=" + uname + "&body=" + URLEncoder.encode(body, "utf-8"));
+                    PMActivity.this.runOnUiThread(new Runnable() {
+
+                        public void run() {
+                            if (ret != null) {
+                                etMessage.setText("");
+                                try {
+                                    JSONObject json = new JSONObject();
+                                    json.put("body", body);
+                                    JSONObject jsonUser = new JSONObject();
+                                    jsonUser.put("uid", uid);
+                                    json.put("user", jsonUser);
+                                    PMFragment pmf = (PMFragment) getSupportFragmentManager().findFragmentByTag(PMFRAGMENTID);
+                                    pmf.onNewMessages("[" + json.toString() + "]");
+                                } catch (Exception e) {
+                                    Log.e("postPM JSON", e.toString());
+                                }
+                            } else {
+                                Toast.makeText(PMActivity.this, R.string.Error, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e("postPM", e.toString());
+                }
+            }
+        });
+        thr.start();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        SharedPreferences.Editor spe = PreferenceManager.getDefaultSharedPreferences(this).edit();
+        if (hasFocus) {
+            spe.putString("currentactivity", "pm-" + uid);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(GCMIntentService.GCMEVENTACTION));
+        } else {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+            spe.remove("currentactivity");
+        }
+        spe.commit();
+        super.onWindowFocusChanged(hasFocus);
     }
 
     @Override

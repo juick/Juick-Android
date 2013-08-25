@@ -79,7 +79,6 @@ public class MainFragment extends ListFragment implements OnItemClickListener {
             public void run() {
                 String url = "http://api.juick.com/groups_pms";
                 final String jsonStr = Utils.getJSON(getActivity(), url);
-                System.out.println(jsonStr);
                 if (isAdded()) {
                     getActivity().runOnUiThread(new Runnable() {
 
@@ -92,7 +91,6 @@ public class MainFragment extends ListFragment implements OnItemClickListener {
                                     }
                                     listAdapter.parseJSON(jsonStr);
                                     setListAdapter(listAdapter);
-                                    parentActivity.setProgressWheelEnabled(false);
 
                                     SharedPreferences.Editor spe = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
                                     spe.putString("jcache_main", jsonStr);
@@ -100,6 +98,7 @@ public class MainFragment extends ListFragment implements OnItemClickListener {
                                 } catch (Exception e) {
                                 }
                             }
+                            parentActivity.setProgressWheelEnabled(false);
                         }
                     });
                 }

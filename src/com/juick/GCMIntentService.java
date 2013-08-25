@@ -24,9 +24,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.google.android.gcm.GCMBaseIntentService;
 import com.juick.android.MainActivity;
+import com.juick.android.PMActivity;
 import com.juick.android.Utils;
 import com.juick.android.api.JuickMessage;
 import java.net.URLEncoder;
@@ -39,6 +41,7 @@ import org.json.JSONObject;
 public class GCMIntentService extends GCMBaseIntentService {
 
     public final static String SENDER_ID = "314097120259";
+    public final static String GCMEVENTACTION = "com.juick.android.gcm-event";
 
     public GCMIntentService() {
         super(SENDER_ID);
@@ -73,9 +76,16 @@ public class GCMIntentService extends GCMBaseIntentService {
         if (intent.hasExtra("message")) {
             String msg = intent.getExtras().getString("message");
             try {
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+                String curactivity = sp.getString("currentactivity", null);
+
                 JSONObject jsonmsg = new JSONObject(msg);
                 JuickMessage jmsg = JuickMessage.parseJSON(jsonmsg);
-                if (jmsg.MID > 0) {
+                if (jmsg.MID == 0 && curactivity != null && curactivity.equals("pm-" + jmsg.User.UID)) {
+                    Intent i = new Intent(GCMEVENTACTION);
+                    i.putExtra("message", msg);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+                } else {
                     String title = "@" + jmsg.User.UName;
                     if (!jmsg.tags.isEmpty()) {
                         title += ": " + jmsg.getTags();
@@ -87,7 +97,6 @@ public class GCMIntentService extends GCMBaseIntentService {
                         body = jmsg.Text;
                     }
 
-                    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
                     int notifpublic = 3;
                     try {
                         notifpublic = Integer.parseInt(sp.getString("notif_public", "3"));
@@ -95,7 +104,14 @@ public class GCMIntentService extends GCMBaseIntentService {
                     }
 
                     if (notifpublic > 0) {
-                        Intent i = new Intent(context, MainActivity.class);
+                        Intent i;
+                        if (jmsg.MID == 0) {
+                            i = new Intent(context, PMActivity.class);
+                            i.putExtra("uname", jmsg.User.UName);
+                            i.putExtra("uid", jmsg.User.UID);
+                        } else {
+                            i = new Intent(context, MainActivity.class);
+                        }
                         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
                         Notification notification = new Notification(R.drawable.ic_notification, title, System.currentTimeMillis());
                         notification.setLatestEventInfo(context.getApplicationContext(), title, body, contentIntent);

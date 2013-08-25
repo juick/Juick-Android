@@ -38,6 +38,7 @@ import org.json.JSONArray;
 public class PMFragment extends ListFragment {
 
     private PMFragmentListener parentActivity;
+    private PMAdapter listAdapter = null;
     private String uname;
     private int uid;
 
@@ -58,33 +59,37 @@ public class PMFragment extends ListFragment {
         uname = getArguments().getString("uname");
         uid = getArguments().getInt("uid", 0);
 
+        listAdapter = new PMAdapter(getActivity(), uid);
+        getListView().setDividerHeight(0);
+
         Thread thr = new Thread(new Runnable() {
 
             public void run() {
                 String url = "http://api.juick.com/pm?uname=" + uname;
-                final String jsonStr = Utils.getJSON(getActivity(), url);
-                System.out.println("PMS: " + jsonStr);
+                String jsonStr = Utils.getJSON(getActivity(), url);
                 if (isAdded()) {
-                    getActivity().runOnUiThread(new Runnable() {
-
-                        public void run() {
-                            if (jsonStr != null) {
-                                try {
-                                    PMAdapter listAdapter = new PMAdapter(getActivity(), uid);
-                                    listAdapter.parseJSON(jsonStr);
-                                    setListAdapter(listAdapter);
-                                    getListView().setSelection(listAdapter.getCount() - 1);
-                                    getListView().setDividerHeight(0);
-                                } catch (Exception e) {
-                                    Log.e("initTagsAdapter", e.toString());
-                                }
-                            }
-                        }
-                    });
+                    onNewMessages(jsonStr);
                 }
             }
         });
         thr.start();
+    }
+
+    public void onNewMessages(final String msg) {
+        if (listAdapter != null && msg != null) {
+            getActivity().runOnUiThread(new Runnable() {
+
+                public void run() {
+                    try {
+                        listAdapter.parseJSON(msg);
+                        setListAdapter(listAdapter);
+                        getListView().setSelection(listAdapter.getCount() - 1);
+                    } catch (Exception e) {
+                        Log.e("PMFragment.onNewMessage", e.toString());
+                    }
+                }
+            });
+        }
     }
 
     public interface PMFragmentListener {
