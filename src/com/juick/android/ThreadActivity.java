@@ -270,6 +270,7 @@ public class ThreadActivity extends FragmentActivity implements View.OnClickList
         if (resultCode == RESULT_OK) {
             if ((requestCode == ACTIVITY_ATTACHMENT_IMAGE || requestCode == ACTIVITY_ATTACHMENT_VIDEO) && data != null) {
                 attachmentUri = data.getDataString();
+                // How to get correct mime type?
                 attachmentMime = (requestCode == ACTIVITY_ATTACHMENT_IMAGE) ? "image/jpeg" : "video/3gpp";
                 bAttach.setSelected(true);
             }

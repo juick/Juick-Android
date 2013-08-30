@@ -189,7 +189,7 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
             Bundle extras = i.getExtras();
             if (mime.equals("text/plain")) {
                 etMessage.append(extras.getString(Intent.EXTRA_TEXT));
-            } else if (mime.equals("image/jpeg") || mime.equals("video/3gpp") || mime.equals("video/mp4")) {
+            } else if (mime.equals("image/jpeg") || mime.equals("image/png") || mime.equals("video/3gpp") || mime.equals("video/mp4")) {
                 attachmentUri = extras.get(Intent.EXTRA_STREAM).toString();
                 attachmentMime = mime;
                 bAttachment.setSelected(true);
@@ -336,7 +336,16 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
             }
 
             if (attachmentUri != null && attachmentUri.length() > 0 && attachmentMime != null) {
-                String fname = "file." + (attachmentMime.equals("image/jpeg") ? "jpg" : "3gp");
+                String fname = "file.";
+                if (attachmentMime.equals("image/jpeg")) {
+                    fname += "jpg";
+                } else if (attachmentMime.equals("image/png")) {
+                    fname += "png";
+                } else if (attachmentMime.equals("video/3gpp")) {
+                    fname += "3gp";
+                } else if (attachmentMime.equals("video/mp4")) {
+                    fname += "mp4";
+                }
                 outStr += twoHyphens + boundary + end;
                 outStr += "Content-Disposition: form-data; name=\"attach\"; filename=\"" + fname + "\"" + end + end;
             }
@@ -442,6 +451,7 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
                 }
             } else if ((requestCode == ACTIVITY_ATTACHMENT_IMAGE || requestCode == ACTIVITY_ATTACHMENT_VIDEO) && data != null) {
                 attachmentUri = data.getDataString();
+                // How to get correct mime type?
                 attachmentMime = (requestCode == ACTIVITY_ATTACHMENT_IMAGE) ? "image/jpeg" : "video/3gpp";
                 bAttachment.setSelected(true);
             }
