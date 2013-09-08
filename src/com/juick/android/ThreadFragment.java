@@ -86,7 +86,7 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
         Thread wsthr = new Thread(new Runnable() {
 
             public void run() {
-                if (ws.connect("ws.juick.com", 80, "/" + mid, null)) {
+                if (ws.connect("ws.juick.com", 80, "/" + mid, null) && ws != null) {
                     ws.readLoop();
                 }
             }

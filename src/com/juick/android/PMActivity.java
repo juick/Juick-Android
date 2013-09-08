@@ -116,17 +116,8 @@ public class PMActivity extends SherlockFragmentActivity implements PMFragment.P
                         public void run() {
                             if (ret != null) {
                                 etMessage.setText("");
-                                try {
-                                    JSONObject json = new JSONObject();
-                                    json.put("body", body);
-                                    JSONObject jsonUser = new JSONObject();
-                                    jsonUser.put("uid", uid);
-                                    json.put("user", jsonUser);
-                                    PMFragment pmf = (PMFragment) getSupportFragmentManager().findFragmentByTag(PMFRAGMENTID);
-                                    pmf.onNewMessages("[" + json.toString() + "]");
-                                } catch (Exception e) {
-                                    Log.e("postPM JSON", e.toString());
-                                }
+                                PMFragment pmf = (PMFragment) getSupportFragmentManager().findFragmentByTag(PMFRAGMENTID);
+                                pmf.onNewMessages("[" + ret + "]");
                             } else {
                                 Toast.makeText(PMActivity.this, R.string.Error, Toast.LENGTH_SHORT).show();
                             }
