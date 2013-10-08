@@ -88,6 +88,8 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
 
         ActionBar bar = getSupportActionBar();
         bar.setDisplayHomeAsUpEnabled(true);
+        
+        setTitle(R.string.New_message);
 
         setContentView(R.layout.newmessage);
 
