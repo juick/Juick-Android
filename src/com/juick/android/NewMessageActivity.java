@@ -299,7 +299,7 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
             final String twoHyphens = "--";
             final String boundary = "****+++++******+++++++********";
 
-            URL apiUrl = new URL("http://api.juick.com/post");
+            URL apiUrl = new URL("https://api.juick.com/post");
             HttpURLConnection conn = (HttpURLConnection) apiUrl.openConnection();
             conn.setConnectTimeout(10000);
             conn.setDoOutput(true);

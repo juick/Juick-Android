@@ -110,7 +110,7 @@ public class PMActivity extends SherlockFragmentActivity implements PMFragment.P
 
             public void run() {
                 try {
-                    final String ret = Utils.postJSON(PMActivity.this, "http://api.juick.com/pm", "uname=" + uname + "&body=" + URLEncoder.encode(body, "utf-8"));
+                    final String ret = Utils.postJSON(PMActivity.this, "https://api.juick.com/pm", "uname=" + uname + "&body=" + URLEncoder.encode(body, "utf-8"));
                     PMActivity.this.runOnUiThread(new Runnable() {
 
                         public void run() {

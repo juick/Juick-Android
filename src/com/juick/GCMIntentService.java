@@ -50,7 +50,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onRegistered(Context context, String regId) {
         try {
-            String res = Utils.getJSON(context, "http://api.juick.com/android/register?regid=" + URLEncoder.encode(regId, "UTF-8"));
+            String res = Utils.getJSON(context, "https://api.juick.com/android/register?regid=" + URLEncoder.encode(regId, "UTF-8"));
             if (res != null) {
                 SharedPreferences.Editor spe = PreferenceManager.getDefaultSharedPreferences(context).edit();
                 spe.putString("gcm_regid", regId);
@@ -63,7 +63,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onUnregistered(Context context, String regId) {
         try {
-            Utils.getJSON(context, "http://api.juick.com/android/unregister?regid=" + URLEncoder.encode(regId, "UTF-8"));
+            Utils.getJSON(context, "https://api.juick.com/android/unregister?regid=" + URLEncoder.encode(regId, "UTF-8"));
             SharedPreferences.Editor spe = PreferenceManager.getDefaultSharedPreferences(context).edit();
             spe.remove("gcm_regid");
             spe.commit();

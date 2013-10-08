@@ -106,7 +106,7 @@ public class SignInActivity extends Activity implements OnClickListener {
                     String authStr = nick + ":" + password;
                     String basicAuth = "Basic " + Base64.encodeToString(authStr.getBytes(), Base64.NO_WRAP);
 
-                    URL apiUrl = new URL("http://api.juick.com/post");
+                    URL apiUrl = new URL("https://api.juick.com/post");
                     HttpURLConnection conn = (HttpURLConnection) apiUrl.openConnection();
                     conn.setConnectTimeout(10000);
                     conn.setUseCaches(false);

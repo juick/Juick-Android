@@ -189,7 +189,7 @@ public class JuickMessageMenu implements OnItemLongClickListener, OnClickListene
 
             public void run() {
                 try {
-                    final String ret = Utils.postJSON(activity, "http://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"));
+                    final String ret = Utils.postJSON(activity, "https://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"));
                     activity.runOnUiThread(new Runnable() {
 
                         public void run() {

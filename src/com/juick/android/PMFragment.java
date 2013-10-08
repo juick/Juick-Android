@@ -65,7 +65,7 @@ public class PMFragment extends ListFragment {
         Thread thr = new Thread(new Runnable() {
 
             public void run() {
-                String url = "http://api.juick.com/pm?uname=" + uname;
+                String url = "https://api.juick.com/pm?uname=" + uname;
                 String jsonStr = Utils.getJSON(getActivity(), url);
                 if (isAdded()) {
                     onNewMessages(jsonStr);

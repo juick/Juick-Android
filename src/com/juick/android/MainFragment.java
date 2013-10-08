@@ -77,7 +77,7 @@ public class MainFragment extends ListFragment implements OnItemClickListener {
         Thread thr = new Thread(new Runnable() {
 
             public void run() {
-                String url = "http://api.juick.com/groups_pms";
+                String url = "https://api.juick.com/groups_pms";
                 final String jsonStr = Utils.getJSON(getActivity(), url);
                 if (isAdded()) {
                     getActivity().runOnUiThread(new Runnable() {

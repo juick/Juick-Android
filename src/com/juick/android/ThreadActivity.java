@@ -171,7 +171,7 @@ public class ThreadActivity extends FragmentActivity implements View.OnClickList
 
             public void run() {
                 try {
-                    final String ret = Utils.postJSON(ThreadActivity.this, "http://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"));
+                    final String ret = Utils.postJSON(ThreadActivity.this, "https://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"));
                     ThreadActivity.this.runOnUiThread(new Runnable() {
 
                         public void run() {

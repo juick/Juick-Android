@@ -93,9 +93,9 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
         }
 
         if (home) {
-            apiurl = "http://api.juick.com/home?1=1";
+            apiurl = "https://api.juick.com/home?1=1";
         } else {
-            apiurl = "http://api.juick.com/messages?1=1";
+            apiurl = "https://api.juick.com/messages?1=1";
             if (uid > 0 && uname != null) {
                 apiurl += "&user_id=" + uid;
             } else if (search != null) {

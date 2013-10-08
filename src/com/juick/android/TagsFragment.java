@@ -62,7 +62,7 @@ public class TagsFragment extends ListFragment implements OnItemClickListener, O
         Thread thr = new Thread(new Runnable() {
 
             public void run() {
-                String url = "http://api.juick.com/tags";
+                String url = "https://api.juick.com/tags";
                 if (uid != 0) {
                     url += "?user_id=" + uid;
                 }

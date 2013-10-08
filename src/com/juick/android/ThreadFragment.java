@@ -94,7 +94,7 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
         Thread thr = new Thread(new Runnable() {
 
             public void run() {
-                final String jsonStr = Utils.getJSON(getActivity(), "http://api.juick.com/thread?mid=" + mid);
+                final String jsonStr = Utils.getJSON(getActivity(), "https://api.juick.com/thread?mid=" + mid);
                 if (isAdded()) {
                     getActivity().runOnUiThread(new Runnable() {
 
