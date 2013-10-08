@@ -111,6 +111,7 @@
     <string name="Appearance">Внешний вид</string>
     <string name="LoadPhotos">Загружать фото автоматически</string>
     <string name="Theme">Тема оформления</string>
+    <string name="FontSize">Размер шрифта</string>
 
     <!-- ThreadActivity -->
     <string name="In_reply_to_">В ответ на:</string>

@@ -18,13 +18,10 @@
 package com.juick.android;
 
 import android.app.Activity;
-import android.os.Build;
-import android.view.MotionEvent;
 import com.juick.android.api.JuickMessage;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v4.app.ListFragment;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.AdapterView;
 import com.juick.R;
@@ -34,20 +31,16 @@ import com.juick.android.api.JuickUser;
  *
  * @author Ugnich Anton
  */
-public class ThreadFragment extends ListFragment implements AdapterView.OnItemClickListener, View.OnTouchListener, WsClientListener {
+public class ThreadFragment extends ListFragment implements AdapterView.OnItemClickListener, WsClientListener {
 
     private ThreadFragmentListener parentActivity;
     private JuickMessagesAdapter listAdapter;
-    private ScaleGestureDetector mScaleDetector = null;
     private WsClient ws = null;
     private int mid = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= 8) {
-            mScaleDetector = new ScaleGestureDetector(getActivity(), new ScaleListener());
-        }
     }
 
     @Override
@@ -71,8 +64,6 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
         if (mid == 0) {
             return;
         }
-
-        getListView().setOnTouchListener(this);
 
         initWebSocket();
         initAdapter();
@@ -164,27 +155,10 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
         parentActivity.onReplySelected(jmsg.RID, jmsg.Text);
     }
 
-    public boolean onTouch(View view, MotionEvent event) {
-        if (mScaleDetector != null) {
-            mScaleDetector.onTouchEvent(event);
-        }
-        return false;
-    }
-
     public interface ThreadFragmentListener {
 
         public void onThreadLoaded(int uid, String nick);
 
         public void onReplySelected(int rid, String txt);
-    }
-
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            listAdapter.setScale(detector.getScaleFactor());
-            listAdapter.notifyDataSetChanged();
-            return true;
-        }
     }
 }

@@ -50,7 +50,7 @@ import org.json.JSONArray;
  */
 public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
 
-    private static final String PREFERENCES_SCALE = "MessagesListScale";
+    private static final String PREFERENCES_FONTSIZE = "fontsize";
     public static final int TYPE_THREAD = 1;
     public static Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
     public static Pattern msgPattern = Pattern.compile("#[0-9]+");
@@ -72,7 +72,12 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         defaultTextSize = new TextView(context).getTextSize();
 
         sp = PreferenceManager.getDefaultSharedPreferences(context);
-        textScale = sp.getFloat(PREFERENCES_SCALE, 0.8f);
+        String textScaleStr = sp.getString(PREFERENCES_FONTSIZE, "0.8");
+        try {
+            textScale = Float.parseFloat(textScaleStr);
+        } catch (Exception e) {
+            textScale = 0.8f;
+        }
 
         String loadphotos = sp.getString("loadphotos", "Always");
         if (loadphotos.charAt(0) == 'A' || (loadphotos.charAt(0) == 'W' && Utils.isWiFiConnected(context))) {
@@ -170,12 +175,6 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         JuickMessage jmsg = new JuickMessage();
         jmsg.Text = txt;
         insert(jmsg, position);
-    }
-
-    public void setScale(float scale) {
-        textScale *= scale;
-        textScale = Math.max(0.5f, Math.min(textScale, 2.0f));
-        sp.edit().putFloat(PREFERENCES_SCALE, textScale).commit();
     }
 
     private SpannableStringBuilder formatMessageText(JuickMessage jmsg) {

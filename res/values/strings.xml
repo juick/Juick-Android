@@ -111,6 +111,7 @@
     <string name="Appearance">Appearance</string>
     <string name="LoadPhotos">Load photos automatically</string>
     <string name="Theme">Theme</string>
+    <string name="FontSize">Font size</string>
 
     <!-- ThreadActivity -->
     <string name="In_reply_to_">In reply to:</string>
