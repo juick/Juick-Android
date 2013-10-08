@@ -50,15 +50,21 @@ public class PickLocationActivity extends MapActivity implements OnClickListener
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.setBuiltInZoomControls(true);
         myLocation = new MyLocationOverlay(this, mapView);
-        mapView.getOverlays().add(myLocation);
+        myLocation.runOnFirstFix(new Runnable() {
 
-        Intent i = getIntent();
-        double lat = i.getDoubleExtra("lat", 0);
-        double lon = i.getDoubleExtra("lon", 0);
-        if (lat != 0 && lon != 0) {
-            mapView.getController().setCenter(new GeoPoint((int) (lat * 1000000), (int) (lon * 1000000)));
-            mapView.getController().setZoom(18);
-        }
+            public void run() {
+                mapView.getController().setCenter(myLocation.getMyLocation());
+                mapView.getController().setZoom(17);
+            }
+        });
+        myLocation.enableMyLocation();
+        mapView.getOverlays().add(myLocation);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        myLocation.disableMyLocation();
     }
 
     public void onClick(View v) {

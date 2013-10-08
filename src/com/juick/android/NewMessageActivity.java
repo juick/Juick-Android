@@ -59,11 +59,8 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
     private ImageButton bTags;
     private ImageButton bLocation;
     private ImageButton bAttachment;
-    private int pid = 0;
-    private String pname = null;
     private double lat = 0;
     private double lon = 0;
-    private int acc = 0;
     private String attachmentUri = null;
     private String attachmentMime = null;
     private ProgressDialog progressDialog = null;
@@ -88,7 +85,7 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
 
         ActionBar bar = getSupportActionBar();
         bar.setDisplayHomeAsUpEnabled(true);
-        
+
         setTitle(R.string.New_message);
 
         setContentView(R.layout.newmessage);
@@ -110,11 +107,8 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
         etMessage.setText("");
         bLocation.setSelected(false);
         bAttachment.setSelected(false);
-        pid = 0;
-        pname = null;
         lat = 0;
         lon = 0;
-        acc = 0;
         attachmentUri = null;
         attachmentMime = null;
         progressDialog = null;
@@ -207,14 +201,11 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
             startActivityForResult(i, ACTIVITY_TAGS);
 
         } else if (v == bLocation) {
-            if (pid == 0 && lat == 0) {
-                startActivityForResult(new Intent(this, PickPlaceActivity.class), ACTIVITY_LOCATION);
+            if (lat == 0 && lon == 0) {
+                startActivityForResult(new Intent(this, PickLocationActivity.class), ACTIVITY_LOCATION);
             } else {
-                pid = 0;
-                pname = null;
                 lat = 0;
                 lon = 0;
-                acc = 0;
                 bLocation.setSelected(false);
             }
         } else if (v == bAttachment) {
@@ -263,7 +254,7 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
             Thread thr = new Thread(new Runnable() {
 
                 public void run() {
-                    final boolean res = sendMessage(NewMessageActivity.this, msg, pid, lat, lon, acc, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
+                    final boolean res = sendMessage(NewMessageActivity.this, msg, lat, lon, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
                     NewMessageActivity.this.runOnUiThread(new Runnable() {
 
                         public void run() {
@@ -302,7 +293,7 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
         }
     }
 
-    public static boolean sendMessage(Context context, String txt, int pid, double lat, double lon, int acc, String attachmentUri, String attachmentMime, final ProgressDialog progressDialog, Handler progressHandler, BooleanReference progressDialogCancel) {
+    public static boolean sendMessage(Context context, String txt, double lat, double lon, String attachmentUri, String attachmentMime, final ProgressDialog progressDialog, Handler progressHandler, BooleanReference progressDialogCancel) {
         try {
             final String end = "\r\n";
             final String twoHyphens = "--";
@@ -322,19 +313,11 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
             String outStr = twoHyphens + boundary + end;
             outStr += "Content-Disposition: form-data; name=\"body\"" + end + end + txt + end;
 
-            if (pid > 0) {
-                outStr += twoHyphens + boundary + end;
-                outStr += "Content-Disposition: form-data; name=\"place_id\"" + end + end + pid + end;
-            }
             if (lat != 0 && lon != 0) {
                 outStr += twoHyphens + boundary + end;
                 outStr += "Content-Disposition: form-data; name=\"lat\"" + end + end + String.valueOf(lat) + end;
                 outStr += twoHyphens + boundary + end;
                 outStr += "Content-Disposition: form-data; name=\"lon\"" + end + end + String.valueOf(lon) + end;
-                if (acc > 0) {
-                    outStr += twoHyphens + boundary + end;
-                    outStr += "Content-Disposition: form-data; name=\"acc\"" + end + end + String.valueOf(acc) + end;
-                }
             }
 
             if (attachmentUri != null && attachmentUri.length() > 0 && attachmentMime != null) {
@@ -443,12 +426,9 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
             if (requestCode == ACTIVITY_TAGS) {
                 etMessage.setText("*" + data.getStringExtra("tag") + " " + etMessage.getText());
             } else if (requestCode == ACTIVITY_LOCATION) {
-                pid = data.getIntExtra("pid", 0);
                 lat = data.getDoubleExtra("lat", 0);
                 lon = data.getDoubleExtra("lon", 0);
-                acc = data.getIntExtra("acc", 0);
-                pname = data.getStringExtra("pname");
-                if ((pid > 0 || lat != 0) && pname != null) {
+                if (lat != 0 && lon != 0) {
                     bLocation.setSelected(true);
                 }
             } else if ((requestCode == ACTIVITY_ATTACHMENT_IMAGE || requestCode == ACTIVITY_ATTACHMENT_VIDEO) && data != null) {

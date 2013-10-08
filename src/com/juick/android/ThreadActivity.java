@@ -207,7 +207,7 @@ public class ThreadActivity extends FragmentActivity implements View.OnClickList
         Thread thr = new Thread(new Runnable() {
 
             public void run() {
-                final boolean res = NewMessageActivity.sendMessage(ThreadActivity.this, body, 0, 0, 0, 0, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
+                final boolean res = NewMessageActivity.sendMessage(ThreadActivity.this, body, 0, 0, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
                 ThreadActivity.this.runOnUiThread(new Runnable() {
 
                     public void run() {
