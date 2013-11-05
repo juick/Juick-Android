@@ -38,11 +38,14 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
                 android:src="@drawable/ic_button_attachment_small"/>
+
             <EditText
                 android:id="@+id/editMessage"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:inputType="textCapSentences|textMultiLine" />
+
             <Button
                 android:id="@+id/buttonSend"
                 android:layout_width="wrap_content"
