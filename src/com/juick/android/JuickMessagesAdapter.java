@@ -50,7 +50,7 @@ import org.json.JSONArray;
  */
 public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
 
-    private static final String PREFERENCES_FONTSIZE = "fontsize";
+    private static final String PREFERENCES_FONTSIZE = "fontsizesp";
     public static final int TYPE_THREAD = 1;
     public static Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
     public static Pattern msgPattern = Pattern.compile("#[0-9]+");
@@ -61,22 +61,19 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
     private int type;
     private boolean allItemsEnabled = true;
     private SharedPreferences sp;
-    private float defaultTextSize;
-    private float textScale;
+    private float textSize;
 
     public JuickMessagesAdapter(Context context, int type) {
         super(context, R.layout.listitem_juickmessage);
         Replies = context.getResources().getString(R.string.Replies_) + " ";
         this.type = type;
 
-        defaultTextSize = new TextView(context).getTextSize();
-
         sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String textScaleStr = sp.getString(PREFERENCES_FONTSIZE, "0.8");
+        String textScaleStr = sp.getString(PREFERENCES_FONTSIZE, "16");
         try {
-            textScale = Float.parseFloat(textScaleStr);
+            textSize = Float.parseFloat(textScaleStr);
         } catch (Exception e) {
-            textScale = 0.8f;
+            textSize = 16;
         }
 
         String loadphotos = sp.getString("loadphotos", "Always");
@@ -113,7 +110,7 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
                 v = vi.inflate(R.layout.listitem_juickmessage, null);
             }
             TextView t = (TextView) v.findViewById(R.id.text);
-            t.setTextSize(defaultTextSize * textScale);
+            t.setTextSize(textSize);
 
             if (type == TYPE_THREAD && jmsg.RID == 0) {
                 t.setText(formatFirstMessageText(jmsg));
@@ -152,7 +149,7 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
                 v = vi.inflate(R.layout.preference_category, null);
             }
 
-            ((TextView) v).setTextSize(defaultTextSize * textScale);
+            ((TextView) v).setTextSize(textSize);
 
             if (jmsg.Text != null) {
                 ((TextView) v).setText(jmsg.Text);

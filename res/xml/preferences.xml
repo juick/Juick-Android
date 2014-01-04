@@ -11,11 +11,11 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/Appearance">
         <ListPreference
-            android:key="fontsize"
+            android:key="fontsizesp"
             android:title="@string/FontSize"
             android:entries="@array/prefsFontSize"
             android:entryValues="@array/prefsFontSizeValues"
-            android:defaultValue="0.8"
+            android:defaultValue="16"
             android:persistent="true"/>
         <ListPreference
             android:key="loadphotos"
