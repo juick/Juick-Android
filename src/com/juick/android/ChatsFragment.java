@@ -42,17 +42,17 @@ import org.json.JSONObject;
  *
  * @author ugnich
  */
-public class MainFragment extends ListFragment implements OnItemClickListener {
+public class ChatsFragment extends ListFragment implements OnItemClickListener {
 
-    private MainFragmentListener parentActivity;
+    private ChatsFragmentListener parentActivity;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            parentActivity = (MainFragmentListener) activity;
+            parentActivity = (ChatsFragmentListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement MainFragmentListener");
+            throw new ClassCastException(activity.toString() + " must implement ChatsFragmentListener");
         }
     }
 
@@ -67,7 +67,7 @@ public class MainFragment extends ListFragment implements OnItemClickListener {
         String jcacheMain = sp.getString("jcache_main", null);
         if (jcacheMain != null) {
             try {
-                MainAdapter listAdapter = new MainAdapter(getActivity());
+                ChatsAdapter listAdapter = new ChatsAdapter(getActivity());
                 listAdapter.parseJSON(jcacheMain);
                 setListAdapter(listAdapter);
             } catch (Exception e) {
@@ -85,9 +85,9 @@ public class MainFragment extends ListFragment implements OnItemClickListener {
                         public void run() {
                             if (jsonStr != null) {
                                 try {
-                                    MainAdapter listAdapter = (MainAdapter) getListAdapter();
+                                    ChatsAdapter listAdapter = (ChatsAdapter) getListAdapter();
                                     if (listAdapter == null) {
-                                        listAdapter = new MainAdapter(getActivity());
+                                        listAdapter = new ChatsAdapter(getActivity());
                                     }
                                     listAdapter.parseJSON(jsonStr);
                                     setListAdapter(listAdapter);
@@ -108,8 +108,8 @@ public class MainFragment extends ListFragment implements OnItemClickListener {
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        MainAdapter listAdapter = (MainAdapter) getListAdapter();
-        MainAdapterItem i = listAdapter.getItem(position);
+        ChatsAdapter listAdapter = (ChatsAdapter) getListAdapter();
+        ChatsAdapterItem i = listAdapter.getItem(position);
         if (i.isUser) {
             parentActivity.onPMClick(i.userName, i.userID);
         } else {
@@ -117,7 +117,7 @@ public class MainFragment extends ListFragment implements OnItemClickListener {
         }
     }
 
-    public interface MainFragmentListener {
+    public interface ChatsFragmentListener {
 
         public void setProgressWheelEnabled(boolean isEnabled);
 
@@ -127,12 +127,12 @@ public class MainFragment extends ListFragment implements OnItemClickListener {
     }
 }
 
-class MainAdapter extends ArrayAdapter<MainAdapterItem> {
+class ChatsAdapter extends ArrayAdapter<ChatsAdapterItem> {
 
     Context context;
     private ImageCache userpics;
 
-    public MainAdapter(Context context) {
+    public ChatsAdapter(Context context) {
         super(context, R.layout.listitem_juickmessage);
         this.context = context;
 
@@ -143,30 +143,30 @@ class MainAdapter extends ArrayAdapter<MainAdapterItem> {
         try {
             clear();
 
-            MainAdapterItem itemGroups = new MainAdapterItem();
+            ChatsAdapterItem itemGroups = new ChatsAdapterItem();
             itemGroups.groupName = "Groups";
             add(itemGroups);
 
             {
-                MainAdapterItem i = new MainAdapterItem();
+                ChatsAdapterItem i = new ChatsAdapterItem();
                 i.groupID = 1;
                 i.groupName = context.getResources().getString(R.string.Subscriptions);
                 add(i);
-                i = new MainAdapterItem();
+                i = new ChatsAdapterItem();
                 i.groupID = 2;
                 i.groupName = context.getResources().getString(R.string.Last_messages);
                 add(i);
-                i = new MainAdapterItem();
+                i = new ChatsAdapterItem();
                 i.groupID = 3;
                 i.groupName = context.getResources().getString(R.string.Top_messages);
                 add(i);
-                i = new MainAdapterItem();
+                i = new ChatsAdapterItem();
                 i.groupID = 4;
                 i.groupName = context.getResources().getString(R.string.With_photos);
                 add(i);
             }
 
-            MainAdapterItem itemPrivate = new MainAdapterItem();
+            ChatsAdapterItem itemPrivate = new ChatsAdapterItem();
             itemPrivate.groupName = "Private chats";
             add(itemPrivate);
 
@@ -174,7 +174,7 @@ class MainAdapter extends ArrayAdapter<MainAdapterItem> {
             int cnt = json.length();
             for (int i = 0; i < cnt; i++) {
                 JSONObject j = json.getJSONObject(i);
-                MainAdapterItem item = new MainAdapterItem();
+                ChatsAdapterItem item = new ChatsAdapterItem();
                 item.isUser = true;
                 item.userName = j.getString("uname");
                 item.userID = j.getInt("uid");
@@ -192,7 +192,7 @@ class MainAdapter extends ArrayAdapter<MainAdapterItem> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        MainAdapterItem i = getItem(position);
+        ChatsAdapterItem i = getItem(position);
         View v = convertView;
 
         if (i.isUser || i.groupID > 0) {
@@ -245,12 +245,12 @@ class MainAdapter extends ArrayAdapter<MainAdapterItem> {
 
     @Override
     public boolean isEnabled(int position) {
-        MainAdapterItem i = getItem(position);
+        ChatsAdapterItem i = getItem(position);
         return i.isUser || i.groupID > 0;
     }
 }
 
-class MainAdapterItem {
+class ChatsAdapterItem {
 
     boolean isUser = false;
     String groupName = null;
