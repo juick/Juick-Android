@@ -77,7 +77,7 @@ public class ChatsFragment extends ListFragment implements OnItemClickListener {
         Thread thr = new Thread(new Runnable() {
 
             public void run() {
-                String url = "https://api.juick.com/groups_pms";
+                String url = "https://api.juick.com/groups_pms?cnt=10";
                 final String jsonStr = Utils.getJSON(getActivity(), url);
                 if (isAdded()) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -110,18 +110,12 @@ public class ChatsFragment extends ListFragment implements OnItemClickListener {
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ChatsAdapter listAdapter = (ChatsAdapter) getListAdapter();
         ChatsAdapterItem i = listAdapter.getItem(position);
-        if (i.isUser) {
-            parentActivity.onPMClick(i.userName, i.userID);
-        } else {
-            parentActivity.onGroupClick(i.groupID);
-        }
+        parentActivity.onPMClick(i.userName, i.userID);
     }
 
     public interface ChatsFragmentListener {
 
         public void setProgressWheelEnabled(boolean isEnabled);
-
-        public void onGroupClick(int group_id);
 
         public void onPMClick(String uname, int uid);
     }
@@ -143,39 +137,11 @@ class ChatsAdapter extends ArrayAdapter<ChatsAdapterItem> {
         try {
             clear();
 
-            ChatsAdapterItem itemGroups = new ChatsAdapterItem();
-            itemGroups.groupName = "Groups";
-            add(itemGroups);
-
-            {
-                ChatsAdapterItem i = new ChatsAdapterItem();
-                i.groupID = 1;
-                i.groupName = context.getResources().getString(R.string.Subscriptions);
-                add(i);
-                i = new ChatsAdapterItem();
-                i.groupID = 2;
-                i.groupName = context.getResources().getString(R.string.Last_messages);
-                add(i);
-                i = new ChatsAdapterItem();
-                i.groupID = 3;
-                i.groupName = context.getResources().getString(R.string.Top_messages);
-                add(i);
-                i = new ChatsAdapterItem();
-                i.groupID = 4;
-                i.groupName = context.getResources().getString(R.string.With_photos);
-                add(i);
-            }
-
-            ChatsAdapterItem itemPrivate = new ChatsAdapterItem();
-            itemPrivate.groupName = "Private chats";
-            add(itemPrivate);
-
             JSONArray json = new JSONObject(jsonStr).getJSONArray("pms");
             int cnt = json.length();
             for (int i = 0; i < cnt; i++) {
                 JSONObject j = json.getJSONObject(i);
                 ChatsAdapterItem item = new ChatsAdapterItem();
-                item.isUser = true;
                 item.userName = j.getString("uname");
                 item.userID = j.getInt("uid");
                 if (j.has("MessagesCount")) {
@@ -195,44 +161,31 @@ class ChatsAdapter extends ArrayAdapter<ChatsAdapterItem> {
         ChatsAdapterItem i = getItem(position);
         View v = convertView;
 
-        if (i.isUser || i.groupID > 0) {
-            if (v == null || !(v instanceof LinearLayout)) {
-                LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.listitem_main, null);
-            }
+        if (v == null || !(v instanceof LinearLayout)) {
+            LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            v = vi.inflate(R.layout.listitem_main, null);
+        }
 
-            TextView t = (TextView) v.findViewById(R.id.text);
-            ImageView img = (ImageView) v.findViewById(R.id.icon);
-            if (i.isUser) {
-                t.setText(i.userName);
-                img.setVisibility(View.VISIBLE);
+        TextView t = (TextView) v.findViewById(R.id.text);
+        ImageView img = (ImageView) v.findViewById(R.id.icon);
+        t.setText(i.userName);
+        img.setVisibility(View.VISIBLE);
 
-                Bitmap bitmap = userpics.getImageMemory(Integer.toString(i.userID));
-                if (bitmap != null) {
-                    img.setImageBitmap(bitmap);
-                } else {
-                    img.setImageResource(R.drawable.ic_user_32);
-                    ImageLoaderTask task = new ImageLoaderTask(userpics, img, true);
-                    task.execute(Integer.toString(i.userID), "http://i.juick.com/as/" + i.userID + ".png");
-                }
-            } else {
-                t.setText(i.groupName);
-                img.setVisibility(View.GONE);
-            }
-
-            TextView unread = (TextView) v.findViewById(R.id.unreadMessages);
-            if (i.unreadMessages > 0) {
-                unread.setText(Integer.toString(i.unreadMessages));
-                unread.setVisibility(View.VISIBLE);
-            } else {
-                unread.setVisibility(View.GONE);
-            }
+        Bitmap bitmap = userpics.getImageMemory(Integer.toString(i.userID));
+        if (bitmap != null) {
+            img.setImageBitmap(bitmap);
         } else {
-            if (v == null || !(v instanceof TextView)) {
-                LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.preference_category, null);
-            }
-            ((TextView) v).setText(i.groupName);
+            img.setImageResource(R.drawable.ic_user_32);
+            ImageLoaderTask task = new ImageLoaderTask(userpics, img, true);
+            task.execute(Integer.toString(i.userID), "http://i.juick.com/as/" + i.userID + ".png");
+        }
+
+        TextView unread = (TextView) v.findViewById(R.id.unreadMessages);
+        if (i.unreadMessages > 0) {
+            unread.setText(Integer.toString(i.unreadMessages));
+            unread.setVisibility(View.VISIBLE);
+        } else {
+            unread.setVisibility(View.GONE);
         }
 
         return v;
@@ -240,21 +193,14 @@ class ChatsAdapter extends ArrayAdapter<ChatsAdapterItem> {
 
     @Override
     public boolean areAllItemsEnabled() {
-        return false;
-    }
+        return true;
 
-    @Override
-    public boolean isEnabled(int position) {
-        ChatsAdapterItem i = getItem(position);
-        return i.isUser || i.groupID > 0;
+
     }
 }
 
 class ChatsAdapterItem {
 
-    boolean isUser = false;
-    String groupName = null;
-    int groupID = 0;
     String userName = null;
     int userID = 0;
     int unreadMessages = 0;
