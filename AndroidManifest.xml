@@ -54,7 +54,6 @@
                 <data android:mimeType="video/mp4"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.juick.android.ExploreActivity" android:label="@string/Juick__Explore" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
         <activity android:name="com.juick.android.ThreadActivity" android:label="" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
         <activity android:name="com.juick.android.SignInActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
         <activity android:name="com.juick.android.PreferencesActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>

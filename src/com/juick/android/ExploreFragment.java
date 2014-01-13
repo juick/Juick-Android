@@ -31,7 +31,7 @@ import com.juick.R;
  *
  * @author Ugnich Anton
  */
-public class ExploreActivity extends FragmentActivity implements View.OnClickListener, TagsFragment.TagsFragmentListener {
+public class ExploreFragment extends FragmentActivity implements View.OnClickListener, TagsFragment.TagsFragmentListener {
 
     private EditText etSearch;
 
