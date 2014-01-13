@@ -17,15 +17,18 @@
  */
 package com.juick.android;
 
+import com.actionbarsherlock.app.ActionBar.Tab;
 import com.juick.GCMIntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -39,11 +42,13 @@ import java.util.List;
  *
  * @author Ugnich Anton
  */
-public class MainActivity extends SherlockFragmentActivity implements MainFragment.MainFragmentListener {
+public class MainActivity extends SherlockFragmentActivity implements ActionBar.TabListener, ChatsFragment.ChatsFragmentListener {
 
     public static final int ACTIVITY_SIGNIN = 2;
     public static final int ACTIVITY_PREFERENCES = 3;
     public static final int PENDINGINTENT_CONSTANT = 713242183;
+    private Fragment fChats = null;
+    private Fragment fMessages = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,25 +84,55 @@ public class MainActivity extends SherlockFragmentActivity implements MainFragme
 
         ActionBar bar = getSupportActionBar();
         bar.setHomeButtonEnabled(false);
+        bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        setContentView(R.layout.main);
-
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        MainFragment mf = new MainFragment();
-        ft.add(R.id.mainfragment, mf);
-        ft.commit();
+        Tab tab;
+        tab = bar.newTab().setTag("c").setText("Chats").setTabListener(this);
+        bar.addTab(tab);
+        tab = bar.newTab().setTag("f").setText("Feed").setTabListener(this);
+        bar.addTab(tab);
+        tab = bar.newTab().setTag("s").setText("Search").setTabListener(this);
+        bar.addTab(tab);
     }
 
-    public void onGroupClick(int group_id) {
-        Intent i = new Intent(this, MessagesActivity.class);
-        if (group_id == 1) {
-            i.putExtra("home", true);
-        } else if (group_id == 3) {
-            i.putExtra("popular", true);
-        } else if (group_id == 4) {
-            i.putExtra("media", true);
+    public void onTabReselected(Tab tab, FragmentTransaction ft) {
+    }
+
+    public void onTabSelected(Tab tab, FragmentTransaction ft) {
+        String tag = tab.getTag().toString();
+        if (tag.equals("c")) {
+            if (fChats == null) {
+                fChats = SherlockFragment.instantiate(this, ChatsFragment.class.getName());
+                ft.add(android.R.id.content, fChats, "c");
+            } else {
+                ft.attach(fChats);
+            }
+        } else if (tag.equals("f")) {
+            if (fMessages == null) {
+                Bundle b = new Bundle();
+                b.putBoolean("home", true);
+                fMessages = SherlockFragment.instantiate(this, MessagesFragment.class.getName(), b);
+                ft.add(android.R.id.content, fMessages, "m");
+            } else {
+                ft.attach(fMessages);
+            }
+        } else {
         }
-        startActivity(i);
+    }
+
+    public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+        String tag = tab.getTag().toString();
+        if (tag.equals("c")) {
+            if (fChats != null) {
+                ft.detach(fChats);
+            }
+        } else if (tag.equals("f")) {
+            if (fMessages != null) {
+                ft.detach(fMessages);
+                fMessages = null; // ANDROID BUG
+            }
+        } else {
+        }
     }
 
     public void onPMClick(String uname, int uid) {
@@ -142,9 +177,6 @@ public class MainActivity extends SherlockFragmentActivity implements MainFragme
                 return true;
             case R.id.menuitem_newmessage:
                 startActivity(new Intent(this, NewMessageActivity.class));
-                return true;
-            case R.id.menuitem_search:
-                startActivity(new Intent(this, ExploreActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
