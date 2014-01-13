@@ -45,10 +45,10 @@ import java.net.URLEncoder;
 public class MessagesFragment extends ListFragment implements AdapterView.OnItemClickListener, AbsListView.OnScrollListener, View.OnTouchListener, View.OnClickListener {
 
     private JuickMessagesAdapter listAdapter;
+    private JuickMessageMenu longClickListener;
     private View viewLoading;
     private String apiurl;
-    private boolean loading = true;
-    private int page = 1;
+    private boolean loading;
     // Pull to refresh
     private static final int TAP_TO_REFRESH = 1;
     private static final int PULL_TO_REFRESH = 2;
@@ -134,11 +134,6 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
         mReverseFlipAnimation.setInterpolator(new LinearInterpolator());
         mReverseFlipAnimation.setDuration(250);
         mReverseFlipAnimation.setFillAfter(true);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
         LayoutInflater li = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -153,44 +148,53 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
         mRefreshOriginalTopPadding = mRefreshView.getPaddingTop();
         mRefreshState = TAP_TO_REFRESH;
 
+        listAdapter = new JuickMessagesAdapter(getActivity(), 0);
+        longClickListener = new JuickMessageMenu(getActivity());
+
+        loadData();
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         getListView().setOnTouchListener(this);
         getListView().setOnScrollListener(this);
         getListView().setOnItemClickListener(this);
-        getListView().setOnItemLongClickListener(new JuickMessageMenu(getActivity()));
-
-        listAdapter = new JuickMessagesAdapter(getActivity(), 0);
-
-        init();
+        getListView().setOnItemLongClickListener(longClickListener);
     }
 
-    private void init() {
+    private void loadData() {
+        loading = true;
         Thread thr = new Thread(new Runnable() {
 
             public void run() {
                 final String jsonStr = Utils.getJSON(getActivity(), apiurl);
-                if (isAdded()) {  //FIX ContentView not yet created
+                if (isAdded()) {
                     getActivity().runOnUiThread(new Runnable() {
 
                         public void run() {
                             if (jsonStr != null) {
                                 listAdapter.clear();
                                 int cnt = listAdapter.parseJSON(jsonStr);
-                                if (cnt == 20 && getListView().getFooterViewsCount() == 0) {
-                                    getListView().addFooterView(viewLoading, null, false);
+
+                                if (getListAdapter() == null) {
+                                    getListView().addHeaderView(mRefreshView, null, false);
+                                    mRefreshViewHeight = mRefreshView.getMeasuredHeight();
+
+                                    if (cnt == 20) {
+                                        getListView().addFooterView(viewLoading, null, false);
+                                    }
+
+                                    setListAdapter(listAdapter);
+                                } else {
+                                    if (cnt < 20 && MessagesFragment.this.getListView().getFooterViewsCount() > 0) {
+                                        MessagesFragment.this.getListView().removeFooterView(viewLoading);
+                                    }
                                 }
                             }
-
-                            if (getListView().getHeaderViewsCount() == 0) {
-                                getListView().addHeaderView(mRefreshView, null, false);
-                                //measureView(mRefreshView);
-                                mRefreshViewHeight = mRefreshView.getMeasuredHeight();
-                            }
-
-                            if (getListAdapter() != listAdapter) {
-                                setListAdapter(listAdapter);
-                            }
-
                             loading = false;
+
                             resetHeader();
                             getListView().invalidateViews();
                             setSelection(1);
@@ -202,21 +206,20 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
         thr.start();
     }
 
-    private void loadMore() {
+    private void loadMore(final int before_mid) {
         loading = true;
-        page++;
-        final JuickMessage jmsg = (JuickMessage) listAdapter.getItem(listAdapter.getCount() - 1);
-
         Thread thr = new Thread(new Runnable() {
 
             public void run() {
-                final String jsonStr = Utils.getJSON(getActivity(), apiurl + "&before_mid=" + jmsg.MID + "&page=" + page);
+                final String jsonStr = Utils.getJSON(getActivity(), apiurl + "&before_mid=" + before_mid);
                 if (isAdded()) {
                     getActivity().runOnUiThread(new Runnable() {
 
                         public void run() {
                             if (jsonStr == null || listAdapter.parseJSON(jsonStr) != 20) {
-                                MessagesFragment.this.getListView().removeFooterView(viewLoading);
+                                if (MessagesFragment.this.getListView().getFooterViewsCount() > 0) {
+                                    MessagesFragment.this.getListView().removeFooterView(viewLoading);
+                                }
                             }
                             loading = false;
                         }
@@ -238,13 +241,14 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
     public void onClick(View view) {
         mRefreshState = REFRESHING;
         prepareForRefresh();
-        init();
+        loadData();
     }
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         if (visibleItemCount < totalItemCount && (firstVisibleItem + visibleItemCount == totalItemCount) && loading == false) {
-            loadMore();
+            int before_mid = ((JuickMessage) listAdapter.getItem(listAdapter.getCount() - 1)).MID;
+            loadMore(before_mid);
         }
 
         // When the refresh view is completely visible, change the text to say
@@ -373,27 +377,6 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
             mRefreshViewProgress.setVisibility(View.GONE);
         }
     }
-    /*
-    private void measureView(View child) {
-    ViewGroup.LayoutParams p = child.getLayoutParams();
-    if (p == null) {
-    p = new ViewGroup.LayoutParams(
-    ViewGroup.LayoutParams.FILL_PARENT,
-    ViewGroup.LayoutParams.WRAP_CONTENT);
-    }
-    
-    int childWidthSpec = ViewGroup.getChildMeasureSpec(0,
-    0 + 0, p.width);
-    int lpHeight = p.height;
-    int childHeightSpec;
-    if (lpHeight > 0) {
-    childHeightSpec = MeasureSpec.makeMeasureSpec(lpHeight, MeasureSpec.EXACTLY);
-    } else {
-    childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-    }
-    child.measure(childWidthSpec, childHeightSpec);
-    }
-     */
 
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         mCurrentScrollState = scrollState;
