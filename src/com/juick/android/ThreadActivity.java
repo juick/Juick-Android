@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.text.Spannable;
@@ -44,10 +43,9 @@ import java.net.URLEncoder;
  *
  * @author Ugnich Anton
  */
-public class ThreadActivity extends FragmentActivity implements View.OnClickListener, DialogInterface.OnClickListener, ThreadFragment.ThreadFragmentListener {
+public class ThreadActivity extends FragmentActivity implements View.OnClickListener, ThreadFragment.ThreadFragmentListener {
 
     public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
-    public static final int ACTIVITY_ATTACHMENT_VIDEO = 3;
     private TextView tvReplyTo;
     private EditText etMessage;
     private Button bSend;
@@ -133,10 +131,9 @@ public class ThreadActivity extends FragmentActivity implements View.OnClickList
     public void onClick(View view) {
         if (view == bAttach) {
             if (attachmentUri == null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.Attach);
-                builder.setAdapter(new AttachAdapter(this), this);
-                builder.show();
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent, null), ACTIVITY_ATTACHMENT_IMAGE);
             } else {
                 attachmentUri = null;
                 attachmentMime = null;
@@ -239,39 +236,13 @@ public class ThreadActivity extends FragmentActivity implements View.OnClickList
         thr.start();
     }
 
-    public void onClick(DialogInterface dialog, int which) {
-        Intent intent;
-        switch (which) {
-            case 0:
-                intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(Intent.createChooser(intent, null), ACTIVITY_ATTACHMENT_IMAGE);
-                break;
-            case 1:
-                intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString());
-                startActivityForResult(intent, ACTIVITY_ATTACHMENT_IMAGE);
-                break;
-            case 2:
-                intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("video/*");
-                startActivityForResult(Intent.createChooser(intent, null), ACTIVITY_ATTACHMENT_VIDEO);
-                break;
-            case 3:
-                intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
-                startActivityForResult(intent, ACTIVITY_ATTACHMENT_VIDEO);
-                break;
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            if ((requestCode == ACTIVITY_ATTACHMENT_IMAGE || requestCode == ACTIVITY_ATTACHMENT_VIDEO) && data != null) {
+            if (requestCode == ACTIVITY_ATTACHMENT_IMAGE && data != null) {
                 attachmentUri = data.getDataString();
                 // How to get correct mime type?
-                attachmentMime = (requestCode == ACTIVITY_ATTACHMENT_IMAGE) ? "image/jpeg" : "video/3gpp";
+                attachmentMime = "image/jpeg";
                 bAttach.setSelected(true);
             }
         }

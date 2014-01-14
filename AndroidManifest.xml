@@ -50,8 +50,6 @@
                 <data android:mimeType="text/plain"/>
                 <data android:mimeType="image/jpeg"/>
                 <data android:mimeType="image/png"/>
-                <data android:mimeType="video/3gpp"/>
-                <data android:mimeType="video/mp4"/>
             </intent-filter>
         </activity>
         <activity android:name="com.juick.android.ThreadActivity" android:label="" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>

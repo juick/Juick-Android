@@ -26,7 +26,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -49,11 +48,10 @@ import java.net.URL;
  *
  * @author Ugnich Anton
  */
-public class NewMessageActivity extends SherlockActivity implements OnClickListener, DialogInterface.OnClickListener {
+public class NewMessageActivity extends SherlockActivity implements OnClickListener {
 
     private static final int ACTIVITY_LOCATION = 1;
     public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
-    public static final int ACTIVITY_ATTACHMENT_VIDEO = 3;
     private static final int ACTIVITY_TAGS = 4;
     private EditText etMessage;
     private ImageButton bTags;
@@ -185,7 +183,7 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
             Bundle extras = i.getExtras();
             if (mime.equals("text/plain")) {
                 etMessage.append(extras.getString(Intent.EXTRA_TEXT));
-            } else if (mime.equals("image/jpeg") || mime.equals("image/png") || mime.equals("video/3gpp") || mime.equals("video/mp4")) {
+            } else if (mime.equals("image/jpeg") || mime.equals("image/png")) {
                 attachmentUri = extras.get(Intent.EXTRA_STREAM).toString();
                 attachmentMime = mime;
                 bAttachment.setSelected(true);
@@ -210,10 +208,9 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
             }
         } else if (v == bAttachment) {
             if (attachmentUri == null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.Attach);
-                builder.setAdapter(new AttachAdapter(this), this);
-                builder.show();
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent, null), ACTIVITY_ATTACHMENT_IMAGE);
             } else {
                 attachmentUri = null;
                 attachmentMime = null;
@@ -326,10 +323,6 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
                     fname += "jpg";
                 } else if (attachmentMime.equals("image/png")) {
                     fname += "png";
-                } else if (attachmentMime.equals("video/3gpp")) {
-                    fname += "3gp";
-                } else if (attachmentMime.equals("video/mp4")) {
-                    fname += "mp4";
                 }
                 outStr += twoHyphens + boundary + end;
                 outStr += "Content-Disposition: form-data; name=\"attach\"; filename=\"" + fname + "\"" + end + end;
@@ -394,32 +387,6 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
         return false;
     }
 
-    public void onClick(DialogInterface dialog, int which) {
-        Intent intent;
-        switch (which) {
-            case 0:
-                intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(Intent.createChooser(intent, null), ACTIVITY_ATTACHMENT_IMAGE);
-                break;
-            case 1:
-                intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString());
-                startActivityForResult(intent, ACTIVITY_ATTACHMENT_IMAGE);
-                break;
-            case 2:
-                intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("video/*");
-                startActivityForResult(Intent.createChooser(intent, null), ACTIVITY_ATTACHMENT_VIDEO);
-                break;
-            case 3:
-                intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
-                startActivityForResult(intent, ACTIVITY_ATTACHMENT_VIDEO);
-                break;
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
@@ -431,10 +398,10 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
                 if (lat != 0 && lon != 0) {
                     bLocation.setSelected(true);
                 }
-            } else if ((requestCode == ACTIVITY_ATTACHMENT_IMAGE || requestCode == ACTIVITY_ATTACHMENT_VIDEO) && data != null) {
+            } else if (requestCode == ACTIVITY_ATTACHMENT_IMAGE && data != null) {
                 attachmentUri = data.getDataString();
                 // How to get correct mime type?
-                attachmentMime = (requestCode == ACTIVITY_ATTACHMENT_IMAGE) ? "image/jpeg" : "video/3gpp";
+                attachmentMime = "image/jpeg";
                 bAttachment.setSelected(true);
             }
         }
