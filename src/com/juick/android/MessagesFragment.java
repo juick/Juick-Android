@@ -196,7 +196,7 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
     }
 
     private void processData(final String jsonStr) {
-        boolean newadapter = false;
+        boolean newadapter = mRefreshState != TAP_TO_REFRESH;
         if (jsonStr != null) {
             listAdapter.clear();
             int cnt = listAdapter.parseJSON(jsonStr);
