@@ -42,7 +42,7 @@ import java.util.List;
  *
  * @author Ugnich Anton
  */
-public class MainActivity extends SherlockFragmentActivity implements ActionBar.TabListener, ChatsFragment.ChatsFragmentListener {
+public class MainActivity extends SherlockFragmentActivity implements ActionBar.TabListener {
 
     public static final int ACTIVITY_SIGNIN = 2;
     public static final int ACTIVITY_PREFERENCES = 3;
@@ -50,6 +50,8 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
     private Fragment fChats = null;
     private Fragment fMessages = null;
     private Fragment fExplore = null;
+    public boolean loadingChats = false;
+    public boolean loadingMessages = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,13 +147,6 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
         }
     }
 
-    public void onPMClick(String uname, int uid) {
-        Intent i = new Intent(this, PMActivity.class);
-        i.putExtra("uname", uname);
-        i.putExtra("uid", uid);
-        startActivity(i);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -214,7 +209,7 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
         return false;
     }
 
-    public void setProgressWheelEnabled(boolean isEnabled) {
-        setSupportProgressBarIndeterminateVisibility(isEnabled ? Boolean.TRUE : Boolean.FALSE);
+    public void updateProgressWheel() {
+        setSupportProgressBarIndeterminateVisibility((loadingChats || loadingMessages) ? Boolean.TRUE : Boolean.FALSE);
     }
 }

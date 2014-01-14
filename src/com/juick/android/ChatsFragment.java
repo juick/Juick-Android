@@ -19,6 +19,7 @@ package com.juick.android;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -44,24 +45,11 @@ import org.json.JSONObject;
  */
 public class ChatsFragment extends ListFragment implements OnItemClickListener {
 
-    private ChatsFragmentListener parentActivity;
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            parentActivity = (ChatsFragmentListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement ChatsFragmentListener");
-        }
-    }
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         getListView().setOnItemClickListener(this);
-        parentActivity.setProgressWheelEnabled(true);
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String jcacheMain = sp.getString("jcache_main", null);
@@ -98,7 +86,6 @@ public class ChatsFragment extends ListFragment implements OnItemClickListener {
                                 } catch (Exception e) {
                                 }
                             }
-                            parentActivity.setProgressWheelEnabled(false);
                         }
                     });
                 }
@@ -109,15 +96,12 @@ public class ChatsFragment extends ListFragment implements OnItemClickListener {
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ChatsAdapter listAdapter = (ChatsAdapter) getListAdapter();
-        ChatsAdapterItem i = listAdapter.getItem(position);
-        parentActivity.onPMClick(i.userName, i.userID);
-    }
+        ChatsAdapterItem item = listAdapter.getItem(position);
 
-    public interface ChatsFragmentListener {
-
-        public void setProgressWheelEnabled(boolean isEnabled);
-
-        public void onPMClick(String uname, int uid);
+        Intent i = new Intent(getActivity(), PMActivity.class);
+        i.putExtra("uname", item.userName);
+        i.putExtra("uid", item.userID);
+        startActivity(i);
     }
 }
 
@@ -194,8 +178,6 @@ class ChatsAdapter extends ArrayAdapter<ChatsAdapterItem> {
     @Override
     public boolean areAllItemsEnabled() {
         return true;
-
-
     }
 }
 

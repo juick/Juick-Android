@@ -37,14 +37,7 @@ import com.juick.R;
  */
 public class ExploreFragment extends ListFragment implements View.OnClickListener, AdapterView.OnItemClickListener {
 
-    private Activity parentActivity;
     private EditText etSearch;
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        parentActivity = activity;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -54,7 +47,7 @@ public class ExploreFragment extends ListFragment implements View.OnClickListene
         ((Button) v.findViewById(R.id.buttonFind)).setOnClickListener(this);
 
         String tags[] = {"juick", "android", "сиськи"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(parentActivity, android.R.layout.simple_list_item_1, tags);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, tags);
         setListAdapter(adapter);
 
         return v;
@@ -69,17 +62,17 @@ public class ExploreFragment extends ListFragment implements View.OnClickListene
     public void onClick(View v) {
         String search = etSearch.getText().toString();
         if (search.length() == 0) {
-            Toast.makeText(parentActivity, R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
             return;
         }
-        Intent i = new Intent(parentActivity, MessagesActivity.class);
+        Intent i = new Intent(getActivity(), MessagesActivity.class);
         i.putExtra("search", search);
         startActivity(i);
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String tag = getListAdapter().getItem(position).toString();
-        Intent i = new Intent(parentActivity, MessagesActivity.class);
+        Intent i = new Intent(getActivity(), MessagesActivity.class);
         i.putExtra("tag", tag);
         startActivity(i);
     }
