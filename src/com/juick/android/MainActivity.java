@@ -112,6 +112,7 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
             if (fMessages == null) {
                 Bundle b = new Bundle();
                 b.putBoolean("home", true);
+                b.putBoolean("usecache", true);
                 fMessages = SherlockFragment.instantiate(this, MessagesFragment.class.getName(), b);
                 ft.add(android.R.id.content, fMessages, "m");
             } else {

@@ -22,7 +22,9 @@ import android.widget.AbsListView;
 import com.juick.android.api.JuickMessage;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,6 +51,7 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
     private View viewLoading;
     private String apiurl;
     private boolean loading;
+    private boolean usecache;
     // Pull to refresh
     private static final int TAP_TO_REFRESH = 1;
     private static final int PULL_TO_REFRESH = 2;
@@ -90,6 +93,7 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
             place_id = args.getInt("place_id", 0);
             popular = args.getBoolean("popular", false);
             media = args.getBoolean("media", false);
+            usecache = args.getBoolean("usecache", false);
         }
 
         if (home) {
@@ -162,6 +166,14 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
         getListView().setOnScrollListener(this);
         getListView().setOnItemClickListener(this);
         getListView().setOnItemLongClickListener(longClickListener);
+
+        if (usecache) {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String jcacheStr = sp.getString("jcache_feed", null);
+            if (jcacheStr != null) {
+                processData(jcacheStr);
+            }
+        }
     }
 
     private void loadData() {
@@ -174,36 +186,46 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
                     getActivity().runOnUiThread(new Runnable() {
 
                         public void run() {
-                            if (jsonStr != null) {
-                                listAdapter.clear();
-                                int cnt = listAdapter.parseJSON(jsonStr);
-
-                                if (getListAdapter() == null) {
-                                    getListView().addHeaderView(mRefreshView, null, false);
-                                    mRefreshViewHeight = mRefreshView.getMeasuredHeight();
-
-                                    if (cnt == 20) {
-                                        getListView().addFooterView(viewLoading, null, false);
-                                    }
-
-                                    setListAdapter(listAdapter);
-                                } else {
-                                    if (cnt < 20 && MessagesFragment.this.getListView().getFooterViewsCount() > 0) {
-                                        MessagesFragment.this.getListView().removeFooterView(viewLoading);
-                                    }
-                                }
-                            }
-                            loading = false;
-
-                            resetHeader();
-                            getListView().invalidateViews();
-                            setSelection(1);
+                            processData(jsonStr);
                         }
                     });
                 }
             }
         });
         thr.start();
+    }
+
+    private void processData(final String jsonStr) {
+        if (jsonStr != null) {
+            listAdapter.clear();
+            int cnt = listAdapter.parseJSON(jsonStr);
+
+            if (getListAdapter() == null) {
+                getListView().addHeaderView(mRefreshView, null, false);
+                mRefreshViewHeight = mRefreshView.getMeasuredHeight();
+
+                if (cnt == 20) {
+                    getListView().addFooterView(viewLoading, null, false);
+                }
+
+                setListAdapter(listAdapter);
+            } else {
+                if (cnt < 20 && MessagesFragment.this.getListView().getFooterViewsCount() > 0) {
+                    MessagesFragment.this.getListView().removeFooterView(viewLoading);
+                }
+            }
+
+            if (usecache) {
+                SharedPreferences.Editor spe = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+                spe.putString("jcache_feed", jsonStr);
+                spe.commit();
+            }
+        }
+        loading = false;
+
+        resetHeader();
+        getListView().invalidateViews();
+        setSelection(1);
     }
 
     private void loadMore(final int before_mid) {
