@@ -50,8 +50,6 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
     private Fragment fChats = null;
     private Fragment fMessages = null;
     private Fragment fExplore = null;
-    public boolean loadingChats = false;
-    public boolean loadingMessages = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -207,9 +205,5 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
             //TODO show user
         }
         return false;
-    }
-
-    public void updateProgressWheel() {
-        setSupportProgressBarIndeterminateVisibility((loadingChats || loadingMessages) ? Boolean.TRUE : Boolean.FALSE);
     }
 }
