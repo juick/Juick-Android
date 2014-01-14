@@ -49,6 +49,7 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
     public static final int PENDINGINTENT_CONSTANT = 713242183;
     private Fragment fChats = null;
     private Fragment fMessages = null;
+    private Fragment fExplore = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +118,12 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
                 ft.attach(fMessages);
             }
         } else {
+            if (fExplore == null) {
+                fExplore = SherlockFragment.instantiate(this, ExploreFragment.class.getName());
+                ft.add(android.R.id.content, fExplore, "e");
+            } else {
+                ft.attach(fExplore);
+            }
         }
     }
 
@@ -132,6 +139,9 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
                 fMessages = null; // ANDROID BUG
             }
         } else {
+            if (fExplore != null) {
+                ft.detach(fExplore);
+            }
         }
     }
 
