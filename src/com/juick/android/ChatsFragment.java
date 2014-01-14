@@ -17,7 +17,6 @@
  */
 package com.juick.android;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -52,7 +51,7 @@ public class ChatsFragment extends ListFragment implements OnItemClickListener {
         getListView().setOnItemClickListener(this);
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String jcacheMain = sp.getString("jcache_main", null);
+        final String jcacheMain = sp.getString("jcache_main", null);
         if (jcacheMain != null) {
             try {
                 ChatsAdapter listAdapter = new ChatsAdapter(getActivity());
@@ -67,24 +66,22 @@ public class ChatsFragment extends ListFragment implements OnItemClickListener {
             public void run() {
                 String url = "https://api.juick.com/groups_pms?cnt=10";
                 final String jsonStr = Utils.getJSON(getActivity(), url);
-                if (isAdded()) {
+                if (isAdded() && jsonStr != null && (jcacheMain == null || !jsonStr.equals(jcacheMain))) {
                     getActivity().runOnUiThread(new Runnable() {
 
                         public void run() {
-                            if (jsonStr != null) {
-                                try {
-                                    ChatsAdapter listAdapter = (ChatsAdapter) getListAdapter();
-                                    if (listAdapter == null) {
-                                        listAdapter = new ChatsAdapter(getActivity());
-                                    }
-                                    listAdapter.parseJSON(jsonStr);
-                                    setListAdapter(listAdapter);
-
-                                    SharedPreferences.Editor spe = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-                                    spe.putString("jcache_main", jsonStr);
-                                    spe.commit();
-                                } catch (Exception e) {
+                            try {
+                                ChatsAdapter listAdapter = (ChatsAdapter) getListAdapter();
+                                if (listAdapter == null) {
+                                    listAdapter = new ChatsAdapter(getActivity());
                                 }
+                                listAdapter.parseJSON(jsonStr);
+                                setListAdapter(listAdapter);
+
+                                SharedPreferences.Editor spe = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+                                spe.putString("jcache_main", jsonStr);
+                                spe.commit();
+                            } catch (Exception e) {
                             }
                         }
                     });

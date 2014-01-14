@@ -196,6 +196,7 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
     }
 
     private void processData(final String jsonStr) {
+        boolean newadapter = false;
         if (jsonStr != null) {
             listAdapter.clear();
             int cnt = listAdapter.parseJSON(jsonStr);
@@ -209,6 +210,7 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
                 }
 
                 setListAdapter(listAdapter);
+                newadapter = true;
             } else {
                 if (cnt < 20 && MessagesFragment.this.getListView().getFooterViewsCount() > 0) {
                     MessagesFragment.this.getListView().removeFooterView(viewLoading);
@@ -225,7 +227,9 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
 
         resetHeader();
         getListView().invalidateViews();
-        setSelection(1);
+        if (newadapter) {
+            setSelection(1);
+        }
     }
 
     private void loadMore(final int before_mid) {
