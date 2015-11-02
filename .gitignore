@@ -1,3 +1,7 @@
-/gen/
-/nbandroid/
-/bin/
+out/*
+gen/*
+.idea/*
+build/*
+.gradle/*
+keystore.properties
+Juick.apk
