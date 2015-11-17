@@ -46,7 +46,8 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
     public static final int ACTIVITY_SIGNIN = 2;
     public static final int ACTIVITY_PREFERENCES = 3;
     public static final int PENDINGINTENT_CONSTANT = 713242183;
-    private Fragment fChats = null;
+    private Fragment fCommonFeed = null;
+    private Fragment fMedia = null;
     private Fragment fMessages = null;
     private Fragment fExplore = null;
 
@@ -85,9 +86,11 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
         bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         Tab tab;
-        tab = bar.newTab().setTag("c").setText("Chats").setTabListener(this);
+        tab = bar.newTab().setTag("f").setText("Home").setTabListener(this);
         bar.addTab(tab);
-        tab = bar.newTab().setTag("f").setText("Feed").setTabListener(this);
+        tab = bar.newTab().setTag("a").setText("All").setTabListener(this);
+        bar.addTab(tab);
+        tab = bar.newTab().setTag("m").setText("Photos").setTabListener(this);
         bar.addTab(tab);
         tab = bar.newTab().setTag("s").setText("Search").setTabListener(this);
         bar.addTab(tab);
@@ -98,12 +101,16 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
 
     public void onTabSelected(Tab tab, FragmentTransaction ft) {
         String tag = tab.getTag().toString();
-        if (tag.equals("c")) {
-            if (fChats == null) {
-                fChats = SherlockFragment.instantiate(this, ChatsFragment.class.getName());
-                ft.add(android.R.id.content, fChats, "c");
+
+        if (tag.equals("a")) {
+            if (fCommonFeed == null) {
+                Bundle b = new Bundle();
+                b.putBoolean("all", true);
+                b.putBoolean("usecache", true);
+                fCommonFeed = SherlockFragment.instantiate(this, MessagesFragment.class.getName(), b);
+                ft.add(android.R.id.content, fCommonFeed, "a");
             } else {
-                ft.attach(fChats);
+                ft.attach(fCommonFeed);
             }
         } else if (tag.equals("f")) {
             if (fMessages == null) {
@@ -111,9 +118,19 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
                 b.putBoolean("home", true);
                 b.putBoolean("usecache", true);
                 fMessages = SherlockFragment.instantiate(this, MessagesFragment.class.getName(), b);
-                ft.add(android.R.id.content, fMessages, "m");
+                ft.add(android.R.id.content, fMessages, "f");
             } else {
                 ft.attach(fMessages);
+            }
+        } else if (tag.equals("m")) {
+            if (fMedia == null) {
+                Bundle b = new Bundle();
+                b.putBoolean("media", true);
+                b.putBoolean("usecache", true);
+                fMedia = SherlockFragment.instantiate(this, MessagesFragment.class.getName(), b);
+                ft.add(android.R.id.content, fMedia, "m");
+            } else {
+                ft.attach(fMedia);
             }
         } else {
             if (fExplore == null) {
@@ -127,18 +144,25 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
 
     public void onTabUnselected(Tab tab, FragmentTransaction ft) {
         String tag = tab.getTag().toString();
-        if (tag.equals("c")) {
-            if (fChats != null) {
-                ft.detach(fChats);
+        if (tag.equals("a")) {
+            if (fCommonFeed != null) {
+                ft.detach(fCommonFeed);
+                fCommonFeed = null;
             }
         } else if (tag.equals("f")) {
             if (fMessages != null) {
                 ft.detach(fMessages);
                 fMessages = null; // ANDROID BUG
             }
+        } else if (tag.equals("m")) {
+            if (fMedia != null) {
+                ft.detach(fMedia);
+                fMedia = null; // ANDROID BUG
+            }
         } else {
             if (fExplore != null) {
                 ft.detach(fExplore);
+                fExplore = null;
             }
         }
     }
