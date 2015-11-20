@@ -26,18 +26,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.juick.R;
 import java.io.FileInputStream;
 import java.io.OutputStream;
@@ -48,7 +44,7 @@ import java.net.URL;
  *
  * @author Ugnich Anton
  */
-public class NewMessageActivity extends SherlockActivity implements OnClickListener {
+public class NewMessageActivity extends AppCompatActivity implements OnClickListener {
 
     private static final int ACTIVITY_LOCATION = 1;
     public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
@@ -221,7 +217,7 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.newmessage, menu);
         return true;
     }

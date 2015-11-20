@@ -4,10 +4,10 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="right"
-    style="@style/LinearLayout.PM">
+    style="@style/LinearLayoutPM">
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/TextView.PMOut"/>
+        style="@style/TextViewPMOut"/>
 </LinearLayout>

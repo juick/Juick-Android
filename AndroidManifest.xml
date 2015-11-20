@@ -41,8 +41,8 @@
                 <data android:mimeType="vnd.android.cursor.item/vnd.com.juick.profile"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.juick.android.PMActivity" android:icon="@drawable/ic_user_32" android:theme="@style/Theme.Sherlock.Light" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"></activity>
-        <activity android:name="com.juick.android.NewMessageActivity" android:label="@string/Juick" android:theme="@style/Theme.Sherlock.Light" android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+        <activity android:name="com.juick.android.PMActivity" android:icon="@drawable/ic_user_32" android:theme="@style/Theme.AppCompat.Light" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"></activity>
+        <activity android:name="com.juick.android.NewMessageActivity" android:label="@string/Juick" android:theme="@style/Theme.AppCompat.Light" android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>
