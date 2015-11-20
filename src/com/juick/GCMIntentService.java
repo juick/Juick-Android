@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.google.android.gcm.GCMBaseIntentService;
@@ -113,17 +114,16 @@ public class GCMIntentService extends GCMBaseIntentService {
                             i = new Intent(context, MainActivity.class);
                         }
                         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-                        Notification notification = new Notification(R.drawable.ic_notification, title, System.currentTimeMillis());
-                        notification.setLatestEventInfo(context.getApplicationContext(), title, body, contentIntent);
-                        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-                        notification.defaults |= Notification.DEFAULT_LIGHTS;
-                        if (notifpublic >= 2) {
-                            notification.defaults |= Notification.DEFAULT_VIBRATE;
-                        }
-                        if (notifpublic == 3) {
-                            notification.defaults |= Notification.DEFAULT_SOUND;
-                        }
-                        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(1, notification);
+                        NotificationCompat.Builder notification = new NotificationCompat.Builder(this);
+                        notification.setSmallIcon(R.drawable.ic_notification)
+                                .setContentTitle(title)
+                                .setContentText(body)
+                                .setAutoCancel(true).setWhen(0)
+                                .setContentIntent(contentIntent)
+                                .setDefaults(Notification.DEFAULT_LIGHTS
+                                        | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND);
+
+                        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(1, notification.build());
                     }
                 }
             } catch (Exception e) {
