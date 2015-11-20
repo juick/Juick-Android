@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <style name="JuickStyle" parent="Theme.Sherlock.Light">
+    <style name="JuickStyle" parent="Theme.AppCompat.Light">
         <item name="android:actionBarStyle">@style/JuickStyle.ActionBar</item>
         <item name="actionBarStyle">@style/JuickStyle.ActionBar</item>
     </style>
 
-    <style name="JuickStyle.ActionBar" parent="Widget.Sherlock.Light.ActionBar.Solid">
+    <style name="JuickStyle.ActionBar" parent="Widget.AppCompat.ActionBar.Solid">
         <item name="android:displayOptions">showHome|useLogo</item>
         <item name="displayOptions">showHome|useLogo</item>
     </style>
     
-    <style name="LinearLayout.PM" parent="Widget">
+    <style name="LinearLayoutPM">
         <item name="android:background">#FFD0D0D0</item>    
     </style>
-    <style name="TextView.PMIn" parent="Widget">
+    <style name="TextViewPMIn" parent="">
         <item name="android:textSize">7pt</item>
         <item name="android:background">@drawable/listitem_pmin</item>
         <item name="android:paddingTop">3dip</item>
@@ -25,7 +25,7 @@
         <item name="android:layout_marginBottom">5dip</item>
         <item name="android:layout_marginLeft">3dip</item>
     </style>
-    <style name="TextView.PMOut" parent="Widget">
+    <style name="TextViewPMOut">
         <item name="android:textSize">7pt</item>
         <item name="android:background">@drawable/listitem_pmout</item>
         <item name="android:paddingTop">3dip</item>
