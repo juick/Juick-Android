@@ -108,7 +108,6 @@ public class SignInActivity extends Activity implements OnClickListener {
 
                     URL apiUrl = new URL("https://api.juick.com/post");
                     HttpURLConnection conn = (HttpURLConnection) apiUrl.openConnection();
-                    conn.setConnectTimeout(10000);
                     conn.setUseCaches(false);
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Authorization", basicAuth);
