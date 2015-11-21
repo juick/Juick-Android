@@ -1,63 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1">
-        <LinearLayout
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:orientation="vertical"
-            android:padding="5dip">
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/Nick_latin_letters_and_numbers_"
-                android:textSize="20sp"/>
-            <EditText
-                android:id="@+id/juickNick"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"/>
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/Password_"
-                android:textSize="20sp"/>
-            <EditText
-                android:id="@+id/juickPassword"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:password="true"/>
-        </LinearLayout>
-    </ScrollView>
-    <ImageView
-        android:layout_width="fill_parent"
-        android:layout_height="1dip"
-        android:scaleType="fitXY"
-        android:gravity="fill_horizontal"
-        android:src="@android:drawable/divider_horizontal_bright"/>
+            android:background="?attr/colorPrimary"
+            android:fitsSystemWindows="true">
+
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        style="@android:style/ButtonBar"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/buttonSave"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/Save"/>
-        <Button
-            android:id="@+id/buttonCancel"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/Cancel"/>
+            android:orientation="vertical"
+            android:paddingTop="12dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp">
+
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="24dp"
+                android:src="@drawable/ic_logo"/>
+
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:background="@android:color/white"
+                android:layout_height="wrap_content">
+
+            <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp">
+
+                <EditText
+                        android:id="@+id/juickNick"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"
+                        android:singleLine="true"
+                        android:hint="Your nickname"/>
+                >
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp">
+
+                <EditText
+                        android:id="@+id/juickPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:singleLine="true"/>
+                >
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/buttonSave"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="24dp"
+                    android:padding="12dp"
+                    android:text="Login"/>
+
+            <TextView
+                    android:id="@+id/link_signup"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:text="No account yet? Create one"
+                    android:gravity="center"
+                    android:textSize="16dip"/>
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>

@@ -62,10 +62,8 @@ public class SignInActivity extends Activity implements OnClickListener {
         etNick = (EditText) findViewById(R.id.juickNick);
         etPassword = (EditText) findViewById(R.id.juickPassword);
         bSave = (Button) findViewById(R.id.buttonSave);
-        bCancel = (Button) findViewById(R.id.buttonCancel);
 
         bSave.setOnClickListener(this);
-        bCancel.setOnClickListener(this);
 
         if (Utils.hasAuth(this)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -82,11 +80,6 @@ public class SignInActivity extends Activity implements OnClickListener {
     }
 
     public void onClick(View view) {
-        if (view == bCancel) {
-            setResult(RESULT_CANCELED);
-            finish();
-            return;
-        }
 
         final String nick = etNick.getText().toString();
         final String password = etPassword.getText().toString();
