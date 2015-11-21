@@ -17,8 +17,11 @@
  */
 package com.juick.android;
 
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,19 +42,16 @@ import java.util.List;
  *
  * @author Ugnich Anton
  */
-public class MainActivity extends AppCompatActivity implements ActionBar.TabListener {
+public class MainActivity extends AppCompatActivity {
 
     public static final int ACTIVITY_SIGNIN = 2;
     public static final int ACTIVITY_PREFERENCES = 3;
     public static final int PENDINGINTENT_CONSTANT = 713242183;
-    private Fragment fCommonFeed = null;
-    private Fragment fMedia = null;
-    private Fragment fMessages = null;
-    private Fragment fExplore = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -79,90 +79,17 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
             Log.e("Juick.GCM", e.toString());
         }
 
-        ActionBar bar = getSupportActionBar();
-        bar.setHomeButtonEnabled(false);
-        bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        setContentView(R.layout.main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
+        toolbar.setLogo(R.drawable.ic_logo);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        ActionBar.Tab tab;
-        tab = bar.newTab().setTag("f").setText("Home").setTabListener(this);
-        bar.addTab(tab);
-        tab = bar.newTab().setTag("a").setText("All").setTabListener(this);
-        bar.addTab(tab);
-        tab = bar.newTab().setTag("m").setText("Photos").setTabListener(this);
-        bar.addTab(tab);
-        tab = bar.newTab().setTag("s").setText("Search").setTabListener(this);
-        bar.addTab(tab);
-    }
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        viewPager.setAdapter(new MessagesFragmentPagerAdapter(getSupportFragmentManager(), MainActivity.this));
 
-    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-    }
-
-    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-        String tag = tab.getTag().toString();
-
-        if (tag.equals("a")) {
-            if (fCommonFeed == null) {
-                Bundle b = new Bundle();
-                b.putBoolean("all", true);
-                b.putBoolean("usecache", true);
-                fCommonFeed = Fragment.instantiate(this, MessagesFragment.class.getName(), b);
-                ft.add(android.R.id.content, fCommonFeed, "a");
-            } else {
-                ft.attach(fCommonFeed);
-            }
-        } else if (tag.equals("f")) {
-            if (fMessages == null) {
-                Bundle b = new Bundle();
-                b.putBoolean("home", true);
-                b.putBoolean("usecache", true);
-                fMessages = Fragment.instantiate(this, MessagesFragment.class.getName(), b);
-                ft.add(android.R.id.content, fMessages, "f");
-            } else {
-                ft.attach(fMessages);
-            }
-        } else if (tag.equals("m")) {
-            if (fMedia == null) {
-                Bundle b = new Bundle();
-                b.putBoolean("media", true);
-                b.putBoolean("usecache", true);
-                fMedia = Fragment.instantiate(this, MessagesFragment.class.getName(), b);
-                ft.add(android.R.id.content, fMedia, "m");
-            } else {
-                ft.attach(fMedia);
-            }
-        } else {
-            if (fExplore == null) {
-                fExplore = Fragment.instantiate(this, ExploreFragment.class.getName());
-                ft.add(android.R.id.content, fExplore, "e");
-            } else {
-                ft.attach(fExplore);
-            }
-        }
-    }
-
-    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-        String tag = tab.getTag().toString();
-        if (tag.equals("a")) {
-            if (fCommonFeed != null) {
-                ft.detach(fCommonFeed);
-                fCommonFeed = null;
-            }
-        } else if (tag.equals("f")) {
-            if (fMessages != null) {
-                ft.detach(fMessages);
-                fMessages = null; // ANDROID BUG
-            }
-        } else if (tag.equals("m")) {
-            if (fMedia != null) {
-                ft.detach(fMedia);
-                fMedia = null; // ANDROID BUG
-            }
-        } else {
-            if (fExplore != null) {
-                ft.detach(fExplore);
-                fExplore = null;
-            }
-        }
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
+        tabLayout.setupWithViewPager(viewPager);
     }
 
     @Override

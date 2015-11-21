@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<resources>
-    <style name="JuickStyle" parent="Theme.AppCompat.Light">
-        <item name="android:actionBarStyle">@style/JuickStyle.ActionBar</item>
-        <item name="actionBarStyle">@style/JuickStyle.ActionBar</item>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="JuickStyle" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowActionBar" tools:ignore="NewApi">false</item>
+        <item name="android:windowNoTitle" tools:ignore="NewApi">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">#EEEEE6</item>
+        <item name="android:windowTranslucentStatus" tools:ignore="NewApi">true</item>
+        <item name="android:windowTranslucentNavigation" tools:ignore="NewApi">true</item>
     </style>
 
-    <style name="JuickStyle.ActionBar" parent="Widget.AppCompat.ActionBar.Solid">
-        <item name="android:displayOptions">showHome|useLogo</item>
-        <item name="displayOptions">showHome|useLogo</item>
-    </style>
-    
     <style name="LinearLayoutPM">
         <item name="android:background">#FFD0D0D0</item>    
     </style>
