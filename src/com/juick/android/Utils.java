@@ -25,6 +25,7 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import com.juick.R;
 import java.io.BufferedReader;
