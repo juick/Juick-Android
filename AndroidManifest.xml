@@ -52,7 +52,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.juick.android.ThreadActivity" android:label="" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
-        <activity android:name="com.juick.android.SignInActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
+        <activity android:name="com.juick.android.SignInActivity" android:theme="@style/JuickStyle" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
         <activity android:name="com.juick.android.PreferencesActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
         <activity android:name="com.juick.android.TagsActivity" android:label="@string/Tags" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
         <activity android:name="com.juick.android.PickLocationActivity" android:label="@string/Pick_a_location" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>

@@ -6,8 +6,12 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="colorPrimary">#EEEEE6</item>
+        <item name="android:colorAccent" tools:ignore="NewApi">#1177AA</item>
+        <item name="colorAccent">#1177AA</item>
         <item name="android:windowTranslucentStatus" tools:ignore="NewApi">true</item>
         <item name="android:windowTranslucentNavigation" tools:ignore="NewApi">true</item>
+        <item name="android:colorButtonNormal" tools:ignore="NewApi">#DDDDD6</item>
+        <item name="colorButtonNormal">#DDDDD6</item>
     </style>
 
     <style name="LinearLayoutPM">
