@@ -18,6 +18,7 @@
 package com.juick.android;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import com.juick.android.api.JuickMessage;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -26,13 +27,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import com.juick.R;
 import com.juick.android.api.JuickUser;
-import com.neovisionaries.ws.client.WebSocket;
-import com.neovisionaries.ws.client.WebSocketAdapter;
-import com.neovisionaries.ws.client.WebSocketListener;
+import com.neovisionaries.ws.client.*;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -78,33 +79,41 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
 
     private void initWebSocket() {
         if (ws == null) {
-            try {
-                ws = Utils.getWSFactory().createSocket(new URI("wss", "ws.juick.com", "/" + mid));
-                ws.addListener(new WebSocketAdapter() {
-                    @Override
-                    public void onTextMessage(WebSocket websocket, final String jsonStr) throws Exception {
-                        super.onTextMessage(websocket, jsonStr);
-                        if (!isAdded()) {
-                            return;
-                        }
-                        ((Vibrator) getActivity().getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(250);
-                        getActivity().runOnUiThread(new Runnable() {
-
-                            public void run() {
-                                if (jsonStr != null) {
-                                    listAdapter.parseJSON("[" + jsonStr + "]");
-                                    listAdapter.getItem(1).Text = getResources().getString(R.string.Replies) + " (" + Integer.toString(listAdapter.getCount() - 2) + ")";
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        ws = Utils.getWSFactory().createSocket(new URI("wss", "ws.juick.com", "/" + mid, null));
+                        ws.addHeader("Origin", "ws.juick.com");
+                        ws.addHeader("Host", "ws.juick.com"); //TODO: remove from server side
+                        ws.addListener(new WebSocketAdapter() {
+                            @Override
+                            public void onTextMessage(WebSocket websocket, final String jsonStr) throws Exception {
+                                super.onTextMessage(websocket, jsonStr);
+                                if (!isAdded()) {
+                                    return;
                                 }
+                                ((Vibrator) getActivity().getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(250);
+                                getActivity().runOnUiThread(new Runnable() {
+
+                                    public void run() {
+                                        if (jsonStr != null) {
+                                            listAdapter.parseJSON("[" + jsonStr + "]");
+                                            listAdapter.getItem(1).Text = getResources().getString(R.string.Replies) + " (" + Integer.toString(listAdapter.getCount() - 2) + ")";
+                                        }
+                                    }
+                                });
                             }
                         });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
                     }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-            ws.connectAsynchronously();
+                    ws.connectAsynchronously();
+                }
+            });
+
         }
     }
 
