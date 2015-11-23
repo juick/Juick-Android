@@ -28,6 +28,8 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import com.juick.R;
+import com.neovisionaries.ws.client.WebSocketFactory;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -155,5 +157,14 @@ public class Utils {
         ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mWiFi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         return mWiFi.isConnected();
+    }
+
+    private static WebSocketFactory WSFactoryInstance;
+
+    public static WebSocketFactory getWSFactory() {
+        if (WSFactoryInstance == null) {
+            WSFactoryInstance = new WebSocketFactory();
+        }
+        return WSFactoryInstance;
     }
 }

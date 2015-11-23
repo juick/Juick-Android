@@ -18,12 +18,12 @@ dependencies {
     compile 'com.android.support:support-v4:23.1.+'
     compile 'com.android.support:design:23.1.+'
     compile 'com.android.support:appcompat-v7:+'
+    compile 'com.neovisionaries:nv-websocket-client:1.12'
 }
 
 android {
     compileSdkVersion "Google Inc.:Google APIs:23"
     buildToolsVersion "22.0.1"
-    useLibrary 'org.apache.http.legacy'
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23

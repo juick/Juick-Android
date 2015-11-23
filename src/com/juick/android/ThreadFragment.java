@@ -26,16 +26,23 @@ import android.view.View;
 import android.widget.AdapterView;
 import com.juick.R;
 import com.juick.android.api.JuickUser;
+import com.neovisionaries.ws.client.WebSocket;
+import com.neovisionaries.ws.client.WebSocketAdapter;
+import com.neovisionaries.ws.client.WebSocketListener;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  *
  * @author Ugnich Anton
  */
-public class ThreadFragment extends ListFragment implements AdapterView.OnItemClickListener, WsClientListener {
+public class ThreadFragment extends ListFragment implements AdapterView.OnItemClickListener {
 
     private ThreadFragmentListener parentActivity;
     private JuickMessagesAdapter listAdapter;
-    private WsClient ws = null;
+    private WebSocket ws = null;
     private int mid = 0;
 
     @Override
@@ -71,18 +78,34 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
 
     private void initWebSocket() {
         if (ws == null) {
-            ws = new WsClient();
-            ws.setListener(this);
-        }
-        Thread wsthr = new Thread(new Runnable() {
+            try {
+                ws = Utils.getWSFactory().createSocket(new URI("wss", "ws.juick.com", "/" + mid));
+                ws.addListener(new WebSocketAdapter() {
+                    @Override
+                    public void onTextMessage(WebSocket websocket, final String jsonStr) throws Exception {
+                        super.onTextMessage(websocket, jsonStr);
+                        if (!isAdded()) {
+                            return;
+                        }
+                        ((Vibrator) getActivity().getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(250);
+                        getActivity().runOnUiThread(new Runnable() {
 
-            public void run() {
-                if (ws.connect("ws.juick.com", 80, "/" + mid, null) && ws != null) {
-                    ws.readLoop();
-                }
+                            public void run() {
+                                if (jsonStr != null) {
+                                    listAdapter.parseJSON("[" + jsonStr + "]");
+                                    listAdapter.getItem(1).Text = getResources().getString(R.string.Replies) + " (" + Integer.toString(listAdapter.getCount() - 2) + ")";
+                                }
+                            }
+                        });
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
             }
-        });
-        wsthr.start();
+            ws.connectAsynchronously();
+        }
     }
 
     private void initAdapter() {
@@ -132,22 +155,6 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
             ws = null;
         }
         super.onPause();
-    }
-
-    public void onWebSocketTextFrame(final String jsonStr) {
-        if (!isAdded()) {
-            return;
-        }
-        ((Vibrator) getActivity().getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(250);
-        getActivity().runOnUiThread(new Runnable() {
-
-            public void run() {
-                if (jsonStr != null) {
-                    listAdapter.parseJSON("[" + jsonStr + "]");
-                    listAdapter.getItem(1).Text = getResources().getString(R.string.Replies) + " (" + Integer.toString(listAdapter.getCount() - 2) + ")";
-                }
-            }
-        });
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
