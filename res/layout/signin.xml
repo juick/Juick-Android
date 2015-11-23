@@ -42,7 +42,6 @@
                         android:inputType="textPersonName"
                         android:singleLine="true"
                         android:hint="Your nickname"/>
-                >
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -57,7 +56,6 @@
                         android:layout_height="wrap_content"
                         android:inputType="textPassword"
                         android:singleLine="true"/>
-                >
             </android.support.design.widget.TextInputLayout>
 
             <android.support.v7.widget.AppCompatButton
