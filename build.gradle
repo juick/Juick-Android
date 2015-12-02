@@ -20,6 +20,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.neovisionaries:nv-websocket-client:1.12'
     compile 'com.google.android.gms:play-services-gcm:8.3.0'
+    compile 'com.jakewharton:disklrucache:2.0.2'
 }
 
 android {
