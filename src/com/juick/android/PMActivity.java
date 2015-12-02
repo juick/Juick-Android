@@ -36,10 +36,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.juick.GCMIntentService;
+import com.juick.GCMReceiverService;
 import com.juick.R;
+
 import java.net.URLEncoder;
-import org.json.JSONObject;
 
 /**
  *
@@ -136,7 +136,7 @@ public class PMActivity extends AppCompatActivity implements PMFragment.PMFragme
         SharedPreferences.Editor spe = PreferenceManager.getDefaultSharedPreferences(this).edit();
         if (hasFocus) {
             spe.putString("currentactivity", "pm-" + uid);
-            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(GCMIntentService.GCMEVENTACTION));
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(GCMReceiverService.GCMEVENTACTION));
         } else {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
             spe.remove("currentactivity");
