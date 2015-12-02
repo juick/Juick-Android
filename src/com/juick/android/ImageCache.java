@@ -24,7 +24,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.support.v4.util.LruCache;
 import android.util.Log;
-import com.jakewharton.DiskLruCache;
+import com.jakewharton.disklrucache.DiskLruCache;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
