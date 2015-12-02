@@ -17,25 +17,19 @@
  */
 package com.juick.android;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import com.juick.GCMIntentService;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-import com.google.android.gcm.GCMRegistrar;
 import com.juick.R;
+import com.juick.RegistrationIntentService;
+
 import java.util.List;
 
 /**
@@ -66,18 +60,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        try {
-            GCMRegistrar.checkDevice(this);
-            GCMRegistrar.checkManifest(this);
-            final String regId = GCMRegistrar.getRegistrationId(this);
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-            String prefRegId = sp.getString("gcm_regid", null);
-            if (regId.length() == 0 || !regId.equals(prefRegId)) {
-                GCMRegistrar.register(this, GCMIntentService.SENDER_ID);
-            }
-        } catch (Exception e) {
-            Log.e("Juick.GCM", e.toString());
-        }
+        startService(new Intent(this, RegistrationIntentService.class));
 
         setContentView(R.layout.main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);

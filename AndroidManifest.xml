@@ -69,13 +69,24 @@
             <meta-data android:name="android.content.SyncAdapter" android:resource="@xml/sync_contacts"/>
             <meta-data android:name="android.provider.CONTACTS_STRUCTURE" android:resource="@xml/contacts"/>
         </service>
-        <receiver android:name="com.google.android.gcm.GCMBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND">
+        <receiver android:name="com.google.android.gms.gcm.GcmReceiver" android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
                 <category android:name="com.juick"/>
             </intent-filter>
         </receiver>
-        <service android:name=".GCMIntentService"/>
+        <service android:name=".GCMReceiverService" android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            </intent-filter>
+        </service>
+        <service android:name=".RegistrationInstanceIDListenerService" android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.id.InstanceID"/>
+            </intent-filter>
+        </service>
+        <service android:name=".RegistrationIntentService" android:exported="false">
+        </service>
     </application>
 </manifest>
