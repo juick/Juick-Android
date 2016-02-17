@@ -23,7 +23,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,6 +48,10 @@ public class JuickMessage {
     public int replies = 0;
     public String Photo = null;
     public String Video = null;
+
+    static Pattern imgUrlPattern = Pattern.compile(
+            "https?://(?:[a-z0-9\\-]+\\.)+[a-z]{2,6}(?:/[^/#?]+)+\\.(?:jpe?g|gif|png)",
+            Pattern.CASE_INSENSITIVE);
 
     public static JuickMessage parseJSON(JSONObject json) throws JSONException {
         JuickMessage jmsg = new JuickMessage();
@@ -88,7 +97,32 @@ public class JuickMessage {
 
         return jmsg;
     }
+    public String getFirstImage(){
+        if(Photo != null)
+            return Photo;
+        if(Text != null){
+            Matcher m = imgUrlPattern.matcher(Text);
+            if(m.find()) {
+                String url = m.group(0);
+                return url;
+            }
+        }
+        return null;
+    }
+    public List<String> getAllImages(){
+        List<String> images = new LinkedList<>();
+        if(Photo != null)
+            images.add(Photo);
+        if(Text != null){
+            Matcher m = imgUrlPattern.matcher(Text);
+            while (m.find()) {
+                String url = m.group(0);
+                images.add(url);
+            }
+        }
 
+        return images;
+    }
     public String getTags() {
         String t = new String();
         for (Iterator i = tags.iterator(); i.hasNext();) {

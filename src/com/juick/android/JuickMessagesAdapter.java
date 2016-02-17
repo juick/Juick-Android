@@ -127,15 +127,15 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
             TextView timestamp = (TextView) v.findViewById(R.id.timestamp);
             timestamp.setText(formatMessageTimestamp(jmsg));
 
+            TextView tags = (TextView) v.findViewById(R.id.tags);
+            tags.setText(jmsg.getTags());
+
             TextView t = (TextView) v.findViewById(R.id.text);
-            if (type == TYPE_THREAD && jmsg.RID == 0) {
-                t.setText(formatFirstMessageText(jmsg));
-            } else {
-                t.setText(formatMessageText(jmsg));
-            }
+            t.setText(formatMessageText(jmsg));
 
             ImageView p = (ImageView) v.findViewById(R.id.photo);
-            if (jmsg.Photo != null) {
+            String photoUrl = jmsg.getFirstImage();
+            if (photoUrl != null) {
                 String key = Integer.toString(jmsg.MID) + "-" + Integer.toString(jmsg.RID);
                 Bitmap bitmap = photos.getImageMemory(key);
                 if (bitmap != null) {
@@ -143,7 +143,7 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
                 } else {
                     p.setImageResource(R.drawable.ic_attach_photo);
                     ImageLoaderTask task = new ImageLoaderTask(photos, p, usenetwork);
-                    task.execute(key, jmsg.Photo);
+                    task.execute(key, photoUrl);
                 }
                 p.setVisibility(View.VISIBLE);
             } else {
@@ -224,17 +224,6 @@ public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
         }
          */
 
-        return ssb;
-    }
-
-    private SpannableStringBuilder formatFirstMessageText(JuickMessage jmsg) {
-        SpannableStringBuilder ssb = formatMessageText(jmsg);
-        String tags = jmsg.getTags();
-        if (tags.length() > 0) {
-            int padding = ssb.length();
-            ssb.append("\n" + tags);
-            ssb.setSpan(new ForegroundColorSpan(0xFF999999), padding, padding + 1 + tags.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
         return ssb;
     }
 }
