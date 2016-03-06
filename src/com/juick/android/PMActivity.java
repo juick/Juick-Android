@@ -26,6 +26,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -33,19 +34,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.MenuItem;
 import com.juick.GCMIntentService;
 import com.juick.R;
 import java.net.URLEncoder;
-import org.json.JSONObject;
 
 /**
  *
  * @author ugnich
  */
-public class PMActivity extends SherlockFragmentActivity implements PMFragment.PMFragmentListener, View.OnClickListener {
+public class PMActivity extends FragmentActivity implements PMFragment.PMFragmentListener, View.OnClickListener {
 
     private static final String PMFRAGMENTID = "PMFRAGMENT";
     private String uname;
@@ -74,9 +71,7 @@ public class PMActivity extends SherlockFragmentActivity implements PMFragment.P
         uname = getIntent().getStringExtra("uname");
         uid = getIntent().getIntExtra("uid", 0);
 
-        ActionBar bar = getSupportActionBar();
-        bar.setDisplayHomeAsUpEnabled(true);
-        bar.setTitle(uname);
+        setTitle(R.string.PrivateMessagingWith + " @" + uname);
 
         setContentView(R.layout.pm);
 
@@ -143,14 +138,5 @@ public class PMActivity extends SherlockFragmentActivity implements PMFragment.P
         }
         spe.commit();
         super.onWindowFocusChanged(hasFocus);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

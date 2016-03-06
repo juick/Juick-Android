@@ -81,7 +81,7 @@ public class JuickMessageMenu implements OnItemLongClickListener, OnClickListene
         pos = m.end();
         }
          */
-        menuLength = 4 + urls.size();
+        menuLength = 5 + urls.size();
         if (listSelectedItem.RID == 0) {
             menuLength++;
         }
@@ -100,6 +100,7 @@ public class JuickMessageMenu implements OnItemLongClickListener, OnClickListene
         items[i++] = activity.getResources().getString(R.string.Subscribe_to) + " @" + UName;
         items[i++] = activity.getResources().getString(R.string.Blacklist) + " @" + UName;
         items[i++] = activity.getResources().getString(R.string.Share);
+        items[i++] = activity.getResources().getString(R.string.SendPm) + " @" + UName;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setItems(items, this);
@@ -165,6 +166,12 @@ public class JuickMessageMenu implements OnItemLongClickListener, OnClickListene
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_TEXT, listSelectedItem.toString());
                 activity.startActivity(intent);
+                break;
+            case 5:
+                i = new Intent(activity, PMActivity.class);
+                i.putExtra("uid", listSelectedItem.User.UID);
+                i.putExtra("uname", listSelectedItem.User.UName);
+                activity.startActivity(i);
                 break;
         }
     }

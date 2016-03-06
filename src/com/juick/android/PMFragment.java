@@ -17,8 +17,11 @@
  */
 package com.juick.android;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
@@ -26,10 +29,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.juick.R;
 import com.juick.android.api.JuickMessage;
 import org.json.JSONArray;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  *
@@ -41,6 +50,8 @@ public class PMFragment extends ListFragment {
     private PMAdapter listAdapter = null;
     private String uname;
     private int uid;
+
+    private String myname;
 
     @Override
     public void onAttach(Activity activity) {
@@ -55,12 +66,11 @@ public class PMFragment extends ListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        myname = getMyName(getActivity());
         uname = getArguments().getString("uname");
         uid = getArguments().getInt("uid", 0);
 
-        listAdapter = new PMAdapter(getActivity(), uid);
-        getListView().setDividerHeight(0);
+        listAdapter = new PMAdapter(getActivity(), uid, uname, myname);
 
         Thread thr = new Thread(new Runnable() {
 
@@ -74,16 +84,36 @@ public class PMFragment extends ListFragment {
         });
         thr.start();
     }
+    /* dirty hack */
+    public static String getMyName(Context context) {
+        AccountManager am = AccountManager.get(context);
+        Account accs[] = am.getAccountsByType(context.getString(R.string.com_juick));
+        if (accs.length > 0) {
+            Bundle b = null;
+            try {
+                b = am.getAuthToken(accs[0], "", false, null, null).getResult();
+            } catch (Exception e) {
+                Log.e("getBasicAuthString", Log.getStackTraceString(e));
+            }
+            if (b != null) {
+                return b.getString(AccountManager.KEY_ACCOUNT_NAME);
+            }
+        }
+        return "";
+    }
 
     public void onNewMessages(final String msg) {
-        if (listAdapter != null && msg != null) {
+        if (listAdapter != null) {
             getActivity().runOnUiThread(new Runnable() {
 
                 public void run() {
                     try {
-                        listAdapter.parseJSON(msg);
+                        if(msg != null)
+                            listAdapter.parseJSON(msg);
                         setListAdapter(listAdapter);
-                        getListView().setSelection(listAdapter.getCount() - 1);
+                        if(listAdapter.getCount() > 0)
+                            getListView().setSelection(listAdapter.getCount() - 1);
+
                     } catch (Exception e) {
                         Log.e("PMFragment.onNewMessage", e.toString());
                     }
@@ -100,18 +130,24 @@ class PMAdapter extends ArrayAdapter<JuickMessage> {
 
     Context context;
     int uid;
+    String uname;
+    String myname;
+    private ImageCache userpics;
 
-    public PMAdapter(Context context, int uid) {
+    public PMAdapter(Context context, int uid, String uname, String myname) {
         super(context, R.layout.listitem_pm_in);
         this.context = context;
         this.uid = uid;
+        this.uname = uname;
+        this.myname = myname;
+        userpics = new ImageCache(context, "userpics-small", 1024 * 1024 * 1);
     }
 
     public int parseJSON(String jsonStr) {
         try {
             JSONArray json = new JSONArray(jsonStr);
             int cnt = json.length();
-            for (int i = 0; i < cnt; i++) {
+            for (int i = cnt-1; i >= 0; i--) {
                 add(JuickMessage.parseJSON(json.getJSONObject(i)));
             }
             return cnt;
@@ -127,27 +163,48 @@ class PMAdapter extends ArrayAdapter<JuickMessage> {
         JuickMessage msg = getItem(position);
 
         View v = convertView;
-
+        TextView tv;
         if (msg.User.UID == uid) {
             if (v == null || !v.getTag().toString().equals("i")) {
                 LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.listitem_pm_in, null);
+                v = vi.inflate(R.layout.listitem_juickmessage, null);
                 v.setTag("i");
+                v.findViewById(R.id.comment).setVisibility(View.GONE);
+                v.findViewById(R.id.replies).setVisibility(View.GONE);
             }
-
-            TextView tv = (TextView) v.findViewById(R.id.text);
-            tv.setText(msg.Text);
+            tv = (TextView) v.findViewById(R.id.username);
+            tv.setText(uname);
         } else {
             if (v == null || !v.getTag().toString().equals("o")) {
                 LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.listitem_pm_out, null);
+                v = vi.inflate(R.layout.listitem_juickmessage, null);
                 v.setTag("o");
+                v.findViewById(R.id.comment).setVisibility(View.GONE);
+                v.findViewById(R.id.replies).setVisibility(View.GONE);
             }
+            tv = (TextView) v.findViewById(R.id.username);
+            tv.setText(myname);
+        }
+        tv = (TextView) v.findViewById(R.id.text);
+        tv.setText(msg.Text);
+        tv = (TextView) v.findViewById(R.id.timestamp);
+        tv.setText(formatMessageTimestamp(msg.Timestamp));
 
-            TextView tv = (TextView) v.findViewById(R.id.text);
-            tv.setText(msg.Text);
+        ImageView upic = (ImageView) v.findViewById(R.id.userpic);
+        Bitmap bitmapupic = userpics.getImageMemory(Integer.toString(msg.User.UID));
+        if (bitmapupic != null) {
+            upic.setImageBitmap(bitmapupic);
+        } else {
+            upic.setImageResource(R.drawable.ic_user_32);
+            ImageLoaderTask task = new ImageLoaderTask(userpics, upic, true);
+            task.execute(Integer.toString(msg.User.UID), "https://i.juick.com/as/" + msg.User.UID + ".png");
         }
 
         return v;
+    }
+    private String formatMessageTimestamp(Date jmsg) {
+        DateFormat df = new SimpleDateFormat("HH:mm dd/MMM/yy");
+        df.setTimeZone(TimeZone.getDefault());
+        return df.format(jmsg);
     }
 }

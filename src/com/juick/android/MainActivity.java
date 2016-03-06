@@ -47,6 +47,7 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
     public static final int ACTIVITY_PREFERENCES = 3;
     public static final int PENDINGINTENT_CONSTANT = 713242183;
     private Fragment fCommonFeed = null;
+    private Fragment fChats = null;
     private Fragment fMedia = null;
     private Fragment fMessages = null;
     private Fragment fExplore = null;
@@ -86,13 +87,13 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
         bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         Tab tab;
-        tab = bar.newTab().setTag("f").setText("Home").setTabListener(this);
+        tab = bar.newTab().setTag("f").setText(R.string.Home).setTabListener(this);
         bar.addTab(tab);
-        tab = bar.newTab().setTag("a").setText("All").setTabListener(this);
+        tab = bar.newTab().setTag("a").setText(R.string.All).setTabListener(this);
         bar.addTab(tab);
-        tab = bar.newTab().setTag("m").setText("Photos").setTabListener(this);
+        tab = bar.newTab().setTag("m").setText(R.string.Photos).setTabListener(this);
         bar.addTab(tab);
-        tab = bar.newTab().setTag("s").setText("Search").setTabListener(this);
+        tab = bar.newTab().setTag("p").setText(R.string.PMs).setTabListener(this);
         bar.addTab(tab);
     }
 
@@ -111,6 +112,13 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
                 ft.add(android.R.id.content, fCommonFeed, "a");
             } else {
                 ft.attach(fCommonFeed);
+            }
+        } else if (tag.equals("p")) {
+            if (fChats == null) {
+                fChats = SherlockFragment.instantiate(this, ChatsFragment.class.getName());
+                ft.add(android.R.id.content, fChats, "p");
+            } else {
+                ft.attach(fChats);
             }
         } else if (tag.equals("f")) {
             if (fMessages == null) {
@@ -148,6 +156,11 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
             if (fCommonFeed != null) {
                 ft.detach(fCommonFeed);
                 fCommonFeed = null;
+            }
+        } else if (tag.equals("p")) {
+            if (fChats != null) {
+                ft.detach(fChats);
+                fChats = null;
             }
         } else if (tag.equals("f")) {
             if (fMessages != null) {
