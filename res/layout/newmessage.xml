@@ -11,7 +11,7 @@
         <EditText
             android:id="@+id/editMessage"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:gravity="top"
             android:background="#00000000"
             android:padding="8dip"
@@ -30,13 +30,6 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="5dip"
             android:src="@drawable/ic_menu_tags"
-            android:background="#00000000"/>
-        <ImageButton
-            android:id="@+id/buttonLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="5dip"
-            android:src="@drawable/ic_button_location"
             android:background="#00000000"/>
         <ImageButton
             android:id="@+id/buttonAttachment"

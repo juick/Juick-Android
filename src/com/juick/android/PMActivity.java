@@ -26,23 +26,26 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.juick.GCMIntentService;
+import com.juick.GCMReceiverService;
 import com.juick.R;
+
 import java.net.URLEncoder;
 
 /**
  *
  * @author ugnich
  */
-public class PMActivity extends FragmentActivity implements PMFragment.PMFragmentListener, View.OnClickListener {
+public class PMActivity extends AppCompatActivity implements PMFragment.PMFragmentListener, View.OnClickListener {
 
     private static final String PMFRAGMENTID = "PMFRAGMENT";
     private String uname;
@@ -71,7 +74,9 @@ public class PMActivity extends FragmentActivity implements PMFragment.PMFragmen
         uname = getIntent().getStringExtra("uname");
         uid = getIntent().getIntExtra("uid", 0);
 
-        setTitle(R.string.PrivateMessagingWith + " @" + uname);
+        ActionBar bar = getSupportActionBar();
+        bar.setDisplayHomeAsUpEnabled(true);
+        bar.setTitle(uname);
 
         setContentView(R.layout.pm);
 
@@ -131,12 +136,21 @@ public class PMActivity extends FragmentActivity implements PMFragment.PMFragmen
         SharedPreferences.Editor spe = PreferenceManager.getDefaultSharedPreferences(this).edit();
         if (hasFocus) {
             spe.putString("currentactivity", "pm-" + uid);
-            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(GCMIntentService.GCMEVENTACTION));
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(GCMReceiverService.GCMEVENTACTION));
         } else {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
             spe.remove("currentactivity");
         }
         spe.commit();
         super.onWindowFocusChanged(hasFocus);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

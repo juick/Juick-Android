@@ -17,44 +17,35 @@
  */
 package com.juick.android;
 
-import com.actionbarsherlock.app.ActionBar.Tab;
-import com.juick.GCMIntentService;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.google.android.gcm.GCMRegistrar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import com.juick.R;
+import com.juick.RegistrationIntentService;
+
 import java.util.List;
 
 /**
  *
  * @author Ugnich Anton
  */
-public class MainActivity extends SherlockFragmentActivity implements ActionBar.TabListener {
+public class MainActivity extends AppCompatActivity {
 
     public static final int ACTIVITY_SIGNIN = 2;
     public static final int ACTIVITY_PREFERENCES = 3;
     public static final int PENDINGINTENT_CONSTANT = 713242183;
-    private Fragment fCommonFeed = null;
-    private Fragment fChats = null;
-    private Fragment fMedia = null;
-    private Fragment fMessages = null;
-    private Fragment fExplore = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -69,115 +60,19 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
             return;
         }
 
-        try {
-            GCMRegistrar.checkDevice(this);
-            GCMRegistrar.checkManifest(this);
-            final String regId = GCMRegistrar.getRegistrationId(this);
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-            String prefRegId = sp.getString("gcm_regid", null);
-            if (regId.length() == 0 || !regId.equals(prefRegId)) {
-                GCMRegistrar.register(this, GCMIntentService.SENDER_ID);
-            }
-        } catch (Exception e) {
-            Log.e("Juick.GCM", e.toString());
-        }
+        startService(new Intent(this, RegistrationIntentService.class));
 
-        ActionBar bar = getSupportActionBar();
-        bar.setHomeButtonEnabled(false);
-        bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        setContentView(R.layout.main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
+        toolbar.setLogo(R.drawable.ic_logo);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        Tab tab;
-        tab = bar.newTab().setTag("f").setText(R.string.Home).setTabListener(this);
-        bar.addTab(tab);
-        tab = bar.newTab().setTag("a").setText(R.string.All).setTabListener(this);
-        bar.addTab(tab);
-        tab = bar.newTab().setTag("m").setText(R.string.Photos).setTabListener(this);
-        bar.addTab(tab);
-        tab = bar.newTab().setTag("p").setText(R.string.PMs).setTabListener(this);
-        bar.addTab(tab);
-    }
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        viewPager.setAdapter(new MessagesFragmentPagerAdapter(getSupportFragmentManager(), MainActivity.this));
 
-    public void onTabReselected(Tab tab, FragmentTransaction ft) {
-    }
-
-    public void onTabSelected(Tab tab, FragmentTransaction ft) {
-        String tag = tab.getTag().toString();
-
-        if (tag.equals("a")) {
-            if (fCommonFeed == null) {
-                Bundle b = new Bundle();
-                b.putBoolean("all", true);
-                b.putBoolean("usecache", true);
-                fCommonFeed = SherlockFragment.instantiate(this, MessagesFragment.class.getName(), b);
-                ft.add(android.R.id.content, fCommonFeed, "a");
-            } else {
-                ft.attach(fCommonFeed);
-            }
-        } else if (tag.equals("p")) {
-            if (fChats == null) {
-                fChats = SherlockFragment.instantiate(this, ChatsFragment.class.getName());
-                ft.add(android.R.id.content, fChats, "p");
-            } else {
-                ft.attach(fChats);
-            }
-        } else if (tag.equals("f")) {
-            if (fMessages == null) {
-                Bundle b = new Bundle();
-                b.putBoolean("home", true);
-                b.putBoolean("usecache", true);
-                fMessages = SherlockFragment.instantiate(this, MessagesFragment.class.getName(), b);
-                ft.add(android.R.id.content, fMessages, "f");
-            } else {
-                ft.attach(fMessages);
-            }
-        } else if (tag.equals("m")) {
-            if (fMedia == null) {
-                Bundle b = new Bundle();
-                b.putBoolean("media", true);
-                b.putBoolean("usecache", true);
-                fMedia = SherlockFragment.instantiate(this, MessagesFragment.class.getName(), b);
-                ft.add(android.R.id.content, fMedia, "m");
-            } else {
-                ft.attach(fMedia);
-            }
-        } else {
-            if (fExplore == null) {
-                fExplore = SherlockFragment.instantiate(this, ExploreFragment.class.getName());
-                ft.add(android.R.id.content, fExplore, "e");
-            } else {
-                ft.attach(fExplore);
-            }
-        }
-    }
-
-    public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-        String tag = tab.getTag().toString();
-        if (tag.equals("a")) {
-            if (fCommonFeed != null) {
-                ft.detach(fCommonFeed);
-                fCommonFeed = null;
-            }
-        } else if (tag.equals("p")) {
-            if (fChats != null) {
-                ft.detach(fChats);
-                fChats = null;
-            }
-        } else if (tag.equals("f")) {
-            if (fMessages != null) {
-                ft.detach(fMessages);
-                fMessages = null; // ANDROID BUG
-            }
-        } else if (tag.equals("m")) {
-            if (fMedia != null) {
-                ft.detach(fMedia);
-                fMedia = null; // ANDROID BUG
-            }
-        } else {
-            if (fExplore != null) {
-                ft.detach(fExplore);
-                fExplore = null;
-            }
-        }
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
+        tabLayout.setupWithViewPager(viewPager);
     }
 
     @Override
@@ -202,7 +97,7 @@ public class MainActivity extends SherlockFragmentActivity implements ActionBar.
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
         return true;
     }

@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<resources>
-    <style name="JuickStyle" parent="Theme.Sherlock.Light">
-        <item name="android:actionBarStyle">@style/JuickStyle.ActionBar</item>
-        <item name="actionBarStyle">@style/JuickStyle.ActionBar</item>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="JuickStyle" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowActionBar" tools:ignore="NewApi">false</item>
+        <item name="android:windowNoTitle" tools:ignore="NewApi">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">#EEEEE6</item>
+        <item name="android:colorAccent" tools:ignore="NewApi">#1177AA</item>
+        <item name="colorAccent">#1177AA</item>
+        <item name="android:windowTranslucentStatus" tools:ignore="NewApi">true</item>
+        <item name="android:windowTranslucentNavigation" tools:ignore="NewApi">true</item>
+        <item name="android:colorButtonNormal" tools:ignore="NewApi">#DDDDD6</item>
+        <item name="colorButtonNormal">#DDDDD6</item>
     </style>
 
-    <style name="JuickStyle.ActionBar" parent="Widget.Sherlock.Light.ActionBar.Solid">
-        <item name="android:displayOptions">showHome|useLogo</item>
-        <item name="displayOptions">showHome|useLogo</item>
+    <style name="LinearLayoutPM">
+        <item name="android:background">#FFD0D0D0</item>    
     </style>
-    
-    <style name="LinearLayout.PM" parent="Widget">
-        <!--item name="android:background">#FFD0D0D0</item-->
-    </style>
-    <style name="TextView.PMIn" parent="Widget">
+    <style name="TextViewPMIn" parent="">
         <item name="android:textSize">7pt</item>
-        <!--item name="android:background">@drawable/listitem_pmin</item-->
+        <item name="android:background">@drawable/listitem_pmin</item>
         <item name="android:paddingTop">3dip</item>
         <item name="android:paddingRight">9dip</item>
         <item name="android:paddingBottom">5dip</item>
@@ -25,9 +29,9 @@
         <item name="android:layout_marginBottom">5dip</item>
         <item name="android:layout_marginLeft">3dip</item>
     </style>
-    <style name="TextView.PMOut" parent="Widget">
+    <style name="TextViewPMOut">
         <item name="android:textSize">7pt</item>
-        <!-- item name="android:background">@drawable/listitem_pmout</item -->
+        <item name="android:background">@drawable/listitem_pmout</item>
         <item name="android:paddingTop">3dip</item>
         <item name="android:paddingRight">14dip</item>
         <item name="android:paddingBottom">5dip</item>

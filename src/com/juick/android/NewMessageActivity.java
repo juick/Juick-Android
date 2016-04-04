@@ -26,18 +26,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.juick.R;
 import java.io.FileInputStream;
 import java.io.OutputStream;
@@ -48,14 +44,12 @@ import java.net.URL;
  *
  * @author Ugnich Anton
  */
-public class NewMessageActivity extends SherlockActivity implements OnClickListener {
+public class NewMessageActivity extends AppCompatActivity implements OnClickListener {
 
-    private static final int ACTIVITY_LOCATION = 1;
     public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
     private static final int ACTIVITY_TAGS = 4;
     private EditText etMessage;
     private ImageButton bTags;
-    private ImageButton bLocation;
     private ImageButton bAttachment;
     private double lat = 0;
     private double lon = 0;
@@ -79,7 +73,7 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+//        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         ActionBar bar = getSupportActionBar();
         bar.setDisplayHomeAsUpEnabled(true);
@@ -90,11 +84,9 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
 
         etMessage = (EditText) findViewById(R.id.editMessage);
         bTags = (ImageButton) findViewById(R.id.buttonTags);
-        bLocation = (ImageButton) findViewById(R.id.buttonLocation);
         bAttachment = (ImageButton) findViewById(R.id.buttonAttachment);
 
         bTags.setOnClickListener(this);
-        bLocation.setOnClickListener(this);
         bAttachment.setOnClickListener(this);
 
         resetForm();
@@ -103,7 +95,6 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
 
     private void resetForm() {
         etMessage.setText("");
-        bLocation.setSelected(false);
         bAttachment.setSelected(false);
         lat = 0;
         lon = 0;
@@ -113,58 +104,11 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
         progressDialogCancel.bool = false;
         etMessage.requestFocus();
         setSupportProgressBarIndeterminateVisibility(Boolean.FALSE);
-
-        /*
-        setProgressBarIndeterminateVisibility(true);
-        Thread thr = new Thread(new Runnable() {
-        
-        public void run() {
-        String jsonUrl = "http://api.juick.com/postform";
-        
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Location loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        if (loc != null) {
-        jsonUrl += "?lat=" + loc.getLatitude() + "&lon=" + loc.getLongitude() + "&acc=" + loc.getAccuracy() + "&fixage=" + Math.round((System.currentTimeMillis() - loc.getTime()) / 1000);
-        }
-        
-        final String jsonStr = Utils.getJSON(NewMessageActivity.this, jsonUrl);
-        
-        NewMessageActivity.this.runOnUiThread(new Runnable() {
-        
-        public void run() {
-        if (jsonStr != null) {
-        
-        try {
-        JSONObject json = new JSONObject(jsonStr);
-        if (json.has("facebook")) {
-        etTo.setText(etTo.getText() + ", Facebook");
-        }
-        if (json.has("twitter")) {
-        etTo.setText(etTo.getText() + ", Twitter");
-        }
-        if (json.has("place")) {
-        JSONObject jsonPlace = json.getJSONObject("place");
-        pidHint = jsonPlace.getInt("pid");
-        bLocationHint.setVisibility(View.VISIBLE);
-        bLocationHint.setText(jsonPlace.getString("name"));
-        }
-        } catch (JSONException e) {
-        System.err.println(e);
-        }
-        }
-        NewMessageActivity.this.setProgressBarIndeterminateVisibility(false);
-        }
-        });
-        }
-        });
-        thr.start();
-         */
     }
 
     private void setFormEnabled(boolean state) {
         etMessage.setEnabled(state);
         bTags.setEnabled(state);
-        bLocation.setEnabled(state);
         bAttachment.setEnabled(state);
         setSupportProgressBarIndeterminateVisibility(state ? Boolean.FALSE : Boolean.TRUE);
     }
@@ -198,14 +142,6 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
             i.putExtra("uid", (int) -1);
             startActivityForResult(i, ACTIVITY_TAGS);
 
-        } else if (v == bLocation) {
-            if (lat == 0 && lon == 0) {
-                startActivityForResult(new Intent(this, PickLocationActivity.class), ACTIVITY_LOCATION);
-            } else {
-                lat = 0;
-                lon = 0;
-                bLocation.setSelected(false);
-            }
         } else if (v == bAttachment) {
             if (attachmentUri == null) {
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -221,7 +157,7 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.newmessage, menu);
         return true;
     }
@@ -392,12 +328,6 @@ public class NewMessageActivity extends SherlockActivity implements OnClickListe
         if (resultCode == RESULT_OK) {
             if (requestCode == ACTIVITY_TAGS) {
                 etMessage.setText("*" + data.getStringExtra("tag") + " " + etMessage.getText());
-            } else if (requestCode == ACTIVITY_LOCATION) {
-                lat = data.getDoubleExtra("lat", 0);
-                lon = data.getDoubleExtra("lon", 0);
-                if (lat != 0 && lon != 0) {
-                    bLocation.setSelected(true);
-                }
             } else if (requestCode == ACTIVITY_ATTACHMENT_IMAGE && data != null) {
                 attachmentUri = data.getDataString();
                 // How to get correct mime type?

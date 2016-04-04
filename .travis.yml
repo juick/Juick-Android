@@ -1,0 +1,22 @@
+language: android
+android:
+  components:
+    - tools
+    - build-tools-23.0.2
+    - android-23
+    - sysimg-23
+    - extra-google-m2repository
+    - extra-android-m2repository
+    - extra-google-google_play_services
+    - addon-google_apis-google-23
+  licenses:
+    - android-sdk-license-.+
+    - android-sdk-license-.+
+    - '.*intel.+'
+
+before_install:
+  # Fix Gradle output
+  - export TERM=dumb
+
+script:
+  - ./gradlew check

@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.util.Base64;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -62,10 +63,8 @@ public class SignInActivity extends Activity implements OnClickListener {
         etNick = (EditText) findViewById(R.id.juickNick);
         etPassword = (EditText) findViewById(R.id.juickPassword);
         bSave = (Button) findViewById(R.id.buttonSave);
-        bCancel = (Button) findViewById(R.id.buttonCancel);
 
         bSave.setOnClickListener(this);
-        bCancel.setOnClickListener(this);
 
         if (Utils.hasAuth(this)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -82,11 +81,6 @@ public class SignInActivity extends Activity implements OnClickListener {
     }
 
     public void onClick(View view) {
-        if (view == bCancel) {
-            setResult(RESULT_CANCELED);
-            finish();
-            return;
-        }
 
         final String nick = etNick.getText().toString();
         final String password = etPassword.getText().toString();
@@ -108,7 +102,6 @@ public class SignInActivity extends Activity implements OnClickListener {
 
                     URL apiUrl = new URL("https://api.juick.com/post");
                     HttpURLConnection conn = (HttpURLConnection) apiUrl.openConnection();
-                    conn.setConnectTimeout(10000);
                     conn.setUseCaches(false);
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Authorization", basicAuth);

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/menuitem_newmessage"
         android:icon="@drawable/ic_action_edit"
         android:title="@string/Create"
-        android:showAsAction="always"/>
+        app:showAsAction="always"/>
     <item android:id="@+id/menuitem_preferences"
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/Settings"
-        android:showAsAction="never"/>
+        app:showAsAction="ifRoom"/>
 </menu>

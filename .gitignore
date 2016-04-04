@@ -5,3 +5,6 @@ build/*
 .gradle/*
 keystore.properties
 Juick.apk
+local.properties
+*.keystore
+*.iml
