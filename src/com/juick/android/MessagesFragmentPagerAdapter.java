@@ -11,8 +11,8 @@ import android.support.v4.app.FragmentPagerAdapter;
  */
 public class MessagesFragmentPagerAdapter extends FragmentPagerAdapter {
 
-    private String tabTitles[] = new String[] {"Home", "Discover", "Photos"};
-    private String tabTags[] = new String[] {"home", "all", "media"};
+    private String tabTitles[] = new String[] {"Home", "Discover", "Photos", "PM"};
+    private String tabTags[] = new String[] {"home", "all", "media", "pm"};
     private Context context;
 
 
@@ -26,12 +26,15 @@ public class MessagesFragmentPagerAdapter extends FragmentPagerAdapter {
         Bundle b = new Bundle();
         b.putBoolean(tabTags[position], true);
         b.putBoolean("usecache", true);
+        if(position == 3)
+            return Fragment.instantiate(context, ChatsFragment.class.getName(), b);
+
         return Fragment.instantiate(context, MessagesFragment.class.getName(), b);
     }
 
     @Override
     public int getCount() {
-        return 3;
+        return 4;
     }
 
     @Override

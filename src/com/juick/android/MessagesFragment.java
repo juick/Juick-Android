@@ -100,8 +100,8 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
             apiurl = "https://api.juick.com/home?1=1";
         } else {
             apiurl = "https://api.juick.com/messages?1=1";
-            if (uid > 0 && uname != null) {
-                apiurl += "&user_id=" + uid;
+            if (uname != null) {
+                apiurl += "&uname=" + uname;
             } else if (search != null) {
                 try {
                     apiurl += "&search=" + URLEncoder.encode(search, "utf-8");
@@ -114,8 +114,11 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
                 } catch (Exception e) {
                     Log.e("ApiURL", e.toString());
                 }
+                if (uname != null) {
+                    apiurl += "&uname=" + uname;
+                }
                 if (uid == -1) {
-                    apiurl += "&user_id=-1";
+                    apiurl += "&uid=" + uid;
                 }
             } else if (place_id > 0) {
                 apiurl += "&place_id=" + place_id;
@@ -273,7 +276,7 @@ public class MessagesFragment extends ListFragment implements AdapterView.OnItem
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         if (visibleItemCount < totalItemCount && (firstVisibleItem + visibleItemCount == totalItemCount) && loading == false) {
-            int before_mid = ((JuickMessage) listAdapter.getItem(listAdapter.getCount() - 1)).MID;
+            int before_mid = listAdapter.getItem(listAdapter.getCount() - 1).MID;
             loadMore(before_mid);
         }
 
