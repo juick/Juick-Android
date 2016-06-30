@@ -19,6 +19,7 @@ package com.juick.android;
 
 import android.app.Activity;
 import android.os.AsyncTask;
+import android.os.Handler;
 import com.juick.android.api.JuickMessage;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -79,7 +80,8 @@ public class ThreadFragment extends ListFragment implements AdapterView.OnItemCl
 
     private void initWebSocket() {
         if (ws == null) {
-            AsyncTask.execute(new Runnable() {
+            Handler handler = new Handler();
+            handler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
