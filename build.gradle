@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.+'
+        classpath 'com.android.tools.build:gradle:2.1.0'
     }
 }
 
@@ -16,7 +16,7 @@ repositories {
 dependencies {
     compile 'com.android.support:support-v4:23.1.+'
     compile 'com.android.support:design:23.1.+'
-    compile 'com.android.support:appcompat-v7:+'
+    compile 'com.android.support:appcompat-v7:23.1.+'
     compile 'com.neovisionaries:nv-websocket-client:1.12'
     compile 'com.google.android.gms:play-services-gcm:8.3.0'
     compile 'com.jakewharton:disklrucache:2.0.2'
@@ -24,7 +24,7 @@ dependencies {
 
 android {
     compileSdkVersion "Google Inc.:Google APIs:23"
-    buildToolsVersion "23.0.2"
+    buildToolsVersion '23.0.3'
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23
@@ -40,6 +40,13 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
+    }
+    packagingOptions {
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/notice.txt'
     }
     sourceSets {
         main {
@@ -90,5 +97,8 @@ android {
         variant.outputs.each { output ->
             output.outputFile = file(apkName)
         }
+    }
+    dexOptions {
+        incremental true
     }
 }
