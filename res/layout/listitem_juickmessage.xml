@@ -33,22 +33,29 @@
 
     <TextView  
         android:id="@+id/timestamp"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        
-        android:layout_toRightOf="@id/userpic"
         android:layout_below="@id/username"
         android:layout_alignParentRight="true"
-        
+        android:layout_alignParentTop="true"
         android:textSize="12sp"
         android:textColor="@android:color/darker_gray"/>
-
+    <TextView
+        android:id="@+id/tags"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_below="@id/username"
+        android:layout_toRightOf="@id/userpic"
+        android:textSize="16sp"
+        android:textColor="@android:color/darker_gray"
+        android:textStyle="bold"/>
     <TextView
         android:id="@+id/text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         
-        android:layout_below="@id/timestamp"
+        android:layout_below="@id/tags"
         android:layout_marginTop="3dp"/>
 
     <ImageView

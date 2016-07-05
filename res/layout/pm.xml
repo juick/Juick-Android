@@ -7,25 +7,31 @@
         android:id="@+id/pmfragment"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="#FFD0D0D0"
         android:layout_weight="1"/>
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:scaleType="fitXY"
+        android:gravity="fill_horizontal"
+        android:src="@android:drawable/divider_horizontal_bright"/>
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
         style="@android:style/ButtonBar"
         android:orientation="horizontal">
-<!--        <ImageButton
+       <!-- ImageButton
             android:id="@+id/buttonAttachment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:src="@drawable/ic_button_attachment_small"/>-->
+            android:src="@drawable/ic_button_attachment_small"/ -->
         <EditText
             android:id="@+id/editMessage"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:inputType="textCapSentences|textMultiLine"/>
         <Button
             android:id="@+id/buttonSend"
             android:layout_width="wrap_content"

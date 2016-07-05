@@ -115,5 +115,11 @@
 
     <!-- ThreadActivity -->
     <string name="In_reply_to_">In reply to:</string>
+    <string name="SendPm">Send PM to</string>
+    <string name="PMs">Chats</string>
+    <string name="Photos">Photos</string>
+    <string name="All">All</string>
+    <string name="Home">Home</string>
+    <string name="PrivateMessagingWith">Private messaging with</string>
 
 </resources>

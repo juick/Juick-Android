@@ -104,5 +104,9 @@
 
     <!-- ThreadActivity -->
     <string name="In_reply_to_">En réponse à:</string>
+    <string name="SendPm"> Envoyer un message privé</string>
+    <string name="PMs">Chats</string>
+    <string name="Photos">Photos</string>
+    <string name="Home"> Мon flux</string>
 
 </resources>

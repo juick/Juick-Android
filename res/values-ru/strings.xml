@@ -115,5 +115,11 @@
 
     <!-- ThreadActivity -->
     <string name="In_reply_to_">В ответ на:</string>
+    <string name="SendPm">Отправить приватное сообщение</string>
+    <string name="PMs">Чаты</string>
+    <string name="Photos">Картинки</string>
+    <string name="All">Всё</string>
+    <string name="Home">Подписки</string>
+    <string name="PrivateMessagingWith">Приватная беседа с</string>
 
 </resources>
