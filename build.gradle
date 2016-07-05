@@ -14,22 +14,24 @@ repositories {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:23.1.+'
-    compile 'com.android.support:design:23.1.+'
-    compile 'com.android.support:appcompat-v7:23.1.+'
+    compile 'com.android.support:support-v4:24.0.0'
+    compile 'com.android.support:design:24.0.0'
+    compile 'com.android.support:appcompat-v7:24.0.0'
     compile 'com.neovisionaries:nv-websocket-client:1.28'
-    compile 'com.google.android.gms:play-services-gcm:8.3.0'
+    compile 'com.google.android.gms:play-services-gcm:9.0.2'
     compile 'com.jakewharton:disklrucache:2.0.2'
 }
 
 android {
     compileSdkVersion "Google Inc.:Google APIs:23"
-    buildToolsVersion '23.0.3'
+    //noinspection GradleDependency
+    buildToolsVersion '23.0.2'
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23
         versionCode 45
         versionName '3.1'
+        applicationId "com.juick"
     }
     lintOptions {
         checkReleaseBuilds false
