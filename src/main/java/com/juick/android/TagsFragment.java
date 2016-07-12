@@ -17,34 +17,55 @@
  */
 package com.juick.android;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
-import android.util.Log;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
-import org.json.JSONArray;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import com.juick.R;
+import com.juick.remote.api.RestClient;
+import com.juick.remote.model.Tag;
+import com.juick.widget.itemanimator.CustomItemAnimator;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Ugnich Anton
  */
-public class TagsFragment extends ListFragment implements OnItemClickListener, OnItemLongClickListener {
+public class TagsFragment extends BaseFragment {
 
-    private TagsFragmentListener parentActivity;
-    private int uid = 0;
+    private static final String ARG_UID = "ARG_UID";
+    public static final String ARG_TAG = "ARG_TAG";
 
+    public static final String TAG_SELECT_ACTION = "TAG_SELECT_ACTION";
+
+    int uid = 0;
+
+    public TagsFragment() {
+    }
+
+    public static TagsFragment newInstance(int uid) {
+        TagsFragment fragment = new TagsFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARG_UID, uid);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Nullable
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            parentActivity = (TagsFragmentListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement TagsFragmentListener");
-        }
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_list, container, false);
     }
 
     @Override
@@ -53,59 +74,146 @@ public class TagsFragment extends ListFragment implements OnItemClickListener, O
 
         Bundle args = getArguments();
         if (args != null) {
-            uid = args.getInt("uid", 0);
+            uid = args.getInt(ARG_UID, 0);
         }
 
-        getListView().setOnItemClickListener(this);
-        getListView().setOnItemLongClickListener(this);
+        if (uid == 0) {
+            getActivity().setTitle(R.string.Popular_tags);
+        }
 
-        Thread thr = new Thread(new Runnable() {
-
-            public void run() {
-                String url = "https://api.juick.com/tags";
-                if (uid != 0) {
-                    url += "?user_id=" + uid;
-                }
-                final String jsonStr = Utils.getJSON(getActivity(), url);
-                if (isAdded()) {
-                    getActivity().runOnUiThread(new Runnable() {
-
-                        public void run() {
-                            if (jsonStr != null) {
-                                try {
-                                    ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1);
-
-                                    JSONArray json = new JSONArray(jsonStr);
-                                    int cnt = json.length();
-                                    for (int i = 0; i < cnt; i++) {
-                                        listAdapter.add(json.getJSONObject(i).getString("tag"));
-                                    }
-                                    setListAdapter(listAdapter);
-                                } catch (Exception e) {
-                                    Log.e("initTagsAdapter", e.toString());
-                                }
-                            }
-                        }
-                    });
-                }
+        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.VISIBLE);
+        final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemAnimator(new CustomItemAnimator());
+        final TagsAdapter adapter = new TagsAdapter();
+        recyclerView.setAdapter(adapter);
+        adapter.setOnItemClickListener(new TagsAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                getActivity().sendBroadcast(new Intent(TAG_SELECT_ACTION).putExtra(ARG_TAG, adapter.getItem(position)));
             }
         });
-        thr.start();
+        adapter.setOnItemLongClickListener(new TagsAdapter.OnItemLongClickListener() {
+            @Override
+            public void onItemLongClick(View view, int position) {
+                ((BaseActivity) getActivity()).replaceFragment(PostsPageFragment.newInstance(uid, null, null, adapter.getItem(position), 0, false));
+            }
+        });
+
+        String url = "https://api.juick.com/tags";
+        if (uid > 0) {
+            url += "?user_id=" + uid;
+        }
+        RestClient.getApi().tags(url).enqueue(new Callback<List<Tag>>() {
+            @Override
+            public void onResponse(Call<List<Tag>> call, Response<List<Tag>> response) {
+                progressBar.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.GONE);
+                List<String> listAdapter = new ArrayList<>();
+                for (Tag tag : response.body()) {
+                    listAdapter.add(tag.tag);
+                }
+                adapter.addData(listAdapter);
+            }
+
+            @Override
+            public void onFailure(Call<List<Tag>> call, Throwable t) {
+            }
+        });
     }
 
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        parentActivity.onTagClick((String) getListAdapter().getItem(position));
+    static class TagsAdapter extends RecyclerView.Adapter<TagsAdapter.VH> {
+
+        List<String> items = new ArrayList<>();
+        OnItemClickListener itemClickListener;
+        OnItemLongClickListener itemLongClickListener;
+
+        public void addData(List<String> newItems) {
+            items.clear();
+            items.addAll(newItems);
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+            VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false));
+            vh.setOnItemClickListener(itemClickListener);
+            vh.setOnItemLongClickListener(itemLongClickListener);
+            return vh;
+        }
+
+        @Override
+        public void onBindViewHolder(VH holder, int position) {
+            String tag = items.get(position);
+
+            holder.textView.setText(tag);
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
+
+        public String getItem(int position) {
+            return items.get(position);
+        }
+
+        public void setOnItemClickListener(OnItemClickListener itemClickListener) {
+            this.itemClickListener = itemClickListener;
+        }
+
+        public void setOnItemLongClickListener(OnItemLongClickListener itemClickListener) {
+            this.itemLongClickListener = itemClickListener;
+        }
+
+        public interface OnItemClickListener {
+            void onItemClick(View view, int pos);
+        }
+
+        public interface OnItemLongClickListener {
+            void onItemLongClick(View view, int pos);
+        }
+
+        static class VH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+
+            TextView textView;
+            OnItemClickListener itemClickListener;
+            OnItemLongClickListener itemLongClickListener;
+
+            public VH(View itemView) {
+                super(itemView);
+                textView = (TextView) itemView.findViewById(android.R.id.text1);
+
+                itemView.setOnClickListener(this);
+                itemView.setOnLongClickListener(this);
+            }
+
+            public void setOnItemClickListener(OnItemClickListener listener) {
+                itemClickListener = listener;
+            }
+
+            public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+                itemLongClickListener = listener;
+            }
+
+            @Override
+            public void onClick(View v) {
+                if (itemClickListener != null){
+                    itemClickListener.onItemClick(v, getAdapterPosition());
+                }
+            }
+
+            @Override
+            public boolean onLongClick(View v) {
+                if (itemLongClickListener != null) {
+                    itemLongClickListener.onItemLongClick(v, getAdapterPosition());
+                    return true;
+                }
+                return false;
+            }
+        }
     }
 
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        parentActivity.onTagLongClick((String) getListAdapter().getItem(position));
-        return true;
-    }
-
-    public interface TagsFragmentListener {
-
-        public void onTagClick(String tag);
-
-        public void onTagLongClick(String tag);
-    }
 }

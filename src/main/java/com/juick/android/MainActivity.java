@@ -18,17 +18,26 @@
 package com.juick.android;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuInflater;
+import android.text.TextUtils;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import com.bumptech.glide.Glide;
+import com.juick.AccountManager;
 import com.juick.R;
+import com.juick.remote.api.RestClient;
+import com.juick.remote.model.User;
 import com.juick.RegistrationIntentService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import java.util.List;
 
@@ -36,104 +45,120 @@ import java.util.List;
  *
  * @author Ugnich Anton
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
-    public static final int ACTIVITY_SIGNIN = 2;
-    public static final int ACTIVITY_PREFERENCES = 3;
-    public static final int PENDINGINTENT_CONSTANT = 713242183;
+    public static final String ARG_UID = "ARG_UID";
+    public static final String ARG_UNAME = "ARG_UNAME";
+    public static final String PUSH_ACTION = "PUSH_ACTION";
+    public static final String PUSH_ACTION_SHOW_THREAD = "PUSH_ACTION_SHOW_THREAD";
+    public static final String PUSH_ACTION_SHOW_PM = "PUSH_ACTION_SHOW_PM";
+
+    private int myId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-        Intent intent = getIntent();
-        if (intent != null) {
-            Uri uri = intent.getData();
-            if (uri != null && uri.getPathSegments().size() > 0 && parseUri(uri)) {
-                return;
-            }
-        }
-
-        if (!Utils.hasAuth(this)) {
-            startActivityForResult(new Intent(this, SignInActivity.class), ACTIVITY_SIGNIN);
-            return;
-        }
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         startService(new Intent(this, RegistrationIntentService.class));
 
-        setContentView(R.layout.main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
-        toolbar.setLogo(R.drawable.ic_logo);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        viewPager.setAdapter(new MessagesFragmentPagerAdapter(getSupportFragmentManager(), MainActivity.this));
+        toggle.syncState();
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
-        tabLayout.setupWithViewPager(viewPager);
-    }
+        final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ACTIVITY_SIGNIN) {
-            if (resultCode == RESULT_OK) {
-                Intent intent = getIntent();
-                finish();
-                startActivity(intent);
-            } else {
-                finish();
+        View navHeader = navigationView.getHeaderView(0).findViewById(R.id.header);
+        navHeader.setOnClickListener(this);
+
+        final ImageView imageHeader = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image);
+        if (AccountManager.hasAuth()) {
+            RestClient.getApi().getUsers(AccountManager.getNick()).enqueue(new Callback<List<User>>() {
+                @Override
+                public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                    myId = response.body().get(0).uid;
+                    Glide.with(imageHeader.getContext()).load("https://i.juick.com/as/" + myId + ".png").into(imageHeader);
+                }
+
+                @Override
+                public void onFailure(Call<List<User>> call, Throwable t) {
+                }
+            });
+            TextView titleHeader = (TextView) navigationView.getHeaderView(0).findViewById(R.id.title_textView);
+            if (!TextUtils.isEmpty(AccountManager.getNick())) {
+                titleHeader.setText(AccountManager.getNick());
             }
-        } else if (requestCode == ACTIVITY_PREFERENCES) {
-            if (resultCode == RESULT_OK) {
-                Intent intent = getIntent();
-                finish();
-                startActivity(intent);
-            }
+        }
+
+        navigationView.getMenu().findItem(R.id.chats).setVisible(AccountManager.hasAuth());
+
+        if (savedInstanceState == null) {
+            addFragment(PostsFragment.newInstance(), false);
         }
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent.getAction() == null) return;
+        if (intent.getAction().equals(PUSH_ACTION)) {
+            if (intent.getBooleanExtra(PUSH_ACTION_SHOW_PM, false)) {
+                replaceFragment(PMFragment.newInstance(intent.getStringExtra(ARG_UNAME), intent.getIntExtra(ARG_UID, 0)));
+            } else if (intent.getBooleanExtra(PUSH_ACTION_SHOW_THREAD, false)) {
+                replaceFragment(ThreadFragment.newInstance(intent.getIntExtra(ARG_UID, 0)));
+            }
+        }
+        setIntent(null);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.header:
+                showLogin();
+                break;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.chats) {
+            replaceFragment(ChatsFragment.newInstance());
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menuitem_preferences:
-                startActivityForResult(new Intent(this, PreferencesActivity.class), ACTIVITY_PREFERENCES);
-                return true;
-            case R.id.menuitem_newmessage:
-                startActivity(new Intent(this, NewMessageActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+    public int fragmentContainerLayoutId() {
+        return R.id.fragment_container;
     }
 
-    private boolean parseUri(Uri uri) {
-        List<String> segs = uri.getPathSegments();
-        if ((segs.size() == 1 && segs.get(0).matches("\\A[0-9]+\\z"))
-                || (segs.size() == 2 && segs.get(1).matches("\\A[0-9]+\\z") && !segs.get(0).equals("places"))) {
-            int mid = Integer.parseInt(segs.get(segs.size() - 1));
-            if (mid > 0) {
-                finish();
-                Intent intent = new Intent(this, ThreadActivity.class);
-                intent.setData(null);
-                intent.putExtra("mid", mid);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                return true;
-            }
-        } else if (segs.size() == 1 && segs.get(0).matches("\\A[a-zA-Z0-9\\-]+\\z")) {
-            //TODO show user
-        }
-        return false;
+    @Override
+    public int getTabsBarLayoutId() {
+        return R.id.tabs;
     }
 }

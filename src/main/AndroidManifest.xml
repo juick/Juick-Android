@@ -18,8 +18,15 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-feature android:name="android.hardware.location.network" android:required="false"/>
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
-    <application android:icon="@drawable/ic_launcher" android:label="@string/Juick" android:theme="@android:style/Theme.Light">
-        <activity android:name="com.juick.android.MainActivity" android:theme="@style/JuickStyle" android:logo="@drawable/ic_logo" android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+    <application android:icon="@drawable/ic_launcher"
+                 android:theme="@style/AppTheme"
+                 android:allowBackup="true"
+                 android:supportsRtl="true"
+                 android:name=".App">
+        <activity android:name=".android.MainActivity"
+                  android:theme="@style/AppTheme.NoActionBar"
+                  android:logo="@drawable/ic_logo"
+                  android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -29,15 +36,12 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:scheme="http" android:host="juick.com"/>
             </intent-filter>
-        </activity>
-        <activity android:name="com.juick.android.MessagesActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="vnd.android.cursor.item/vnd.com.juick.profile"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.juick.android.PMActivity" android:icon="@drawable/ic_user_32" android:theme="@style/Theme.AppCompat.Light" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"></activity>
         <activity android:name="com.juick.android.NewMessageActivity" android:label="@string/Juick" android:theme="@style/Theme.AppCompat.Light" android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
@@ -47,10 +51,6 @@
                 <data android:mimeType="image/png"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.juick.android.ThreadActivity" android:label="" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
-        <activity android:name="com.juick.android.SignInActivity" android:theme="@style/JuickStyle" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
-        <activity android:name="com.juick.android.PreferencesActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
-        <activity android:name="com.juick.android.TagsActivity" android:label="@string/Tags" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
         <service android:name="com.juick.android.AuthenticationService" android:exported="true" android:process=":auth">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>

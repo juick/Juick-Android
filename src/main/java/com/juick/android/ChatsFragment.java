@@ -17,170 +17,162 @@
  */
 package com.juick.android;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.app.ListFragment;
-import android.util.Log;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import com.bumptech.glide.Glide;
 import com.juick.R;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.juick.remote.api.RestClient;
+import com.juick.remote.model.Chat;
+import com.juick.remote.model.Pms;
+import com.juick.widget.itemanimator.CustomItemAnimator;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author ugnich
  */
-public class ChatsFragment extends ListFragment implements OnItemClickListener {
+public class ChatsFragment extends BaseFragment {
+
+    public ChatsFragment() {
+    }
+
+    public static ChatsFragment newInstance() {
+        ChatsFragment fragment = new ChatsFragment();
+        return fragment;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_list, container, false);
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        getListView().setOnItemClickListener(this);
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        final String jcacheMain = sp.getString("jcache_main", null);
-        if (jcacheMain != null) {
-            try {
-                ChatsAdapter listAdapter = new ChatsAdapter(getActivity());
-                listAdapter.parseJSON(jcacheMain);
-                setListAdapter(listAdapter);
-            } catch (Exception e) {
-            }
-        }
-
-        Thread thr = new Thread(new Runnable() {
-
-            public void run() {
-                String url = "https://api.juick.com/groups_pms?cnt=10";
-                final String jsonStr = Utils.getJSON(getActivity(), url);
-                if (isAdded() && jsonStr != null && (jcacheMain == null || !jsonStr.equals(jcacheMain))) {
-                    getActivity().runOnUiThread(new Runnable() {
-
-                        public void run() {
-                            try {
-                                ChatsAdapter listAdapter = (ChatsAdapter) getListAdapter();
-                                if (listAdapter == null) {
-                                    listAdapter = new ChatsAdapter(getActivity());
-                                }
-                                listAdapter.parseJSON(jsonStr);
-                                setListAdapter(listAdapter);
-
-                                SharedPreferences.Editor spe = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-                                spe.putString("jcache_main", jsonStr);
-                                spe.commit();
-                            } catch (Exception e) {
-                            }
-                        }
-                    });
-                }
+        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemAnimator(new CustomItemAnimator());
+        final ChatsAdapter adapter = new ChatsAdapter();
+        recyclerView.setAdapter(adapter);
+        adapter.setOnItemClickListener(new ChatsAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                Chat item = adapter.getItem(position);
+                getBaseActivity().replaceFragment(PMFragment.newInstance(item.uname, item.uid));
             }
         });
-        thr.start();
-    }
 
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ChatsAdapter listAdapter = (ChatsAdapter) getListAdapter();
-        ChatsAdapterItem item = listAdapter.getItem(position);
-
-        Intent i = new Intent(getActivity(), PMActivity.class);
-        i.putExtra("uname", item.userName);
-        i.putExtra("uid", item.userID);
-        startActivity(i);
-    }
-}
-
-class ChatsAdapter extends ArrayAdapter<ChatsAdapterItem> {
-
-    Context context;
-    private ImageCache userpics;
-
-    public ChatsAdapter(Context context) {
-        super(context, R.layout.listitem_juickmessage);
-        this.context = context;
-
-        userpics = new ImageCache(context, "userpics-small", 1024 * 1024 * 1);
-    }
-
-    public int parseJSON(String jsonStr) {
-        try {
-            clear();
-
-            JSONArray json = new JSONObject(jsonStr).getJSONArray("pms");
-            int cnt = json.length();
-            for (int i = 0; i < cnt; i++) {
-                JSONObject j = json.getJSONObject(i);
-                ChatsAdapterItem item = new ChatsAdapterItem();
-                item.userName = j.getString("uname");
-                item.userID = j.getInt("uid");
-                if (j.has("MessagesCount")) {
-                    item.unreadMessages = j.getInt("MessagesCount");
+        RestClient.getApi().groupsPms(10).enqueue(new Callback<Pms>() {
+            @Override
+            public void onResponse(Call<Pms> call, Response<Pms> response) {
+                progressBar.setVisibility(View.GONE);
+                if (response.isSuccessful()) {
+                    adapter.addData(response.body().pms);
                 }
-                add(item);
             }
-            return cnt;
-        } catch (Exception e) {
-            Log.e("MainAdapter.parseJSON", e.toString());
-        }
-        return 0;
+
+            @Override
+            public void onFailure(Call<Pms> call, Throwable t) {
+            }
+        });
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ChatsAdapterItem i = getItem(position);
-        View v = convertView;
+    static class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.VH> {
 
-        if (v == null || !(v instanceof LinearLayout)) {
-            LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.listitem_main, null);
+        List<Chat> items = new ArrayList<>();
+        OnItemClickListener itemClickListener;
+
+        public void addData(List<Chat> newItems) {
+            items.clear();
+            items.addAll(newItems);
+            notifyDataSetChanged();
         }
 
-        TextView t = (TextView) v.findViewById(R.id.text);
-        ImageView img = (ImageView) v.findViewById(R.id.icon);
-        t.setText(i.userName);
-        img.setVisibility(View.VISIBLE);
-
-        Bitmap bitmap = userpics.getImageMemory(Integer.toString(i.userID));
-        if (bitmap != null) {
-            img.setImageBitmap(bitmap);
-        } else {
-            img.setImageResource(R.drawable.ic_user_32);
-            ImageLoaderTask task = new ImageLoaderTask(userpics, img, true);
-            task.execute(Integer.toString(i.userID), "http://i.juick.com/as/" + i.userID + ".png");
+        @Override
+        public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+            VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat, parent, false));
+            vh.setOnItemClickListener(itemClickListener);
+            return vh;
         }
 
-        TextView unread = (TextView) v.findViewById(R.id.unreadMessages);
-        if (i.unreadMessages > 0) {
-            unread.setText(Integer.toString(i.unreadMessages));
-            unread.setVisibility(View.VISIBLE);
-        } else {
-            unread.setVisibility(View.GONE);
+        @Override
+        public void onBindViewHolder(VH holder, int position) {
+            Chat chat = items.get(position);
+
+            holder.textView.setText(chat.uname);
+            holder.avatarImageView.setVisibility(View.VISIBLE);
+
+            Glide.with(holder.avatarImageView.getContext()).load("https://i.juick.com/as/" + chat.uid + ".png").into(holder.avatarImageView);
+
+            if (chat.MessagesCount > 0) {
+                holder.unreadTextView.setText(Integer.toString(chat.MessagesCount));
+                holder.unreadTextView.setVisibility(View.VISIBLE);
+            } else {
+                holder.unreadTextView.setVisibility(View.GONE);
+            }
         }
 
-        return v;
-    }
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
 
-    @Override
-    public boolean areAllItemsEnabled() {
-        return true;
+        public Chat getItem(int position) {
+            return items.get(position);
+        }
+
+        public void setOnItemClickListener(OnItemClickListener itemClickListener) {
+            this.itemClickListener = itemClickListener;
+        }
+
+        public interface OnItemClickListener {
+            void onItemClick(View view, int pos);
+        }
+
+        static class VH extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+            TextView textView;
+            ImageView avatarImageView;
+            TextView unreadTextView;
+            private OnItemClickListener itemClickListener;
+
+            public VH(View itemView) {
+                super(itemView);
+                textView = (TextView) itemView.findViewById(R.id.text);
+                avatarImageView = (ImageView) itemView.findViewById(R.id.icon);
+                unreadTextView = (TextView) itemView.findViewById(R.id.unreadMessages);
+                itemView.setOnClickListener(this);
+            }
+
+            public void setOnItemClickListener(OnItemClickListener listener) {
+                itemClickListener = listener;
+            }
+
+            @Override
+            public void onClick(View v) {
+                if (itemClickListener != null){
+                    itemClickListener.onItemClick(v, getAdapterPosition());
+                }
+            }
+        }
     }
 }
 
-class ChatsAdapterItem {
 
-    String userName = null;
-    int userID = 0;
-    int unreadMessages = 0;
-}
