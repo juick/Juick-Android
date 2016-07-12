@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="AppTheme">
+        <attr name="toolbarTheme" format="reference" />
+        <attr name="textColorPrimaryInverse" format="reference" />
+        <attr name="textSecondaryDark" format="reference" />
+    </declare-styleable>
+</resources>

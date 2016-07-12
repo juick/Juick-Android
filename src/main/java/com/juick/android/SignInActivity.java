@@ -21,21 +21,21 @@ import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-import android.util.Base64;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.juick.App;
 import com.juick.R;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import com.juick.remote.api.RestClient;
+import com.juick.RegistrationIntentService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  *
@@ -45,30 +45,19 @@ public class SignInActivity extends Activity implements OnClickListener {
 
     private EditText etNick;
     private EditText etPassword;
-    private Button bSave;
-    private Button bCancel;
-    private Handler handlErrToast = new Handler() {
-
-        public void handleMessage(Message msg) {
-            Toast.makeText(SignInActivity.this, R.string.Unknown_nick_or_wrong_password, Toast.LENGTH_LONG).show();
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.signin);
+        setContentView(R.layout.activity_login);
 
         etNick = (EditText) findViewById(R.id.juickNick);
         etPassword = (EditText) findViewById(R.id.juickPassword);
-        bSave = (Button) findViewById(R.id.buttonSave);
+        findViewById(R.id.buttonSave).setOnClickListener(this);
 
-        bSave.setOnClickListener(this);
-
-        if (Utils.hasAuth(this)) {
+        if (com.juick.AccountManager.hasAuth()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setNeutralButton(R.string.OK, new android.content.DialogInterface.OnClickListener() {
+            builder.setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface arg0, int arg1) {
                     setResult(RESULT_CANCELED);
@@ -81,56 +70,46 @@ public class SignInActivity extends Activity implements OnClickListener {
     }
 
     public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.buttonSave:
+                final String nick = etNick.getText().toString();
+                final String password = etPassword.getText().toString();
 
-        final String nick = etNick.getText().toString();
-        final String password = etPassword.getText().toString();
-
-        if (nick.length() == 0 || password.length() == 0) {
-            Toast.makeText(this, R.string.Enter_nick_and_password, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Toast.makeText(this, R.string.Please_wait___, Toast.LENGTH_SHORT).show();
-
-        Thread thr = new Thread(new Runnable() {
-
-            public void run() {
-                int status = 0;
-                try {
-                    String authStr = nick + ":" + password;
-                    String basicAuth = "Basic " + Base64.encodeToString(authStr.getBytes(), Base64.NO_WRAP);
-
-                    URL apiUrl = new URL("https://api.juick.com/post");
-                    HttpURLConnection conn = (HttpURLConnection) apiUrl.openConnection();
-                    conn.setUseCaches(false);
-                    conn.setRequestMethod("POST");
-                    conn.setRequestProperty("Authorization", basicAuth);
-                    conn.connect();
-                    status = conn.getResponseCode();
-                    conn.disconnect();
-                } catch (Exception e) {
-                    Log.e("checkingNickPassw", e.toString());
+                if (nick.length() == 0 || password.length() == 0) {
+                    Toast.makeText(this, R.string.Enter_nick_and_password, Toast.LENGTH_SHORT).show();
+                    return;
                 }
-                if (status == 400) {
-                    Account account = new Account(nick, getString(R.string.com_juick));
-                    AccountManager am = AccountManager.get(SignInActivity.this);
-                    boolean accountCreated = am.addAccountExplicitly(account, password, null);
-                    Bundle extras = getIntent().getExtras();
-                    if (extras != null && accountCreated) {
-                        AccountAuthenticatorResponse response = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
-                        Bundle result = new Bundle();
-                        result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
-                        result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick));
-                        response.onResult(result);
+
+                RestClient.auth(nick, password, new Callback<Object>() {
+                    @Override
+                    public void onResponse(Call<Object> call, Response<Object> response) {
+                        if (response.code() == 400) {
+                            Account account = new Account(nick, getString(R.string.Juick));
+                            AccountManager am = AccountManager.get(SignInActivity.this);
+                            boolean accountCreated = am.addAccountExplicitly(account, password, null);
+                            Bundle extras = getIntent().getExtras();
+                            if (extras != null && accountCreated) {
+                                AccountAuthenticatorResponse accountAuthenticatorResponse = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
+                                Bundle result = new Bundle();
+                                result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
+                                result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.Juick));
+                                accountAuthenticatorResponse.onResult(result);
+                            }
+
+                            startService(new Intent(SignInActivity.this, RegistrationIntentService.class));
+                            SignInActivity.this.setResult(RESULT_OK);
+                            SignInActivity.this.finish();
+                        } else {
+                            Toast.makeText(App.getInstance(), R.string.Unknown_nick_or_wrong_password, Toast.LENGTH_LONG).show();
+                        }
                     }
 
-                    SignInActivity.this.setResult(RESULT_OK);
-                    SignInActivity.this.finish();
-                } else {
-                    handlErrToast.sendEmptyMessage(0);
-                }
-            }
-        });
-        thr.start();
+                    @Override
+                    public void onFailure(Call<Object> call, Throwable t) {
+                        Toast.makeText(App.getInstance(), R.string.Unknown_nick_or_wrong_password, Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+        }
     }
 }

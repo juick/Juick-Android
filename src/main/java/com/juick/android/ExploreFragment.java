@@ -35,7 +35,7 @@ import com.juick.R;
  * @author ugnich
  */
 public class ExploreFragment extends ListFragment implements View.OnClickListener, AdapterView.OnItemClickListener {
-
+    /*
     private EditText etSearch;
 
     @Override
@@ -137,8 +137,9 @@ public class ExploreFragment extends ListFragment implements View.OnClickListene
         super.onViewCreated(view, savedInstanceState);
         getListView().setOnItemClickListener(this);
     }
-
+    */
     public void onClick(View v) {
+        /*
         String search = etSearch.getText().toString();
         if (search.length() == 0) {
             Toast.makeText(getActivity(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
@@ -147,12 +148,15 @@ public class ExploreFragment extends ListFragment implements View.OnClickListene
         Intent i = new Intent(getActivity(), MessagesActivity.class);
         i.putExtra("search", search);
         startActivity(i);
+        */
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        /*
         String tag = getListAdapter().getItem(position).toString();
         Intent i = new Intent(getActivity(), MessagesActivity.class);
         i.putExtra("tag", tag);
         startActivity(i);
+        */
     }
 }

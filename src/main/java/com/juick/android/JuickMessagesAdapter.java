@@ -17,224 +17,383 @@
  */
 package com.juick.android;
 
-import com.juick.android.api.JuickMessage;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.preference.PreferenceManager;
+import android.content.Intent;
+import android.net.Uri;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import co.lujun.androidtagview.TagContainerLayout;
+import co.lujun.androidtagview.TagView;
+import com.bumptech.glide.Glide;
+import com.juick.App;
 import com.juick.R;
+import com.juick.remote.model.Post;
+import com.juick.android.BaseActivity;
+import com.juick.android.PostsPageFragment;
+import com.juick.widget.util.ViewUtil;
+
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.json.JSONArray;
 
 /**
  *
  * @author Ugnich Anton
  */
-public class JuickMessagesAdapter extends ArrayAdapter<JuickMessage> {
+public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final String PREFERENCES_FONTSIZE = "fontsizesp";
-    public static final int TYPE_THREAD = 1;
-    public static Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
-    public static Pattern msgPattern = Pattern.compile("#[0-9]+");
-//    public static Pattern usrPattern = Pattern.compile("@[a-zA-Z0-9\\-]{2,16}");
-    private ImageCache userpics;
-    private ImageCache photos;
-    private boolean usenetwork = false;
-    private int type;
-    private SharedPreferences sp;
-    private float textSize;
+    private static final int TYPE_FOOTER = 1;
+    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_HEADER = -1;
 
-    public JuickMessagesAdapter(Context context, int type) {
-        super(context, R.layout.listitem_juickmessage);
-        this.type = type;
+    public static final Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
+    public static final Pattern msgPattern = Pattern.compile("#[0-9]+");
+    private static final Pattern usrPattern = Pattern.compile("@[a-zA-Z0-9\\-]{2,16}");
+    private static final DateFormat sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateFormat outDateFormat = new SimpleDateFormat("HH:mm dd MMM yyyy");
 
-        sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String textScaleStr = sp.getString(PREFERENCES_FONTSIZE, "16");
-        try {
-            textSize = Float.parseFloat(textScaleStr);
-        } catch (Exception e) {
-            textSize = 16;
-        }
+    List<Post> postList = new ArrayList<>();
+    boolean isThread;
+    OnLoadMoreRequestListener loadMoreRequestListener;
+    OnItemClickListener itemClickListener;
+    OnItemClickListener itemMenuListener;
 
-        String loadphotos = sp.getString("loadphotos", "Always");
-        if (loadphotos.charAt(0) == 'A' || (loadphotos.charAt(0) == 'W' && Utils.isWiFiConnected(context))) {
-            usenetwork = true;
-        }
+    private boolean hasHeader;
+    private boolean hasOldPosts = true;
 
-        photos = new ImageCache(context, "photos-small", 1024 * 1024 * 5);
-        userpics = new ImageCache(context, "userpics-small", 1024 * 1024 * 2);
+    static {
+        outDateFormat.setTimeZone(TimeZone.getDefault());
+        sourceDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public int parseJSON(String jsonStr) {
-        try {
-            JSONArray json = new JSONArray(jsonStr);
-            int cnt = json.length();
-            for (int i = 0; i < cnt; i++) {
-                add(JuickMessage.parseJSON(json.getJSONObject(i)));
-            }
-            return cnt;
-        } catch (Exception e) {
-            Log.e("initOpinionsAdapter", e.toString());
-        }
+    public JuickMessagesAdapter(boolean isThread) {
+        this.isThread = isThread;
 
-        return 0;
+        //setHasStableIds(true);
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        JuickMessage jmsg = getItem(position);
-        View v = convertView;
-
-        if (jmsg.User != null && jmsg.Text != null) {
-            if (v == null || !(v instanceof LinearLayout)) {
-                LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.listitem_juickmessage, null);
-                ((TextView) v.findViewById(R.id.text)).setTextSize(textSize);
-                if (type == TYPE_THREAD) {
-                    v.findViewById(R.id.comment).setVisibility(View.GONE);
-                    v.findViewById(R.id.replies).setVisibility(View.GONE);
-                }
-            }
-
-            ImageView upic = (ImageView) v.findViewById(R.id.userpic);
-            Bitmap bitmapupic = photos.getImageMemory(Integer.toString(jmsg.User.UID));
-            if (bitmapupic != null) {
-                upic.setImageBitmap(bitmapupic);
-            } else {
-                upic.setImageResource(R.drawable.ic_user_32);
-                ImageLoaderTask task = new ImageLoaderTask(userpics, upic, usenetwork);
-                task.execute(Integer.toString(jmsg.User.UID), "https://i.juick.com/as/" + jmsg.User.UID + ".png");
-            }
-
-            TextView username = (TextView) v.findViewById(R.id.username);
-            username.setText(jmsg.User.UName);
-
-            TextView timestamp = (TextView) v.findViewById(R.id.timestamp);
-            timestamp.setText(formatMessageTimestamp(jmsg));
-
-            TextView t = (TextView) v.findViewById(R.id.text);
-            if (type == TYPE_THREAD && jmsg.RID == 0) {
-                t.setText(formatFirstMessageText(jmsg));
-            } else {
-                t.setText(formatMessageText(jmsg));
-            }
-
-            ImageView p = (ImageView) v.findViewById(R.id.photo);
-            if (jmsg.Photo != null) {
-                String key = Integer.toString(jmsg.MID) + "-" + Integer.toString(jmsg.RID);
-                Bitmap bitmap = photos.getImageMemory(key);
-                if (bitmap != null) {
-                    p.setImageBitmap(bitmap);
-                } else {
-                    p.setImageResource(R.drawable.ic_attach_photo);
-                    ImageLoaderTask task = new ImageLoaderTask(photos, p, usenetwork);
-                    task.execute(key, jmsg.Photo);
-                }
-                p.setVisibility(View.VISIBLE);
-            } else {
-                p.setVisibility(View.GONE);
-            }
-
-            if (jmsg.replies > 0 && type != TYPE_THREAD) {
-                TextView replies = (TextView) v.findViewById(R.id.replies);
-                replies.setVisibility(View.VISIBLE);
-                replies.setText(Integer.toString(jmsg.replies));
-            } else {
-                v.findViewById(R.id.replies).setVisibility(View.GONE);
-            }
-
-        } else {
-            if (v == null || !(v instanceof TextView)) {
-                LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.preference_category, null);
-            }
-
-            ((TextView) v).setTextSize(textSize);
-
-            if (jmsg.Text != null) {
-                ((TextView) v).setText(jmsg.Text);
-            } else {
-                ((TextView) v).setText("");
-            }
+    /*@Override
+    public long getItemId(int position) {
+        switch (getItemViewType(position)) {
+            case TYPE_FOOTER:
+                return -1;
+            case TYPE_HEADER:
+                return 0;
+            default:
+                Post post = getItem(position);
+                return post == null ? 0 : post.user.uid;
         }
+    }*/
 
-        return v;
+    public void addData(List<Post> data) {
+        int oldCount = postList.size();
+        postList.addAll(data);
+        notifyItemRangeInserted(oldCount, postList.size());
     }
 
-    @Override
-    public boolean isEnabled(int position) {
-        JuickMessage jmsg = getItem(position);
-        return (jmsg != null && jmsg.User != null && jmsg.MID > 0);
+    public void addData(Post data) {
+        int oldCount = postList.size();
+        postList.add(data);
+        notifyItemRangeInserted(oldCount, postList.size());
     }
 
     public void addDisabledItem(String txt, int position) {
-        JuickMessage jmsg = new JuickMessage();
-        jmsg.Text = txt;
-        insert(jmsg, position);
+        Post post = new Post();
+        post.body = txt;
+        postList.add(position, post);
+        notifyItemRangeInserted(position, postList.size());
     }
 
-    private String formatMessageTimestamp(JuickMessage jmsg) {
-        DateFormat df = new SimpleDateFormat("HH:mm dd/MMM/yy");
-        df.setTimeZone(TimeZone.getDefault());
-        return df.format(jmsg.Timestamp);
+    @Override
+    public int getItemViewType(int position) {
+        if (loadMoreRequestListener != null && position == postList.size() + (hasHeader ? 1 : -1))
+            return TYPE_FOOTER;
+        if (position == 0 && hasHeader)
+            return TYPE_HEADER;
+        return TYPE_ITEM;
     }
 
-    private SpannableStringBuilder formatMessageText(JuickMessage jmsg) {
+    public RecyclerView.ViewHolder onCreateFooterViewHolder(ViewGroup viewGroup) {
+        final View v = LayoutInflater.from(viewGroup.getContext())
+                .inflate(R.layout.item_footer, viewGroup, false);
+        return new FH(v);
+    }
+
+    public RecyclerView.ViewHolder onCreateHeaderViewHolder(ViewGroup viewGroup) {
+        return new RecyclerView.ViewHolder(viewGroup) {
+        };
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType == TYPE_FOOTER) {
+            return onCreateFooterViewHolder(parent);
+        } else if (viewType == TYPE_HEADER) {
+            return onCreateHeaderViewHolder(parent);
+        } else {
+            VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false));
+            vh.setOnItemClickListener(itemClickListener);
+            vh.setOnMenuClickListener(itemMenuListener);
+            return vh;
+        }
+    }
+
+    public void onBindFooterViewHolder(RecyclerView.ViewHolder holder) {
+        FH footerHolder = (FH) holder;
+        footerHolder.progressBar.setVisibility(View.VISIBLE);
+        if (hasOldPosts && loadMoreRequestListener != null) {
+            if (!loadMoreRequestListener.onLoadMore()) {
+                footerHolder.progressBar.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder) {
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+        int type = getItemViewType(position);
+        if (type == TYPE_FOOTER) {
+            onBindFooterViewHolder(viewHolder);
+            return;
+        } else if (type == TYPE_HEADER) {
+            onBindHeaderViewHolder(viewHolder);
+            return;
+        }
+        final VH holder = (VH) viewHolder;
+        final Post post = postList.get(position);
+
+        if (post.user != null && post.body != null) {
+            Glide.with(holder.upicImageView.getContext()).load("https://i.juick.com/as/" + post.user.uid + ".png").into(holder.upicImageView);
+
+            holder.usernameTextView.setText(post.user.uname);
+
+            holder.timestampTextView.setText(formatMessageTimestamp(post));
+
+            holder.tagContainerLayout.removeAllTags();
+            holder.tagContainerLayout.setTags(post.tags);
+            holder.tagContainerLayout.setOnTagClickListener(new TagView.OnTagClickListener() {
+                @Override
+                public void onTagClick(int position, String text) {
+                    Log.d("position", position + " " + text);
+                    ((BaseActivity)holder.tagContainerLayout.getContext()).replaceFragment(PostsPageFragment.newInstance(post.user.uid, null, null, text, 0, false));
+                }
+
+                @Override
+                public void onTagLongClick(int position, String text) {
+
+                    Log.d("positn", position + " " + text);
+                }
+            });
+
+            holder.textTextView.setText(formatMessageText(post));
+            holder.textTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            if (post.photo != null && post.photo.small != null) {
+                Glide.with(holder.photoImageView.getContext()).load(post.photo.small).into(holder.photoImageView);
+                holder.photoImageView.setVisibility(View.VISIBLE);
+            } else {
+                holder.photoImageView.setVisibility(View.GONE);
+            }
+
+            if (post.replies > 0 && !isThread) {
+                holder.repliesTextView.setVisibility(View.VISIBLE);
+                holder.repliesTextView.setText(Integer.toString(post.replies));
+            } else {
+                holder.repliesTextView.setVisibility(View.GONE);
+            }
+        }
+
+        if (isThread && post.replyto != 0) {
+            RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
+            lp.leftMargin = ViewUtil.dpToPx(15) * post.offset;
+            holder.itemView.setLayoutParams(lp);
+        } else {
+            RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
+            lp.leftMargin = 0;
+            holder.itemView.setLayoutParams(lp);
+        }
+    }
+
+    public Post getItem(int position) {
+        if (position == postList.size()) return null;
+        if (hasHeader)
+            return postList.get(position - 1);
+        else
+            return postList.get(position);
+    }
+
+    @Override
+    public int getItemCount() {
+        if (postList.isEmpty()) return 0;
+        return postList.size();
+    }
+
+    private String formatMessageTimestamp(Post jmsg) {
+        try {
+            return outDateFormat.format(sourceDateFormat.parse(jmsg.timestamp));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    private SpannableStringBuilder formatMessageText(Post jmsg) {
+        Spanned text = Html.fromHtml(jmsg.body);
         SpannableStringBuilder ssb = new SpannableStringBuilder();
-        ssb.append(jmsg.Text);
+        ssb.append(text);
 
         // Highlight links http://example.com/
         int pos = 0;
-        Matcher m = urlPattern.matcher(jmsg.Text);
+        Matcher m = urlPattern.matcher(text);
         while (m.find(pos)) {
-            ssb.setSpan(new ForegroundColorSpan(0xFF0000CC), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new MyClickableSpan(m.group()), m.start(), m.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(App.getColor(App.getInstance(), R.attr.colorPrimary)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             pos = m.end();
         }
 
         // Highlight messages #1234
         pos = 0;
-        m = msgPattern.matcher(jmsg.Text);
+        m = msgPattern.matcher(text);
         while (m.find(pos)) {
-            ssb.setSpan(new ForegroundColorSpan(0xFF0000CC), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(App.getColor(App.getInstance(), R.attr.colorPrimary)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             pos = m.end();
         }
 
-        /*
         // Highlight usernames @username
         pos = 0;
-        m = usrPattern.matcher(txt);
+        m = usrPattern.matcher(text);
         while (m.find(pos)) {
-        ssb.setSpan(new ForegroundColorSpan(0xFF0000CC), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        pos = m.end();
+            ssb.setSpan(new ForegroundColorSpan(App.getColor(App.getInstance(), R.attr.colorPrimary)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            pos = m.end();
         }
-         */
-
         return ssb;
     }
 
-    private SpannableStringBuilder formatFirstMessageText(JuickMessage jmsg) {
-        SpannableStringBuilder ssb = formatMessageText(jmsg);
-        String tags = jmsg.getTags();
-        if (tags.length() > 0) {
-            int padding = ssb.length();
-            ssb.append("\n" + tags);
-            ssb.setSpan(new ForegroundColorSpan(0xFF999999), padding, padding + 1 + tags.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    public void setHasHeader(boolean hasHeader) {
+        this.hasHeader = hasHeader;
+    }
+
+    public void setOnLoadMoreRequestListener(OnLoadMoreRequestListener loadMoreRequestListener) {
+        this.loadMoreRequestListener = loadMoreRequestListener;
+    }
+
+    public void setHasOldPosts(boolean hasOldPosts) {
+        this.hasOldPosts = hasOldPosts;
+    }
+
+    public List<Post> getItems() {
+        return postList;
+    }
+
+    public interface OnLoadMoreRequestListener {
+        boolean onLoadMore();
+    }
+
+    static class VH extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        ViewGroup container;
+        ImageView upicImageView;
+        TextView usernameTextView;
+        TextView timestampTextView;
+        TagContainerLayout tagContainerLayout;
+        ImageView photoImageView;
+        TextView textTextView;
+        TextView repliesTextView;
+        ImageView menuImageView;
+        OnItemClickListener itemClickListener;
+        OnItemClickListener menuClickListener;
+
+        public VH(View itemView) {
+            super(itemView);
+            container = (ViewGroup) itemView.findViewById(R.id.container);
+            upicImageView = (ImageView) itemView.findViewById(R.id.userpic);
+            usernameTextView = (TextView) itemView.findViewById(R.id.username);
+            timestampTextView = (TextView) itemView.findViewById(R.id.timestamp);
+            tagContainerLayout = (TagContainerLayout) itemView.findViewById(R.id.tags_container);
+            textTextView = (TextView) itemView.findViewById(R.id.text);
+            photoImageView = (ImageView) itemView.findViewById(R.id.photo);
+            repliesTextView = (TextView) itemView.findViewById(R.id.replies);
+            ViewUtil.setTint(repliesTextView);
+            menuImageView = (ImageView) itemView.findViewById(R.id.menu_imageView);
+            menuImageView.setOnClickListener(this);
+            itemView.setOnClickListener(this);
+            textTextView.setOnClickListener(this);
         }
-        return ssb;
+
+        @Override
+        public void onClick(View v) {
+            if (v.getId() == R.id.menu_imageView) {
+                if (menuClickListener != null){
+                    menuClickListener.onItemClick(v, getAdapterPosition());
+                }
+                return;
+            }
+            if (itemClickListener != null){
+                itemClickListener.onItemClick(v, getAdapterPosition());
+            }
+        }
+
+        public void setOnItemClickListener(OnItemClickListener listener) {
+            itemClickListener = listener;
+        }
+
+        public void setOnMenuClickListener(OnItemClickListener listener) {
+            menuClickListener = listener;
+        }
+    }
+
+    protected class FH extends RecyclerView.ViewHolder {
+        ProgressBar progressBar;
+
+        public FH(View itemView) {
+            super(itemView);
+            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
+        }
+    }
+
+    public void setOnItemClickListener(OnItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
+    }
+
+    public void setOnMenuListener(OnItemClickListener listener) {
+        itemMenuListener = listener;
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(View view, int pos);
+    }
+
+    public static class MyClickableSpan extends ClickableSpan {
+        String link;
+
+        public MyClickableSpan(String link) {
+            this.link = link;
+        }
+
+        @Override
+        public void onClick(View widget) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+            widget.getContext().startActivity(intent);
+        }
     }
 }

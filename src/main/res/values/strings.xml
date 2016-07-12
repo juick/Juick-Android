@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="maps_key">0DjDjZPPUT1SCsxeIxkduemcXUkYnxtPSw7s0lQ</string>
-    <!--<string name="maps_key">0DjDjZPPUT1RBx4LNrOlllz_EVOwnO83nJFq_xA</string>-->
     <string name="com_juick">com.juick</string>
-
     <string name="Juick">Juick</string>
+    <string name="gcm_defaultSenderId">661985690018</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="Loading___">Loading...</string>
     <string name="Please_wait___">Please wait...</string>
     <string name="OK">OK</string>
@@ -44,6 +44,7 @@
     <string name="Last_messages">Last messages</string>
     <string name="Top_messages">Top messages</string>
     <string name="With_photos">With photos</string>
+    <string name="PMs">Private messages</string>
     
     <!-- ExploreActivity -->
     <string name="Juick__Explore">Juick: Explore</string>
@@ -115,5 +116,6 @@
 
     <!-- ThreadActivity -->
     <string name="In_reply_to_">In reply to:</string>
+    <string name="post_not_found">Post not found</string>
 
 </resources>

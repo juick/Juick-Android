@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="JuickStyle" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowActionBar" tools:ignore="NewApi">false</item>
-        <item name="android:windowNoTitle" tools:ignore="NewApi">true</item>
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">#EEEEE6</item>
-        <item name="android:colorAccent" tools:ignore="NewApi">#1177AA</item>
         <item name="colorAccent">#1177AA</item>
         <item name="android:windowTranslucentStatus" tools:ignore="NewApi">true</item>
         <item name="android:windowTranslucentNavigation" tools:ignore="NewApi">true</item>
         <item name="android:colorButtonNormal" tools:ignore="NewApi">#DDDDD6</item>
         <item name="colorButtonNormal">#DDDDD6</item>
+        <item name="android:textColorSecondary">#ccc</item>
     </style>
-
+    <style name="AppTheme.NoActionBar">
+        <item name="android:windowActionBar" tools:ignore="NewApi">false</item>
+        <item name="android:windowNoTitle" tools:ignore="NewApi">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
     <style name="LinearLayoutPM">
         <item name="android:background">#FFD0D0D0</item>    
     </style>
@@ -40,5 +41,18 @@
         <item name="android:layout_marginRight">3dip</item>
         <item name="android:layout_marginBottom">5dip</item>
         <item name="android:layout_marginLeft">5dip</item>
+    </style>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="AppTheme.ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:background">?attr/colorPrimary</item>
+    </style>
+    <style name="NavigationDrawerStyle">
+        <!-- <item name="android:textSize">20sp</item>--><!-- text size in menu-->
+        <!-- <item name="android:lines">2</item>-->
+        <!-- <item name="android:ellipsize">end</item>-->
+        <!-- <item name="android:textStyle">bold</item>-->
     </style>
 </resources>
