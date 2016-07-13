@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">#EEEEE6</item>
-        <item name="colorAccent">#1177AA</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowTranslucentStatus" tools:ignore="NewApi">true</item>
         <item name="android:windowTranslucentNavigation" tools:ignore="NewApi">true</item>
         <item name="android:colorButtonNormal" tools:ignore="NewApi">#DDDDD6</item>
         <item name="colorButtonNormal">#DDDDD6</item>
-        <item name="android:textColorSecondary">#ccc</item>
     </style>
     <style name="AppTheme.NoActionBar">
         <item name="android:windowActionBar" tools:ignore="NewApi">false</item>

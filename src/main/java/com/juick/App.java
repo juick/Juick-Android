@@ -20,10 +20,4 @@ public class App extends Application {
         super.onCreate();
         instance = this;
     }
-    public static int getColor(Context ctx, int addressInRClass)
-    {
-        TypedValue typedValue = new TypedValue();
-        ctx.getTheme().resolveAttribute(addressInRClass, typedValue, true);
-        return typedValue.data;
-    }
 }

@@ -267,7 +267,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         Matcher m = urlPattern.matcher(text);
         while (m.find(pos)) {
             ssb.setSpan(new MyClickableSpan(m.group()), m.start(), m.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            ssb.setSpan(new ForegroundColorSpan(App.getColor(App.getInstance(), R.attr.colorPrimary)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(ContextCompat.getColor(App.getInstance(), R.color.colorAccent)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             pos = m.end();
         }
 
@@ -275,7 +275,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         pos = 0;
         m = msgPattern.matcher(text);
         while (m.find(pos)) {
-            ssb.setSpan(new ForegroundColorSpan(App.getColor(App.getInstance(), R.attr.colorPrimary)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(ContextCompat.getColor(App.getInstance(), R.color.colorAccent)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             pos = m.end();
         }
 
@@ -283,7 +283,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         pos = 0;
         m = usrPattern.matcher(text);
         while (m.find(pos)) {
-            ssb.setSpan(new ForegroundColorSpan(App.getColor(App.getInstance(), R.attr.colorPrimary)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(ContextCompat.getColor(App.getInstance(), R.color.colorAccent)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             pos = m.end();
         }
         return ssb;

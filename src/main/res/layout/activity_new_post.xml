@@ -26,7 +26,7 @@
             android:layout_marginRight="5dp"
             android:src="@drawable/ic_code_tags_black_24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="?attr/android:textColorSecondary"
+            android:tint="@color/colorSecondary"
             android:padding="10dp" />
         <ImageView
             android:id="@+id/buttonAttachment"
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_attach_file_black_24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="?attr/android:textColorSecondary"
+            android:tint="@color/colorSecondary"
             android:padding="10dp" />
 
         <ImageView
@@ -44,7 +44,7 @@
             android:layout_weight="0"
             android:src="@drawable/ic_send_black_24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="?attr/android:textColorSecondary"
+            android:tint="@color/colorSecondary"
             android:text="Send"
             android:padding="10dp" />
     </LinearLayout>

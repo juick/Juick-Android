@@ -89,7 +89,7 @@
             android:layout_alignParentBottom="true"
             android:paddingTop="16dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="?attr/android:textColorSecondary"
+            android:tint="@color/colorSecondary"
             android:drawableLeft="@drawable/ic_comment_black_24dp"
             android:drawablePadding="3dp"
             android:textSize="14sp"
@@ -106,7 +106,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="?attr/android:textColorSecondary"
+            android:tint="@color/colorSecondary"
             android:src="@drawable/ic_more_vert_black_24dp" />
     </RelativeLayout>
 </android.support.v7.widget.CardView>
