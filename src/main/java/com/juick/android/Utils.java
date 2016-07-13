@@ -20,8 +20,6 @@ package com.juick.android;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -30,13 +28,6 @@ import android.util.Log;
 import com.juick.App;
 import com.juick.R;
 import com.neovisionaries.ws.client.WebSocketFactory;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  *
@@ -73,35 +64,6 @@ public class Utils {
             }
         }
         return "";
-    }
-
-    public static String streamToString(InputStream is) {
-        try {
-            BufferedReader buf = new BufferedReader(new InputStreamReader(is));
-            StringBuilder str = new StringBuilder();
-            String line;
-            do {
-                line = buf.readLine();
-                str.append(line).append("\n");
-            } while (line != null);
-            return str.toString();
-        } catch (Exception e) {
-            Log.e("streamReader", e.toString());
-        }
-        return null;
-    }
-
-    public static Bitmap downloadImage(String url) {
-        try {
-            URL imgURL = new URL(url);
-            HttpURLConnection conn = (HttpURLConnection) imgURL.openConnection();
-            conn.setDoInput(true);
-            conn.connect();
-            return BitmapFactory.decodeStream(conn.getInputStream());
-        } catch (Exception e) {
-            Log.e("downloadImage", e.toString());
-        }
-        return null;
     }
 
     public static boolean isWiFiConnected(Context context) {
