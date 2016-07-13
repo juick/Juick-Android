@@ -38,7 +38,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.bluelinelabs.logansquare.LoganSquare;
-import com.juick.AccountManager;
 import com.juick.App;
 import com.juick.R;
 import com.juick.remote.api.RestClient;
@@ -290,7 +289,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                 bAttach.setSelected(false);
             }
         } else if (view == bSend) {
-            if (!AccountManager.hasAuth()) {
+            if (!Utils.hasAuth()) {
                 startActivity(new Intent(getContext(), SignInActivity.class));
                 return;
             }

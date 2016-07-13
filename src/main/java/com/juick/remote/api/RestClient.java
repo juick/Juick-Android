@@ -3,9 +3,9 @@ package com.juick.remote.api;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
-import com.juick.AccountManager;
 import com.juick.App;
 import com.juick.BuildConfig;
+import com.juick.android.Utils;
 import com.juick.remote.model.Pms;
 import com.juick.remote.model.Post;
 import com.juick.remote.model.Tag;
@@ -48,7 +48,7 @@ public class RestClient {
                             Request original = chain.request();
 
                             Request.Builder requestBuilder = original.newBuilder()
-                                    .header("Authorization", AccountManager.getBasicAuthString())
+                                    .header("Authorization", Utils.getBasicAuthString())
                                     .header("Accept", "application/json")
                                     .method(original.method(), original.body());
                             //Log.e("intercept", requestBuilder.toString());

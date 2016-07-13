@@ -55,7 +55,7 @@ public class SignInActivity extends Activity implements OnClickListener {
         etPassword = (EditText) findViewById(R.id.juickPassword);
         findViewById(R.id.buttonSave).setOnClickListener(this);
 
-        if (com.juick.AccountManager.hasAuth()) {
+        if (Utils.hasAuth()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 

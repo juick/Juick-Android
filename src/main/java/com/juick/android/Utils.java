@@ -27,6 +27,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import com.juick.App;
 import com.juick.R;
 import com.neovisionaries.ws.client.WebSocketFactory;
 
@@ -43,13 +44,20 @@ import java.net.URL;
  */
 public class Utils {
 
-    public static boolean hasAuth(Context context) {
-        AccountManager am = AccountManager.get(context);
-        Account accs[] = am.getAccountsByType(context.getString(R.string.com_juick));
+    public static boolean hasAuth() {
+        AccountManager am = AccountManager.get(App.getInstance());
+        Account accs[] = am.getAccountsByType(App.getInstance().getString(R.string.com_juick));
         return accs.length > 0;
     }
 
-    public static String getBasicAuthString(Context context) {
+    public static String getNick() {
+        AccountManager am = AccountManager.get(App.getInstance());
+        Account accs[] = am.getAccountsByType(App.getInstance().getString(R.string.com_juick));
+        return accs.length > 0 ? accs[0].name : null;
+    }
+
+    public static String getBasicAuthString() {
+        Context context = App.getInstance();
         AccountManager am = AccountManager.get(context);
         Account accs[] = am.getAccountsByType(context.getString(R.string.com_juick));
         if (accs.length > 0) {
@@ -65,63 +73,6 @@ public class Utils {
             }
         }
         return "";
-    }
-
-    public static String getJSON(Context context, String url) {
-        String ret = null;
-        try {
-            URL jsonURL = new URL(url);
-            HttpURLConnection conn = (HttpURLConnection) jsonURL.openConnection();
-
-            String basicAuth = getBasicAuthString(context);
-            if (basicAuth.length() > 0) {
-                conn.setRequestProperty("Authorization", basicAuth);
-            }
-
-            conn.setUseCaches(false);
-            conn.setDoInput(true);
-            conn.connect();
-            if (conn.getResponseCode() == 200) {
-                ret = streamToString(conn.getInputStream());
-            }
-
-            conn.disconnect();
-        } catch (Exception e) {
-            Log.e("getJSON", e.toString());
-        }
-        return ret;
-    }
-
-    public static String postJSON(Context context, String url, String data) {
-        String ret = null;
-        try {
-            URL jsonURL = new URL(url);
-            HttpURLConnection conn = (HttpURLConnection) jsonURL.openConnection();
-
-            String basicAuth = getBasicAuthString(context);
-            if (basicAuth.length() > 0) {
-                conn.setRequestProperty("Authorization", basicAuth);
-            }
-
-            conn.setUseCaches(false);
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
-            conn.connect();
-
-            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-            wr.write(data);
-            wr.close();
-
-            if (conn.getResponseCode() == 200) {
-                ret = streamToString(conn.getInputStream());
-            }
-
-            conn.disconnect();
-        } catch (Exception e) {
-            Log.e("getJSON", e.toString());
-        }
-        return ret;
     }
 
     public static String streamToString(InputStream is) {

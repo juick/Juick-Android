@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import com.juick.AccountManager;
 
 /**
  * Created by gerc on 03.06.2016.
@@ -14,7 +13,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_LOGIN = 5;
 
     public void showLogin() {
-        if (!AccountManager.hasAuth()) {
+        if (!Utils.hasAuth()) {
             startActivityForResult(new Intent(this, SignInActivity.class), REQUEST_CODE_LOGIN);
         }
     }
