@@ -197,9 +197,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     private void initWebSocket() {
         if (ws != null) return;
         try {
-            ws = new WebSocketFactory().createSocket(new URI("wss", "ws.juick.com", "/" + mid, null));
-            ws.addHeader("Origin", "ws.juick.com");
-            ws.addHeader("Host", "ws.juick.com"); //TODO: remove from server side
+            ws = Utils.getWSFactory().createSocket(new URI("wss", "ws.juick.com", "/" + mid, null));
             ws.addListener(new WebSocketAdapter() {
                 @Override
                 public void onTextMessage(WebSocket websocket, final String jsonStr) throws Exception {
