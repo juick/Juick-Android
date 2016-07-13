@@ -84,7 +84,7 @@ public class SignInActivity extends Activity implements OnClickListener {
                     @Override
                     public void onResponse(Call<Object> call, Response<Object> response) {
                         if (response.code() == 400) {
-                            Account account = new Account(nick, getString(R.string.Juick));
+                            Account account = new Account(nick, getString(R.string.com_juick));
                             AccountManager am = AccountManager.get(SignInActivity.this);
                             boolean accountCreated = am.addAccountExplicitly(account, password, null);
                             Bundle extras = getIntent().getExtras();
@@ -92,7 +92,7 @@ public class SignInActivity extends Activity implements OnClickListener {
                                 AccountAuthenticatorResponse accountAuthenticatorResponse = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
                                 Bundle result = new Bundle();
                                 result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
-                                result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.Juick));
+                                result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick));
                                 accountAuthenticatorResponse.onResult(result);
                             }
 
