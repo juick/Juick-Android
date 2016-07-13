@@ -54,13 +54,13 @@
                 <data android:mimeType="image/png"/>
             </intent-filter>
         </activity>
-        <service android:name="com.juick.android.AuthenticationService" android:exported="true" android:process=":auth">
+        <service android:name=".android.service.AuthenticationService" android:exported="true" android:process=":auth">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>
             <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/authenticator"/>
         </service>
-        <service android:name="com.juick.android.ContactsSyncService" android:exported="true" android:process=":contacts">
+        <service android:name=".android.service.ContactsSyncService" android:exported="true" android:process=":contacts">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter"/>
             </intent-filter>
@@ -74,17 +74,17 @@
                 <category android:name="com.juick"/>
             </intent-filter>
         </receiver>
-        <service android:name=".GCMReceiverService" android:exported="false">
+        <service android:name=".android.service.GCMReceiverService" android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
             </intent-filter>
         </service>
-        <service android:name=".RegistrationInstanceIDListenerService" android:exported="false">
+        <service android:name=".android.service.RegistrationInstanceIDListenerService" android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.id.InstanceID"/>
             </intent-filter>
         </service>
-        <service android:name=".RegistrationIntentService" android:exported="false">
+        <service android:name=".android.service.RegistrationIntentService" android:exported="false">
         </service>
     </application>
 </manifest>

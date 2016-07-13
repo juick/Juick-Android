@@ -40,8 +40,9 @@ import co.lujun.androidtagview.TagView;
 import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
-import com.juick.remote.model.Post;
-import com.juick.widget.util.ViewUtil;
+import com.juick.android.fragment.PostsPageFragment;
+import com.juick.api.model.Post;
+import com.juick.android.widget.util.ViewUtil;
 
 import java.text.DateFormat;
 import java.text.ParseException;
