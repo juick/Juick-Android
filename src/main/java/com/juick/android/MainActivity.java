@@ -30,7 +30,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
-import com.juick.AccountManager;
 import com.juick.R;
 import com.juick.remote.api.RestClient;
 import com.juick.remote.model.User;
@@ -79,8 +78,8 @@ public class MainActivity extends BaseActivity
         navHeader.setOnClickListener(this);
 
         final ImageView imageHeader = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image);
-        if (AccountManager.hasAuth()) {
-            RestClient.getApi().getUsers(AccountManager.getNick()).enqueue(new Callback<List<User>>() {
+        if (Utils.hasAuth()) {
+            RestClient.getApi().getUsers(Utils.getNick()).enqueue(new Callback<List<User>>() {
                 @Override
                 public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                     myId = response.body().get(0).uid;
@@ -92,12 +91,12 @@ public class MainActivity extends BaseActivity
                 }
             });
             TextView titleHeader = (TextView) navigationView.getHeaderView(0).findViewById(R.id.title_textView);
-            if (!TextUtils.isEmpty(AccountManager.getNick())) {
-                titleHeader.setText(AccountManager.getNick());
+            if (!TextUtils.isEmpty(Utils.getNick())) {
+                titleHeader.setText(Utils.getNick());
             }
         }
 
-        navigationView.getMenu().findItem(R.id.chats).setVisible(AccountManager.hasAuth());
+        navigationView.getMenu().findItem(R.id.chats).setVisible(Utils.hasAuth());
 
         if (savedInstanceState == null) {
             addFragment(PostsFragment.newInstance(), false);

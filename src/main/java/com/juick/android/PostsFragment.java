@@ -13,7 +13,6 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.juick.AccountManager;
 import com.juick.App;
 import com.juick.R;
 import com.juick.widget.ScrollingFABBehavior;
@@ -75,7 +74,7 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:
-                if (AccountManager.hasAuth()) {
+                if (Utils.hasAuth()) {
                     startActivity(new Intent(getContext(), NewMessageActivity.class));
                 } else {
                     getBaseActivity().showLogin();

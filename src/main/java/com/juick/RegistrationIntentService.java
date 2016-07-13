@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import com.juick.android.Utils;
 import com.juick.remote.api.RestClient;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
@@ -60,7 +61,7 @@ public class RegistrationIntentService extends IntentService {
             Log.i(TAG, "GCM Registration Token: " + token);
             String prefToken = sharedPreferences.getString(Preferences.TOKEN, null);
             Log.e(TAG, "prefToken " + prefToken);
-            if (AccountManager.hasAuth()) {
+            if (Utils.hasAuth()) {
                 if (prefToken != null && !token.equals(prefToken)) {
                     RestClient.getApi().unregisterPush(prefToken).enqueue(new Callback<String>() {
                         @Override
