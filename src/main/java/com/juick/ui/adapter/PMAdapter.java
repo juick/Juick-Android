@@ -68,9 +68,9 @@ public class PMAdapter extends RecyclerView.Adapter<PMAdapter.VH> {
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == TYPE_IN_MESSAGE) {
-            return new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_pm_in, parent, false));
+            return new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.listitem_pm_in, parent, false));
         } else if (viewType == TYPE_OUT_MESSAGE) {
-            return new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_pm_out, parent, false));
+            return new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.listitem_pm_out, parent, false));
         }
         return null;
     }

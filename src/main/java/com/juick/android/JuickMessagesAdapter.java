@@ -41,8 +41,6 @@ import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
 import com.juick.remote.model.Post;
-import com.juick.android.BaseActivity;
-import com.juick.android.PostsPageFragment;
 import com.juick.widget.util.ViewUtil;
 
 import java.text.DateFormat;
