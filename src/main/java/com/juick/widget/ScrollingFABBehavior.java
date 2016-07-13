@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -24,7 +25,7 @@ public class ScrollingFABBehavior extends CoordinatorLayout.Behavior<FloatingAct
     public boolean onDependentViewChanged(CoordinatorLayout parent, FloatingActionButton fab, View dependency) {
         if (enabled) {
             if (dependency instanceof AppBarLayout) {
-                if (dependency.getY() > 0) {
+                if (ViewCompat.getY(dependency) > 0) {
                     fab.show();
                 } else {
                     fab.hide();
