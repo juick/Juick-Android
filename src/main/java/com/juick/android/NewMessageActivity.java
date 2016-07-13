@@ -37,8 +37,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import com.juick.App;
 import com.juick.R;
-import com.juick.remote.api.RestClient;
-import com.juick.util.FileUtils;
+import com.juick.android.fragment.TagsFragment;
+import com.juick.api.RestClient;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -230,9 +230,9 @@ public class NewMessageActivity extends BaseActivity implements OnClickListener 
     }
 
     public static boolean sendMessage(Context context, String txt, double lat, double lon, String attachmentUri, String attachmentMime, final ProgressDialog progressDialog, final Handler progressHandler, BooleanReference progressDialogCancel) {
-        Log.e("sendMessage",attachmentMime+ " "+FileUtils.getPath(Uri.parse(attachmentUri)));
+        Log.e("sendMessage",attachmentMime+ " "+Utils.getPath(Uri.parse(attachmentUri)));
         try {
-            File file = new File(FileUtils.getPath(Uri.parse(attachmentUri)));
+            File file = new File(Utils.getPath(Uri.parse(attachmentUri)));
             RequestBody requestFile =
                     RequestBody.create(MediaType.parse("multipart/form-data"), file);
             MultipartBody.Part body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
