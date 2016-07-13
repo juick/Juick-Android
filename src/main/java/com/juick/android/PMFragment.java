@@ -43,7 +43,6 @@ import com.juick.remote.api.RestClient;
 import com.juick.remote.model.Post;
 import com.juick.GCMReceiverService;
 import com.juick.ui.adapter.PMAdapter;
-import com.juick.widget.itemanimator.CustomItemAnimator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -117,7 +116,6 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
-        recyclerView.setItemAnimator(new CustomItemAnimator());
         adapter = new PMAdapter(uid);
         recyclerView.setAdapter(adapter);
 
