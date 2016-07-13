@@ -182,7 +182,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         final Post post = postList.get(position);
 
         if (post.user != null && post.body != null) {
-            Glide.with(holder.upicImageView.getContext()).load("https://i.juick.com/as/" + post.user.uid + ".png").into(holder.upicImageView);
+            Glide.with(holder.upicImageView.getContext()).load("https://i.juick.com/a/" + post.user.uid + ".png").into(holder.upicImageView);
 
             holder.usernameTextView.setText(post.user.uname);
 
