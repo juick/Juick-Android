@@ -30,7 +30,6 @@ import android.widget.TextView;
 import com.juick.R;
 import com.juick.remote.api.RestClient;
 import com.juick.remote.model.Tag;
-import com.juick.widget.itemanimator.CustomItemAnimator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -86,7 +85,6 @@ public class TagsFragment extends BaseFragment {
         final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
-        recyclerView.setItemAnimator(new CustomItemAnimator());
         final TagsAdapter adapter = new TagsAdapter();
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(new TagsAdapter.OnItemClickListener() {

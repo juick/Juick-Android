@@ -32,7 +32,6 @@ import com.juick.R;
 import com.juick.remote.api.RestClient;
 import com.juick.remote.model.Chat;
 import com.juick.remote.model.Pms;
-import com.juick.widget.itemanimator.CustomItemAnimator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -68,7 +67,6 @@ public class ChatsFragment extends BaseFragment {
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
-        recyclerView.setItemAnimator(new CustomItemAnimator());
         final ChatsAdapter adapter = new ChatsAdapter();
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(new ChatsAdapter.OnItemClickListener() {

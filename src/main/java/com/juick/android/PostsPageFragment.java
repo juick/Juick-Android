@@ -14,7 +14,6 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.remote.api.RestClient;
 import com.juick.remote.model.Post;
-import com.juick.widget.itemanimator.CustomItemAnimator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -166,8 +165,6 @@ public class PostsPageFragment extends BasePageFragment {
         recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
-        recyclerView.setItemAnimator(new CustomItemAnimator());
-        //recyclerView.setItemAnimator(new ReboundItemAnimator());
 
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(new JuickMessagesAdapter.OnItemClickListener() {

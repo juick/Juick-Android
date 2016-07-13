@@ -42,10 +42,8 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.remote.api.RestClient;
 import com.juick.remote.model.Post;
-import com.juick.widget.itemanimator.CustomItemAnimator;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
-import com.neovisionaries.ws.client.WebSocketFactory;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -134,8 +132,6 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
-        recyclerView.setItemAnimator(new CustomItemAnimator());
-        //recyclerView.setItemAnimator(new ReboundItemAnimator());
 
         adapter = new JuickMessagesAdapter(true);
         recyclerView.setAdapter(adapter);
