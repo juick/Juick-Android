@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.juick">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools" package="com.juick">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -22,6 +23,8 @@
                  android:theme="@style/AppTheme"
                  android:allowBackup="true"
                  android:supportsRtl="true"
+                 tools:replace="android:label"
+                 android:label="@string/Juick"
                  android:name=".App">
         <activity android:name=".android.MainActivity"
                   android:theme="@style/AppTheme.NoActionBar"
