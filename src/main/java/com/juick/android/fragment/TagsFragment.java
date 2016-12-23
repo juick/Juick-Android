@@ -29,6 +29,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.juick.R;
 import com.juick.android.BaseActivity;
+import com.juick.android.UrlBuilder;
 import com.juick.api.RestClient;
 import com.juick.api.model.Tag;
 import retrofit2.Call;
@@ -96,8 +97,8 @@ public class TagsFragment extends BaseFragment {
         });
         adapter.setOnItemLongClickListener(new TagsAdapter.OnItemLongClickListener() {
             @Override
-            public void onItemLongClick(View view, int position) {
-                ((BaseActivity) getActivity()).replaceFragment(PostsPageFragment.newInstance(uid, null, null, adapter.getItem(position), 0, false));
+            public void onItemLongClick(View view, int position){
+                ((BaseActivity) getActivity()).replaceFragment(PostsPageFragment.newInstance(UrlBuilder.getPostsByTag(uid, adapter.getItem(position))));
             }
         });
 

@@ -119,7 +119,11 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
                 });
                 break;
             case 1:
-                ((BaseActivity) context).replaceFragment(PostsPageFragment.newInstance(selectedPost.user.uid, selectedPost.user.uname, null, null, 0, false));
+                ((BaseActivity) context).replaceFragment(
+                        PostsPageFragment.newInstance(
+                                UrlBuilder.getUserPostsByUid(selectedPost.user.uid)
+                        )
+                );
                 break;
             case 2:
                 confirmAction(R.string.Are_you_sure_subscribe, new Runnable() {

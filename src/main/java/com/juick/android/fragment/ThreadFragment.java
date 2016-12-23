@@ -169,18 +169,6 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                 recyclerView.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
                 List<Post> list = response.body();
-                for (int i = 0; i < list.size(); i++) {
-                    int offset = 1;
-                    Post commentToCompareWith = list.get(i);
-                    for (int j = i + 1; j < list.size(); j++) {
-                        Post commentCompared = list.get(j);
-                        if (commentCompared.replyto == commentToCompareWith.rid) {
-                            list.remove(j);
-                            commentCompared.offset = commentToCompareWith.offset + 1;
-                            list.add(i + offset++, commentCompared);
-                        }
-                    }
-                }
                 adapter.addData(list);
             }
 

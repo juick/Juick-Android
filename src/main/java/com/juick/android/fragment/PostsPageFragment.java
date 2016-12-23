@@ -11,6 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.juick.android.UrlBuilder;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.JuickMessageMenu;
@@ -29,16 +32,7 @@ import java.util.List;
  */
 public class PostsPageFragment extends BasePageFragment {
 
-    public static final String ARG_UID = "ARG_UID";
-    public static final String ARG_UNAME = "ARG_UNAME";
-    public static final String ARG_SEARCH = "ARG_SEARCH";
-    public static final String ARG_PLACE_ID = "ARG_PLACE_ID";
-    public static final String ARG_POPULAR = "ARG_POPULAR";
-    public static final String ARG_NEW = "ARG_NEW";
-    public static final String ARG_TAG = "ARG_TAG";
-
-    private static final String ARG_HOME_TAG = "home";
-    private static final String ARG_MEDIA_TAG = "media";
+    public static final String ARG_URL = "ARG_URL";
 
     RecyclerView recyclerView;
     SwipeRefreshLayout swipeRefreshLayout;
@@ -50,16 +44,11 @@ public class PostsPageFragment extends BasePageFragment {
     public PostsPageFragment() {
     }
 
-    public static PostsPageFragment newInstance(int uid, String uname, String search, String tag, int placeId, boolean popular) {
+    public static PostsPageFragment newInstance(UrlBuilder u) {
         PostsPageFragment fragment = new PostsPageFragment();
         Bundle args = new Bundle();
 
-        args.putInt(PostsPageFragment.ARG_UID, uid);
-        args.putString(PostsPageFragment.ARG_UNAME, uname);
-        args.putString(PostsPageFragment.ARG_SEARCH, search);
-        args.putString(PostsPageFragment.ARG_TAG, tag);
-        args.putInt(PostsPageFragment.ARG_PLACE_ID, placeId);
-        args.putBoolean(PostsPageFragment.ARG_POPULAR, popular);
+        args.putParcelable(ARG_URL, u);
 
         fragment.setArguments(args);
         return fragment;
@@ -69,49 +58,16 @@ public class PostsPageFragment extends BasePageFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        int uid = 0;
-        String uname = null;
-        String search = null;
-        String tag = null;
-        boolean newPosts = false;
-        int placeId = 0;
-        boolean popular = false;
-
+        apiUrl = null;
         Bundle args = getArguments();
         if (args != null) {
-            uid = args.getInt(ARG_UID, 0);
-            uname = args.getString(ARG_UNAME);
-            search = args.getString(ARG_SEARCH);
-            newPosts = args.getBoolean(ARG_NEW);
-            tag = args.getString(ARG_TAG);
-            placeId = args.getInt(ARG_PLACE_ID, 0);
-            popular = args.getBoolean(ARG_POPULAR, false);
+            UrlBuilder url = args.getParcelable(ARG_URL);
+            if(url != null)
+                apiUrl = url.toString();
         }
+        if(apiUrl != null)
+            load();
 
-        apiUrl = "/messages?1=1";
-        if (uid > 0 && uname != null) {
-            apiUrl += "&user_id=" + uid;
-        } else if (search != null) {
-            try {
-                apiUrl += "&search=" + URLEncoder.encode(search, "utf-8");
-            } catch (Exception e) {
-                Log.e("ApiURL", e.toString());
-            }
-        } else if (tag != null) {
-            try {
-                apiUrl += "&tag=" + URLEncoder.encode(tag, "utf-8");
-            } catch (Exception e) {
-                Log.e("ApiURL", e.toString());
-            }
-            if (uid == -1) {
-                apiUrl += "&user_id=-1";
-            }
-        } else if (placeId > 0) {
-            apiUrl += "&place_id=" + placeId;
-        } else if (popular) {
-            apiUrl += "&popular=1";
-        }
-        load();
 
         /*if (uid > 0 && uname != null) {
             getActivity().setTitle("@" + uname);
@@ -142,7 +98,10 @@ public class PostsPageFragment extends BasePageFragment {
                 swipeRefreshLayout.setRefreshing(false);
                 recyclerView.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
-                adapter.addData(response.body());
+                List<Post> posts = response.body();
+                if(posts != null) {
+                    adapter.addData(posts);
+                }
             }
 
             @Override

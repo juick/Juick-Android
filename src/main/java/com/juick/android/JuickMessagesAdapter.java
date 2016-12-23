@@ -39,10 +39,10 @@ import co.lujun.androidtagview.TagContainerLayout;
 import co.lujun.androidtagview.TagView;
 import com.bumptech.glide.Glide;
 import com.juick.App;
-import com.juick.R;
 import com.juick.android.fragment.PostsPageFragment;
 import com.juick.api.model.Post;
 import com.juick.android.widget.util.ViewUtil;
+import com.juick.R;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -77,6 +77,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     private boolean hasHeader;
     private boolean hasOldPosts = true;
+    String inReplyTo = null;
 
     static {
         outDateFormat.setTimeZone(TimeZone.getDefault());
@@ -151,6 +152,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false));
             vh.setOnItemClickListener(itemClickListener);
             vh.setOnMenuClickListener(itemMenuListener);
+            inReplyTo = parent.getContext().getString(R.string.In_reply_to_);
             return vh;
         }
     }
@@ -194,7 +196,11 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 @Override
                 public void onTagClick(int position, String text) {
                     Log.d("position", position + " " + text);
-                    ((BaseActivity)holder.tagContainerLayout.getContext()).replaceFragment(PostsPageFragment.newInstance(post.user.uid, null, null, text, 0, false));
+                    ((BaseActivity)holder.tagContainerLayout.getContext()).replaceFragment(
+                            PostsPageFragment.newInstance(
+                                    UrlBuilder.getPostsByTag(post.user.uid, text)
+                            )
+                    );
                 }
 
                 @Override
@@ -213,23 +219,32 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             } else {
                 holder.photoImageView.setVisibility(View.GONE);
             }
-
             if (post.replies > 0 && !isThread) {
                 holder.repliesTextView.setVisibility(View.VISIBLE);
                 holder.repliesTextView.setText(Integer.toString(post.replies));
             } else {
                 holder.repliesTextView.setVisibility(View.GONE);
             }
-        }
+            if (post.likes > 0 && !isThread) {
+                holder.likesTextView.setVisibility(View.VISIBLE);
+                holder.likesTextView.setText(Integer.toString(post.likes));
+            } else {
+                holder.likesTextView.setVisibility(View.GONE);
+            }
+            if(post.replyQuote != null && isThread){
+                holder.replyQuoteTextView.setText(post.replyQuote);
+                holder.replyQuoteTextView.setVisibility(View.VISIBLE);
+            }else
+                holder.replyQuoteTextView.setVisibility(View.GONE);
 
-        if (isThread && post.replyto != 0) {
-            RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
-            lp.leftMargin = ViewUtil.dpToPx(15) * post.offset;
-            holder.itemView.setLayoutParams(lp);
-        } else {
-            RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
-            lp.leftMargin = 0;
-            holder.itemView.setLayoutParams(lp);
+            if(post.rid > 0){
+                holder.midTextView.setText(
+                        post.replyto > 0
+                            ? String.format("/%1$d %2$s /%3$d", post.rid, inReplyTo, post.replyto)
+                            : "/" + post.rid);
+                holder.midTextView.setVisibility(View.VISIBLE);
+            }else
+                holder.midTextView.setVisibility(View.GONE);
         }
     }
 
@@ -318,6 +333,9 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         ImageView photoImageView;
         TextView textTextView;
         TextView repliesTextView;
+        TextView likesTextView;
+        TextView replyQuoteTextView;
+        TextView midTextView;
         ImageView menuImageView;
         OnItemClickListener itemClickListener;
         OnItemClickListener menuClickListener;
@@ -329,8 +347,12 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             usernameTextView = (TextView) itemView.findViewById(R.id.username);
             timestampTextView = (TextView) itemView.findViewById(R.id.timestamp);
             tagContainerLayout = (TagContainerLayout) itemView.findViewById(R.id.tags_container);
+            replyQuoteTextView = (TextView) itemView.findViewById(R.id.replyQuote);
             textTextView = (TextView) itemView.findViewById(R.id.text);
             photoImageView = (ImageView) itemView.findViewById(R.id.photo);
+            likesTextView = (TextView) itemView.findViewById(R.id.likes);
+            midTextView = (TextView) itemView.findViewById(R.id.mid);
+            ViewUtil.setTint(likesTextView);
             repliesTextView = (TextView) itemView.findViewById(R.id.replies);
             ViewUtil.setTint(repliesTextView);
             menuImageView = (ImageView) itemView.findViewById(R.id.menu_imageView);
