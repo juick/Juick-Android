@@ -18,6 +18,7 @@
 package com.juick.android;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -28,6 +29,8 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,7 +66,12 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int TYPE_ITEM = 0;
     private static final int TYPE_HEADER = -1;
 
+
+    public static final Pattern boldPattern = Pattern.compile("\\*([^\\*]+)\\*");
+    public static final Pattern italicPattern = Pattern.compile("(?:^|\\s|,)/([^/]+)/");
+    public static final Pattern underlinePattern = Pattern.compile("_([^_]+)_");
     public static final Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
+    public static final Pattern juickUrlPattern = Pattern.compile("\\[([^\\]]+)\\]\\[(http[^\\]]+)\\]", Pattern.CASE_INSENSITIVE);
     public static final Pattern msgPattern = Pattern.compile("#[0-9]+");
     private static final Pattern usrPattern = Pattern.compile("@[a-zA-Z0-9\\-]{2,16}");
     private static final DateFormat sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -272,7 +280,13 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private SpannableStringBuilder formatMessageText(Post jmsg) {
-        Spanned text = Html.fromHtml(jmsg.body);
+        String tmp = jmsg.body.replaceAll("\n", "<br>");
+        tmp = boldPattern.matcher(tmp).replaceAll("<b>$1</b>");
+        tmp = italicPattern.matcher(tmp).replaceAll("<i>$1</i>");
+        tmp = underlinePattern.matcher(tmp).replaceAll("<u>$1</u>");
+        tmp = juickUrlPattern.matcher(tmp).replaceAll("<a href=\"$2\">$1</a>");
+
+        Spanned text = Html.fromHtml(tmp);
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         ssb.append(text);
 
