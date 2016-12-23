@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.NewMessageActivity;
+import com.juick.android.UrlBuilder;
 import com.juick.android.Utils;
 import com.juick.android.widget.ScrollingFABBehavior;
 
@@ -87,15 +88,48 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
 
     public static class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
-        private String tabTitles[] = new String[] {App.getInstance().getString(R.string.Top_messages), App.getInstance().getString(R.string.Last_messages)};
+        private String tabTitles[] = new String[] {
+                App.getInstance().getString(R.string.Subscriptions),
+                App.getInstance().getString(R.string.Last_messages),
+                App.getInstance().getString(R.string.With_photos),
+                App.getInstance().getString(R.string.Top_messages),
+                App.getInstance().getString(R.string.Blog_messages)
+        };
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
+
+
         @Override
         public Fragment getItem(int position) {
-            return PostsPageFragment.newInstance(0, null, null, null, 0, position == 0);
+            UrlBuilder u = null;
+            switch (position){
+                case 0:
+                    if(Utils.hasAuth())
+                        u = UrlBuilder.goHome();
+                    else
+                        return new NoAuthFragment();
+                    break;
+                case 1:
+                    u = UrlBuilder.getLast();
+                    break;
+                case 2:
+                    u = UrlBuilder.getPhotos();
+                    break;
+                case 3:
+                    u = UrlBuilder.getTop();
+                    break;
+                case 4:
+                default:
+                    if(Utils.hasAuth())
+                        u = UrlBuilder.getUserPostsByName(Utils.getNick());
+                    else
+                        return new NoAuthFragment();
+                    break;
+            }
+            return PostsPageFragment.newInstance(u);
         }
 
         @Override

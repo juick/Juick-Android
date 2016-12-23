@@ -40,10 +40,11 @@
     <string name="pull_to_refresh_tap_label">Нажмите, чтобы обновить...</string>
 
     <!-- MainActivity -->
-    <string name="Subscriptions">Подписки</string>
-    <string name="Last_messages">Последние сообщения</string>
-    <string name="Top_messages">Топ-сообщения</string>
-    <string name="With_photos">С фотографиями</string>
+    <string name="Subscriptions">Лента</string>
+    <string name="Last_messages">Все</string>
+    <string name="Top_messages">Топ</string>
+    <string name="With_photos">Фото</string>
+    <string name="Blog_messages">Блог</string>
 
     <!-- ExploreActivity -->
     <string name="Juick__Explore">Juick: Обзор</string>
@@ -114,6 +115,6 @@
     <string name="FontSize">Размер шрифта</string>
 
     <!-- ThreadActivity -->
-    <string name="In_reply_to_">В ответ на:</string>
-
+    <string name="In_reply_to_">в ответ на</string>
+    <string name="NoAuthMessage">Вы не вошли</string>
 </resources>

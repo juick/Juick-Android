@@ -28,13 +28,15 @@ public class Post {
     @JsonField
     public int replies;
     @JsonField
+    public int likes;
+    @JsonField
     public String repliesby;
+    @JsonField
+    public String replyQuote;
     @JsonField
     public Photo photo;
     @JsonField
     public Video video;
     @JsonField
     public int rid;
-
-    public int offset;
 }

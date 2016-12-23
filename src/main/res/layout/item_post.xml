@@ -65,10 +65,19 @@
             android:layout_marginTop="8dp" />
 
         <TextView
-            android:id="@+id/text"
+            android:id="@+id/replyQuote"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tags_container"
+            android:layout_marginTop="16dp"
+            android:linksClickable="true"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/replyQuote"
             android:layout_marginTop="16dp"
             android:linksClickable="true" />
 
@@ -99,6 +108,26 @@
             android:layout_marginTop="8dp"
             android:layout_marginRight="8dp" />
 
+        <TextView
+            android:id="@+id/likes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/photo"
+            android:layout_toLeftOf="@id/replies"
+            android:layout_alignParentBottom="true"
+            android:layout_alignWithParentIfMissing="true"
+            android:paddingTop="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@color/colorSecondary"
+            android:drawableLeft="@drawable/ic_heart_black_24dp"
+            android:drawablePadding="3dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp" />
+
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -108,5 +137,14 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:tint="@color/colorSecondary"
             android:src="@drawable/ic_more_vert_black_24dp" />
+        <TextView
+            android:id="@+id/mid"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/replies"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="16dp"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp" />
     </RelativeLayout>
 </android.support.v7.widget.CardView>
