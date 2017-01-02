@@ -58,8 +58,6 @@ public class NewMessageActivity extends BaseActivity implements OnClickListener 
     ImageView bTags;
     ImageView bAttachment;
     ImageView bSend;
-    double lat = 0;
-    double lon = 0;
     String attachmentUri = null;
     String attachmentMime = null;
     ProgressDialog progressDialog = null;
@@ -97,8 +95,6 @@ public class NewMessageActivity extends BaseActivity implements OnClickListener 
     private void resetForm() {
         etMessage.setText("");
         bAttachment.setSelected(false);
-        lat = 0;
-        lon = 0;
         attachmentUri = null;
         attachmentMime = null;
         progressDialog = null;
@@ -142,7 +138,7 @@ public class NewMessageActivity extends BaseActivity implements OnClickListener 
                 sendMessage();
                 break;
             case R.id.buttonTags:
-                replaceFragment(TagsFragment.newInstance(-1));
+                replaceFragment(TagsFragment.newInstance(Utils.myId));
                 break;
             case R.id.buttonAttachment:
                 if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -197,7 +193,7 @@ public class NewMessageActivity extends BaseActivity implements OnClickListener 
         Thread thr = new Thread(new Runnable() {
 
             public void run() {
-                final boolean res = sendMessage(NewMessageActivity.this, msg, lat, lon, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
+                final boolean res = sendMessage(NewMessageActivity.this, msg, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
                 NewMessageActivity.this.runOnUiThread(new Runnable() {
 
                     public void run() {
@@ -229,7 +225,7 @@ public class NewMessageActivity extends BaseActivity implements OnClickListener 
         thr.start();
     }
 
-    public static boolean sendMessage(Context context, String txt, double lat, double lon, String attachmentUri, String attachmentMime, final ProgressDialog progressDialog, final Handler progressHandler, BooleanReference progressDialogCancel) {
+    public static boolean sendMessage(Context context, String txt, String attachmentUri, String attachmentMime, final ProgressDialog progressDialog, final Handler progressHandler, BooleanReference progressDialogCancel) {
         Log.e("sendMessage",attachmentMime+ " "+Utils.getPath(Uri.parse(attachmentUri)));
         try {
             File file = new File(Utils.getPath(Uri.parse(attachmentUri)));
@@ -238,8 +234,8 @@ public class NewMessageActivity extends BaseActivity implements OnClickListener 
             MultipartBody.Part body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
 
             return RestClient.getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
-                    RequestBody.create(MediaType.parse("text/plain"), String.valueOf(lat)),
-                    RequestBody.create(MediaType.parse("text/plain"), String.valueOf(lon)),
+                    RequestBody.create(MediaType.parse("text/plain"), "0.0"),
+                    RequestBody.create(MediaType.parse("text/plain"), "0.0"),
                     body
                     /*new ProgressRequestBody(attachmentUri == null ? null : new File(FileUtils.getPath(Uri.parse(attachmentUri))), "png",
                     new ProgressRequestBody.UploadCallbacks() {
