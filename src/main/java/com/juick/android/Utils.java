@@ -42,6 +42,7 @@ import com.neovisionaries.ws.client.WebSocketFactory;
  * @author Ugnich Anton
  */
 public class Utils {
+    public static int myId = 0;
 
     public static boolean hasAuth() {
         AccountManager am = AccountManager.get(App.getInstance());

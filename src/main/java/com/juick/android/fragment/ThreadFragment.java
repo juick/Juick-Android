@@ -334,7 +334,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         new Thread(new Runnable() {
 
             public void run() {
-                final boolean res = NewMessageActivity.sendMessage(getActivity(), body, 0, 0, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
+                final boolean res = NewMessageActivity.sendMessage(getActivity(), body, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
                 getActivity().runOnUiThread(new Runnable() {
 
                     public void run() {
