@@ -17,379 +17,102 @@
  */
 package com.juick.android;
 
-import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.*;
-import android.content.pm.PackageManager;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.provider.MediaStore;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Toast;
-import com.juick.App;
+
 import com.juick.R;
-import com.juick.android.fragment.TagsFragment;
+import com.juick.android.fragment.BaseFragment;
+import com.juick.android.fragment.NewPostFragment;
 import com.juick.api.RestClient;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 
 import java.io.File;
 import java.io.IOException;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 
 /**
  *
  * @author Ugnich Anton
  */
-public class NewMessageActivity extends BaseActivity implements OnClickListener {
-
-    public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
-
-    EditText etMessage;
-    ImageView bTags;
-    ImageView bAttachment;
-    ImageView bSend;
-    String attachmentUri = null;
-    String attachmentMime = null;
-    ProgressDialog progressDialog = null;
-    BooleanReference progressDialogCancel = new BooleanReference(false);
-    Handler progressHandler = new Handler() {
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (progressDialog.getMax() < msg.what) {
-                progressDialog.setMax(msg.what);
-            } else {
-                progressDialog.setProgress(msg.what);
-            }
-        }
-    };
+public class NewMessageActivity extends BaseActivity implements ITagable {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_post);
-
-        etMessage = (EditText) findViewById(R.id.editMessage);
-        bTags = (ImageView) findViewById(R.id.buttonTags);
-        bAttachment = (ImageView) findViewById(R.id.buttonAttachment);
-        bSend = (ImageView) findViewById(R.id.buttonSend);
-
-        bTags.setOnClickListener(this);
-        bAttachment.setOnClickListener(this);
-        bSend.setOnClickListener(this);
-
-        resetForm();
-        handleIntent(getIntent());
-    }
-
-    private void resetForm() {
-        etMessage.setText("");
-        bAttachment.setSelected(false);
-        attachmentUri = null;
-        attachmentMime = null;
-        progressDialog = null;
-        progressDialogCancel.bool = false;
-        etMessage.requestFocus();
-        //setSupportProgressBarIndeterminateVisibility(Boolean.FALSE);
-    }
-
-    private void setFormEnabled(boolean state) {
-        etMessage.setEnabled(state);
-        bTags.setEnabled(state);
-        bAttachment.setEnabled(state);
-        //setSupportProgressBarIndeterminateVisibility(state ? Boolean.FALSE : Boolean.TRUE);
+        replaceFragment(NewPostFragment.newInstance());
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        resetForm();
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent i) {
-        String action = i.getAction();
-        if (action != null && action.equals(Intent.ACTION_SEND)) {
-            String mime = i.getType();
-            Bundle extras = i.getExtras();
-            if (mime.equals("text/plain")) {
-                etMessage.append(extras.getString(Intent.EXTRA_TEXT));
-            } else if (mime.equals("image/jpeg") || mime.equals("image/png")) {
-                attachmentUri = extras.get(Intent.EXTRA_STREAM).toString();
-                attachmentMime = mime;
-                bAttachment.setSelected(true);
-            }
+        NewPostFragment currentFragment = getCommonFragment();
+        if(currentFragment != null){
+            currentFragment.resetForm();
+            currentFragment.handleIntent(intent);
         }
-    }
-
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.buttonSend:
-                sendMessage();
-                break;
-            case R.id.buttonTags:
-                replaceFragment(TagsFragment.newInstance(Utils.myId));
-                break;
-            case R.id.buttonAttachment:
-                if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 4);
-                    return;
-                }
-                if (attachmentUri == null) {
-                    try {
-                        Intent videoPickerIntent = new Intent();
-                        videoPickerIntent.setType("video/*");
-                        videoPickerIntent.setAction(Intent.ACTION_GET_CONTENT);
-                        videoPickerIntent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, (long) (1024 * 1024 * 1536));
-
-                        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                        photoPickerIntent.setType("image/*");
-                        Intent chooserIntent = Intent.createChooser(photoPickerIntent, null);
-                        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{videoPickerIntent});
-
-                        startActivityForResult(chooserIntent, ACTIVITY_ATTACHMENT_IMAGE);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    attachmentUri = null;
-                    attachmentMime = null;
-                    bAttachment.setSelected(false);
-                }
-                break;
-        }
-    }
-
-    private void sendMessage() {
-        final String msg = etMessage.getText().toString();
-        if (msg.length() < 3) {
-            Toast.makeText(this, R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        setFormEnabled(false);
-        if (attachmentUri != null) {
-            progressDialog = new ProgressDialog(this);
-            progressDialogCancel.bool = false;
-            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-
-                public void onCancel(DialogInterface arg0) {
-                    NewMessageActivity.this.progressDialogCancel.bool = true;
-                }
-            });
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progressDialog.setMax(0);
-            progressDialog.show();
-        }
-        Thread thr = new Thread(new Runnable() {
-
-            public void run() {
-                final boolean res = sendMessage(NewMessageActivity.this, msg, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
-                NewMessageActivity.this.runOnUiThread(new Runnable() {
-
-                    public void run() {
-                        if (progressDialog != null) {
-                            progressDialog.dismiss();
-                        }
-                        setFormEnabled(true);
-                        if (res) {
-                            resetForm();
-                        }
-                        if ((res && attachmentUri == null) || NewMessageActivity.this.isFinishing()) {
-                            Toast.makeText(NewMessageActivity.this, res ? R.string.Message_posted : R.string.Error, Toast.LENGTH_LONG).show();
-                        } else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(NewMessageActivity.this);
-                            builder.setNeutralButton(android.R.string.ok, null);
-                            if (res) {
-                                builder.setIcon(android.R.drawable.ic_dialog_info);
-                                builder.setMessage(R.string.Message_posted);
-                            } else {
-                                builder.setIcon(android.R.drawable.ic_dialog_alert);
-                                builder.setMessage(R.string.Error);
-                            }
-                            builder.show();
-                        }
-                    }
-                });
-            }
-        });
-        thr.start();
     }
 
     public static boolean sendMessage(Context context, String txt, String attachmentUri, String attachmentMime, final ProgressDialog progressDialog, final Handler progressHandler, BooleanReference progressDialogCancel) {
-        Log.e("sendMessage",attachmentMime+ " "+Utils.getPath(Uri.parse(attachmentUri)));
-        try {
-            File file = new File(Utils.getPath(Uri.parse(attachmentUri)));
-            RequestBody requestFile =
-                    RequestBody.create(MediaType.parse("multipart/form-data"), file);
-            MultipartBody.Part body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
 
+        try {
+            MultipartBody.Part body = null;
+            if(attachmentUri != null) {
+                Log.e("sendMessage", attachmentMime + " " + Utils.getPath(Uri.parse(attachmentUri)));
+                File file = new File(Utils.getPath(Uri.parse(attachmentUri)));
+                RequestBody requestFile =
+                        RequestBody.create(MediaType.parse("multipart/form-data"), file);
+                body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
+            }
             return RestClient.getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
                     RequestBody.create(MediaType.parse("text/plain"), "0.0"),
                     RequestBody.create(MediaType.parse("text/plain"), "0.0"),
                     body
-                    /*new ProgressRequestBody(attachmentUri == null ? null : new File(FileUtils.getPath(Uri.parse(attachmentUri))), "png",
-                    new ProgressRequestBody.UploadCallbacks() {
-
-                    @Override
-                    public void onProgressUpdate(int percentage) {
-
-                    }
-
-                    @Override
-                    public void onError() {
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-
-                    }
-                })*/).execute().isSuccessful();
+                   ).execute().isSuccessful();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        /*try {
-            final String end = "\r\n";
-            final String twoHyphens = "--";
-            final String boundary = "****+++++******+++++++********";
-
-            URL apiUrl = new URL("https://api.juick.com/post");
-            HttpURLConnection conn = (HttpURLConnection) apiUrl.openConnection();
-            conn.setConnectTimeout(10000);
-            conn.setDoOutput(true);
-            conn.setUseCaches(false);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Connection", "Keep-Alive");
-            conn.setRequestProperty("Charset", "UTF-8");
-            conn.setRequestProperty("Authorization", AccountManager.getBasicAuthString());
-            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-
-            String outStr = twoHyphens + boundary + end;
-            outStr += "Content-Disposition: form-data; name=\"body\"" + end + end + txt + end;
-
-            if (lat != 0 && lon != 0) {
-                outStr += twoHyphens + boundary + end;
-                outStr += "Content-Disposition: form-data; name=\"lat\"" + end + end + String.valueOf(lat) + end;
-                outStr += twoHyphens + boundary + end;
-                outStr += "Content-Disposition: form-data; name=\"lon\"" + end + end + String.valueOf(lon) + end;
-            }
-
-            if (attachmentUri != null && attachmentUri.length() > 0 && attachmentMime != null) {
-                String fname = "file.";
-                if (attachmentMime.equals("image/jpeg")) {
-                    fname += "jpg";
-                } else if (attachmentMime.equals("image/png")) {
-                    fname += "png";
-                }
-                outStr += twoHyphens + boundary + end;
-                outStr += "Content-Disposition: form-data; name=\"attach\"; filename=\"" + fname + "\"" + end + end;
-            }
-            byte outStrB[] = outStr.getBytes("utf-8");
-
-            String outStrEnd = twoHyphens + boundary + twoHyphens + end;
-            byte outStrEndB[] = outStrEnd.getBytes();
-
-            int size = outStrB.length + outStrEndB.length;
-
-            FileInputStream fileInput = null;
-            if (attachmentUri != null && attachmentUri.length() > 0) {
-                fileInput = context.getContentResolver().openAssetFileDescriptor(Uri.parse(attachmentUri), "r").createInputStream();
-                size += fileInput.available();
-                size += 2; // \r\n (end)
-            }
-
-            if (progressDialog != null) {
-                progressHandler.sendEmptyMessage(size);
-            }
-
-            conn.setFixedLengthStreamingMode(size);
-            conn.connect();
-            OutputStream out = conn.getOutputStream();
-            out.write(outStrB);
-
-            if (attachmentUri != null && attachmentUri.length() > 0 && fileInput != null) {
-                byte[] buffer = new byte[4096];
-                int length = -1;
-                int total = 0;
-                int totallast = 0;
-                while ((length = fileInput.read(buffer, 0, 4096)) != -1 && !progressDialogCancel.bool) {
-                    out.write(buffer, 0, length);
-                    total += length;
-                    if (((int) (total / 102400)) != totallast) {
-                        totallast = (int) (total / 102400);
-                        progressHandler.sendEmptyMessage(total);
-                    }
-                }
-                if (!progressDialogCancel.bool) {
-                    out.write(end.getBytes());
-                }
-                fileInput.close();
-                progressHandler.sendEmptyMessage(size);
-            }
-            if (!progressDialogCancel.bool) {
-                out.write(outStrEndB);
-                out.flush();
-            }
-            out.close();
-
-            if (progressDialogCancel.bool) {
-                return false;
-            } else {
-                return (conn.getResponseCode() == 200);
-            }
-        } catch (Exception e) {
-            Log.e("sendOpinion", e.toString());
-        }*/
         return false;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            if (requestCode == ACTIVITY_ATTACHMENT_IMAGE && data != null) {
-                attachmentUri = data.getDataString();
-                // How to get correct mime type?
-                attachmentMime = "image/jpeg";
-                bAttachment.setSelected(true);
-            }
-        }
-    }
-
-    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(TagsFragment.TAG_SELECT_ACTION)) {
-                etMessage.setText("*" + intent.getStringExtra(TagsFragment.ARG_TAG) + " " + etMessage.getText());
-            } else if (intent.getAction().equals(RestClient.ACTION_UPLOAD_PROGRESS)) {
-                if (progressDialog != null) {
-                    progressHandler.sendEmptyMessage(intent.getIntExtra(RestClient.EXTRA_PROGRESS, 0));
+            if (requestCode == NewPostFragment.ACTIVITY_ATTACHMENT_IMAGE && data != null) {
+                NewPostFragment currentFragment = getCommonFragment();
+                if(currentFragment != null){
+                    currentFragment.onImageAttached(data);
                 }
             }
         }
-    };
+    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        registerReceiver(broadcastReceiver, new IntentFilter(TagsFragment.TAG_SELECT_ACTION));
-        LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(RestClient.ACTION_UPLOAD_PROGRESS));
+    private NewPostFragment getCommonFragment(){
+        BaseFragment currentFragment = this.getCurrentFragment();
+        if(currentFragment.getClass().getName() == NewPostFragment.class.getName()){
+            NewPostFragment npFragment = (NewPostFragment)currentFragment;
+            return npFragment;
+        }
+        return null;
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(broadcastReceiver);
-        LocalBroadcastManager.getInstance(App.getInstance()).unregisterReceiver(broadcastReceiver);
+    public void onTagApplied(String tag) {
+        Log.d("NewMessageActivity", "onTagApplied: " + tag);
+        this.getSupportFragmentManager().popBackStackImmediate();
+        NewPostFragment commonFragment = getCommonFragment();
+        if(commonFragment != null){
+            commonFragment.applyTag(tag);
+        }else{
+            Log.d("NewMessageActivity", "fucking shit: ");
+        }
     }
 
     public static class BooleanReference {
@@ -401,9 +124,10 @@ public class NewMessageActivity extends BaseActivity implements OnClickListener 
         }
     }
 
+
     @Override
     public int fragmentContainerLayoutId() {
-        return 0;
+        return R.id.fragment_container;
     }
 
     @Override

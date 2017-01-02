@@ -18,12 +18,16 @@ public class BaseFragment extends Fragment {
 
     public void hideTabsBar() {
         showTabsBar = false;
-        getBaseActivity().findViewById(getBaseActivity().getTabsBarLayoutId()).setVisibility(View.GONE);
+        int id = getBaseActivity().getTabsBarLayoutId();
+        if(id != 0)
+            getBaseActivity().findViewById(id).setVisibility(View.GONE);
     }
 
     public void showTabsBar() {
         showTabsBar = true;
-        getBaseActivity().findViewById(getBaseActivity().getTabsBarLayoutId()).setVisibility(View.VISIBLE);
+        int id = getBaseActivity().getTabsBarLayoutId();
+        if(id != 0)
+            getBaseActivity().findViewById(id).setVisibility(View.VISIBLE);
     }
 
     @Override

@@ -55,6 +55,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
+    public BaseFragment getCurrentFragment(){
+        return (BaseFragment)getSupportFragmentManager().findFragmentById(fragmentContainerLayoutId());
+    }
+
     public abstract int fragmentContainerLayoutId();
     public abstract int getTabsBarLayoutId();
 
