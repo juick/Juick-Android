@@ -17,18 +17,23 @@
  */
 package com.juick.android.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.juick.R;
 import com.juick.android.BaseActivity;
+import com.juick.android.ITagable;
 import com.juick.android.UrlBuilder;
 import com.juick.api.RestClient;
 import com.juick.api.model.Tag;
@@ -51,6 +56,7 @@ public class TagsFragment extends BaseFragment {
     public static final String TAG_SELECT_ACTION = "TAG_SELECT_ACTION";
 
     int uid = 0;
+    ITagable mCallback;
 
     public TagsFragment() {
     }
@@ -61,6 +67,16 @@ public class TagsFragment extends BaseFragment {
         args.putInt(ARG_UID, uid);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Context c) {
+        super.onAttach(c);
+        try {
+            mCallback = (ITagable) c;
+        } catch (ClassCastException e) {
+
+        }
     }
 
     @Nullable
@@ -92,7 +108,11 @@ public class TagsFragment extends BaseFragment {
         adapter.setOnItemClickListener(new TagsAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                getActivity().sendBroadcast(new Intent(TAG_SELECT_ACTION).putExtra(ARG_TAG, adapter.getItem(position)));
+                String tag = adapter.getItem(position);
+                if(mCallback != null)
+                    mCallback.onTagApplied(tag);
+                else
+                    getActivity().sendBroadcast(new Intent(TAG_SELECT_ACTION).putExtra(ARG_TAG, tag));
             }
         });
         adapter.setOnItemLongClickListener(new TagsAdapter.OnItemLongClickListener() {
@@ -110,7 +130,6 @@ public class TagsFragment extends BaseFragment {
             @Override
             public void onResponse(Call<List<Tag>> call, Response<List<Tag>> response) {
                 progressBar.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.GONE);
                 List<String> listAdapter = new ArrayList<>();
                 for (Tag tag : response.body()) {
                     listAdapter.add(tag.tag);
@@ -120,6 +139,8 @@ public class TagsFragment extends BaseFragment {
 
             @Override
             public void onFailure(Call<List<Tag>> call, Throwable t) {
+                Log.e("", t.toString());
+                Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_LONG);
             }
         });
     }
@@ -141,22 +162,26 @@ public class TagsFragment extends BaseFragment {
             VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false));
             vh.setOnItemClickListener(itemClickListener);
             vh.setOnItemLongClickListener(itemLongClickListener);
+            Log.d("TagsAdapter", "onCreateViewHolder");
             return vh;
         }
 
         @Override
         public void onBindViewHolder(VH holder, int position) {
             String tag = items.get(position);
-
+            Log.d("TagsAdapter", "onBindViewHolder: " + String.valueOf(position) + " " + tag);
             holder.textView.setText(tag);
         }
 
         @Override
         public int getItemCount() {
+            Log.d("TagsAdapter", "getItemCount: " + String.valueOf(items.size()));
             return items.size();
         }
 
         public String getItem(int position) {
+            Log.d("TagsAdapter", "getItem: " + String.valueOf(position));
+
             return items.get(position);
         }
 
