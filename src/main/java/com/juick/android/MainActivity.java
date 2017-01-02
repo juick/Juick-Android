@@ -57,8 +57,6 @@ public class MainActivity extends BaseActivity
     public static final String PUSH_ACTION_SHOW_THREAD = "PUSH_ACTION_SHOW_THREAD";
     public static final String PUSH_ACTION_SHOW_PM = "PUSH_ACTION_SHOW_PM";
 
-    private int myId;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,8 +84,8 @@ public class MainActivity extends BaseActivity
             RestClient.getApi().getUsers(Utils.getNick()).enqueue(new Callback<List<User>>() {
                 @Override
                 public void onResponse(Call<List<User>> call, Response<List<User>> response) {
-                    myId = response.body().get(0).uid;
-                    Glide.with(imageHeader.getContext()).load("https://i.juick.com/as/" + myId + ".png").into(imageHeader);
+                    Utils.myId = response.body().get(0).uid;
+                    Glide.with(imageHeader.getContext()).load("https://i.juick.com/as/" + Utils.myId + ".png").into(imageHeader);
                 }
 
                 @Override
