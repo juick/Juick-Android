@@ -1,14 +1,16 @@
 language: android
+jdk:
+  - oraclejdk8
 android:
   components:
     - tools
-    - build-tools-23.0.2
-    - android-23
-    - sysimg-23
+    - build-tools-25.0.2
+    - android-25
+    - sysimg-25
     - extra-google-m2repository
     - extra-android-m2repository
     - extra-google-google_play_services
-    - addon-google_apis-google-23
+    - addon-google_apis-google-25
   licenses:
     - android-sdk-license-.+
     - android-sdk-license-.+
