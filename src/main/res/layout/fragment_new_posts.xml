@@ -27,7 +27,7 @@
             android:layout_alignParentLeft="true"
             android:src="@drawable/ic_code_tags_black_24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="@color/common_plus_signin_btn_text_light_focused"
+            android:tint="@color/common_google_signin_btn_text_light_focused"
             android:padding="10dp" />
         <ImageView
             android:id="@+id/buttonAttachment"
@@ -36,7 +36,7 @@
             android:layout_toRightOf="@id/buttonTags"
             android:src="@drawable/ic_attach_file_black_24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="@color/common_plus_signin_btn_text_light_focused"
+            android:tint="@color/common_google_signin_btn_text_light_focused"
             android:padding="10dp" />
 
         <ImageView
