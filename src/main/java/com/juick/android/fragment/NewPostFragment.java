@@ -149,7 +149,7 @@ public class NewPostFragment extends BasePageFragment implements View.OnClickLis
                         photoPickerIntent.setType("image/*");
                         Intent chooserIntent = Intent.createChooser(photoPickerIntent, null);
 
-                        startActivityForResult(chooserIntent, ACTIVITY_ATTACHMENT_IMAGE);
+                        getActivity().startActivityForResult(chooserIntent, ACTIVITY_ATTACHMENT_IMAGE);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -221,6 +221,8 @@ public class NewPostFragment extends BasePageFragment implements View.OnClickLis
         if (data != null) {
             attachmentUri = data.getDataString();
             attachmentMime = data.getType();
+            if(attachmentMime == null)
+                attachmentMime = "image/jpeg";
             bAttachment.setSelected(true);
         }
     }
