@@ -34,11 +34,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/buttonTags"
-            android:src="@drawable/ic_attach_file_black_24dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="@color/common_google_signin_btn_text_light_focused"
+            android:src="@drawable/ic_button_attachment"
             android:padding="10dp" />
-
         <ImageView
             android:id="@+id/buttonSend"
             android:layout_weight="0"

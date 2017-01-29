@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -116,6 +117,10 @@ public class NewPostFragment extends BasePageFragment implements View.OnClickLis
         //setSupportProgressBarIndeterminateVisibility(state ? Boolean.FALSE : Boolean.TRUE);
     }
 
+    private boolean isImageTypeAllowed(String mime){
+        return mime != null && (mime.equals("image/jpeg") || mime.equals("image/png"));
+    }
+
     public void handleIntent(Intent i) {
         String action = i.getAction();
         if (action != null && action.equals(Intent.ACTION_SEND)) {
@@ -123,10 +128,8 @@ public class NewPostFragment extends BasePageFragment implements View.OnClickLis
             Bundle extras = i.getExtras();
             if (mime.equals("text/plain")) {
                 etMessage.append(extras.getString(Intent.EXTRA_TEXT));
-            } else if (mime.equals("image/jpeg") || mime.equals("image/png")) {
-                attachmentUri = extras.get(Intent.EXTRA_STREAM).toString();
-                attachmentMime = mime;
-                bAttachment.setSelected(true);
+            } else{
+                attachImage(extras.get(Intent.EXTRA_STREAM).toString());
             }
         }
     }
@@ -219,11 +222,19 @@ public class NewPostFragment extends BasePageFragment implements View.OnClickLis
 
     public void onImageAttached(Intent data){
         if (data != null) {
-            attachmentUri = data.getDataString();
-            attachmentMime = data.getType();
-            if(attachmentMime == null)
-                attachmentMime = "image/jpeg";
+            attachImage(data.getDataString());
+        }
+    }
+
+    private void attachImage(String uri){
+        uri = Utils.getPath(Uri.parse(uri));
+        String mime = Utils.getMimeTypeFor(uri);
+        if (isImageTypeAllowed(mime)) {
+            attachmentUri = uri;
+            attachmentMime = mime;
             bAttachment.setSelected(true);
+        }else{
+            Toast.makeText(getActivity(), R.string.WrongImageFormat, Toast.LENGTH_LONG).show();
         }
     }
 

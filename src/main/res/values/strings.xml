@@ -119,5 +119,6 @@
     <string name="In_reply_to_">in reply to</string>
     <string name="post_not_found">Post not found</string>
     <string name="NoAuthMessage">Not authorized</string>
+    <string name="WrongImageFormat">Images of this format are not supported</string>
 
 </resources>

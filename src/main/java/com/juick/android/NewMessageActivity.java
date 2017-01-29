@@ -65,8 +65,8 @@ public class NewMessageActivity extends BaseActivity implements ITagable {
         try {
             MultipartBody.Part body = null;
             if(attachmentUri != null) {
-                Log.e("sendMessage", attachmentMime + " " + Utils.getPath(Uri.parse(attachmentUri)));
-                File file = new File(Utils.getPath(Uri.parse(attachmentUri)));
+                Log.e("sendMessage", attachmentMime + " " + attachmentUri);
+                File file = new File(attachmentUri);
                 RequestBody requestFile =
                         RequestBody.create(MediaType.parse("multipart/form-data"), file);
                 body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
