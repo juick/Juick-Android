@@ -216,6 +216,11 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
                     Log.d("positn", position + " " + text);
                 }
+
+                @Override
+                public void onTagCrossClick(int position) {
+
+                }
             });
 
             holder.textTextView.setText(formatMessageText(post));
