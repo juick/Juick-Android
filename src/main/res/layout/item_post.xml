@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_margin="4dp"
     android:clickable="true"
     android:orientation="horizontal">
@@ -28,11 +29,12 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/userpic"
             android:layout_alignParentTop="true"
-            android:textSize="14sp"
-            android:textStyle="bold"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textColor="@color/colorAccent"
             android:layout_toLeftOf="@+id/menu_imageView"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
+            tools:text="ugnich"
             android:textIsSelectable="false" />
 
         <TextView
@@ -46,6 +48,7 @@
             android:layout_toLeftOf="@+id/menu_imageView"
             android:layout_marginTop="8dp"
             android:textSize="14sp"
+            tools:text="11:11:11"
             android:layout_marginRight="@dimen/activity_horizontal_margin" />
 
         <co.lujun.androidtagview.TagContainerLayout
@@ -73,14 +76,17 @@
             android:layout_below="@+id/tags_container"
             android:layout_marginTop="16dp"
             android:linksClickable="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@android:color/darker_gray"
-            android:textSize="14sp" />
+            tools:text=">quote"
+        />
         <TextView
             android:id="@+id/text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/replyQuote"
-            android:layout_marginTop="16dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            tools:text="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
             android:linksClickable="true" />
 
         <ImageView
@@ -88,7 +94,6 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/text"
-            android:layout_marginTop="16dp"
             android:visibility="gone"/>
 
         <TextView
@@ -103,12 +108,13 @@
             android:tint="@color/colorSecondary"
             android:drawableLeft="@drawable/ic_comment_black_24dp"
             android:drawablePadding="3dp"
-            android:textSize="14sp"
-            android:textStyle="bold"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:layout_marginTop="8dp"
-            android:layout_marginRight="8dp" />
+            android:layout_marginRight="8dp"
+            tools:text="66"
+        />
 
         <TextView
             android:id="@+id/likes"
@@ -123,8 +129,8 @@
             android:tint="@color/colorSecondary"
             android:drawableLeft="@drawable/ic_heart_black_24dp"
             android:drawablePadding="3dp"
-            android:textSize="14sp"
-            android:textStyle="bold"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            tools:text="66"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:layout_marginTop="8dp"
