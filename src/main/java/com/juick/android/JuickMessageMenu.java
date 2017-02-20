@@ -121,7 +121,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
             case 1:
                 ((BaseActivity) context).replaceFragment(
                         PostsPageFragment.newInstance(
-                                UrlBuilder.getUserPostsByUid(selectedPost.user.uid)
+                                UrlBuilder.getUserPostsByName(selectedPost.user.uname)
                         )
                 );
                 break;

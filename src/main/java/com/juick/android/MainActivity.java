@@ -18,6 +18,7 @@
 package com.juick.android;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -103,20 +104,29 @@ public class MainActivity extends BaseActivity
         if (savedInstanceState == null) {
             addFragment(PostsFragment.newInstance(), false);
         }
+        onNewIntent(getIntent());
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        if (intent.getAction() == null) return;
-        if (intent.getAction().equals(PUSH_ACTION)) {
+        String action = intent.getAction();
+
+        if (PUSH_ACTION.equals(action)) {
             if (intent.getBooleanExtra(PUSH_ACTION_SHOW_PM, false)) {
                 replaceFragment(PMFragment.newInstance(intent.getStringExtra(ARG_UNAME), intent.getIntExtra(ARG_UID, 0)));
             } else if (intent.getBooleanExtra(PUSH_ACTION_SHOW_THREAD, false)) {
                 replaceFragment(ThreadFragment.newInstance(intent.getIntExtra(ARG_UID, 0)));
             }
+        }else if(Intent.ACTION_VIEW.equals(action)){
+            Uri data = intent.getData();
+            List<String> pathSegments = data.getPathSegments();
+            String threadId = (pathSegments.size() > 1) ? pathSegments.get(pathSegments.size() - 1) : pathSegments.get(0);
+            try {
+                replaceFragment(ThreadFragment.newInstance(Integer.parseInt(threadId)));
+            }catch (NumberFormatException ex){}
         }
-        setIntent(null);
+        //setIntent(null);
     }
 
     @Override

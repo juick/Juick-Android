@@ -83,4 +83,8 @@ public class UrlBuilder implements Parcelable {
             return new UrlBuilder[size];
         }
     };
+
+    public static String getNormalPostById(String mid) {
+        return "https://juick.com/"+mid;
+    }
 }

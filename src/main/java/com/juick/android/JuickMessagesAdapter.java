@@ -72,7 +72,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     public static final Pattern underlinePattern = Pattern.compile("_([^_]+)_");
     public static final Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
     public static final Pattern juickUrlPattern = Pattern.compile("\\[([^\\]]+)\\]\\[(http[^\\]]+)\\]", Pattern.CASE_INSENSITIVE);
-    public static final Pattern msgPattern = Pattern.compile("#[0-9]+");
+    public static final Pattern msgPattern = Pattern.compile("#([0-9]+)");
     private static final Pattern usrPattern = Pattern.compile("@[a-zA-Z0-9\\-]{2,16}");
     private static final DateFormat sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final DateFormat outDateFormat = new SimpleDateFormat("HH:mm dd MMM yyyy");
@@ -308,6 +308,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         pos = 0;
         m = msgPattern.matcher(text);
         while (m.find(pos)) {
+            ssb.setSpan(new MyClickableSpan(UrlBuilder.getNormalPostById(m.group(1).toString())), m.start(), m.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             ssb.setSpan(new ForegroundColorSpan(ContextCompat.getColor(App.getInstance(), R.color.colorAccent)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             pos = m.end();
         }
