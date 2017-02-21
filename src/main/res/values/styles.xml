@@ -41,11 +41,11 @@
         <item name="android:layout_marginBottom">5dip</item>
         <item name="android:layout_marginLeft">5dip</item>
     </style>
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="AppTheme.AppBarOverlay" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="AppTheme.PopupOverlay" />
 
-    <style name="AppTheme.ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    <style name="AppTheme.ToolbarTheme" parent="AppTheme.ToolbarTheme">
         <item name="android:background">?attr/colorPrimary</item>
     </style>
     <style name="NavigationDrawerStyle">
