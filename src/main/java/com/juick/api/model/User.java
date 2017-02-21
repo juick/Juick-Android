@@ -16,4 +16,6 @@ public class User {
     public String uname;
     @JsonField
     public String fullname = null;
+    @JsonField
+    public boolean banned;
 }

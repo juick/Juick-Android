@@ -57,7 +57,7 @@ public class PostsPageFragment extends BasePageFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        adapter = new JuickMessagesAdapter(false);
         apiUrl = null;
         Bundle args = getArguments();
         if (args != null) {
@@ -66,32 +66,16 @@ public class PostsPageFragment extends BasePageFragment {
                 apiUrl = url.toString();
         }
         if(apiUrl != null)
-            load();
-
-
-        /*if (uid > 0 && uname != null) {
-            getActivity().setTitle("@" + uname);
-        } else if (search != null) {
-            getActivity().setTitle(getResources().getString(R.string.search) + ": " + search);
-        } else if (tag != null) {
-            String title = getResources().getString(R.string.tag) + ": " + tag;
-            if (uid == -1) {
-                title += " (" + getResources().getString(R.string.your_messages) + ")";
-            }
-            getActivity().setTitle(title);
-        } else if (placeId > 0) {
-            getActivity().setTitle("Location");
-        } else if (popular) {
-            getActivity().setTitle(getResources().getString(R.string.top_messages));
-        } else {
-            getActivity().setTitle(getResources().getString(R.string.last_messages));
-        }*/
+            load(false);
 
         Log.e("PostsPageFragment", "load");
     }
-
-    private void load() {
-        adapter = new JuickMessagesAdapter(false);
+    @Override
+    public void reload(){
+        super.reload();
+        load(true);
+    }
+    private void load(final boolean isReload) {
         RestClient.getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
@@ -100,7 +84,10 @@ public class PostsPageFragment extends BasePageFragment {
                 progressBar.setVisibility(View.GONE);
                 List<Post> posts = response.body();
                 if(posts != null) {
-                    adapter.addData(posts);
+                    if(isReload)
+                        adapter.newData(posts);
+                    else
+                        adapter.addData(posts);
                 }
             }
 
@@ -169,7 +156,7 @@ public class PostsPageFragment extends BasePageFragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                load();
+                load(true);
             }
         });
 

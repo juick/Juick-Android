@@ -41,6 +41,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         showFragment(fragment, true, true);
     }
 
+    public void reloadFragment(){
+        getCurrentFragment().reload();
+    }
+
     public void showFragment(BaseFragment fragment, boolean isReplace, boolean addToBackStack) {
         Log.e(fragment.getClass().getSimpleName(), "showFragment");
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();

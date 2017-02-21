@@ -16,6 +16,10 @@ public class BaseFragment extends Fragment {
         return (BaseActivity) getActivity();
     }
 
+    public void reload(){
+
+    }
+
     public void hideTabsBar() {
         showTabsBar = false;
         int id = getBaseActivity().getTabsBarLayoutId();

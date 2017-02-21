@@ -40,11 +40,19 @@ import java.util.List;
  * @author Ugnich Anton
  */
 public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.OnItemClickListener {
+    private final static int MENU_ACTION_RECOMMEND = 1;
+    private final static int MENU_ACTION_BLOG = 2;
+    private final static int MENU_ACTION_SUBSCRIBE = 3;
+    private final static int MENU_ACTION_BLACKLIST = 4;
+    private final static int MENU_ACTION_SHARE = 5;
+    private final static int MENU_ACTION_DELETE_POST = 6;
+    private final static int MENU_ACTION_SOME_LAST_CMD = 7;
 
     Context context;
     List<Post> postList;
     Post selectedPost;
     int menuLength;
+    int[] currentActions = new int[MENU_ACTION_SOME_LAST_CMD];
 
     public JuickMessageMenu(List<Post> postList) {
         this.postList = postList;
@@ -66,39 +74,65 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
     }
 
     private void postMessage(final String body, final String ok) {
+        postMessage(body, ok, false);
+    }
+    private void postMessage(final String body, final String ok, final boolean isReload) {
         RestClient.getApi().post(body).enqueue(new Callback<Object>() {
             @Override
             public void onResponse(Call<Object> call, Response<Object> response) {
                 Toast.makeText(App.getInstance(), (response.isSuccessful()) ? ok : App.getInstance().getResources().getString(R.string.Error), Toast.LENGTH_SHORT).show();
+                if(isReload)
+                    reloadView();
             }
 
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
-
+                if(isReload)
+                    reloadView();
             }
         });
+    }
+
+    private void reloadView(){
+        if(context != null)
+        {
+            BaseActivity activity = (BaseActivity) context;
+            activity.reloadFragment();
+        }
     }
 
     @Override
     public void onItemClick(View view, int position) {
         context = view.getContext();
         selectedPost = postList.get(position);
+        CharSequence[] items;
+        if(selectedPost.user.uid == Utils.myId){
+            menuLength = 1;
+            items = new CharSequence[menuLength];
+            items[0] = selectedPost.rid == 0 ? context.getString(R.string.DeletePost) : context.getString(R.string.DeleteComment);
+            currentActions[0] = MENU_ACTION_DELETE_POST;
+        }else {
+            menuLength = 4;
+            if (selectedPost.rid == 0) {
+                menuLength++;
+            }
+            items = new CharSequence[menuLength];
 
-        menuLength = 4;
-        if (selectedPost.rid == 0) {
-            menuLength++;
+            int i = 0;
+            if (selectedPost.rid == 0) {
+                items[i++] = App.getInstance().getResources().getString(R.string.Recommend_message);
+                currentActions[i - 1] = MENU_ACTION_RECOMMEND;
+            }
+            String UName = selectedPost.user.uname;
+            items[i++] = '@' + UName + " " + App.getInstance().getResources().getString(R.string.blog);
+            currentActions[i - 1] = MENU_ACTION_BLOG;
+            items[i++] = App.getInstance().getResources().getString(R.string.Subscribe_to) + " @" + UName;
+            currentActions[i - 1] = MENU_ACTION_SUBSCRIBE;
+            items[i++] = App.getInstance().getResources().getString(R.string.Blacklist) + " @" + UName;
+            currentActions[i - 1] = MENU_ACTION_BLACKLIST;
+            items[i++] = App.getInstance().getResources().getString(R.string.Share);
+            currentActions[i - 1] = MENU_ACTION_SHARE;
         }
-        CharSequence[] items = new CharSequence[menuLength];
-        int i = 0;
-        if (selectedPost.rid == 0) {
-            items[i++] = App.getInstance().getResources().getString(R.string.Recommend_message);
-        }
-        String UName = selectedPost.user.uname;
-        items[i++] = '@' + UName + " " + App.getInstance().getResources().getString(R.string.blog);
-        items[i++] = App.getInstance().getResources().getString(R.string.Subscribe_to) + " @" + UName;
-        items[i++] = App.getInstance().getResources().getString(R.string.Blacklist) + " @" + UName;
-        items[i++] = App.getInstance().getResources().getString(R.string.Share);
-
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setItems(items, this);
         builder.show();
@@ -106,11 +140,9 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        if (selectedPost.rid != 0) {
-            which += 1;
-        }
-        switch (which) {
-            case 0:
+        int action = currentActions[which];
+        switch (action) {
+            case MENU_ACTION_RECOMMEND:
                 confirmAction(R.string.Are_you_sure_recommend, new Runnable() {
 
                     public void run() {
@@ -118,14 +150,14 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
                     }
                 });
                 break;
-            case 1:
+            case MENU_ACTION_BLOG:
                 ((BaseActivity) context).replaceFragment(
                         PostsPageFragment.newInstance(
                                 UrlBuilder.getUserPostsByName(selectedPost.user.uname)
                         )
                 );
                 break;
-            case 2:
+            case MENU_ACTION_SUBSCRIBE:
                 confirmAction(R.string.Are_you_sure_subscribe, new Runnable() {
 
                     public void run() {
@@ -133,7 +165,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
                     }
                 });
                 break;
-            case 3:
+            case MENU_ACTION_BLACKLIST:
                 confirmAction(R.string.Are_you_sure_blacklist, new Runnable() {
 
                     public void run() {
@@ -141,7 +173,19 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
                     }
                 });
                 break;
-            case 4:
+            case MENU_ACTION_DELETE_POST:
+                confirmAction(R.string.Are_you_sure_delete, new Runnable() {
+
+                    public void run() {
+                        postMessage("D #" +
+                                (selectedPost.rid == 0 ?
+                                        String.valueOf(selectedPost.mid) :
+                                        String.format("%s/%s", selectedPost.mid, selectedPost.rid)),
+                                App.getInstance().getResources().getString(R.string.Deleted), true);
+                    }
+                });
+                break;
+            case MENU_ACTION_SHARE:
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_TEXT, selectedPost.toString());

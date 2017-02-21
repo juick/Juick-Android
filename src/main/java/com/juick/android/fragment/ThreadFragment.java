@@ -155,6 +155,12 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         load();
     }
 
+    @Override
+    public void reload(){
+        super.reload();
+        load();
+    }
+
     private void load() {
         RestClient.getApi().thread("https://api.juick.com/thread?mid=" + mid).enqueue(new Callback<List<Post>>() {
             @Override
@@ -169,7 +175,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                 recyclerView.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
                 List<Post> list = response.body();
-                adapter.addData(list);
+                adapter.newData(list);
             }
 
             @Override
@@ -314,7 +320,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
 
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
-
+                resetForm();
             }
         });
     }

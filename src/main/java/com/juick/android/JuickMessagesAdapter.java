@@ -111,6 +111,12 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }*/
 
+    public void newData(List<Post> data) {
+        postList.clear();
+        postList.addAll(data);
+        notifyDataSetChanged();
+    }
+
     public void addData(List<Post> data) {
         int oldCount = postList.size();
         postList.addAll(data);

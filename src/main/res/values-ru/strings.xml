@@ -118,4 +118,8 @@
     <string name="In_reply_to_">в ответ на</string>
     <string name="NoAuthMessage">Вы не вошли</string>
     <string name="WrongImageFormat">Изображения в этом формате не поддерживаются</string>
+    <string name="DeleteComment">Удалить комментарий</string>
+    <string name="DeletePost">Удалить пост</string>
+    <string name="Are_you_sure_delete">Вы уверены, что хотите удалить сообщение?</string>
+    <string name="Deleted">Удалено</string>
 </resources>
