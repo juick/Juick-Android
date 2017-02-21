@@ -140,7 +140,7 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
     }
 
     public void onNewMessages(List<Post> posts) {
-        Log.e("onNewMessages", posts.toString());
+        Log.d("onNewMessages", posts.toString());
         if (adapter != null && posts != null) {
             adapter.addData(posts);
         }

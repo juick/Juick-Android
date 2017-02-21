@@ -193,7 +193,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                 @Override
                 public void onTextMessage(WebSocket websocket, final String jsonStr) throws Exception {
                     super.onTextMessage(websocket, jsonStr);
-                    Log.e("onTextMessage", ""+jsonStr);
+                    Log.d("onTextMessage", ""+jsonStr);
                     if (!isAdded()) {
                         return;
                     }

@@ -26,7 +26,7 @@ public class GCMReceiverService extends GcmListenerService {
     public void onMessageReceived(String from, Bundle data) {
         super.onMessageReceived(from, data);
         String msg = data.getString("message");
-        Log.e("GCMReceiverService", "onMessageReceived " + data.toString());
+        Log.d("GCMReceiverService", "onMessageReceived " + data.toString());
         try {
             Post jmsg = LoganSquare.parse(msg, Post.class);
             String title = "@" + jmsg.user.uname;

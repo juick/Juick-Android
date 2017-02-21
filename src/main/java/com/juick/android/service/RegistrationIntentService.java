@@ -59,16 +59,16 @@ public class RegistrationIntentService extends IntentService {
             final String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             // [END get_token]
-            Log.i(TAG, "GCM Registration Token: " + token);
+            Log.d(TAG, "GCM Registration Token: " + token);
             String prefToken = sharedPreferences.getString(Preferences.TOKEN, null);
-            Log.e(TAG, "prefToken " + prefToken);
+            Log.d(TAG, "prefToken " + prefToken);
             if (Utils.hasAuth()) {
                 if (prefToken != null && !token.equals(prefToken)) {
                     RestClient.getApi().unregisterPush(prefToken).enqueue(new Callback<String>() {
                         @Override
                         public void onResponse(Call<String> call, Response<String> response) {
                             String res = response.body();
-                            Log.e(TAG, "unregisterPush " + res);
+                            Log.d(TAG, "unregisterPush " + res);
                         }
 
                         @Override
@@ -82,7 +82,7 @@ public class RegistrationIntentService extends IntentService {
                         @Override
                         public void onResponse(Call<String> call, Response<String> response) {
                             String res = response.body();
-                            Log.e(TAG, "registerPush " + res);
+                            Log.d(TAG, "registerPush " + res);
                             if (res != null) {
                                 // You should store a boolean that indicates whether the generated token has been
                                 // sent to your server. If the boolean is false, send the token to your server,
@@ -105,8 +105,7 @@ public class RegistrationIntentService extends IntentService {
 
             // [END register_for_gcm]
         } catch (Exception e) {
-            e.printStackTrace();
-            Log.d(TAG, "Failed to complete token refresh " + e.getMessage());
+            Log.e(TAG, "Failed to complete token refresh", e);
             // If an exception happens while fetching the new token or updating our registration data
             // on a third-party server, this ensures that we'll attempt the update at a later time.
             sharedPreferences.edit().putBoolean(Preferences.SENT_TOKEN_TO_SERVER, false).apply();

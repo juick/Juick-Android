@@ -68,7 +68,7 @@ public class PostsPageFragment extends BasePageFragment {
         if(apiUrl != null)
             load(false);
 
-        Log.e("PostsPageFragment", "load");
+        Log.d("PostsPageFragment", "load");
     }
     @Override
     public void reload(){
@@ -167,7 +167,7 @@ public class PostsPageFragment extends BasePageFragment {
             recyclerView.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
         }
-        Log.e("PostsPageFragment", "creatview "+adapter.getItemCount());
+        Log.d("PostsPageFragment", "creatview "+adapter.getItemCount());
     }
 
     @Override

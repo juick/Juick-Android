@@ -46,7 +46,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     public void showFragment(BaseFragment fragment, boolean isReplace, boolean addToBackStack) {
-        Log.e(fragment.getClass().getSimpleName(), "showFragment");
+        Log.d(fragment.getClass().getSimpleName(), "showFragment");
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         if (isReplace) {
             fragmentTransaction.replace(fragmentContainerLayoutId(), fragment);

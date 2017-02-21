@@ -68,7 +68,7 @@ public class Utils {
             try {
                 b = am.getAuthToken(accs[0], "", false, null, null).getResult();
             } catch (Exception e) {
-                Log.e("getBasicAuthString", Log.getStackTraceString(e));
+                Log.d("getBasicAuthString", Log.getStackTraceString(e));
             }
             if (b != null) {
                 String authStr = b.getString(AccountManager.KEY_ACCOUNT_NAME) + ":" + b.getString(AccountManager.KEY_AUTHTOKEN);

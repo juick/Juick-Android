@@ -139,7 +139,7 @@ public class TagsFragment extends BaseFragment {
 
             @Override
             public void onFailure(Call<List<Tag>> call, Throwable t) {
-                Log.e("", t.toString());
+                Log.d("", t.toString());
                 Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_LONG);
             }
         });
