@@ -144,7 +144,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="@color/colorSecondary"
+            android:tint="@color/colorText"
             android:src="@drawable/ic_more_vert_black_24dp" />
         <TextView
             android:id="@+id/mid"
