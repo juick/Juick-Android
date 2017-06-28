@@ -29,7 +29,10 @@ import android.os.IBinder;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.RawContacts;
+import android.util.Log;
+
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.juick.R;
 import com.juick.api.RestClient;
 import com.juick.api.model.User;
@@ -134,15 +137,14 @@ public class ContactsSyncService extends Service {
         }
 
         Bitmap photo = null;
+        RequestOptions options = new RequestOptions().centerCrop();
         try {
-            photo = Glide.with(context).load("http://i.juick.com/a/" + user.uid + ".png").asBitmap()
-                    .centerCrop()
-                    .into(200, 200)
+            photo = Glide.with(context).asBitmap().load("http://i.juick.com/a/" + user.uid + ".png")
+                    .apply(options)
+                    .submit(200, 200)
                     .get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        } catch (InterruptedException | ExecutionException e) {
+            Log.w("JuickContacts", "Avatar error", e);
         }
         // Photo
         if (photo != null) {
