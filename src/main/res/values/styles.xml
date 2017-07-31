@@ -51,6 +51,7 @@
         <item name="android:background">?attr/colorPrimary</item>
     </style>
     <style name="NavigationDrawerStyle">
+        <item name="android:textColor">@color/colorForegroundElements</item>
         <!-- <item name="android:textSize">20sp</item>--><!-- text size in menu-->
         <!-- <item name="android:lines">2</item>-->
         <!-- <item name="android:ellipsize">end</item>-->
