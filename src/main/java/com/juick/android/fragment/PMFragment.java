@@ -57,8 +57,6 @@ import java.util.List;
  */
 public class PMFragment extends BaseFragment implements View.OnClickListener {
 
-    private static final String FRAGMENT_TAG = PMFragment.class.getName() + "_FRAGMENT_TAG";
-
     private static final String ARG_UID = "ARG_UID";
     private static final String ARG_UNAME = "ARG_UNAME";
 
@@ -66,14 +64,15 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
     int uid;
     EditText etMessage;
     ImageView bSend;
+    RecyclerView recyclerView;
+
     BroadcastReceiver messageReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, final Intent intent) {
             ((Vibrator) context.getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(250);
 
-            PMFragment pmf = (PMFragment) getFragmentManager().findFragmentByTag(FRAGMENT_TAG);
-            pmf.onNewMessages(new ArrayList<Post>(){{
+            onNewMessages(new ArrayList<Post>(){{
                 try {
                     add(LoganSquare.parse(intent.getStringExtra("message"), Post.class));
                 } catch (IOException e) {
@@ -107,14 +106,16 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String uname = getArguments().getString(ARG_UNAME);
-        int uid = getArguments().getInt(ARG_UID, 0);
+        uname = getArguments().getString(ARG_UNAME);
+        uid = getArguments().getInt(ARG_UID, 0);
 
         getActivity().setTitle(uname);
 
         final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         adapter = new PMAdapter(uid);
         recyclerView.setAdapter(adapter);
@@ -125,6 +126,7 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
                     adapter.addData(response.body());
+                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                 }
             }
 
@@ -162,10 +164,10 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
             @Override
             public void onResponse(Call<Post> call, final Response<Post> response) {
                 etMessage.setText("");
-                PMFragment pmf = (PMFragment) getFragmentManager().findFragmentByTag(FRAGMENT_TAG);
-                pmf.onNewMessages(new ArrayList<Post>() {{
+                onNewMessages(new ArrayList<Post>() {{
                     add(response.body());
                 }});
+                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
             }
 
             @Override

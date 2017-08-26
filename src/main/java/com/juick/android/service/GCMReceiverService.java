@@ -40,7 +40,7 @@ public class GCMReceiverService extends GcmListenerService {
                 body = jmsg.body;
             }
 
-            Intent i = new Intent();
+            Intent i = new Intent(this, MainActivity.class);
             i.setAction(MainActivity.PUSH_ACTION);
             i.putExtra(MainActivity.ARG_UNAME, jmsg.user.uname);
             i.putExtra(MainActivity.ARG_UID, jmsg.user.uid);

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.juick.R;
 import com.juick.api.model.Post;
+import com.juick.api.model.User;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -54,11 +55,15 @@ public class PMAdapter extends RecyclerView.Adapter<PMAdapter.VH> {
 
     @Override
     public int getItemViewType(int position) {
-        if (uid == getItem(position).user.uid) {
-            return TYPE_IN_MESSAGE;
-        } else {
-            return TYPE_OUT_MESSAGE;
+        User user = getItem(position).user;
+        if (user != null) {
+            if (uid == user.uid) {
+                return TYPE_IN_MESSAGE;
+            } else {
+                return TYPE_OUT_MESSAGE;
+            }
         }
+        return TYPE_IN_MESSAGE;
     }
 
     public Post getItem(int position) {

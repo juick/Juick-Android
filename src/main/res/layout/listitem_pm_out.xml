@@ -3,8 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:gravity="right"
-    style="@style/LinearLayoutPM">
+    android:gravity="right">
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
