@@ -86,6 +86,7 @@ public class NewPostFragment extends BasePageFragment implements View.OnClickLis
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getActivity().setTitle(R.string.New_message);
         etMessage = (EditText) view.findViewById(R.id.editMessage);
         bTags = (ImageView) view.findViewById(R.id.buttonTags);
         bAttachment = (ImageView) view.findViewById(R.id.buttonAttachment);

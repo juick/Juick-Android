@@ -62,6 +62,7 @@ public class ChatsFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getActivity().setTitle(R.string.PMs);
 
         final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);

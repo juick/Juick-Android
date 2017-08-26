@@ -42,6 +42,7 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getActivity().setTitle(R.string.Juick);
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
         ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewpager);
