@@ -34,7 +34,7 @@ dependencies {
     compile 'com.squareup.okhttp3:logging-interceptor:3.8.1'
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'co.lujun:androidtagview:1.1.4'
-    compile 'com.github.bumptech.glide:glide:4.0.0-RC1'
+    compile 'com.github.bumptech.glide:glide:4.0.0'
     compile 'com.facebook.rebound:rebound:0.3.8'
     compile 'de.hdodenhof:circleimageview:2.1.0'
 }
@@ -45,7 +45,7 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 25
-        versionCode 50
+        versionCode 51
         versionName '3.1'
         applicationId "com.juick"
         buildConfigField "String", "API_ENDPOINT", '"https://api.juick.com/"'
