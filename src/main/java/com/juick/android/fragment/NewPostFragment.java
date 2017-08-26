@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -36,6 +37,7 @@ import com.juick.api.RestClient;
 
 public class NewPostFragment extends BasePageFragment implements View.OnClickListener {
     public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
+    private static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 4;
     EditText etMessage;
     ImageView bTags;
     ImageView bAttachment;
@@ -144,7 +146,7 @@ public class NewPostFragment extends BasePageFragment implements View.OnClickLis
                 break;
             case R.id.buttonAttachment:
                 if (Build.VERSION.SDK_INT >= 23 && getBaseActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 4);
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE_READ_EXTERNAL_STORAGE);
                     return;
                 }
                 if (attachmentUri == null) {
@@ -163,6 +165,16 @@ public class NewPostFragment extends BasePageFragment implements View.OnClickLis
                     bAttachment.setSelected(false);
                 }
                 break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (requestCode == REQUEST_CODE_READ_EXTERNAL_STORAGE) {
+                bAttachment.performClick();
+            }
         }
     }
 
