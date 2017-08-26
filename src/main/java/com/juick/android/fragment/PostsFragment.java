@@ -3,13 +3,14 @@ package com.juick.android.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +19,13 @@ import com.juick.R;
 import com.juick.android.NewMessageActivity;
 import com.juick.android.UrlBuilder;
 import com.juick.android.Utils;
-import com.juick.android.widget.ScrollingFABBehavior;
 
 /**
  * Created by gerc on 03.06.2016.
  */
 public class PostsFragment extends BaseTabsFragment implements View.OnClickListener {
+
+    AppBarLayout.OnOffsetChangedListener offsetChangedListener;
 
     public PostsFragment() {
     }
@@ -51,27 +53,36 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
         TabLayout tabLayout = (TabLayout) getBaseActivity().findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        FloatingActionButton fab = (FloatingActionButton) getBaseActivity().findViewById(R.id.fab);
-
+        final FloatingActionButton fab = (FloatingActionButton) getBaseActivity().findViewById(R.id.fab);
         fab.setOnClickListener(this);
+        fab.show();
+
+        AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar_layout);
+        offsetChangedListener = new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (Math.abs(verticalOffset) >= (appBarLayout.getTotalScrollRange())) {
+                    fab.hide();
+                } else {
+                    fab.show();
+                }
+            }
+        };
+        appBarLayout.addOnOffsetChangedListener(offsetChangedListener);
+        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        ((AppBarLayout.LayoutParams) toolbar.getLayoutParams())
+                .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        setFABEnabled(true);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        setFABEnabled(false);
-    }
-
-    private void setFABEnabled(boolean enabled) {
+    public void onDestroyView() {
+        super.onDestroyView();
         FloatingActionButton fab = (FloatingActionButton) getBaseActivity().findViewById(R.id.fab);
-        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
-        ((ScrollingFABBehavior) lp.getBehavior()).setEnabled(enabled);
+        fab.hide();
+        AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar_layout);
+        appBarLayout.removeOnOffsetChangedListener(offsetChangedListener);
+        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        ((AppBarLayout.LayoutParams) toolbar.getLayoutParams()).setScrollFlags(0);
     }
 
     @Override

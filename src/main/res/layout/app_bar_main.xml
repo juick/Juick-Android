@@ -10,6 +10,7 @@
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/app_bar_layout"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
@@ -42,7 +43,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:src="@android:drawable/ic_dialog_email"
-        app:borderWidth="0dp"
-        app:layout_behavior="com.juick.android.widget.ScrollingFABBehavior" />
+        app:borderWidth="0dp" />
 
 </android.support.design.widget.CoordinatorLayout>
