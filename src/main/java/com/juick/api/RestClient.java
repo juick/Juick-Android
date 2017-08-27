@@ -30,6 +30,11 @@ public class RestClient {
     public static final String ACTION_UPLOAD_PROGRESS = "ACTION_UPLOAD_PROGRESS";
     public static final String EXTRA_PROGRESS = "EXTRA_PROGRESS";
 
+    public static String getBaseUrl() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ?
+                BuildConfig.API_ENDPOINT : BuildConfig.API_ENDPOINT_FALLBACK;
+    }
+
     private static Api api;
 
     public static Api getApi() {
@@ -60,8 +65,7 @@ public class RestClient {
                     .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                     .build();
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ?
-                            BuildConfig.API_ENDPOINT : BuildConfig.API_ENDPOINT_FALLBACK)
+                    .baseUrl(getBaseUrl())
                     .client(client)
                     .addConverterFactory(LoganSquareConverterFactory.create())
                     .build();
@@ -93,8 +97,7 @@ public class RestClient {
                 }).build();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ?
-                        BuildConfig.API_ENDPOINT : BuildConfig.API_ENDPOINT_FALLBACK)
+                .baseUrl(getBaseUrl())
                 .client(client)
                 .addConverterFactory(LoganSquareConverterFactory.create())
                 .build();

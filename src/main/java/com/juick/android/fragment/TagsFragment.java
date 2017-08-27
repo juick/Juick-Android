@@ -123,7 +123,7 @@ public class TagsFragment extends BaseFragment {
             }
         });
 
-        String url = "https://api.juick.com/tags";
+        String url = RestClient.getBaseUrl() + "tags";
         if (uid > 0) {
             url += "?user_id=" + uid;
         }

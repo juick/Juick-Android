@@ -163,7 +163,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     }
 
     private void load() {
-        RestClient.getApi().thread("https://api.juick.com/thread?mid=" + mid).enqueue(new Callback<List<Post>>() {
+        RestClient.getApi().thread(RestClient.getBaseUrl() + "thread?mid=" + mid).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
                 if (response.code() == 404) {

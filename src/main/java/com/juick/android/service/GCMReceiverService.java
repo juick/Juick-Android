@@ -17,6 +17,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.juick.App;
 import com.juick.R;
+import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import com.juick.android.MainActivity;
 import com.google.android.gms.gcm.GcmListenerService;
@@ -65,7 +66,7 @@ public class GCMReceiverService extends GcmListenerService {
             notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.body));
 
             Glide.with(App.getInstance())
-                    .load("https://i.juick.com/as/" + jmsg.user.uid + ".png")
+                    .load(RestClient.getBaseUrl() + "a/" + jmsg.user.uid + ".png")
                     .asBitmap()
                     .into(new SimpleTarget<Bitmap>() {
                         @Override

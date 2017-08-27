@@ -43,6 +43,7 @@ import co.lujun.androidtagview.TagView;
 import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.android.fragment.PostsPageFragment;
+import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.R;
@@ -197,7 +198,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         final Post post = postList.get(position);
 
         if (post.user != null && post.body != null) {
-            Glide.with(holder.itemView.getContext()).load("https://i.juick.com/a/" + post.user.uid + ".png").into(holder.upicImageView);
+            Glide.with(holder.itemView.getContext()).load(RestClient.getBaseUrl() + "a/" + post.user.uid + ".png").into(holder.upicImageView);
             holder.usernameTextView.setText(post.user.uname);
             holder.timestampTextView.setText(formatMessageTimestamp(post));
             holder.tagContainerLayout.removeAllTags();
