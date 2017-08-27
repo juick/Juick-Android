@@ -66,7 +66,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int TYPE_ITEM = 0;
     private static final int TYPE_HEADER = -1;
 
-
     public static final Pattern boldPattern = Pattern.compile("\\*([^\\*]+)\\*");
     public static final Pattern italicPattern = Pattern.compile("(?:^|\\s|,)/([^/]+)/");
     public static final Pattern underlinePattern = Pattern.compile("_([^_]+)_");
@@ -96,6 +95,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         this.isThread = isThread;
 
         //setHasStableIds(true);
+        inReplyTo = App.getInstance().getString(R.string.In_reply_to_);
     }
 
     /*@Override
@@ -166,7 +166,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false));
             vh.setOnItemClickListener(itemClickListener);
             vh.setOnMenuClickListener(itemMenuListener);
-            inReplyTo = parent.getContext().getString(R.string.In_reply_to_);
             return vh;
         }
     }
@@ -198,34 +197,27 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         final Post post = postList.get(position);
 
         if (post.user != null && post.body != null) {
-            Glide.with(holder.upicImageView.getContext()).load("https://i.juick.com/a/" + post.user.uid + ".png").into(holder.upicImageView);
-
+            Glide.with(holder.itemView.getContext()).load("https://i.juick.com/a/" + post.user.uid + ".png").into(holder.upicImageView);
             holder.usernameTextView.setText(post.user.uname);
-
             holder.timestampTextView.setText(formatMessageTimestamp(post));
-
             holder.tagContainerLayout.removeAllTags();
             holder.tagContainerLayout.setTags(post.tags);
             holder.tagContainerLayout.setOnTagClickListener(new TagView.OnTagClickListener() {
                 @Override
                 public void onTagClick(int position, String text) {
                     Log.d("position", position + " " + text);
-                    ((BaseActivity)holder.tagContainerLayout.getContext()).replaceFragment(
+                    ((BaseActivity) holder.itemView.getContext()).replaceFragment(
                             PostsPageFragment.newInstance(
-                                    UrlBuilder.getPostsByTag(post.user.uid, text)
-                            )
-                    );
+                                    UrlBuilder.getPostsByTag(post.user.uid, text)));
                 }
 
                 @Override
                 public void onTagLongClick(int position, String text) {
-
                     Log.d("positn", position + " " + text);
                 }
 
                 @Override
                 public void onTagCrossClick(int position) {
-
                 }
             });
 
@@ -233,7 +225,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             holder.textTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
             if (post.photo != null && post.photo.small != null) {
-                Glide.with(holder.photoImageView.getContext()).load(post.photo.small).into(holder.photoImageView);
+                Glide.with(holder.itemView.getContext()).load(post.photo.small).into(holder.photoImageView);
                 holder.photoImageView.setVisibility(View.VISIBLE);
             } else {
                 holder.photoImageView.setVisibility(View.GONE);

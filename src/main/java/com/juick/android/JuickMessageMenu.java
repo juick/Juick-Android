@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.fragment.PostsPageFragment;
+import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import retrofit2.Call;
@@ -105,7 +106,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
 
     @Override
     public void onItemClick(View view, int position) {
-        context = view.getContext();
+        context = ViewUtil.getActivity(view.getContext());
         selectedPost = postList.get(position);
         CharSequence[] items;
         if(selectedPost.user.uid == Utils.myId){
