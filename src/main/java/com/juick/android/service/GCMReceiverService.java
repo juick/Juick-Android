@@ -5,11 +5,17 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.bluelinelabs.logansquare.LoganSquare;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.juick.App;
 import com.juick.R;
 import com.juick.api.model.Post;
 import com.juick.android.MainActivity;
@@ -27,8 +33,12 @@ public class GCMReceiverService extends GcmListenerService {
         super.onMessageReceived(from, data);
         String msg = data.getString("message");
         Log.d("GCMReceiverService", "onMessageReceived " + data.toString());
+        showNotification(msg);
+    }
+
+    public static void showNotification(final String msgStr) {
         try {
-            Post jmsg = LoganSquare.parse(msg, Post.class);
+            final Post jmsg = LoganSquare.parse(msgStr, Post.class);
             String title = "@" + jmsg.user.uname;
             if (!jmsg.tags.isEmpty()) {
                 title += ": " + jmsg.tags;
@@ -40,30 +50,53 @@ public class GCMReceiverService extends GcmListenerService {
                 body = jmsg.body;
             }
 
-            Intent i = new Intent(this, MainActivity.class);
-            i.setAction(MainActivity.PUSH_ACTION);
-            i.putExtra(MainActivity.ARG_UNAME, jmsg.user.uname);
-            i.putExtra(MainActivity.ARG_UID, jmsg.user.uid);
-            if (jmsg.mid == 0) {
-                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(GCM_EVENT_ACTION).putExtra("message", msg));
-                i.putExtra(MainActivity.PUSH_ACTION_SHOW_PM, true);
-            } else {
-                i.putExtra(MainActivity.ARG_MID, jmsg.mid);
-                i.putExtra(MainActivity.PUSH_ACTION_SHOW_THREAD, true);
-            }
-            PendingIntent contentIntent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-            NotificationCompat.Builder notification = new NotificationCompat.Builder(this);
-            notification.setSmallIcon(R.drawable.ic_notification)
+            PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(), 0, getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT);
+            final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(App.getInstance());
+            notificationBuilder.setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle(title)
                     .setContentText(body)
                     .setAutoCancel(true).setWhen(0)
                     .setContentIntent(contentIntent)
+                    .setGroup("messages")
+                    .setGroupSummary(true)
                     .setDefaults(Notification.DEFAULT_LIGHTS
                             | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND);
+            notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
+            notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.body));
 
-            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(1, notification.build());
+            Glide.with(App.getInstance())
+                    .asBitmap()
+                    .load("https://i.juick.com/as/" + jmsg.user.uid + ".png")
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                            notificationBuilder.setLargeIcon(resource);
+                            notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
+                                    | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
+                            ((NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE)).notify(jmsg.mid != 0 ? jmsg.mid : jmsg.user.uid, notificationBuilder.build());
+                        }
+                    });
+
+            notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
+                    App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), 2, getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
+            ((NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE)).notify(jmsg.mid != 0 ? jmsg.mid : jmsg.user.uid, notificationBuilder.build());
         } catch (Exception e) {
             Log.e("GCMIntentService", "GCM message error", e);
         }
+    }
+
+    public static Intent getIntent(String msgStr, Post jmsg) {
+        Intent intent = new Intent(App.getInstance(), MainActivity.class);
+        intent.setAction(MainActivity.PUSH_ACTION);
+        intent.putExtra(MainActivity.ARG_UNAME, jmsg.user.uname);
+        intent.putExtra(MainActivity.ARG_UID, jmsg.user.uid);
+        if (jmsg.mid == 0) {
+            LocalBroadcastManager.getInstance(App.getInstance()).sendBroadcast(new Intent(GCM_EVENT_ACTION).putExtra("message", msgStr));
+            intent.putExtra(MainActivity.PUSH_ACTION_SHOW_PM, true);
+        } else {
+            intent.putExtra(MainActivity.ARG_MID, jmsg.mid);
+            intent.putExtra(MainActivity.PUSH_ACTION_SHOW_THREAD, true);
+        }
+        return intent;
     }
 }
