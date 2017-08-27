@@ -85,8 +85,11 @@ public class MainActivity extends BaseActivity
             RestClient.getApi().getUsers(Utils.getNick()).enqueue(new Callback<List<User>>() {
                 @Override
                 public void onResponse(Call<List<User>> call, Response<List<User>> response) {
-                    Utils.myId = response.body().get(0).uid;
-                    Glide.with(imageHeader.getContext()).load("https://i.juick.com/as/" + Utils.myId + ".png").into(imageHeader);
+                    List<User> users = response.body();
+                    if (users.size() > 0) {
+                        Utils.myId = users.get(0).uid;
+                        Glide.with(imageHeader.getContext()).load("https://i.juick.com/as/" + Utils.myId + ".png").into(imageHeader);
+                    }
                 }
 
                 @Override
