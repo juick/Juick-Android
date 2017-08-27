@@ -48,6 +48,7 @@ public class GCMReceiverService extends GcmListenerService {
                 LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(GCM_EVENT_ACTION).putExtra("message", msg));
                 i.putExtra(MainActivity.PUSH_ACTION_SHOW_PM, true);
             } else {
+                i.putExtra(MainActivity.ARG_MID, jmsg.mid);
                 i.putExtra(MainActivity.PUSH_ACTION_SHOW_THREAD, true);
             }
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);

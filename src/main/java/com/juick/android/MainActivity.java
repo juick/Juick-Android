@@ -56,6 +56,7 @@ public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     public static final String ARG_UID = "ARG_UID";
+    public static final String ARG_MID = "ARG_MID";
     public static final String ARG_UNAME = "ARG_UNAME";
     public static final String PUSH_ACTION = "PUSH_ACTION";
     public static final String PUSH_ACTION_SHOW_THREAD = "PUSH_ACTION_SHOW_THREAD";
@@ -124,7 +125,7 @@ public class MainActivity extends BaseActivity
             if (intent.getBooleanExtra(PUSH_ACTION_SHOW_PM, false)) {
                 replaceFragment(PMFragment.newInstance(intent.getStringExtra(ARG_UNAME), intent.getIntExtra(ARG_UID, 0)));
             } else if (intent.getBooleanExtra(PUSH_ACTION_SHOW_THREAD, false)) {
-                replaceFragment(ThreadFragment.newInstance(intent.getIntExtra(ARG_UID, 0)));
+                replaceFragment(ThreadFragment.newInstance(intent.getIntExtra(ARG_MID, 0)));
             }
         }else if(Intent.ACTION_VIEW.equals(action)){
             Uri data = intent.getData();
