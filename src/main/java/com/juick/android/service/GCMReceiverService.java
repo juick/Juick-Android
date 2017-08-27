@@ -13,8 +13,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.bluelinelabs.logansquare.LoganSquare;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.model.Post;
@@ -65,24 +65,29 @@ public class GCMReceiverService extends GcmListenerService {
             notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.body));
 
             Glide.with(App.getInstance())
-                    .asBitmap()
                     .load("https://i.juick.com/as/" + jmsg.user.uid + ".png")
+                    .asBitmap()
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
-                        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                             notificationBuilder.setLargeIcon(resource);
                             notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
                                     | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
-                            ((NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE)).notify(jmsg.mid != 0 ? jmsg.mid : jmsg.user.uid, notificationBuilder.build());
+                            GCMReceiverService.notify(jmsg, notificationBuilder);
                         }
                     });
 
             notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
                     App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), 2, getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
-            ((NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE)).notify(jmsg.mid != 0 ? jmsg.mid : jmsg.user.uid, notificationBuilder.build());
+            notify(jmsg, notificationBuilder);
         } catch (Exception e) {
             Log.e("GCMIntentService", "GCM message error", e);
         }
+    }
+
+    private static void notify(Post jmsg, NotificationCompat.Builder notificationBuilder) {
+        ((NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE))
+                .notify(jmsg.mid != 0 ? jmsg.mid : jmsg.user.uid, notificationBuilder.build());
     }
 
     public static Intent getIntent(String msgStr, Post jmsg) {
