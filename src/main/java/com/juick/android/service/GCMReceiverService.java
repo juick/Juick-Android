@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -65,22 +67,29 @@ public class GCMReceiverService extends GcmListenerService {
             notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
             notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.body));
 
-            Glide.with(App.getInstance())
-                    .load(RestClient.getBaseUrl() + "a/" + jmsg.user.uid + ".png")
-                    .asBitmap()
-                    .into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            notificationBuilder.setLargeIcon(resource);
-                            notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
-                                    | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
-                            GCMReceiverService.notify(jmsg, notificationBuilder);
-                        }
-                    });
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Glide.with(App.getInstance())
+                            .load(RestClient.getBaseUrl() + "a/" + jmsg.user.uid + ".png")
+                            .asBitmap()
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    notificationBuilder.setLargeIcon(resource);
+                                    notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
+                                            | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
+                                    GCMReceiverService.notify(jmsg, notificationBuilder);
+                                }
+                            });
 
-            notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
-                    App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), 2, getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
-            notify(jmsg, notificationBuilder);
+                    notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
+                            App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), 2, getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
+                    GCMReceiverService.notify(jmsg, notificationBuilder);
+                }
+            });
+
         } catch (Exception e) {
             Log.e("GCMIntentService", "GCM message error", e);
         }
