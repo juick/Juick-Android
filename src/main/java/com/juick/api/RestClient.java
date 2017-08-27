@@ -1,6 +1,7 @@
 package com.juick.api;
 
 import android.content.Intent;
+import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import com.juick.App;
@@ -59,7 +60,8 @@ public class RestClient {
                     .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                     .build();
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(BuildConfig.API_ENDPOINT)
+                    .baseUrl(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ?
+                            BuildConfig.API_ENDPOINT : BuildConfig.API_ENDPOINT_FALLBACK)
                     .client(client)
                     .addConverterFactory(LoganSquareConverterFactory.create())
                     .build();
@@ -91,7 +93,8 @@ public class RestClient {
                 }).build();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BuildConfig.API_ENDPOINT)
+                .baseUrl(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ?
+                        BuildConfig.API_ENDPOINT : BuildConfig.API_ENDPOINT_FALLBACK)
                 .client(client)
                 .addConverterFactory(LoganSquareConverterFactory.create())
                 .build();
