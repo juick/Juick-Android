@@ -20,6 +20,7 @@ package com.juick.android.fragment;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.*;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -375,7 +376,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == BaseActivity.RESULT_OK) {
             if (requestCode == ACTIVITY_ATTACHMENT_IMAGE && data != null) {
-                attachmentUri = data.getDataString();
+                attachmentUri = Utils.getPath(Uri.parse(data.getDataString()));
                 // How to get correct mime type?
                 attachmentMime = "image/jpeg";
                 bAttach.setSelected(true);
