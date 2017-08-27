@@ -33,6 +33,8 @@
     <string name="Your_messages">Ваши сообщения</string>
     <string name="Juick_profile">Профайл в Juick</string>
 
+    <string name="network_error">Ошибка сети, проверьте подключение к интернету</string>
+
     <!-- Pull-to-refresh -->
     <string name="pull_to_refresh_pull_label">Тяните, чтобы обновить...</string>
     <string name="pull_to_refresh_release_label">Отпустите, чтобы обновить...</string>

@@ -132,7 +132,7 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
-
+                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
 
@@ -172,7 +172,7 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
 
             @Override
             public void onFailure(Call<Post> call, Throwable t) {
-
+                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
     }

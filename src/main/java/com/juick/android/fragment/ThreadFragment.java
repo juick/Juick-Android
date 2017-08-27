@@ -181,7 +181,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
-
+                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -322,6 +322,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
                 resetForm();
+                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
     }

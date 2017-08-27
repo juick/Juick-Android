@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.juick.android.UrlBuilder;
 import com.juick.App;
@@ -95,6 +96,7 @@ public class PostsPageFragment extends BasePageFragment {
             public void onFailure(Call<List<Post>> call, Throwable t) {
                 t.printStackTrace();
                 swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -144,6 +146,7 @@ public class PostsPageFragment extends BasePageFragment {
                     @Override
                     public void onFailure(Call<List<Post>> call, Throwable t) {
                         loading = false;
+                        Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
                     }
                 });
                 return true;

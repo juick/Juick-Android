@@ -89,6 +89,8 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
             public void onFailure(Call<Object> call, Throwable t) {
                 if(isReload)
                     reloadView();
+
+                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
     }

@@ -30,7 +30,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.bumptech.glide.Glide;
+import com.juick.App;
 import com.juick.R;
 import com.juick.android.fragment.ChatsFragment;
 import com.juick.android.fragment.PMFragment;
@@ -94,6 +97,7 @@ public class MainActivity extends BaseActivity
 
                 @Override
                 public void onFailure(Call<List<User>> call, Throwable t) {
+                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
                 }
             });
             TextView titleHeader = (TextView) navigationView.getHeaderView(0).findViewById(R.id.title_textView);

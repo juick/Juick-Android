@@ -106,7 +106,7 @@ public class SignInActivity extends Activity implements OnClickListener {
 
                     @Override
                     public void onFailure(Call<Object> call, Throwable t) {
-                        Toast.makeText(App.getInstance(), R.string.Unknown_nick_or_wrong_password, Toast.LENGTH_LONG).show();
+                        Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
                     }
                 });
                 break;

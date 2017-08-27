@@ -32,6 +32,8 @@
     <string name="Enter_a_name">Enter a name</string>
     <string name="Your_messages">Your messages</string>
     <string name="Juick_profile">Juick profile</string>
+
+    <string name="network_error">Network error</string>
     
     <!-- Pull-to-refresh -->
     <string name="pull_to_refresh_pull_label">Pull to refresh...</string>

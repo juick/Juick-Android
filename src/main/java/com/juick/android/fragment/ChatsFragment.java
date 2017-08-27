@@ -27,7 +27,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.bumptech.glide.Glide;
+import com.juick.App;
 import com.juick.R;
 import com.juick.api.RestClient;
 import com.juick.api.model.Chat;
@@ -89,6 +92,7 @@ public class ChatsFragment extends BaseFragment {
 
             @Override
             public void onFailure(Call<Pms> call, Throwable t) {
+                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
     }

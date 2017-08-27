@@ -31,6 +31,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.juick.App;
 import com.juick.R;
 import com.juick.android.BaseActivity;
 import com.juick.android.ITagable;
@@ -140,7 +141,7 @@ public class TagsFragment extends BaseFragment {
             @Override
             public void onFailure(Call<List<Tag>> call, Throwable t) {
                 Log.d("", t.toString());
-                Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_LONG);
+                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
     }
