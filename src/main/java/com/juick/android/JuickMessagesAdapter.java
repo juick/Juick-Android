@@ -201,26 +201,28 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             Glide.with(holder.itemView.getContext()).load(RestClient.getImagesUrl() + "a/" + post.user.uid + ".png").into(holder.upicImageView);
             holder.usernameTextView.setText(post.user.uname);
             holder.timestampTextView.setText(formatMessageTimestamp(post));
-            holder.tagContainerLayout.removeAllTags();
-            holder.tagContainerLayout.setTags(post.tags);
-            holder.tagContainerLayout.setOnTagClickListener(new TagView.OnTagClickListener() {
-                @Override
-                public void onTagClick(int position, String text) {
-                    Log.d("position", position + " " + text);
-                    ((BaseActivity) holder.itemView.getContext()).replaceFragment(
-                            PostsPageFragment.newInstance(
-                                    UrlBuilder.getPostsByTag(post.user.uid, text)));
-                }
+            if (!isThread) {
+                holder.tagContainerLayout.removeAllTags();
+                holder.tagContainerLayout.setTags(post.tags);
+                holder.tagContainerLayout.setOnTagClickListener(new TagView.OnTagClickListener() {
+                    @Override
+                    public void onTagClick(int position, String text) {
+                        Log.d("position", position + " " + text);
+                        ((BaseActivity) holder.itemView.getContext()).replaceFragment(
+                                PostsPageFragment.newInstance(
+                                        UrlBuilder.getPostsByTag(post.user.uid, text)));
+                    }
 
-                @Override
-                public void onTagLongClick(int position, String text) {
-                    Log.d("positn", position + " " + text);
-                }
+                    @Override
+                    public void onTagLongClick(int position, String text) {
+                        Log.d("positn", position + " " + text);
+                    }
 
-                @Override
-                public void onTagCrossClick(int position) {
-                }
-            });
+                    @Override
+                    public void onTagCrossClick(int position) {
+                    }
+                });
+            }
 
             holder.textTextView.setText(formatMessageText(post));
             holder.textTextView.setMovementMethod(LinkMovementMethod.getInstance());
