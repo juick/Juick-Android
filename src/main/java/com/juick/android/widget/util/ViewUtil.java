@@ -17,6 +17,7 @@ import com.juick.R;
 public class ViewUtil {
 
     public static void setTint(TextView v) {
+        if (v == null) return;
         Drawable[] ds = v.getCompoundDrawables();
         Drawable[] cs = new Drawable[ds.length];
         int c = v.getCurrentTextColor();

@@ -164,7 +164,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         } else if (viewType == TYPE_HEADER) {
             return onCreateHeaderViewHolder(parent);
         } else {
-            VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false));
+            VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(isThread ? R.layout.item_thread_message : R.layout.item_post, parent, false));
             vh.setOnItemClickListener(itemClickListener);
             vh.setOnMenuClickListener(itemMenuListener);
             return vh;
@@ -234,20 +234,15 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             if (post.replies > 0 && !isThread) {
                 holder.repliesTextView.setVisibility(View.VISIBLE);
                 holder.repliesTextView.setText(Integer.toString(post.replies));
-            } else {
-                holder.repliesTextView.setVisibility(View.GONE);
             }
             if (post.likes > 0 && !isThread) {
                 holder.likesTextView.setVisibility(View.VISIBLE);
                 holder.likesTextView.setText(Integer.toString(post.likes));
-            } else {
-                holder.likesTextView.setVisibility(View.GONE);
             }
             if(post.replyQuote != null && isThread){
                 holder.replyQuoteTextView.setText(post.replyQuote);
                 holder.replyQuoteTextView.setVisibility(View.VISIBLE);
-            }else
-                holder.replyQuoteTextView.setVisibility(View.GONE);
+            }
 
             if(post.rid > 0){
                 holder.midTextView.setText(
