@@ -122,7 +122,7 @@ public class ChatsFragment extends BaseFragment {
             holder.textView.setText(chat.uname);
             holder.avatarImageView.setVisibility(View.VISIBLE);
 
-            Glide.with(holder.itemView.getContext()).load(RestClient.getBaseUrl() + "a/" + chat.uid + ".png").into(holder.avatarImageView);
+            Glide.with(holder.itemView.getContext()).load(RestClient.getImagesUrl() + "a/" + chat.uid + ".png").into(holder.avatarImageView);
 
             if (chat.MessagesCount > 0) {
                 holder.unreadTextView.setText(Integer.toString(chat.MessagesCount));

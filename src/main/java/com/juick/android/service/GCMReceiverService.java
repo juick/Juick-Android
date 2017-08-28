@@ -72,7 +72,7 @@ public class GCMReceiverService extends GcmListenerService {
                 @Override
                 public void run() {
                     Glide.with(App.getInstance())
-                            .load(RestClient.getBaseUrl() + "a/" + jmsg.user.uid + ".png")
+                            .load(RestClient.getImagesUrl() + "a/" + jmsg.user.uid + ".png")
                             .asBitmap()
                             .into(new SimpleTarget<Bitmap>() {
                                 @Override

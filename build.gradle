@@ -48,11 +48,13 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 25
-        versionCode 55
+        versionCode 56
         versionName '3.1'
         applicationId "com.juick"
         buildConfigField "String", "API_ENDPOINT", '"https://api.juick.com/"'
         buildConfigField "String", "API_ENDPOINT_FALLBACK", '"http://api.juick.com/"'
+        buildConfigField "String", "IMAGES_ENDPOINT", '"https://i.juick.com/"'
+        buildConfigField "String", "IMAGES_ENDPOINT_FALLBACK", '"http://i.juick.com/"'
     }
     lintOptions {
         checkReleaseBuilds false

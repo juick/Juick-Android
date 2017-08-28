@@ -198,7 +198,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         final Post post = postList.get(position);
 
         if (post.user != null && post.body != null) {
-            Glide.with(holder.itemView.getContext()).load(RestClient.getBaseUrl() + "a/" + post.user.uid + ".png").into(holder.upicImageView);
+            Glide.with(holder.itemView.getContext()).load(RestClient.getImagesUrl() + "a/" + post.user.uid + ".png").into(holder.upicImageView);
             holder.usernameTextView.setText(post.user.uname);
             holder.timestampTextView.setText(formatMessageTimestamp(post));
             holder.tagContainerLayout.removeAllTags();

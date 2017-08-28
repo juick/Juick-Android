@@ -92,7 +92,7 @@ public class MainActivity extends BaseActivity
                     List<User> users = response.body();
                     if (users.size() > 0) {
                         Utils.myId = users.get(0).uid;
-                        Glide.with(imageHeader.getContext()).load(RestClient.getBaseUrl() + "a/" + Utils.myId + ".png").into(imageHeader);
+                        Glide.with(imageHeader.getContext()).load(RestClient.getImagesUrl() + "a/" + Utils.myId + ".png").into(imageHeader);
                     }
                 }
 

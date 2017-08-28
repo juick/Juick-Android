@@ -35,6 +35,11 @@ public class RestClient {
                 BuildConfig.API_ENDPOINT : BuildConfig.API_ENDPOINT_FALLBACK;
     }
 
+    public static String getImagesUrl() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ?
+                BuildConfig.IMAGES_ENDPOINT : BuildConfig.IMAGES_ENDPOINT_FALLBACK;
+    }
+
     private static Api api;
 
     public static Api getApi() {
