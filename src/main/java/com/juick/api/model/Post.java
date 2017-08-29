@@ -2,6 +2,7 @@
 package com.juick.api.model;
 
 import com.bluelinelabs.logansquare.annotation.JsonField;
+import com.bluelinelabs.logansquare.annotation.JsonIgnore;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
 
 import java.util.ArrayList;
@@ -39,4 +40,9 @@ public class Post {
     public Video video;
     @JsonField
     public int rid;
+
+    @JsonIgnore
+    public boolean select;
+    @JsonIgnore
+    public int prevRid;
 }

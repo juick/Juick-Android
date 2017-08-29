@@ -18,7 +18,9 @@
 package com.juick.android;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -80,6 +82,9 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     OnLoadMoreRequestListener loadMoreRequestListener;
     OnItemClickListener itemClickListener;
     OnItemClickListener itemMenuListener;
+    OnScrollListener scrollListener;
+
+    private Handler handler = new Handler();
 
     private boolean hasHeader;
     private boolean hasOldPosts = true;
@@ -231,26 +236,69 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             } else {
                 holder.photoImageView.setVisibility(View.GONE);
             }
-            if (post.replies > 0 && !isThread) {
-                holder.repliesTextView.setVisibility(View.VISIBLE);
-                holder.repliesTextView.setText(Integer.toString(post.replies));
-            }
-            if (post.likes > 0 && !isThread) {
-                holder.likesTextView.setVisibility(View.VISIBLE);
-                holder.likesTextView.setText(Integer.toString(post.likes));
-            }
-            if(post.replyQuote != null && isThread){
+            if (!isThread) {
+                if (post.replies > 0) {
+                    holder.repliesTextView.setVisibility(View.VISIBLE);
+                    holder.repliesTextView.setText(Integer.toString(post.replies));
+                } else {
+                    holder.repliesTextView.setVisibility(View.GONE);
+                }
+                if (post.likes > 0) {
+                    holder.likesTextView.setVisibility(View.VISIBLE);
+                    holder.likesTextView.setText(Integer.toString(post.likes));
+                } else {
+                    holder.likesTextView.setVisibility(View.GONE);
+                }
+            } else {
                 holder.replyQuoteTextView.setText(post.replyQuote);
                 holder.replyQuoteTextView.setVisibility(View.VISIBLE);
+                if (post.prevRid != 0) {
+                    holder.backImageView.setVisibility(View.VISIBLE);
+                    holder.backImageView.setTag(post);
+                    holder.backImageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Post p = ((Post) v.getTag());
+                            if (scrollListener != null)
+                                scrollListener.onScrollToPost(v, p.prevRid, 0);
+                            p.prevRid = 0;
+                            p.select = false;
+                            v.setVisibility(View.GONE);
+                        }
+                    });
+                } else {
+                    holder.backImageView.setVisibility(View.GONE);
+                }
             }
-
-            if(post.rid > 0){
+            if (post.rid > 0) {
                 holder.midTextView.setText(
                         post.replyto > 0
                             ? String.format("/%1$d %2$s /%3$d", post.rid, inReplyTo, post.replyto)
                             : "/" + post.rid);
                 holder.midTextView.setVisibility(View.VISIBLE);
-            }else
+                holder.midTextView.setTag(post);
+                holder.midTextView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Post p = ((Post) v.getTag());
+                        if (scrollListener != null)
+                            scrollListener.onScrollToPost(v, p.replyto, p.rid);
+                    }
+                });
+                if (post.select) {
+                    holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.post_select));
+                    handler.removeCallbacksAndMessages(null);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            post.select = false;
+                            holder.container.setBackgroundColor(Color.TRANSPARENT);
+                        }
+                    }, 600);
+                } else {
+                    holder.container.setBackgroundColor(Color.TRANSPARENT);
+                }
+            } else
                 holder.midTextView.setVisibility(View.GONE);
         }
     }
@@ -351,10 +399,11 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         TextView replyQuoteTextView;
         TextView midTextView;
         ImageView menuImageView;
+        ImageView backImageView;
         OnItemClickListener itemClickListener;
         OnItemClickListener menuClickListener;
 
-        public VH(View itemView) {
+        VH(View itemView) {
             super(itemView);
             container = (ViewGroup) itemView.findViewById(R.id.container);
             upicImageView = (ImageView) itemView.findViewById(R.id.userpic);
@@ -369,6 +418,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             ViewUtil.setTint(likesTextView);
             repliesTextView = (TextView) itemView.findViewById(R.id.replies);
             ViewUtil.setTint(repliesTextView);
+            backImageView = (ImageView) itemView.findViewById(R.id.back_imageView);
             menuImageView = (ImageView) itemView.findViewById(R.id.menu_imageView);
             menuImageView.setOnClickListener(this);
             itemView.setOnClickListener(this);
@@ -414,8 +464,16 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         itemMenuListener = listener;
     }
 
+    public void setOnScrollListener(OnScrollListener listener) {
+        scrollListener = listener;
+    }
+
     public interface OnItemClickListener {
         void onItemClick(View view, int pos);
+    }
+
+    public interface OnScrollListener {
+        void onScrollToPost(View v, int replyTo, int rid);
     }
 
     public static class MyClickableSpan extends ClickableSpan {

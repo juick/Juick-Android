@@ -145,6 +145,27 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
             }
         });
         adapter.setOnMenuListener(new JuickMessageMenu(adapter.getItems()));
+        adapter.setOnScrollListener(new JuickMessagesAdapter.OnScrollListener() {
+            @Override
+            public void onScrollToPost(View v, int replyTo, int rid) {
+                int pos = 0;
+                for (int i = 0; i < adapter.getItems().size(); ++i) {
+                    Post p = adapter.getItems().get(i);
+                    p.select = false;
+                    p.prevRid = 0;
+                    if (p.rid == replyTo) {
+                        pos = i;
+                        p.select = true;
+                        p.prevRid = rid;
+                        break;
+                    }
+                }
+                if (pos != 0) {
+                    adapter.notifyItemChanged(pos);
+                    recyclerView.scrollToPosition(pos);
+                }
+            }
+        });
 
         SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         swipeRefreshLayout.setEnabled(false);
