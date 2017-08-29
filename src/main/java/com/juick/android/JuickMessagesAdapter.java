@@ -18,7 +18,6 @@
 package com.juick.android;
 
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -29,8 +28,6 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +40,7 @@ import co.lujun.androidtagview.TagView;
 import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.android.fragment.PostsPageFragment;
+import com.juick.android.fragment.ThreadFragment;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import com.juick.android.widget.util.ViewUtil;
@@ -304,7 +302,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         pos = 0;
         m = msgPattern.matcher(text);
         while (m.find(pos)) {
-            ssb.setSpan(new MyClickableSpan(UrlBuilder.getNormalPostById(m.group(1).toString())), m.start(), m.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new MessageClickableSpan(m.group(1)), m.start(), m.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             ssb.setSpan(new ForegroundColorSpan(ContextCompat.getColor(App.getInstance(), R.color.colorAccent)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             pos = m.end();
         }
@@ -431,6 +429,25 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         public void onClick(View widget) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
             widget.getContext().startActivity(intent);
+        }
+    }
+
+    public static class MessageClickableSpan extends ClickableSpan {
+        String mid;
+
+        public MessageClickableSpan(String mid) {
+            this.mid = mid;
+        }
+
+        @Override
+        public void onClick(View widget) {
+            try {
+                ((BaseActivity) widget.getContext()).replaceFragment(ThreadFragment.newInstance(Integer.parseInt(mid)));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(UrlBuilder.getNormalPostById(mid)));
+                widget.getContext().startActivity(intent);
+            }
         }
     }
 }
