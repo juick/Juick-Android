@@ -42,7 +42,7 @@ public class Post {
     public int rid;
 
     @JsonIgnore
-    public boolean select;
+    public int nextRid;
     @JsonIgnore
     public int prevRid;
 }

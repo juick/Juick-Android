@@ -58,7 +58,7 @@ public class PostsPageFragment extends BasePageFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adapter = new JuickMessagesAdapter(false);
+        adapter = new JuickMessagesAdapter();
         apiUrl = null;
         Bundle args = getArguments();
         if (args != null) {

@@ -135,7 +135,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
 
-        adapter = new JuickMessagesAdapter(true);
+        adapter = new JuickMessagesAdapter();
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(new JuickMessagesAdapter.OnItemClickListener() {
             @Override
@@ -151,12 +151,11 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                 int pos = 0;
                 for (int i = 0; i < adapter.getItems().size(); ++i) {
                     Post p = adapter.getItems().get(i);
-                    p.select = false;
-                    p.prevRid = 0;
                     if (p.rid == replyTo) {
+                        p.nextRid = replyTo;
+                        if (p.prevRid == 0)
+                            p.prevRid = rid;
                         pos = i;
-                        p.select = true;
-                        p.prevRid = rid;
                         break;
                     }
                 }
