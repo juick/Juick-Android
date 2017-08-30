@@ -90,7 +90,7 @@ public class MainActivity extends BaseActivity
                 @Override
                 public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                     List<User> users = response.body();
-                    if (users.size() > 0) {
+                    if (users != null && users.size() > 0) {
                         Utils.myId = users.get(0).uid;
                         Glide.with(imageHeader.getContext()).load(RestClient.getImagesUrl() + "a/" + Utils.myId + ".png").into(imageHeader);
                     }
