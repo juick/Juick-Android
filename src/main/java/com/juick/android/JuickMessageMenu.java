@@ -191,7 +191,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
             case MENU_ACTION_SHARE:
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, selectedPost.toString());
+                intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/" + selectedPost.mid);
                 context.startActivity(intent);
                 break;
         }
