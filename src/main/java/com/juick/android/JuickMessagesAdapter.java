@@ -270,17 +270,17 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                         }
                     });
 
-                    holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.post_select));
+                    holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorPrimary));
                     handler.removeCallbacksAndMessages(null);
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            holder.container.setBackgroundColor(Color.TRANSPARENT);
+                            holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorSecondary));
                         }
                     }, 600);
                 } else {
                     holder.backImageView.setVisibility(View.GONE);
-                    holder.container.setBackgroundColor(Color.TRANSPARENT);
+                    holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorSecondary));
                 }
             }
             if (post.rid > 0 && post.replyto > 0) {
