@@ -80,9 +80,9 @@ public class SignInActivity extends Activity implements OnClickListener {
                     return;
                 }
 
-                RestClient.auth(nick, password, new Callback<Object>() {
+                RestClient.auth(nick, password, new Callback<Void>() {
                     @Override
-                    public void onResponse(Call<Object> call, Response<Object> response) {
+                    public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.code() == 400) {
                             Account account = new Account(nick, getString(R.string.com_juick));
                             AccountManager am = AccountManager.get(SignInActivity.this);
@@ -105,7 +105,7 @@ public class SignInActivity extends Activity implements OnClickListener {
                     }
 
                     @Override
-                    public void onFailure(Call<Object> call, Throwable t) {
+                    public void onFailure(Call<Void> call, Throwable t) {
                         Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
                     }
                 });

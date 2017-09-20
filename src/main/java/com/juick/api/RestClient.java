@@ -80,7 +80,7 @@ public class RestClient {
         return api;
     }
 
-    public static void auth(String username, String password, Callback<Object> callback) {
+    public static void auth(String username, String password, Callback<Void> callback) {
         String credentials = username + ":" + password;
         final String basic =
                 "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
@@ -129,7 +129,7 @@ public class RestClient {
 
         @FormUrlEncoded
         @POST("/post")
-        Call<Object> post(@Field("body") String body);
+        Call<Void> post(@Field("body") String body);
 
         @Multipart
         @POST("/post")

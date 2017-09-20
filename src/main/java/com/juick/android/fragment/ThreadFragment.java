@@ -327,9 +327,9 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     }
 
     public void postText(final String body) {
-        RestClient.getApi().post(body).enqueue(new Callback<Object>() {
+        RestClient.getApi().post(body).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Object> call, Response<Object> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response != null) {
                     Toast.makeText(App.getInstance(), R.string.Message_posted, Toast.LENGTH_SHORT).show();
                     resetForm();
@@ -340,7 +340,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
             }
 
             @Override
-            public void onFailure(Call<Object> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
                 resetForm();
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }

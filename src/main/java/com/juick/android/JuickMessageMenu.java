@@ -78,16 +78,16 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
         postMessage(body, ok, false);
     }
     private void postMessage(final String body, final String ok, final boolean isReload) {
-        RestClient.getApi().post(body).enqueue(new Callback<Object>() {
+        RestClient.getApi().post(body).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Object> call, Response<Object> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
                 Toast.makeText(App.getInstance(), (response.isSuccessful()) ? ok : App.getInstance().getResources().getString(R.string.Error), Toast.LENGTH_SHORT).show();
                 if(isReload)
                     reloadView();
             }
 
             @Override
-            public void onFailure(Call<Object> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
                 if(isReload)
                     reloadView();
 
