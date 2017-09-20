@@ -30,8 +30,8 @@ dependencies {
     apt 'com.bluelinelabs:logansquare-compiler:1.3.7'
     compile 'com.bluelinelabs:logansquare:1.3.7'
     compile "com.github.aurae.retrofit2:converter-logansquare:1.4.1"
-    compile 'com.squareup.okhttp3:okhttp:3.8.1'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.8.1'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'co.lujun:androidtagview:1.1.4'
     // this is the latest glide with android 2.3 support
@@ -48,7 +48,7 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 25
-        versionCode 58
+        versionCode 59
         versionName '3.1'
         applicationId "com.juick"
         buildConfigField "String", "API_ENDPOINT", '"https://api.juick.com/"'
