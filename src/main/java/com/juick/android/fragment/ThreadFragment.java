@@ -42,6 +42,7 @@ import com.bluelinelabs.logansquare.LoganSquare;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.*;
+import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import com.neovisionaries.ws.client.WebSocket;
@@ -90,6 +91,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     int mid = 0;
 
     RecyclerView recyclerView;
+    LinearLayoutManager linearLayoutManager;
     ProgressBar progressBar;
     JuickMessagesAdapter adapter;
 
@@ -132,11 +134,11 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
 
         adapter = new JuickMessagesAdapter();
         recyclerView.setAdapter(adapter);
+        linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
         adapter.setOnItemClickListener(new JuickMessagesAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -224,9 +226,11 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                         public void run() {
                             if (jsonStr != null && !jsonStr.trim().isEmpty()) {
                                 try {
-                                    adapter.addData(LoganSquare.parse(jsonStr, Post.class));
+                                    Post reply = LoganSquare.parse(jsonStr, Post.class);
+                                    adapter.addData(reply);
+                                    linearLayoutManager.scrollToPosition(reply.rid);
                                 } catch (IOException e) {
-                                    e.printStackTrace();
+                                    Log.d("Websocket", e.getLocalizedMessage());
                                 }
                             }
                         }
@@ -333,6 +337,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                 if (response != null) {
                     Toast.makeText(App.getInstance(), R.string.Message_posted, Toast.LENGTH_SHORT).show();
                     resetForm();
+                    ViewUtil.hideKeyboard(getActivity());
                 } else {
                     Toast.makeText(App.getInstance(), R.string.Error, Toast.LENGTH_SHORT).show();
                     setFormEnabled(true);
