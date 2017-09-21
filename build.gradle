@@ -43,12 +43,12 @@ dependencies {
 }
 
 android {
-    compileSdkVersion "android-25"
-    buildToolsVersion '25.0.3'
+    compileSdkVersion "android-26"
+    buildToolsVersion '26.0.1'
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 25
-        versionCode 60
+        targetSdkVersion 26
+        versionCode 61
         versionName '3.1'
         applicationId "com.juick"
         buildConfigField "String", "API_ENDPOINT", '"https://api.juick.com/"'
