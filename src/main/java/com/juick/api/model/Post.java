@@ -45,4 +45,13 @@ public class Post {
     public int nextRid;
     @JsonIgnore
     public int prevRid;
+
+    public String getTagsString() {
+        StringBuilder builder = new StringBuilder();
+        if (!tags.isEmpty()) {
+            for (String tag : tags)
+                builder.append(" *").append(tag);
+        }
+        return builder.toString();
+    }
 }

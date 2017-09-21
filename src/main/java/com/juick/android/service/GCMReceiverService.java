@@ -44,7 +44,7 @@ public class GCMReceiverService extends GcmListenerService {
             final Post jmsg = LoganSquare.parse(msgStr, Post.class);
             String title = "@" + jmsg.user.uname;
             if (!jmsg.tags.isEmpty()) {
-                title += ": " + jmsg.tags;
+                title += ": " + jmsg.getTagsString();
             }
             String body;
             if (jmsg.body.length() > 64) {
