@@ -31,8 +31,7 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
     }
 
     public static PostsFragment newInstance() {
-        PostsFragment fragment = new PostsFragment();
-        return fragment;
+        return new PostsFragment();
     }
 
     @Nullable
@@ -47,7 +46,7 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
         getActivity().setTitle(R.string.Juick);
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
-        ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewpager);
+        ViewPager viewPager = view.findViewById(R.id.viewpager);
         viewPager.setAdapter(sectionsPagerAdapter);
 
         TabLayout tabLayout = (TabLayout) getBaseActivity().findViewById(R.id.tabs);
@@ -57,7 +56,7 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
         fab.setOnClickListener(this);
         fab.show();
 
-        AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar_layout);
+        AppBarLayout appBarLayout = getActivity().findViewById(R.id.app_bar_layout);
         offsetChangedListener = new AppBarLayout.OnOffsetChangedListener() {
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
@@ -69,7 +68,7 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
             }
         };
         appBarLayout.addOnOffsetChangedListener(offsetChangedListener);
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
         ((AppBarLayout.LayoutParams) toolbar.getLayoutParams())
                 .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
     }
@@ -79,9 +78,9 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
         super.onDestroyView();
         FloatingActionButton fab = (FloatingActionButton) getBaseActivity().findViewById(R.id.fab);
         fab.hide();
-        AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar_layout);
+        AppBarLayout appBarLayout = getActivity().findViewById(R.id.app_bar_layout);
         appBarLayout.removeOnOffsetChangedListener(offsetChangedListener);
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
         ((AppBarLayout.LayoutParams) toolbar.getLayoutParams()).setScrollFlags(0);
     }
 
@@ -116,7 +115,7 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
 
         @Override
         public Fragment getItem(int position) {
-            UrlBuilder u = null;
+            UrlBuilder u;
             switch (position){
                 case 0:
                     if(Utils.hasAuth())

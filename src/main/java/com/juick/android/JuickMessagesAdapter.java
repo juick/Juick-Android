@@ -402,21 +402,21 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         VH(View itemView) {
             super(itemView);
-            container = (ViewGroup) itemView.findViewById(R.id.container);
-            upicImageView = (ImageView) itemView.findViewById(R.id.userpic);
-            usernameTextView = (TextView) itemView.findViewById(R.id.username);
-            timestampTextView = (TextView) itemView.findViewById(R.id.timestamp);
-            tagContainerLayout = (TagContainerLayout) itemView.findViewById(R.id.tags_container);
-            replyQuoteTextView = (TextView) itemView.findViewById(R.id.replyQuote);
-            textTextView = (TextView) itemView.findViewById(R.id.text);
-            photoImageView = (ImageView) itemView.findViewById(R.id.photo);
-            likesTextView = (TextView) itemView.findViewById(R.id.likes);
-            midTextView = (TextView) itemView.findViewById(R.id.mid);
+            container = itemView.findViewById(R.id.container);
+            upicImageView = itemView.findViewById(R.id.userpic);
+            usernameTextView = itemView.findViewById(R.id.username);
+            timestampTextView = itemView.findViewById(R.id.timestamp);
+            tagContainerLayout = itemView.findViewById(R.id.tags_container);
+            replyQuoteTextView = itemView.findViewById(R.id.replyQuote);
+            textTextView = itemView.findViewById(R.id.text);
+            photoImageView = itemView.findViewById(R.id.photo);
+            likesTextView = itemView.findViewById(R.id.likes);
+            midTextView = itemView.findViewById(R.id.mid);
             ViewUtil.setTint(likesTextView);
-            repliesTextView = (TextView) itemView.findViewById(R.id.replies);
+            repliesTextView = itemView.findViewById(R.id.replies);
             ViewUtil.setTint(repliesTextView);
-            backImageView = (ImageView) itemView.findViewById(R.id.back_imageView);
-            menuImageView = (ImageView) itemView.findViewById(R.id.menu_imageView);
+            backImageView = itemView.findViewById(R.id.back_imageView);
+            menuImageView = itemView.findViewById(R.id.menu_imageView);
             menuImageView.setOnClickListener(this);
             itemView.setOnClickListener(this);
             textTextView.setOnClickListener(this);
@@ -449,7 +449,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         public FH(View itemView) {
             super(itemView);
-            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
+            progressBar = itemView.findViewById(R.id.progressBar);
         }
     }
 

@@ -128,16 +128,16 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
             return;
         }
 
-        tvReplyTo = (TextView) view.findViewById(R.id.textReplyTo);
-        etMessage = (EditText) view.findViewById(R.id.editMessage);
-        bSend = (ImageView) view.findViewById(R.id.buttonSend);
+        tvReplyTo = view.findViewById(R.id.textReplyTo);
+        etMessage = view.findViewById(R.id.editMessage);
+        bSend = view.findViewById(R.id.buttonSend);
         bSend.setOnClickListener(this);
-        bAttach = (ImageView) view.findViewById(R.id.buttonAttachment);
+        bAttach = view.findViewById(R.id.buttonAttachment);
         bAttach.setOnClickListener(this);
 
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        progressBar = view.findViewById(R.id.progressBar);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        recyclerView = view.findViewById(R.id.list);
         recyclerView.setHasFixedSize(true);
 
         adapter = new JuickMessagesAdapter();
@@ -172,7 +172,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
             }
         });
 
-        SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipe_container);
         swipeRefreshLayout.setEnabled(false);
 
         recyclerView.setVisibility(View.GONE);

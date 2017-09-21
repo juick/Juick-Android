@@ -99,9 +99,9 @@ public class TagsFragment extends BaseFragment {
             getActivity().setTitle(R.string.Popular_tags);
         }
 
-        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        final ProgressBar progressBar = view.findViewById(R.id.progressBar);
         progressBar.setVisibility(View.VISIBLE);
-        final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        final RecyclerView recyclerView = view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
         final TagsAdapter adapter = new TagsAdapter();
@@ -210,7 +210,7 @@ public class TagsFragment extends BaseFragment {
 
             public VH(View itemView) {
                 super(itemView);
-                textView = (TextView) itemView.findViewById(android.R.id.text1);
+                textView = itemView.findViewById(android.R.id.text1);
 
                 itemView.setOnClickListener(this);
                 itemView.setOnLongClickListener(this);

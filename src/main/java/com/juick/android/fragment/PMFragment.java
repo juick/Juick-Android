@@ -111,8 +111,8 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
 
         getActivity().setTitle(uname);
 
-        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        final ProgressBar progressBar = view.findViewById(R.id.progressBar);
+        recyclerView = view.findViewById(R.id.list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
@@ -136,8 +136,8 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
             }
         });
 
-        etMessage = (EditText) view.findViewById(R.id.editMessage);
-        bSend = (ImageView) view.findViewById(R.id.buttonSend);
+        etMessage = view.findViewById(R.id.editMessage);
+        bSend = view.findViewById(R.id.buttonSend);
         bSend.setOnClickListener(this);
     }
 

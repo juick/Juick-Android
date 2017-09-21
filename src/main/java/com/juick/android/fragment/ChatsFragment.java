@@ -52,8 +52,7 @@ public class ChatsFragment extends BaseFragment {
     }
 
     public static ChatsFragment newInstance() {
-        ChatsFragment fragment = new ChatsFragment();
-        return fragment;
+        return new ChatsFragment();
     }
 
     @Nullable
@@ -67,8 +66,8 @@ public class ChatsFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(R.string.PMs);
 
-        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        final ProgressBar progressBar = view.findViewById(R.id.progressBar);
+        RecyclerView recyclerView = view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
         final ChatsAdapter adapter = new ChatsAdapter();
@@ -158,9 +157,9 @@ public class ChatsFragment extends BaseFragment {
 
             public VH(View itemView) {
                 super(itemView);
-                textView = (TextView) itemView.findViewById(R.id.text);
-                avatarImageView = (ImageView) itemView.findViewById(R.id.icon);
-                unreadTextView = (TextView) itemView.findViewById(R.id.unreadMessages);
+                textView = itemView.findViewById(R.id.text);
+                avatarImageView = itemView.findViewById(R.id.icon);
+                unreadTextView = itemView.findViewById(R.id.unreadMessages);
                 itemView.setOnClickListener(this);
             }
 

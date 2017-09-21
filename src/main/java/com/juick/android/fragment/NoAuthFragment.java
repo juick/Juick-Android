@@ -26,7 +26,7 @@ public class NoAuthFragment extends BasePageFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        msg = (TextView) view.findViewById(R.id.msg);
+        msg = view.findViewById(R.id.msg);
         msg.setText(R.string.NoAuthMessage);
     }
 }

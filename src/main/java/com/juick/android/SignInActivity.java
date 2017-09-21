@@ -51,8 +51,8 @@ public class SignInActivity extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        etNick = (EditText) findViewById(R.id.juickNick);
-        etPassword = (EditText) findViewById(R.id.juickPassword);
+        etNick = findViewById(R.id.juickNick);
+        etPassword = findViewById(R.id.juickPassword);
         findViewById(R.id.buttonSave).setOnClickListener(this);
 
         if (Utils.hasAuth()) {

@@ -97,7 +97,7 @@ public class PMAdapter extends RecyclerView.Adapter<PMAdapter.VH> {
 
         public VH(View itemView) {
             super(itemView);
-            tv = (TextView) itemView.findViewById(R.id.text);
+            tv = itemView.findViewById(R.id.text);
         }
     }
 }

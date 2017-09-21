@@ -96,9 +96,8 @@ public class NewMessageActivity extends BaseActivity implements ITagable {
 
     private NewPostFragment getCommonFragment(){
         BaseFragment currentFragment = this.getCurrentFragment();
-        if(currentFragment.getClass().getName() == NewPostFragment.class.getName()){
-            NewPostFragment npFragment = (NewPostFragment)currentFragment;
-            return npFragment;
+        if (currentFragment.getClass().getName().equals(NewPostFragment.class.getName())) {
+            return (NewPostFragment)currentFragment;
         }
         return null;
     }

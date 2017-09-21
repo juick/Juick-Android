@@ -20,6 +20,7 @@ package com.juick.android;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -84,7 +85,7 @@ public class MainActivity extends BaseActivity
         View navHeader = navigationView.getHeaderView(0).findViewById(R.id.header);
         navHeader.setOnClickListener(this);
 
-        final ImageView imageHeader = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image);
+        final ImageView imageHeader = navigationView.getHeaderView(0).findViewById(R.id.profile_image);
         if (Utils.hasAuth()) {
             RestClient.getApi().getUsers(Utils.getNick()).enqueue(new Callback<List<User>>() {
                 @Override
@@ -101,7 +102,7 @@ public class MainActivity extends BaseActivity
                     Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
                 }
             });
-            TextView titleHeader = (TextView) navigationView.getHeaderView(0).findViewById(R.id.title_textView);
+            TextView titleHeader = navigationView.getHeaderView(0).findViewById(R.id.title_textView);
             if (!TextUtils.isEmpty(Utils.getNick())) {
                 titleHeader.setText(Utils.getNick());
             }
@@ -159,7 +160,7 @@ public class MainActivity extends BaseActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
