@@ -17,14 +17,18 @@
  */
 package com.juick.android.fragment;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -293,6 +297,10 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
 
     public void onClick(View view) {
         if (view == bAttach) {
+            if (Build.VERSION.SDK_INT >= 23 && getBaseActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE);
+                return;
+            }
             if (attachmentUri == null) {
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
@@ -426,5 +434,14 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         super.onResume();
         getActivity().registerReceiver(broadcastReceiver, new IntentFilter(TagsFragment.TAG_SELECT_ACTION));
         LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(RestClient.ACTION_UPLOAD_PROGRESS));
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (requestCode == ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE) {
+                bAttach.performClick();
+            }
+        }
     }
 }

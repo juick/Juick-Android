@@ -9,12 +9,15 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
+
 import com.juick.R;
 
 /**
  * Created by gerc on 14.02.2016.
  */
 public class ViewUtil {
+
+    public static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 4;
 
     public static void setTint(TextView v) {
         if (v == null) return;

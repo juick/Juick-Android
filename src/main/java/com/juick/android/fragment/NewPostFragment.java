@@ -29,6 +29,7 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.android.NewMessageActivity;
 import com.juick.android.Utils;
+import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.RestClient;
 
 /**
@@ -37,7 +38,6 @@ import com.juick.api.RestClient;
 
 public class NewPostFragment extends BasePageFragment implements View.OnClickListener {
     public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
-    private static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 4;
     EditText etMessage;
     ImageView bTags;
     ImageView bAttachment;
@@ -146,7 +146,7 @@ public class NewPostFragment extends BasePageFragment implements View.OnClickLis
                 break;
             case R.id.buttonAttachment:
                 if (Build.VERSION.SDK_INT >= 23 && getBaseActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE_READ_EXTERNAL_STORAGE);
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE);
                     return;
                 }
                 if (attachmentUri == null) {
@@ -172,7 +172,7 @@ public class NewPostFragment extends BasePageFragment implements View.OnClickLis
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            if (requestCode == REQUEST_CODE_READ_EXTERNAL_STORAGE) {
+            if (requestCode == ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE) {
                 bAttachment.performClick();
             }
         }
