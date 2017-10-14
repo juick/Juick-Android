@@ -68,11 +68,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int TYPE_HEADER = -1;
     private static final int TYPE_THREAD_POST = 2;
 
-    public static final Pattern boldPattern = Pattern.compile("\\*([^\\*]+)\\*");
-    public static final Pattern italicPattern = Pattern.compile("(?:^|\\s|,)/([^/]+)/");
-    public static final Pattern underlinePattern = Pattern.compile("_([^_]+)_");
     public static final Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
-    public static final Pattern juickUrlPattern = Pattern.compile("\\[([^\\]]+)\\]\\[(http[^\\]]+)\\]", Pattern.CASE_INSENSITIVE);
     public static final Pattern msgPattern = Pattern.compile("#([0-9]+)");
     private static final Pattern usrPattern = Pattern.compile("@[a-zA-Z0-9\\-]{2,16}");
     private static final DateFormat sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -323,14 +319,82 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         return "";
     }
 
-    private SpannableStringBuilder formatMessageText(Post jmsg) {
-        String tmp = jmsg.body.replaceAll("\n", "<br>");
-        tmp = boldPattern.matcher(tmp).replaceAll("<b>$1</b>");
-        tmp = italicPattern.matcher(tmp).replaceAll("<i>$1</i>");
-        tmp = underlinePattern.matcher(tmp).replaceAll("<u>$1</u>");
-        tmp = juickUrlPattern.matcher(tmp).replaceAll("<a href=\"$2\">$1</a>");
 
-        Spanned text = Html.fromHtml(tmp);
+    // TODO: taken from juick-core, need merge
+
+    private static Pattern regexLinks2 = Pattern.compile("((?<=\\s)|(?<=\\A))([\\[\\{]|&lt;)((?:ht|f)tps?://(?:www\\.)?([^\\/\\s\\\"\\)\\!]+)/?(?:[^\\]\\}](?<!&gt;))*)([\\]\\}]|&gt;)");
+
+    public static String formatMessage(String msg) {
+        msg = msg.replaceAll("&", "&amp;");
+        msg = msg.replaceAll("<", "&lt;");
+        msg = msg.replaceAll(">", "&gt;");
+
+        // --
+        // &mdash;
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))\\-\\-?((?=\\s)|(?=\\Z))", "$1&mdash;$2");
+
+        // http://juick.com/last?page=2
+        // <a href="http://juick.com/last?page=2" rel="nofollow">juick.com</a>
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))((?:ht|f)tps?://(?:www\\.)?([^\\/\\s\\n\\\"]+)/?[^\\s\\n\\\"]*)", "$1<a href=\"$2\" rel=\"nofollow\">$3</a>");
+
+        // [link text][http://juick.com/last?page=2]
+        // <a href="http://juick.com/last?page=2" rel="nofollow">link text</a>
+        msg = msg.replaceAll("\\[([^\\]]+)\\]\\[((?:ht|f)tps?://[^\\]]+)\\]", "<a href=\"$2\" rel=\"nofollow\">$1</a>");
+        msg = msg.replaceAll("\\[([^\\]]+)\\]\\(((?:ht|f)tps?://[^\\)]+)\\)", "<a href=\"$2\" rel=\"nofollow\">$1</a>");
+
+        // #12345
+        // <a href="http://juick.com/12345">#12345</a>
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A)|(?<=\\p{Punct}))#(\\d+)((?=\\s)|(?=\\Z)|(?=\\))|(?=\\.)|(?=\\,))", "$1<a href=\"http://juick.com/$2\">#$2</a>$3");
+
+        // #12345/65
+        // <a href="http://juick.com/12345#65">#12345/65</a>
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A)|(?<=\\p{Punct}))#(\\d+)/(\\d+)((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"http://juick.com/$2#$3\">#$2/$3</a>$4");
+
+        // *bold*
+        // <b>bold</b>
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A)|(?<=\\p{Punct}))\\*([^\\*\\n<>]+)\\*((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<b>$2</b>$3");
+
+        // /italic/
+        // <i>italic</i>
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))/([^\\/\\n<>]+)/((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<i>$2</i>$3");
+
+        // _underline_
+        // <span class="u">underline</span>
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))_([^\\_\\n<>]+)_((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<span class=\"u\">$2</span>$3");
+
+        // /12
+        // <a href="#12">/12</a>
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))\\/(\\d+)((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"#$2\">/$2</a>$3");
+
+        // @username@jabber.org
+        // <a href="http://juick.com/username@jabber.org/">@username@jabber.org</a>
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))@([\\w\\-\\.]+@[\\w\\-\\.]+)((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"http://juick.com/$2/\">@$2</a>$3");
+
+        // @username
+        // <a href="http://juick.com/username/">@username</a>
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))@([\\w\\-]{2,16})((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"http://juick.com/$2/\">@$2</a>$3");
+
+        // (http://juick.com/last?page=2)
+        // (<a href="http://juick.com/last?page=2" rel="nofollow">juick.com</a>)
+        Matcher m = regexLinks2.matcher(msg);
+        StringBuffer sb = new StringBuffer();
+        while (m.find()) {
+            String url = m.group(3).replace(" ", "%20").replaceAll("\\s+", "");
+            m.appendReplacement(sb, "$1$2<a href=\"" + url + "\" rel=\"nofollow\">$4</a>$5");
+        }
+        m.appendTail(sb);
+        msg = sb.toString();
+
+        // > citate
+        msg = msg.replaceAll("(?:(?<=\\n)|(?<=\\A))&gt; *(.*)?(\\n|(?=\\Z))", "<q>$1</q>");
+        msg = msg.replaceAll("</q><q>", "\n");
+
+        msg = msg.replaceAll("\n", "<br/>\n");
+        return msg;
+    }
+
+    private SpannableStringBuilder formatMessageText(Post jmsg) {
+        Spanned text = Html.fromHtml(formatMessage(jmsg.body));
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         ssb.append(text);
 
