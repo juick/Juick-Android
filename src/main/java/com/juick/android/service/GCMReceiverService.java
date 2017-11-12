@@ -53,7 +53,7 @@ public class GCMReceiverService extends GcmListenerService {
                 body = jmsg.body;
             }
 
-            PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(), 0, getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT);
             final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(App.getInstance());
             notificationBuilder.setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle(title)
@@ -85,7 +85,7 @@ public class GCMReceiverService extends GcmListenerService {
                             });
 
                     notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
-                            App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), 2, getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
+                            App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
                     GCMReceiverService.notify(jmsg, notificationBuilder);
                 }
             });
@@ -97,7 +97,11 @@ public class GCMReceiverService extends GcmListenerService {
 
     private static void notify(Post jmsg, NotificationCompat.Builder notificationBuilder) {
         ((NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE))
-                .notify(jmsg.mid != 0 ? jmsg.mid : jmsg.user.uid, notificationBuilder.build());
+                .notify(getId(jmsg), notificationBuilder.build());
+    }
+
+    private static Integer getId(Post jmsg) {
+        return jmsg.mid != 0 ? jmsg.mid + jmsg.rid : jmsg.user.uid;
     }
 
     public static Intent getIntent(String msgStr, Post jmsg) {
