@@ -95,5 +95,16 @@
         </service>
         <service android:name=".android.service.RegistrationIntentService" android:exported="false">
         </service>
+        <receiver android:name=".android.service.UpdateReceiver$LegacyUpdateReceiver" android:enabled="@bool/shouldUseActionPackageReplaced" >
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".android.service.UpdateReceiver" android:enabled="@bool/shouldUseActionMyPackageReplaced" >
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
