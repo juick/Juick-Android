@@ -27,6 +27,7 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
@@ -201,7 +202,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         final VH holder = (VH) viewHolder;
         final Post post = postList.get(position);
         boolean isThread = type != TYPE_THREAD_POST;
-        if (post.user != null && post.body != null) {
+        if (post.user != null) {
             Glide.with(holder.itemView.getContext()).load(RestClient.getImagesUrl() + "a/" + post.user.uid + ".png").into(holder.upicImageView);
             holder.usernameTextView.setText(post.user.uname);
             holder.timestampTextView.setText(formatMessageTimestamp(post));
@@ -227,8 +228,9 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     }
                 });
             }
-
-            holder.textTextView.setText(formatMessageText(post));
+            if (!TextUtils.isEmpty(post.body)) {
+                holder.textTextView.setText(formatMessageText(post));
+            }
             holder.textTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
             if (post.photo != null && post.photo.small != null) {

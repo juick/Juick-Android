@@ -52,7 +52,7 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 26
-        versionCode 64
+        versionCode 65
         versionName '3.1'
         applicationId "com.juick"
         buildConfigField "String", "API_ENDPOINT", '"https://api.juick.com/"'
