@@ -228,6 +228,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     }
                 });
             }
+            holder.textTextView.setText("");
             if (!TextUtils.isEmpty(post.body)) {
                 holder.textTextView.setText(formatMessageText(post));
             }
