@@ -8,3 +8,5 @@ Juick.apk
 local.properties
 *.keystore
 *.iml
+.DS_Store
+release/**

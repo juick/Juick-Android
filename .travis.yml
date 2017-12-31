@@ -18,6 +18,7 @@ android:
 before_install:
   # Fix Gradle output
   - export TERM=dumb
+  - yes | sdkmanager "platforms;android-27"
 
 script:
-  - ./gradlew check
+  - ./gradlew --no-daemon check
