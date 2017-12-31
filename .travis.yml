@@ -13,6 +13,7 @@ android:
     - addon-google_apis-google-27
   licenses:
     - android-sdk-license-.+
+    - android-sdk-preview-license-.+
 
 before_install:
   # Fix Gradle output
