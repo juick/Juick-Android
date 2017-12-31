@@ -137,9 +137,8 @@ public class ContactsSyncService extends Service {
 
         Bitmap photo = null;
         try {
-            photo = Glide.with(context).load("http://i.juick.com/a/" + user.uid + ".png").asBitmap()
-                    .centerCrop()
-                    .into(200, 200)
+            photo = Glide.with(context).asBitmap().load("http://i.juick.com/a/" + user.uid + ".png")
+                    .submit(200, 200)
                     .get();
         } catch (InterruptedException | ExecutionException e) {
             Log.w("JuickContacts", "Avatar error", e);

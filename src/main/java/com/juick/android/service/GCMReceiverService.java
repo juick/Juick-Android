@@ -1,6 +1,7 @@
 package com.juick.android.service;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -15,8 +16,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.bluelinelabs.logansquare.LoganSquare;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.RestClient;
@@ -30,6 +32,29 @@ import com.google.android.gms.gcm.GcmListenerService;
 public class GCMReceiverService extends GcmListenerService {
 
     public final static String GCM_EVENT_ACTION = GCMReceiverService.class.getName() + "_GCM_EVENT_ACTION";
+
+    private static final String CHANNEL_ID = "default";
+
+    private static NotificationManager notificationManager =
+            (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
+
+    GCMReceiverService() {
+        if (Build.VERSION.SDK_INT < 26) {
+            return;
+        }
+
+        NotificationChannel channel =  notificationManager.getNotificationChannel(CHANNEL_ID);
+        if (channel == null) {
+            channel = new NotificationChannel(CHANNEL_ID,
+                    "Juick",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("Juick notifications");
+            channel.enableLights(true);
+            channel.enableVibration(true);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
@@ -54,32 +79,34 @@ public class GCMReceiverService extends GcmListenerService {
             }
 
             PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT);
-            final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(App.getInstance());
+            final NotificationCompat.Builder notificationBuilder = Build.VERSION.SDK_INT < 26 ?
+                    new NotificationCompat.Builder(App.getInstance()) : new NotificationCompat.Builder(App.getInstance(), CHANNEL_ID);
             notificationBuilder.setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle(title)
                     .setContentText(body)
                     .setAutoCancel(true).setWhen(0)
                     .setContentIntent(contentIntent)
                     .setGroup("messages")
-                    .setGroupSummary(true)
-                    .setDefaults(Notification.DEFAULT_LIGHTS
-                            | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND);
+                    .setGroupSummary(true);
             notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
             notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.body));
 
+            final RequestOptions options = new RequestOptions().centerCrop();
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Glide.with(App.getInstance())
+                    Glide.with(App.getInstance()).asBitmap()
                             .load(RestClient.getImagesUrl() + "a/" + jmsg.user.uid + ".png")
-                            .asBitmap()
+                            .apply(options)
                             .into(new SimpleTarget<Bitmap>() {
                                 @Override
-                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
                                     notificationBuilder.setLargeIcon(resource);
-                                    notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
-                                            | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
+                                    if (Build.VERSION.SDK_INT < 26) {
+                                        notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
+                                                | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
+                                    }
                                     GCMReceiverService.notify(jmsg, notificationBuilder);
                                 }
                             });
@@ -96,8 +123,7 @@ public class GCMReceiverService extends GcmListenerService {
     }
 
     private static void notify(Post jmsg, NotificationCompat.Builder notificationBuilder) {
-        ((NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE))
-                .notify(getId(jmsg), notificationBuilder.build());
+        notificationManager.notify(getId(jmsg), notificationBuilder.build());
     }
 
     private static Integer getId(Post jmsg) {
@@ -106,6 +132,8 @@ public class GCMReceiverService extends GcmListenerService {
 
     public static Intent getIntent(String msgStr, Post jmsg) {
         Intent intent = new Intent(App.getInstance(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.setAction(MainActivity.PUSH_ACTION);
         intent.putExtra(MainActivity.ARG_UNAME, jmsg.user.uname);
         intent.putExtra(MainActivity.ARG_UID, jmsg.user.uid);
