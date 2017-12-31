@@ -109,7 +109,6 @@ public class MainActivity extends BaseActivity
         }
 
         navigationView.getMenu().findItem(R.id.chats).setVisible(Utils.hasAuth());
-        navigationView.getMenu().findItem(R.id.newpost).setVisible(Utils.hasAuth());
 
         if (savedInstanceState == null) {
             addFragment(PostsFragment.newInstance(), false);
@@ -166,10 +165,8 @@ public class MainActivity extends BaseActivity
 
         if (id == R.id.chats) {
             replaceFragment(ChatsFragment.newInstance());
-        }else if(id == R.id.newpost){
-            if (Utils.hasAuth()) {
-                startActivity(new Intent(this, NewMessageActivity.class));
-            }
+        }else if(id == R.id.messages){
+            startActivity(new Intent(this, MainActivity.class));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

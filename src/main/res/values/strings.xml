@@ -55,6 +55,7 @@
     <string name="Popular_tags">Popular tags</string>
     <string name="All_messages">All messages</string>
     <string name="Nearby_places">Nearby places</string>
+    <string name="Discover">Discover</string>
 
     <!-- JuickMessageMenu -->
     <string name="Recommend_message">Recommend message</string>

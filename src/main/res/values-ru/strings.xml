@@ -54,6 +54,7 @@
     <string name="Popular_tags">Популярные теги</string>
     <string name="All_messages">Все сообщения</string>
     <string name="Nearby_places">Места поблизости</string>
+    <string name="Discover">Обзор</string>
 
     <!-- JuickMessageMenu -->
     <string name="Recommend_message">Рекомендовать сообщение</string>

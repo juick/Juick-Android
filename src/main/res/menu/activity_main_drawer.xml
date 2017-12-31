@@ -3,9 +3,9 @@
 
         <group android:checkableBehavior="single">
             <item
-                android:id="@+id/newpost"
-                android:icon="@drawable/ic_send_black_24dp"
-                android:title="@string/New_message"/>
+                android:id="@+id/messages"
+                android:icon="@drawable/ic_comment_black_24dp"
+                android:title="@string/Discover"/>
             <item
                 android:id="@+id/chats"
                 android:icon="@drawable/ic_chat_black_24dp"
