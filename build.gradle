@@ -5,7 +5,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0'
+        classpath 'com.android.tools.build:gradle:3.0.1'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
     }
 }
@@ -33,8 +33,8 @@ dependencies {
     annotationProcessor 'com.bluelinelabs:logansquare-compiler:1.3.7'
     compile 'com.bluelinelabs:logansquare:1.3.7'
     compile "com.github.aurae.retrofit2:converter-logansquare:1.4.1"
-    compile 'com.squareup.okhttp3:okhttp:3.9.0'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
+    compile 'com.squareup.okhttp3:okhttp:3.9.1'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.9.1'
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'co.lujun:androidtagview:1.1.4'
     // this is the latest glide with android 2.3 support
@@ -47,11 +47,11 @@ dependencies {
 }
 
 android {
-    compileSdkVersion "android-26"
+    compileSdkVersion "android-27"
     buildToolsVersion '26.0.2'
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 66
         versionName '3.1'
         applicationId "com.juick"
