@@ -38,7 +38,9 @@ public class GCMReceiverService extends GcmListenerService {
     private static NotificationManager notificationManager =
             (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
 
-    GCMReceiverService() {
+    @Override
+    public void onCreate() {
+        super.onCreate();
         if (Build.VERSION.SDK_INT < 26) {
             return;
         }
