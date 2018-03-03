@@ -26,45 +26,46 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import com.bluelinelabs.logansquare.LoganSquare;
+import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
-import com.juick.android.PMAdapter;
+import com.juick.android.Utils;
+import com.juick.android.service.GCMReceiverService;
+import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
-import com.juick.android.service.GCMReceiverService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.stfalcon.chatkit.commons.ImageLoader;
+import com.stfalcon.chatkit.messages.MessageInput;
+import com.stfalcon.chatkit.messages.MessagesList;
+import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 /**
  *
  * @author ugnich
  */
-public class PMFragment extends BaseFragment implements View.OnClickListener {
+public class PMFragment extends BaseFragment {
 
     private static final String ARG_UID = "ARG_UID";
     private static final String ARG_UNAME = "ARG_UNAME";
 
     String uname;
     int uid;
-    EditText etMessage;
-    ImageView bSend;
-    RecyclerView recyclerView;
 
     BroadcastReceiver messageReceiver = new BroadcastReceiver() {
 
@@ -82,7 +83,7 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
         }
     };
 
-    private PMAdapter adapter;
+    private MessagesListAdapter<Post> adapter;
 
     public PMFragment() {
     }
@@ -111,22 +112,24 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
 
         getActivity().setTitle(uname);
 
-        final ProgressBar progressBar = view.findViewById(R.id.progressBar);
-        recyclerView = view.findViewById(R.id.list);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        layoutManager.setStackFromEnd(true);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setHasFixedSize(true);
-        adapter = new PMAdapter(uid);
-        recyclerView.setAdapter(adapter);
+        adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId), new ImageLoader() {
+            @Override
+            public void loadImage(ImageView imageView, String url) {
+                Glide.with(imageView.getContext())
+                        .load(url)
+                        .into(imageView);
+
+            }
+        });
+        MessagesList messagesList = getActivity().findViewById(R.id.messagesList);
+        messagesList.setAdapter(adapter);
 
         RestClient.getApi().pm(uname).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                progressBar.setVisibility(View.GONE);
+                // progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
-                    adapter.addData(response.body());
-                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                    adapter.addToEnd(response.body(), false);
                 }
             }
 
@@ -135,26 +138,22 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
-
-        etMessage = view.findViewById(R.id.editMessage);
-        bSend = view.findViewById(R.id.buttonSend);
-        bSend.setOnClickListener(this);
+        MessageInput messageInput = getActivity().findViewById(R.id.input);
+        messageInput.setInputListener(new MessageInput.InputListener() {
+            @Override
+            public boolean onSubmit(CharSequence input) {
+                postText(input.toString());
+                ViewUtil.hideKeyboard(getActivity());
+                return true;
+            }
+        });
     }
 
     public void onNewMessages(List<Post> posts) {
         Log.d("onNewMessages", posts.toString());
-        if (adapter != null && posts != null) {
-            adapter.addData(posts);
-        }
-    }
-
-    public void onClick(View view) {
-        if (view == bSend) {
-            String msg = etMessage.getText().toString();
-            if (msg.length() > 0) {
-                postText(msg);
-            } else {
-                Toast.makeText(App.getInstance(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
+        if (adapter != null) {
+            for (Post p : posts) {
+                adapter.addToStart(p, true);
             }
         }
     }
@@ -163,11 +162,9 @@ public class PMFragment extends BaseFragment implements View.OnClickListener {
         RestClient.getApi().postPm(uname, body).enqueue(new Callback<Post>() {
             @Override
             public void onResponse(Call<Post> call, final Response<Post> response) {
-                etMessage.setText("");
                 onNewMessages(new ArrayList<Post>() {{
                     add(response.body());
                 }});
-                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
             }
 
             @Override

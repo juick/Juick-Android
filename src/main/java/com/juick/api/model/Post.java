@@ -9,9 +9,15 @@ import com.bluelinelabs.logansquare.annotation.JsonObject;
 import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
 
+import java.sql.Time;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Created by gerc on 10.02.2016.
@@ -75,14 +81,29 @@ public class Post implements IMessage {
         return user;
     }
 
+    private static final DateFormat sourceDateFormat;
+
+    static {
+        sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sourceDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
     @Override
     public Date getCreatedAt() {
-        return null;
+        if (timestamp != null) {
+            try {
+                return sourceDateFormat.parse(timestamp);
+            } catch (ParseException e) {
+                return new Date();
+            }
+        }
+        return new Date();
     }
 
     public static Post empty() {
 
         Post post = new Post();
+        post.timestamp = sourceDateFormat.format(new Date());
         post.body = "";
         return post;
     }

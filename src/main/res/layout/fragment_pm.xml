@@ -1,51 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/list"
+    <com.stfalcon.chatkit.messages.MessagesList
+        android:id="@+id/messagesList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:scrollbars="vertical" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
+        android:layout_above="@+id/input"
+        app:outcomingDefaultBubbleColor="@color/colorAccent"/>
+    <com.stfalcon.chatkit.messages.MessageInput
+        android:id="@+id/input"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:padding="72dp"
-        android:layout_weight="1" />
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:orientation="horizontal"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp">
-        <EditText
-            android:id="@+id/editMessage"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/Enter_a_message"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp" />
-        <ImageView
-            android:id="@+id/buttonSend"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:src="@drawable/ic_send_black_24dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="@color/button_material_dark"
-            android:text="Send"
-            android:layout_gravity="center_vertical"
-            android:padding="8dp" />
-    </LinearLayout>
-</LinearLayout>
+        android:layout_alignParentBottom="true"
+        app:inputHint="@string/Enter_a_message"/>
+</RelativeLayout>
