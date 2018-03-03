@@ -35,6 +35,11 @@ import com.juick.R;
 import com.juick.api.RestClient;
 import com.juick.api.model.Chat;
 import com.juick.api.model.Pms;
+import com.stfalcon.chatkit.commons.ImageLoader;
+import com.stfalcon.chatkit.commons.models.IDialog;
+import com.stfalcon.chatkit.dialogs.DialogsList;
+import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -58,7 +63,7 @@ public class ChatsFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_list, container, false);
+        return inflater.inflate(R.layout.dialog_list, container, false);
     }
 
     @Override
@@ -66,26 +71,32 @@ public class ChatsFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(R.string.PMs);
 
-        final ProgressBar progressBar = view.findViewById(R.id.progressBar);
-        RecyclerView recyclerView = view.findViewById(R.id.list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setHasFixedSize(true);
-        final ChatsAdapter adapter = new ChatsAdapter();
-        recyclerView.setAdapter(adapter);
-        adapter.setOnItemClickListener(new ChatsAdapter.OnItemClickListener() {
+        final DialogsListAdapter<Chat> dialogListAdapter = new DialogsListAdapter<>(new ImageLoader() {
             @Override
-            public void onItemClick(View view, int position) {
-                Chat item = adapter.getItem(position);
-                getBaseActivity().replaceFragment(PMFragment.newInstance(item.uname, item.uid));
+            public void loadImage(ImageView imageView, String url) {
+                Glide.with(imageView.getContext())
+                        .load(url)
+                        .into(imageView);
+
             }
         });
+        dialogListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener<Chat>() {
+            @Override
+            public void onDialogClick(Chat dialog) {
+                getBaseActivity().replaceFragment(
+                        PMFragment.newInstance(dialog.getDialogName(), Integer.valueOf(dialog.getId())));
+            }
+        });
+        final DialogsList dialogsList = getBaseActivity().findViewById(R.id.dialogsList);
+        dialogsList.setAdapter(dialogListAdapter);
 
         RestClient.getApi().groupsPms(10).enqueue(new Callback<Pms>() {
             @Override
             public void onResponse(Call<Pms> call, Response<Pms> response) {
-                progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
-                    adapter.addData(response.body().pms);
+                    dialogListAdapter.setItems(
+                            response.body().pms
+                    );
                 }
             }
 
@@ -94,86 +105,6 @@ public class ChatsFragment extends BaseFragment {
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    static class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.VH> {
-
-        List<Chat> items = new ArrayList<>();
-        OnItemClickListener itemClickListener;
-
-        public void addData(List<Chat> newItems) {
-            items.clear();
-            items.addAll(newItems);
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-            VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat, parent, false));
-            vh.setOnItemClickListener(itemClickListener);
-            return vh;
-        }
-
-        @Override
-        public void onBindViewHolder(VH holder, int position) {
-            Chat chat = items.get(position);
-
-            holder.textView.setText(chat.uname);
-            holder.avatarImageView.setVisibility(View.VISIBLE);
-
-            Glide.with(holder.itemView.getContext()).load(RestClient.getImagesUrl() + "a/" + chat.uid + ".png").into(holder.avatarImageView);
-
-            if (chat.MessagesCount > 0) {
-                holder.unreadTextView.setText(Integer.toString(chat.MessagesCount));
-                holder.unreadTextView.setVisibility(View.VISIBLE);
-            } else {
-                holder.unreadTextView.setVisibility(View.GONE);
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return items.size();
-        }
-
-        public Chat getItem(int position) {
-            return items.get(position);
-        }
-
-        public void setOnItemClickListener(OnItemClickListener itemClickListener) {
-            this.itemClickListener = itemClickListener;
-        }
-
-        public interface OnItemClickListener {
-            void onItemClick(View view, int pos);
-        }
-
-        static class VH extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-            TextView textView;
-            ImageView avatarImageView;
-            TextView unreadTextView;
-            private OnItemClickListener itemClickListener;
-
-            public VH(View itemView) {
-                super(itemView);
-                textView = itemView.findViewById(R.id.text);
-                avatarImageView = itemView.findViewById(R.id.icon);
-                unreadTextView = itemView.findViewById(R.id.unreadMessages);
-                itemView.setOnClickListener(this);
-            }
-
-            public void setOnItemClickListener(OnItemClickListener listener) {
-                itemClickListener = listener;
-            }
-
-            @Override
-            public void onClick(View v) {
-                if (itemClickListener != null){
-                    itemClickListener.onItemClick(v, getAdapterPosition());
-                }
-            }
-        }
     }
 }
 

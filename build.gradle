@@ -36,6 +36,7 @@ dependencies {
     compile 'com.github.bumptech.glide:okhttp3-integration:4.6.1@aar'
     compile 'com.facebook.rebound:rebound:0.3.8'
     compile 'de.hdodenhof:circleimageview:2.2.0'
+    compile 'com.github.stfalcon:chatkit:0.2.2'
 }
 
 android {
