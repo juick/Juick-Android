@@ -11,27 +11,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.juick.android.UrlBuilder;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.JuickMessageMenu;
 import com.juick.android.JuickMessagesAdapter;
+import com.juick.android.UrlBuilder;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
+
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.net.URLEncoder;
-import java.util.List;
-
 /**
  * Created by gerc on 10.01.2016.
  */
-public class PostsPageFragment extends BasePageFragment {
+public class PostsPageFragment extends BaseFragment {
 
     public static final String ARG_URL = "ARG_URL";
 

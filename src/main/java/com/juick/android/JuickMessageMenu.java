@@ -17,6 +17,7 @@
  */
 package com.juick.android;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,7 +50,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
     private final static int MENU_ACTION_DELETE_POST = 6;
     private final static int MENU_ACTION_SOME_LAST_CMD = 7;
 
-    Context context;
+    Activity context;
     List<Post> postList;
     Post selectedPost;
     int menuLength;
@@ -154,6 +155,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
                 });
                 break;
             case MENU_ACTION_BLOG:
+                context.setTitle(selectedPost.user.uname);
                 ((BaseActivity) context).replaceFragment(
                         PostsPageFragment.newInstance(
                                 UrlBuilder.getUserPostsByName(selectedPost.user.uname)

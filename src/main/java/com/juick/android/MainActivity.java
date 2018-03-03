@@ -38,7 +38,8 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.android.fragment.ChatsFragment;
 import com.juick.android.fragment.PMFragment;
-import com.juick.android.fragment.PostsFragment;
+import com.juick.android.fragment.DiscoverFragment;
+import com.juick.android.fragment.PostsPageFragment;
 import com.juick.android.fragment.ThreadFragment;
 import com.juick.api.RestClient;
 import com.juick.api.model.User;
@@ -109,9 +110,10 @@ public class MainActivity extends BaseActivity
         }
 
         navigationView.getMenu().findItem(R.id.chats).setVisible(Utils.hasAuth());
+        navigationView.getMenu().findItem(R.id.feed).setVisible(Utils.hasAuth());
 
         if (savedInstanceState == null) {
-            addFragment(PostsFragment.newInstance(), false);
+            addFragment(DiscoverFragment.newInstance(), false);
         }
         onNewIntent(getIntent());
     }
@@ -165,8 +167,11 @@ public class MainActivity extends BaseActivity
 
         if (id == R.id.chats) {
             replaceFragment(ChatsFragment.newInstance());
-        }else if(id == R.id.messages){
-            startActivity(new Intent(this, MainActivity.class));
+        } else if(id == R.id.messages) {
+            replaceFragment(DiscoverFragment.newInstance());
+        } else if (id == R.id.feed) {
+            setTitle(R.string.Discussions);
+            replaceFragment(PostsPageFragment.newInstance(UrlBuilder.getDiscussions()));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -182,5 +187,9 @@ public class MainActivity extends BaseActivity
     @Override
     public int getTabsBarLayoutId() {
         return R.id.tabs;
+    }
+
+    public void showTabsBar() {
+        findViewById(getTabsBarLayoutId()).setVisibility(View.VISIBLE);
     }
 }

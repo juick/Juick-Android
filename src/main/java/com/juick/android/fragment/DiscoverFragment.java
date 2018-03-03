@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.juick.App;
 import com.juick.R;
+import com.juick.android.MainActivity;
 import com.juick.android.NewMessageActivity;
 import com.juick.android.UrlBuilder;
 import com.juick.android.Utils;
@@ -23,15 +24,15 @@ import com.juick.android.Utils;
 /**
  * Created by gerc on 03.06.2016.
  */
-public class PostsFragment extends BaseTabsFragment implements View.OnClickListener {
+public class DiscoverFragment extends BaseFragment implements View.OnClickListener {
 
     AppBarLayout.OnOffsetChangedListener offsetChangedListener;
 
-    public PostsFragment() {
+    public DiscoverFragment() {
     }
 
-    public static PostsFragment newInstance() {
-        return new PostsFragment();
+    public static DiscoverFragment newInstance() {
+        return new DiscoverFragment();
     }
 
     @Nullable
@@ -51,6 +52,7 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
 
         TabLayout tabLayout = (TabLayout) getBaseActivity().findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setVisibility(View.VISIBLE);
 
         final FloatingActionButton fab = (FloatingActionButton) getBaseActivity().findViewById(R.id.fab);
         fab.setOnClickListener(this);
@@ -100,11 +102,9 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
     public static class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
         private String tabTitles[] = new String[] {
-                App.getInstance().getString(R.string.Subscriptions),
                 App.getInstance().getString(R.string.Last_messages),
                 App.getInstance().getString(R.string.With_photos),
-                App.getInstance().getString(R.string.Top_messages),
-                App.getInstance().getString(R.string.Blog_messages)
+                App.getInstance().getString(R.string.Top_messages)
         };
 
         public SectionsPagerAdapter(FragmentManager fm) {
@@ -118,21 +118,14 @@ public class PostsFragment extends BaseTabsFragment implements View.OnClickListe
             UrlBuilder u;
             switch (position){
                 case 0:
-                    if(Utils.hasAuth())
-                        u = UrlBuilder.goHome();
-                    else
-                        return new NoAuthFragment();
-                    break;
-                case 1:
                     u = UrlBuilder.getLast();
                     break;
-                case 2:
+                case 1:
                     u = UrlBuilder.getPhotos();
                     break;
-                case 3:
+                case 2:
                     u = UrlBuilder.getTop();
                     break;
-                case 4:
                 default:
                     if(Utils.hasAuth())
                         u = UrlBuilder.getUserPostsByName(Utils.getNick());

@@ -61,6 +61,11 @@ public class UrlBuilder implements Parcelable {
         }
         return url;
     }
+    public static UrlBuilder getDiscussions() {
+        UrlBuilder builder = new UrlBuilder();
+        builder.url = "messages/discussions";
+        return builder;
+    }
 
     @Override
     public String toString() {

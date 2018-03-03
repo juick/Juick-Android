@@ -213,7 +213,9 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     @Override
                     public void onTagClick(int position, String text) {
                         Log.d("position", position + " " + text);
-                        ((BaseActivity) holder.itemView.getContext()).replaceFragment(
+                        MainActivity activity = (MainActivity) holder.itemView.getContext();
+                        activity.setTitle("*" + text);
+                        activity.replaceFragment(
                                 PostsPageFragment.newInstance(
                                         UrlBuilder.getPostsByTag(post.user.uid, text)));
                     }
@@ -564,7 +566,8 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         @Override
         public void onClick(View widget) {
             try {
-                ((BaseActivity) widget.getContext()).replaceFragment(ThreadFragment.newInstance(Integer.parseInt(mid)));
+                MainActivity activity = (MainActivity) widget.getContext();
+                activity.replaceFragment(ThreadFragment.newInstance(Integer.parseInt(mid)));
             } catch (NumberFormatException e) {
                 e.printStackTrace();
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(UrlBuilder.getNormalPostById(mid)));

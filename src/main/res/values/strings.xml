@@ -49,6 +49,7 @@
     <string name="With_photos">Photos</string>
     <string name="Blog_messages">Blog</string>
     <string name="PMs">Private messages</string>
+    <string name="Discussions">Discussions</string>
     
     <!-- ExploreActivity -->
     <string name="Juick__Explore">Juick: Explore</string>

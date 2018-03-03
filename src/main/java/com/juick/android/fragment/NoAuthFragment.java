@@ -12,7 +12,7 @@ import com.juick.R;
  * Created by alx on 13.12.16.
  */
 
-public class NoAuthFragment extends BasePageFragment {
+public class NoAuthFragment extends BaseFragment {
     TextView msg;
 
     public NoAuthFragment(){}

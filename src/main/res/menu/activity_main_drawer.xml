@@ -7,18 +7,12 @@
                 android:icon="@drawable/ic_comment_black_24dp"
                 android:title="@string/Discover"/>
             <item
+                android:id="@+id/feed"
+                android:icon="@drawable/ic_comment_black_24dp"
+                android:title="@string/Notifications"/>
+            <item
                 android:id="@+id/chats"
                 android:icon="@drawable/ic_chat_black_24dp"
                 android:title="@string/PMs"/>
         </group>
-
-   <!--    <item android:title="Communicate">
-            <menu>
-                <item
-                    android:id="@+id/nav_share"
-                    android:icon="@drawable/ic_menu_share"
-                    android:title="Share" />
-            </menu>
-        </item>
-    -->
 </menu>

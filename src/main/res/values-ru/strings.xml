@@ -48,6 +48,7 @@
     <string name="Top_messages">Топ</string>
     <string name="With_photos">Фото</string>
     <string name="Blog_messages">Блог</string>
+    <string name="Discussions">Диалоги</string>
 
     <!-- ExploreActivity -->
     <string name="Juick__Explore">Juick: Обзор</string>

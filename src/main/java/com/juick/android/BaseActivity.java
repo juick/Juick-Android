@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+
 import com.juick.android.fragment.BaseFragment;
 
 /**
@@ -34,10 +36,16 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     public void addFragment(BaseFragment fragment, boolean addToBackStack) {
+        if (getTabsBarLayoutId() > 0) {
+            findViewById(getTabsBarLayoutId()).setVisibility(View.GONE);
+        }
         showFragment(fragment, false, addToBackStack);
     }
 
     public void replaceFragment(BaseFragment fragment) {
+        if (getTabsBarLayoutId() > 0) {
+            findViewById(getTabsBarLayoutId()).setVisibility(View.GONE);
+        }
         showFragment(fragment, true, true);
     }
 

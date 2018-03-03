@@ -36,7 +36,7 @@ import com.juick.api.RestClient;
  * Created by alx on 02.01.17.
  */
 
-public class NewPostFragment extends BasePageFragment implements View.OnClickListener {
+public class NewPostFragment extends BaseFragment implements View.OnClickListener {
     public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
     EditText etMessage;
     ImageView bTags;
