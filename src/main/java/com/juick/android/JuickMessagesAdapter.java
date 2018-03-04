@@ -316,12 +316,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private String formatMessageTimestamp(Post jmsg) {
-        try {
-            return outDateFormat.format(sourceDateFormat.parse(jmsg.timestamp));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return "";
+        return outDateFormat.format(jmsg.timestamp);
     }
 
 

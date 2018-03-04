@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonIgnore;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
+import com.juick.api.JuickDateConverter;
 import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
 
@@ -33,8 +34,8 @@ public class Post implements IMessage {
     public User user;
     @JsonField
     public String body;
-    @JsonField
-    public String timestamp;
+    @JsonField(typeConverter = JuickDateConverter.class)
+    public Date timestamp;
     @JsonField
     public List<String> tags = new ArrayList<String>();
     @JsonField
@@ -81,21 +82,10 @@ public class Post implements IMessage {
         return user;
     }
 
-    private static final DateFormat sourceDateFormat;
-
-    static {
-        sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        sourceDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
     @Override
     public Date getCreatedAt() {
         if (timestamp != null) {
-            try {
-                return sourceDateFormat.parse(timestamp);
-            } catch (ParseException e) {
-                return new Date();
-            }
+            return timestamp;
         }
         return new Date();
     }
@@ -103,7 +93,7 @@ public class Post implements IMessage {
     public static Post empty() {
 
         Post post = new Post();
-        post.timestamp = sourceDateFormat.format(new Date());
+        post.timestamp = new Date();
         post.body = "";
         return post;
     }

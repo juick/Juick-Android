@@ -133,7 +133,12 @@ public class PostsPageFragment extends BaseFragment {
                 }
                 if (loading) return true;
                 loading = true;
-                RestClient.getApi().getPosts(apiUrl + "&before_mid=" + adapter.getItem(adapter.getItemCount() - 1).mid).enqueue(new Callback<List<Post>>() {
+                Post lastItem = adapter.getItem(adapter.getItemCount() - 1);
+                String requestUrl = apiUrl + "&before_mid=" + lastItem.mid;
+                if (apiUrl.equals(UrlBuilder.getDiscussions().toString())) {
+                    requestUrl = apiUrl + "?to=" + String.valueOf(lastItem.timestamp.getTime());
+                }
+                RestClient.getApi().getPosts(requestUrl).enqueue(new Callback<List<Post>>() {
                     @Override
                     public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
                         loading = false;
