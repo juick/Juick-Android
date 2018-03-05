@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:juick="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/menuitem_refresh"
-        android:icon="@drawable/ic_action_refresh"
-        android:title="@string/Refresh"
-        juick:showAsAction="always"/>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menuitem_newmessage"
         android:icon="@drawable/ic_action_edit"
-        android:title="@string/NewMessage"
-        juick:showAsAction="always"/>
+        android:title="@string/Create"
+        android:showAsAction="always"/>
+    <item android:id="@+id/menuitem_preferences"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/Settings"
+        android:showAsAction="never"/>
 </menu>

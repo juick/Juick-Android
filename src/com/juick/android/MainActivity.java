@@ -1,6 +1,6 @@
 /*
  * Juick
- * Copyright (C) 2014, ugnich
+ * Copyright (C) 2008-2013, Ugnich Anton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,184 +17,191 @@
  */
 package com.juick.android;
 
+import com.actionbarsherlock.app.ActionBar.Tab;
+import com.juick.GCMIntentService;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.Window;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.google.android.gcm.GCMRegistrar;
 import com.juick.R;
+import java.util.List;
 
 /**
  *
- * @author ugnich
+ * @author Ugnich Anton
  */
-public class MainActivity extends ActionBarActivity implements OnItemClickListener, WebViewClientJuick.WebViewClientListener {
+public class MainActivity extends SherlockFragmentActivity implements ActionBar.TabListener {
 
-    WebView wv;
-    DrawerLayout dl;
-    ActionBarDrawerToggle dt;
-    boolean clearHistory = false;
-    private ValueCallback<Uri> mUploadMessage;
-    private final static int FILECHOOSER_RESULTCODE = 1;
+    public static final int ACTIVITY_SIGNIN = 2;
+    public static final int ACTIVITY_PREFERENCES = 3;
+    public static final int PENDINGINTENT_CONSTANT = 713242183;
+    private Fragment fChats = null;
+    private Fragment fMessages = null;
+    private Fragment fExplore = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String url = "http://juick.com/";
         Intent intent = getIntent();
         if (intent != null) {
             Uri uri = intent.getData();
-            if (uri != null) {
-                url = uri.toString();
+            if (uri != null && uri.getPathSegments().size() > 0 && parseUri(uri)) {
+                return;
             }
         }
 
-        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        if (!Utils.hasAuth(this)) {
+            startActivityForResult(new Intent(this, SignInActivity.class), ACTIVITY_SIGNIN);
+            return;
+        }
 
-        setContentView(R.layout.main);
-
-        ListView nd = (ListView) findViewById(R.id.navigationdrawer);
-        String ndtitles[] = getResources().getStringArray(R.array.NavigationDrawerTitles);
-        nd.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_listitem, ndtitles));
-        nd.setOnItemClickListener(this);
-
-        dl = (DrawerLayout) findViewById(R.id.main);
-        dt = new ActionBarDrawerToggle(this, dl, R.drawable.ic_drawer, R.string.DrawerOpen, R.string.DrawerClose);
-        dl.setDrawerListener(dt);
+        try {
+            GCMRegistrar.checkDevice(this);
+            GCMRegistrar.checkManifest(this);
+            final String regId = GCMRegistrar.getRegistrationId(this);
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+            String prefRegId = sp.getString("gcm_regid", null);
+            if (regId.length() == 0 || !regId.equals(prefRegId)) {
+                GCMRegistrar.register(this, GCMIntentService.SENDER_ID);
+            }
+        } catch (Exception e) {
+            Log.e("Juick.GCM", e.toString());
+        }
 
         ActionBar bar = getSupportActionBar();
-        bar.setHomeButtonEnabled(true);
-        bar.setDisplayHomeAsUpEnabled(true);
+        bar.setHomeButtonEnabled(false);
+        bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        wv = (WebView) findViewById(R.id.webview);
-        WebSettings ws = wv.getSettings();
-        ws.setUserAgentString(ws.getUserAgentString() + " Juick/3.0");
-        ws.setJavaScriptEnabled(true);
+        Tab tab;
+        tab = bar.newTab().setTag("c").setText("Chats").setTabListener(this);
+        bar.addTab(tab);
+        tab = bar.newTab().setTag("f").setText("Feed").setTabListener(this);
+        bar.addTab(tab);
+        tab = bar.newTab().setTag("s").setText("Search").setTabListener(this);
+        bar.addTab(tab);
+    }
 
-        wv.setWebChromeClient(new WebChromeClient() {
+    public void onTabReselected(Tab tab, FragmentTransaction ft) {
+    }
 
-            public void openFileChooser(ValueCallback<Uri> uploadMsg) {
-                mUploadMessage = uploadMsg;
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                i.setType("image/*");
-                MainActivity.this.startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE);
+    public void onTabSelected(Tab tab, FragmentTransaction ft) {
+        String tag = tab.getTag().toString();
+        if (tag.equals("c")) {
+            if (fChats == null) {
+                fChats = SherlockFragment.instantiate(this, ChatsFragment.class.getName());
+                ft.add(android.R.id.content, fChats, "c");
+            } else {
+                ft.attach(fChats);
             }
-
-            public void openFileChooser(ValueCallback uploadMsg, String acceptType) {
-                openFileChooser(mUploadMessage);
+        } else if (tag.equals("f")) {
+            if (fMessages == null) {
+                Bundle b = new Bundle();
+                b.putBoolean("home", true);
+                b.putBoolean("usecache", true);
+                fMessages = SherlockFragment.instantiate(this, MessagesFragment.class.getName(), b);
+                ft.add(android.R.id.content, fMessages, "m");
+            } else {
+                ft.attach(fMessages);
             }
-
-            public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
-                openFileChooser(mUploadMessage);
+        } else {
+            if (fExplore == null) {
+                fExplore = SherlockFragment.instantiate(this, ExploreFragment.class.getName());
+                ft.add(android.R.id.content, fExplore, "e");
+            } else {
+                ft.attach(fExplore);
             }
-        });
+        }
+    }
 
-        WebViewClientJuick wvc = new WebViewClientJuick(this);
-        wvc.setWebViewClientListener(this);
-        wv.setWebViewClient(wvc);
-        wv.loadUrl(url);
-
-        wv.requestFocus(View.FOCUS_DOWN);
-        wv.setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                    case MotionEvent.ACTION_UP:
-                        if (!v.hasFocus()) {
-                            v.requestFocus();
-                        }
-                        break;
-                }
-                return false;
+    public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+        String tag = tab.getTag().toString();
+        if (tag.equals("c")) {
+            if (fChats != null) {
+                ft.detach(fChats);
             }
-        });
+        } else if (tag.equals("f")) {
+            if (fMessages != null) {
+                ft.detach(fMessages);
+                fMessages = null; // ANDROID BUG
+            }
+        } else {
+            if (fExplore != null) {
+                ft.detach(fExplore);
+            }
+        }
     }
 
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        dt.syncState();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == FILECHOOSER_RESULTCODE) {
-            if (null == mUploadMessage) {
-                return;
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ACTIVITY_SIGNIN) {
+            if (resultCode == RESULT_OK) {
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            } else {
+                finish();
             }
-            Uri result = intent == null || resultCode != RESULT_OK ? null : intent.getData();
-            mUploadMessage.onReceiveValue(result);
-            mUploadMessage = null;
+        } else if (requestCode == ACTIVITY_PREFERENCES) {
+            if (resultCode == RESULT_OK) {
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (dt.onOptionsItemSelected(item)) {
-            return true;
-        }
-
         switch (item.getItemId()) {
-            case R.id.menuitem_refresh:
-                wv.reload();
+            case R.id.menuitem_preferences:
+                startActivityForResult(new Intent(this, PreferencesActivity.class), ACTIVITY_PREFERENCES);
                 return true;
             case R.id.menuitem_newmessage:
-                clearHistory = true;
-                wv.loadUrl("http://juick.com/post");
+                startActivity(new Intent(this, NewMessageActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK) && wv.canGoBack() && !clearHistory) {
-            wv.goBack();
-            return true;
-        } else {
-            return super.onKeyDown(keyCode, event);
+    private boolean parseUri(Uri uri) {
+        List<String> segs = uri.getPathSegments();
+        if ((segs.size() == 1 && segs.get(0).matches("\\A[0-9]+\\z"))
+                || (segs.size() == 2 && segs.get(1).matches("\\A[0-9]+\\z") && !segs.get(0).equals("places"))) {
+            int mid = Integer.parseInt(segs.get(segs.size() - 1));
+            if (mid > 0) {
+                finish();
+                Intent intent = new Intent(this, ThreadActivity.class);
+                intent.setData(null);
+                intent.putExtra("mid", mid);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                return true;
+            }
+        } else if (segs.size() == 1 && segs.get(0).matches("\\A[a-zA-Z0-9\\-]+\\z")) {
+            //TODO show user
         }
-    }
-
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String ndurls[] = getResources().getStringArray(R.array.NavigationDrawerURLs);
-        clearHistory = true;
-        wv.loadUrl(ndurls[position]);
-        dl.closeDrawers();
-    }
-
-    public void setProgressBarVisible(boolean visible) {
-        setSupportProgressBarIndeterminateVisibility(visible);
-        if (!visible && clearHistory) {
-            wv.clearHistory();
-            clearHistory = false;
-        }
+        return false;
     }
 }

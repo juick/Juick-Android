@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/Notifications">
+        <ListPreference
+            android:key="notif_public"
+            android:title="@string/NotificationPublic"
+            android:entries="@array/prefsNotificationTypes"
+            android:entryValues="@array/prefsNotificationTypesValues"
+            android:defaultValue="3"
+            android:persistent="true"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/Appearance">
+        <ListPreference
+            android:key="fontsizesp"
+            android:title="@string/FontSize"
+            android:entries="@array/prefsFontSize"
+            android:entryValues="@array/prefsFontSizeValues"
+            android:defaultValue="16"
+            android:persistent="true"/>
+        <ListPreference
+            android:key="loadphotos"
+            android:title="@string/LoadPhotos"
+            android:entries="@array/prefsLoadImages"
+            android:entryValues="@array/prefsLoadImagesValues"
+            android:defaultValue="Always"
+            android:persistent="true"/>
+<!--        <ListPreference
+            android:key="theme"
+            android:title="@string/Theme"
+            android:entries="@array/prefsThemesTitles"
+            android:entryValues="@array/prefsThemesValues"
+            android:defaultValue="0"
+            android:persistent="true"/>-->
+    </PreferenceCategory>
+</PreferenceScreen>

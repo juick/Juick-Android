@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string-array name="messagesLists">
+        <item>Subscriptions</item>
+        <item>Last messages</item>
+        <item>Top messages</item>
+        <item>With photos</item>
+    </string-array>
+    <string-array name="prefsNotificationTypes">
+        <item>No notification</item>
+        <item>Lights</item>
+        <item>Vibrate</item>
+        <item>Sound</item>
+    </string-array>
+    <string-array name="prefsNotificationTypesValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="prefsLoadImages">
+        <item>Never</item>
+        <item>Always</item>
+        <item>Over WiFi only</item>
+    </string-array>
+    <string-array name="prefsLoadImagesValues">
+        <item>Never</item>
+        <item>Always</item>
+        <item>WiFi</item>
+    </string-array>
+    <string-array name="prefsFontSize">
+        <item>Small</item>
+        <item>Medium</item>
+        <item>Large</item>
+        <item>X-Large</item>
+    </string-array>
+    <string-array name="prefsFontSizeValues">
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+    </string-array>
+    <string-array name="prefsThemesTitles">
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="prefsThemesValues">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+</resources>

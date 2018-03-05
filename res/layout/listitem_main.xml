@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dip">
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="32dip"
+        android:layout_height="32dip"
+        android:layout_weight="0"
+        android:layout_marginRight="10dip"
+        android:src="@drawable/ic_user_32"/>
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="22dip"/>
+    <TextView
+        android:id="@+id/unreadMessages"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:layout_marginRight="3dip"
+        android:paddingLeft="8dip"
+        android:paddingRight="8dip"
+        android:paddingTop="3dip"
+        android:paddingBottom="4dip"
+        android:background="#FFCCCCCC"
+        android:textSize="16dip"/>
+</LinearLayout>

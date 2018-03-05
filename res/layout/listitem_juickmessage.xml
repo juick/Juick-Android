@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="7dp"
+    android:paddingRight="9dp"
+    android:paddingBottom="7dp"
+    android:paddingLeft="9dp">
+
+    <ImageView
+        android:id="@+id/userpic"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="8dp"
+
+        android:src="@drawable/ic_user_32"/>
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        
+        android:layout_toRightOf="@id/userpic"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        
+        android:textSize="16sp"
+        android:textStyle="bold"/>
+
+    <TextView  
+        android:id="@+id/timestamp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        
+        android:layout_toRightOf="@id/userpic"
+        android:layout_below="@id/username"
+        android:layout_alignParentRight="true"
+        
+        android:textSize="12sp"
+        android:textColor="@android:color/darker_gray"/>
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        
+        android:layout_below="@id/timestamp"
+        android:layout_marginTop="3dp"/>
+
+    <ImageView
+        android:id="@+id/photo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_below="@id/text"
+        android:layout_marginTop="3dp"
+        
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_below="@id/photo"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:paddingTop="7dp"
+        android:paddingBottom="5dp"
+    
+        android:text="Comment"
+        android:textSize="14sp"
+        android:textStyle="bold"/>
+        
+    <TextView
+        android:id="@+id/replies"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_below="@id/photo"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:paddingTop="7dp"
+        android:paddingBottom="5dp"
+    
+        android:drawableLeft="@drawable/ic_comments"
+        android:drawablePadding="3dp"
+        android:textSize="14sp"
+        android:textStyle="bold"/>
+        
+</RelativeLayout>
