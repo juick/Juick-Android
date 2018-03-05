@@ -83,7 +83,7 @@ public class TagsFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_list, container, false);
+        return inflater.inflate(R.layout.tags_list, container, false);
     }
 
     @Override
