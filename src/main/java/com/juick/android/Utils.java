@@ -36,9 +36,15 @@ import android.util.Base64;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.juick.App;
 import com.juick.R;
+import com.juick.api.RestClient;
 import com.neovisionaries.ws.client.WebSocketFactory;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  *
@@ -222,5 +228,26 @@ public class Utils {
         }
 
         return "";
+    }
+
+    public static void updateFCMToken() {
+        final String TAG = "updateFCMToken";
+        String prefToken = FirebaseInstanceId.getInstance().getToken();
+        Log.d(TAG, "currentToken " + prefToken);
+        if (hasAuth()) {
+            if (prefToken != null) {
+                RestClient.getApi().registerPush(prefToken).enqueue(new Callback<String>() {
+                    @Override
+                    public void onResponse(Call<String> call, Response<String> response) {
+                        Log.d(TAG, "registerPush " + response.code());
+                    }
+
+                    @Override
+                    public void onFailure(Call<String> call, Throwable t) {
+                        Log.d(TAG, "Failed to unregister", t);
+                    }
+                });
+            }
+        }
     }
 }

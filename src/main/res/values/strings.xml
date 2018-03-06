@@ -2,7 +2,7 @@
 <resources>
     <string name="com_juick">com.juick</string>
     <string name="Juick">Juick</string>
-    <string name="gcm_defaultSenderId">661985690018</string>
+    <string name="default_notification_channel_id">default</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="Loading___">Loading...</string>

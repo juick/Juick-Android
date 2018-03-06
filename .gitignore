@@ -10,3 +10,4 @@ local.properties
 *.iml
 .DS_Store
 release/**
+google-services.json

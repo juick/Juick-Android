@@ -8,32 +8,35 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
 import com.bluelinelabs.logansquare.LoganSquare;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 import com.juick.App;
 import com.juick.R;
+import com.juick.android.MainActivity;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
-import com.juick.android.MainActivity;
-import com.google.android.gms.gcm.GcmListenerService;
+
+import java.util.Map;
 
 /**
  * Created by vt on 03/12/15.
  */
-public class GCMReceiverService extends GcmListenerService {
+public class FCMReceiverService extends FirebaseMessagingService {
 
-    public final static String GCM_EVENT_ACTION = GCMReceiverService.class.getName() + "_GCM_EVENT_ACTION";
+    public final static String GCM_EVENT_ACTION = FCMReceiverService.class.getName() + "_GCM_EVENT_ACTION";
 
-    private static final String CHANNEL_ID = "default";
+    private static String channelId;
 
     private static NotificationManager notificationManager =
             (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -45,9 +48,10 @@ public class GCMReceiverService extends GcmListenerService {
             return;
         }
 
-        NotificationChannel channel =  notificationManager.getNotificationChannel(CHANNEL_ID);
+        channelId = getApplicationContext().getString(R.string.default_notification_channel_id);
+        NotificationChannel channel =  notificationManager.getNotificationChannel(channelId);
         if (channel == null) {
-            channel = new NotificationChannel(CHANNEL_ID,
+            channel = new NotificationChannel(channelId,
                     "Juick",
                     NotificationManager.IMPORTANCE_DEFAULT);
             channel.setDescription("Juick notifications");
@@ -59,10 +63,10 @@ public class GCMReceiverService extends GcmListenerService {
     }
 
     @Override
-    public void onMessageReceived(String from, Bundle data) {
-        super.onMessageReceived(from, data);
-        String msg = data.getString("message");
-        Log.d("GCMReceiverService", "onMessageReceived " + data.toString());
+    public void onMessageReceived(RemoteMessage message) {
+        Map<String,String> data = message.getData();
+        String msg = data.get("message");
+        Log.d("FCMReceiverService", "onMessageReceived " + data.toString());
         showNotification(msg);
     }
 
@@ -82,7 +86,7 @@ public class GCMReceiverService extends GcmListenerService {
 
             PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT);
             final NotificationCompat.Builder notificationBuilder = Build.VERSION.SDK_INT < 26 ?
-                    new NotificationCompat.Builder(App.getInstance()) : new NotificationCompat.Builder(App.getInstance(), CHANNEL_ID);
+                    new NotificationCompat.Builder(App.getInstance()) : new NotificationCompat.Builder(App.getInstance(), channelId);
             notificationBuilder.setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle(title)
                     .setContentText(body)
@@ -109,13 +113,13 @@ public class GCMReceiverService extends GcmListenerService {
                                         notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
                                                 | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
                                     }
-                                    GCMReceiverService.notify(jmsg, notificationBuilder);
+                                    FCMReceiverService.notify(jmsg, notificationBuilder);
                                 }
                             });
 
                     notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
                             App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
-                    GCMReceiverService.notify(jmsg, notificationBuilder);
+                    FCMReceiverService.notify(jmsg, notificationBuilder);
                 }
             });
 

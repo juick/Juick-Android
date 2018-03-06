@@ -32,7 +32,6 @@ import android.widget.Toast;
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.RestClient;
-import com.juick.android.service.RegistrationIntentService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -96,7 +95,7 @@ public class SignInActivity extends Activity implements OnClickListener {
                                 accountAuthenticatorResponse.onResult(result);
                             }
 
-                            startService(new Intent(SignInActivity.this, RegistrationIntentService.class));
+                            Utils.updateFCMToken();
                             SignInActivity.this.setResult(RESULT_OK);
                             SignInActivity.this.finish();
                         } else {

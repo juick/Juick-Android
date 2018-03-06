@@ -43,7 +43,6 @@ import com.juick.android.fragment.PostsPageFragment;
 import com.juick.android.fragment.ThreadFragment;
 import com.juick.api.RestClient;
 import com.juick.api.model.User;
-import com.juick.android.service.RegistrationIntentService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -70,8 +69,7 @@ public class MainActivity extends BaseActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        startService(new Intent(this, RegistrationIntentService.class));
+        Utils.updateFCMToken();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

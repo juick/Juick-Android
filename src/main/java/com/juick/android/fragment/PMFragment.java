@@ -38,7 +38,7 @@ import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.Utils;
-import com.juick.android.service.GCMReceiverService;
+import com.juick.android.service.FCMReceiverService;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
@@ -177,7 +177,7 @@ public class PMFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter(GCMReceiverService.GCM_EVENT_ACTION));
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter(FCMReceiverService.GCM_EVENT_ACTION));
     }
 
     @Override
