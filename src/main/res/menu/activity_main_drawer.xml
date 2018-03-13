@@ -9,7 +9,7 @@
             <item
                 android:id="@+id/feed"
                 android:icon="@drawable/ic_comment_black_24dp"
-                android:title="@string/Notifications"/>
+                android:title="@string/Discussions"/>
             <item
                 android:id="@+id/chats"
                 android:icon="@drawable/ic_chat_black_24dp"
