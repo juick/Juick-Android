@@ -10,13 +10,12 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.bluelinelabs.logansquare.LoganSquare;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -24,6 +23,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.MainActivity;
+import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 
@@ -97,17 +97,16 @@ public class FCMReceiverService extends FirebaseMessagingService {
             notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
             notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.body));
 
-            final RequestOptions options = new RequestOptions().centerCrop();
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Glide.with(App.getInstance()).asBitmap()
+                    GlideApp.with(App.getInstance()).asBitmap()
                             .load(RestClient.getImagesUrl() + "a/" + jmsg.user.uid + ".png")
-                            .apply(options)
+                            .centerCrop()
                             .into(new SimpleTarget<Bitmap>() {
                                 @Override
-                                public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                                public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
                                     notificationBuilder.setLargeIcon(resource);
                                     if (Build.VERSION.SDK_INT < 26) {
                                         notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
