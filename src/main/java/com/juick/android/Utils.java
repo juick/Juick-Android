@@ -40,8 +40,8 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.RestClient;
-import com.neovisionaries.ws.client.WebSocketFactory;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -90,11 +90,11 @@ public class Utils {
         return mWiFi.isConnected();
     }
 
-    private static WebSocketFactory WSFactoryInstance;
+    private static OkHttpClient.Builder WSFactoryInstance;
 
-    public static WebSocketFactory getWSFactory() {
+    public static OkHttpClient.Builder getWSFactory() {
         if (WSFactoryInstance == null) {
-            WSFactoryInstance = new WebSocketFactory();
+            WSFactoryInstance = new OkHttpClient.Builder();
         }
         return WSFactoryInstance;
     }

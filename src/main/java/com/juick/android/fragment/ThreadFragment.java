@@ -20,9 +20,14 @@ package com.juick.android.fragment;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,24 +46,35 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.bluelinelabs.logansquare.LoganSquare;
 import com.juick.App;
 import com.juick.R;
-import com.juick.android.*;
+import com.juick.android.BaseActivity;
+import com.juick.android.JuickMessageMenu;
+import com.juick.android.JuickMessagesAdapter;
+import com.juick.android.NewMessageActivity;
+import com.juick.android.SignInActivity;
+import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
-import com.neovisionaries.ws.client.WebSocket;
-import com.neovisionaries.ws.client.WebSocketAdapter;
+
+import java.io.IOException;
+import java.util.List;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
 
 /**
  *
@@ -91,7 +107,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         }
     };
 
-    WebSocket ws;
+    OkHttpClient ws;
     int mid = 0;
 
     RecyclerView recyclerView;
@@ -214,37 +230,50 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
 
     private void initWebSocket() {
         if (ws != null) return;
-        try {
-            ws = Utils.getWSFactory().createSocket(new URI("wss", "ws.juick.com", "/" + mid, null));
-            ws.addListener(new WebSocketAdapter() {
-                @Override
-                public void onTextMessage(WebSocket websocket, final String jsonStr) throws Exception {
-                    super.onTextMessage(websocket, jsonStr);
-                    Log.d("onTextMessage", ""+jsonStr);
-                    if (!isAdded()) {
-                        return;
-                    }
-                    ((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(250);
-                    getActivity().runOnUiThread(new Runnable() {
-
-                        public void run() {
-                            if (jsonStr != null && !jsonStr.trim().isEmpty()) {
-                                try {
-                                    Post reply = LoganSquare.parse(jsonStr, Post.class);
-                                    adapter.addData(reply);
-                                    linearLayoutManager.scrollToPosition(reply.rid);
-                                } catch (IOException e) {
-                                    Log.d("Websocket", e.getLocalizedMessage());
-                                }
+        ws = Utils.getWSFactory().build();
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                Request request = new Request.Builder()
+                        .url("wss://api.juick.com/ws/" + mid)
+                        .build();
+                ws.newWebSocket(request, new WebSocketListener() {
+                    @Override
+                    public void onMessage(WebSocket webSocket, final String jsonStr) {
+                        super.onMessage(webSocket, jsonStr);
+                        Log.d("onTextMessage", "" + jsonStr);
+                        if (!isAdded()) {
+                            return;
+                        }
+                        if (jsonStr != null && !jsonStr.trim().isEmpty()) {
+                            try {
+                                final Post reply = LoganSquare.parse(jsonStr, Post.class);
+                                ((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(250);
+                                getActivity().runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        adapter.addData(reply);
+                                        linearLayoutManager.smoothScrollToPosition(recyclerView,
+                                                new RecyclerView.State(), reply.rid);
+                                    }
+                                });
+                            } catch (IOException e) {
+                                Log.d("Websocket", e.getLocalizedMessage());
                             }
                         }
-                    });
-                }
-            });
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-        }
-        ws.connectAsynchronously();
+                    }
+                    @Override
+                    public void onOpen(WebSocket webSocket, okhttp3.Response response) {
+                        super.onOpen(webSocket, response);
+                        Log.d("Websocket", "Websocket opened");
+                    }
+                    @Override
+                    public void onFailure(WebSocket webSocket, Throwable t, okhttp3.Response response) {
+                        super.onFailure(webSocket, t, response);
+                        Log.d("Websocket", "WS failure", t);
+                    }
+                });
+            }
+        });
     }
 
     private void initAdapterStageTwo() {
@@ -258,10 +287,6 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     @Override
     public void onPause() {
         super.onPause();
-        if (ws != null) {
-            ws.disconnect();
-            ws = null;
-        }
         getActivity().unregisterReceiver(broadcastReceiver);
         LocalBroadcastManager.getInstance(App.getInstance()).unregisterReceiver(broadcastReceiver);
     }
