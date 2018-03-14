@@ -18,6 +18,7 @@
 package com.juick.android.fragment;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -433,7 +434,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == BaseActivity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
             if (requestCode == ACTIVITY_ATTACHMENT_IMAGE && data != null) {
                 attachmentUri = Utils.getPath(Uri.parse(data.getDataString()));
                 // How to get correct mime type?
