@@ -14,9 +14,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.juick.App;
 import com.juick.R;
-import com.juick.android.MainActivity;
 import com.juick.android.NewMessageActivity;
 import com.juick.android.UrlBuilder;
 import com.juick.android.Utils;
@@ -27,13 +27,6 @@ import com.juick.android.Utils;
 public class DiscoverFragment extends BaseFragment implements View.OnClickListener {
 
     AppBarLayout.OnOffsetChangedListener offsetChangedListener;
-
-    public DiscoverFragment() {
-    }
-
-    public static DiscoverFragment newInstance() {
-        return new DiscoverFragment();
-    }
 
     @Nullable
     @Override
@@ -50,7 +43,7 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
         ViewPager viewPager = view.findViewById(R.id.viewpager);
         viewPager.setAdapter(sectionsPagerAdapter);
 
-        TabLayout tabLayout = (TabLayout) getBaseActivity().findViewById(R.id.tabs);
+        TabLayout tabLayout = getBaseActivity().findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.setVisibility(View.VISIBLE);
 
@@ -70,15 +63,12 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
             }
         };
         appBarLayout.addOnOffsetChangedListener(offsetChangedListener);
-        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
-        ((AppBarLayout.LayoutParams) toolbar.getLayoutParams())
-                .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        FloatingActionButton fab = (FloatingActionButton) getBaseActivity().findViewById(R.id.fab);
+        FloatingActionButton fab = getBaseActivity().findViewById(R.id.fab);
         fab.hide();
         AppBarLayout appBarLayout = getActivity().findViewById(R.id.app_bar_layout);
         appBarLayout.removeOnOffsetChangedListener(offsetChangedListener);

@@ -67,7 +67,7 @@ public class MainActivity extends BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Utils.updateFCMToken();
 
@@ -111,7 +111,7 @@ public class MainActivity extends BaseActivity
         navigationView.getMenu().findItem(R.id.feed).setVisible(Utils.hasAuth());
 
         if (savedInstanceState == null) {
-            addFragment(DiscoverFragment.newInstance(), false);
+            addFragment(new DiscoverFragment(), false);
         }
         onNewIntent(getIntent());
     }
@@ -157,7 +157,6 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
@@ -166,7 +165,7 @@ public class MainActivity extends BaseActivity
         if (id == R.id.chats) {
             replaceFragment(ChatsFragment.newInstance());
         } else if(id == R.id.messages) {
-            replaceFragment(DiscoverFragment.newInstance());
+            replaceFragment(new DiscoverFragment());
         } else if (id == R.id.feed) {
             setTitle(R.string.Discussions);
             replaceFragment(PostsPageFragment.newInstance(UrlBuilder.getDiscussions()));
@@ -185,9 +184,5 @@ public class MainActivity extends BaseActivity
     @Override
     public int getTabsBarLayoutId() {
         return R.id.tabs;
-    }
-
-    public void showTabsBar() {
-        findViewById(getTabsBarLayoutId()).setVisibility(View.VISIBLE);
     }
 }

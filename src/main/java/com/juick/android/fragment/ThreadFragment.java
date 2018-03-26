@@ -56,7 +56,6 @@ import android.widget.Toast;
 import com.bluelinelabs.logansquare.LoganSquare;
 import com.juick.App;
 import com.juick.R;
-import com.juick.android.BaseActivity;
 import com.juick.android.JuickMessageMenu;
 import com.juick.android.JuickMessagesAdapter;
 import com.juick.android.NewMessageActivity;
