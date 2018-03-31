@@ -42,6 +42,7 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         android:layout_weight="0">
         <TextView
             android:id="@+id/textReplyTo"
