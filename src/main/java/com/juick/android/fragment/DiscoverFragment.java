@@ -63,6 +63,10 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
             }
         };
         appBarLayout.addOnOffsetChangedListener(offsetChangedListener);
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+        ((AppBarLayout.LayoutParams) toolbar.getLayoutParams())
+                .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+                        | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
     }
 
     @Override
@@ -74,6 +78,7 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
         appBarLayout.removeOnOffsetChangedListener(offsetChangedListener);
         Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
         ((AppBarLayout.LayoutParams) toolbar.getLayoutParams()).setScrollFlags(0);
+        appBarLayout.requestLayout();
     }
 
     @Override
