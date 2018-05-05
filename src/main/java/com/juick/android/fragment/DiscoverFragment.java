@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 
 import com.juick.App;
 import com.juick.R;
+import com.juick.android.FeedBuilder;
 import com.juick.android.NewMessageActivity;
 import com.juick.android.UrlBuilder;
 import com.juick.android.Utils;
@@ -128,7 +129,7 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
                         return new NoAuthFragment();
                     break;
             }
-            return PostsPageFragment.newInstance(u);
+            return FeedBuilder.feedFor(u);
         }
 
         @Override

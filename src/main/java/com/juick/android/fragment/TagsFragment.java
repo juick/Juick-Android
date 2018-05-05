@@ -34,6 +34,7 @@ import android.widget.Toast;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.BaseActivity;
+import com.juick.android.FeedBuilder;
 import com.juick.android.ITagable;
 import com.juick.android.UrlBuilder;
 import com.juick.api.RestClient;
@@ -119,7 +120,8 @@ public class TagsFragment extends BaseFragment {
         adapter.setOnItemLongClickListener(new TagsAdapter.OnItemLongClickListener() {
             @Override
             public void onItemLongClick(View view, int position){
-                ((BaseActivity) getActivity()).replaceFragment(PostsPageFragment.newInstance(UrlBuilder.getPostsByTag(uid, adapter.getItem(position))));
+                ((BaseActivity) getActivity()).replaceFragment(
+                        FeedBuilder.feedFor(UrlBuilder.getPostsByTag(uid, adapter.getItem(position))));
             }
         });
 

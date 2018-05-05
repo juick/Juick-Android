@@ -85,18 +85,6 @@ public class PMFragment extends BaseFragment {
 
     private MessagesListAdapter<Post> adapter;
 
-    public PMFragment() {
-    }
-
-    public static PMFragment newInstance(String uname, int uid) {
-        PMFragment fragment = new PMFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_UNAME, uname);
-        args.putInt(ARG_UID, uid);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

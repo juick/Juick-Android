@@ -41,19 +41,6 @@ public class PostsPageFragment extends BaseFragment {
 
     String apiUrl;
 
-    public PostsPageFragment() {
-    }
-
-    public static PostsPageFragment newInstance(UrlBuilder u) {
-        PostsPageFragment fragment = new PostsPageFragment();
-        Bundle args = new Bundle();
-
-        args.putParcelable(ARG_URL, u);
-
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -157,7 +157,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
             case MENU_ACTION_BLOG:
                 context.setTitle(selectedPost.user.uname);
                 ((BaseActivity) context).replaceFragment(
-                        PostsPageFragment.newInstance(
+                        FeedBuilder.feedFor(
                                 UrlBuilder.getUserPostsByName(selectedPost.user.uname)
                         )
                 );

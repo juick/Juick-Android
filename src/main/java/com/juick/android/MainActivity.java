@@ -123,7 +123,7 @@ public class MainActivity extends BaseActivity
 
         if (PUSH_ACTION.equals(action)) {
             if (intent.getBooleanExtra(PUSH_ACTION_SHOW_PM, false)) {
-                replaceFragment(PMFragment.newInstance(intent.getStringExtra(ARG_UNAME), intent.getIntExtra(ARG_UID, 0)));
+                replaceFragment(FeedBuilder.chatFor(intent.getStringExtra(ARG_UNAME), intent.getIntExtra(ARG_UID, 0)));
             } else if (intent.getBooleanExtra(PUSH_ACTION_SHOW_THREAD, false)) {
                 replaceFragment(ThreadFragment.newInstance(intent.getIntExtra(ARG_MID, 0)));
             }
@@ -168,7 +168,7 @@ public class MainActivity extends BaseActivity
             replaceFragment(new DiscoverFragment());
         } else if (id == R.id.feed) {
             setTitle(R.string.Discussions);
-            replaceFragment(PostsPageFragment.newInstance(UrlBuilder.getDiscussions()));
+            replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

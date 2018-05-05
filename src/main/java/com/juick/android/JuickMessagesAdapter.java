@@ -216,7 +216,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                         MainActivity activity = (MainActivity) holder.itemView.getContext();
                         activity.setTitle("*" + text);
                         activity.replaceFragment(
-                                PostsPageFragment.newInstance(
+                                FeedBuilder.feedFor(
                                         UrlBuilder.getPostsByTag(post.user.uid, text)));
                     }
 

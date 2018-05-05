@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
+import com.juick.android.FeedBuilder;
 import com.juick.api.RestClient;
 import com.juick.api.model.Chat;
 import com.juick.api.model.Pms;
@@ -84,7 +85,7 @@ public class ChatsFragment extends BaseFragment {
             @Override
             public void onDialogClick(Chat dialog) {
                 getBaseActivity().replaceFragment(
-                        PMFragment.newInstance(dialog.getDialogName(), Integer.valueOf(dialog.getId())));
+                        FeedBuilder.chatFor(dialog.getDialogName(), Integer.valueOf(dialog.getId())));
             }
         });
         final DialogsList dialogsList = getBaseActivity().findViewById(R.id.dialogsList);
