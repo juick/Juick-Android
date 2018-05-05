@@ -2,19 +2,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/side_nav_bar"
     android:id="@+id/header"
     android:orientation="vertical"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+    android:theme="@style/AppTheme">
 
-    <de.hdodenhof.circleimageview.CircleImageView
+    <ImageView
         android:id="@+id/profile_image"
         android:layout_width="76dp"
         android:layout_height="76dp"
-        app:civ_border_color="#FF000000"
         android:src="@drawable/ic_logo"
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
@@ -25,7 +23,7 @@
         android:layout_height="wrap_content"
         android:text="Нажмите, чтобы войти"
         android:textSize="14sp"
-        android:textColor="#000"
+        android:textColor="@color/colorAccent"
         android:textStyle="bold"
         android:gravity="left"
         android:paddingBottom="4dp"

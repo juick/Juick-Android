@@ -3,10 +3,9 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:windowTranslucentStatus" tools:ignore="NewApi">true</item>
         <item name="android:windowTranslucentNavigation" tools:ignore="NewApi">true</item>
-        <item name="android:colorButtonNormal" tools:ignore="NewApi">#DDDDD6</item>
-        <item name="colorButtonNormal">#DDDDD6</item>
     </style>
     <style name="AppTheme.NoActionBar">
         <item name="android:windowActionBar" tools:ignore="NewApi">false</item>
@@ -14,41 +13,11 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-    <style name="TextViewPMIn" parent="">
-        <item name="android:textSize">7pt</item>
-        <item name="android:background">@drawable/listitem_pmin</item>
-        <item name="android:paddingTop">3dip</item>
-        <item name="android:paddingRight">9dip</item>
-        <item name="android:paddingBottom">5dip</item>
-        <item name="android:paddingLeft">13dip</item>
-        <item name="android:layout_marginTop">5dip</item>
-        <item name="android:layout_marginRight">5dip</item>
-        <item name="android:layout_marginBottom">5dip</item>
-        <item name="android:layout_marginLeft">3dip</item>
-    </style>
-    <style name="TextViewPMOut">
-        <item name="android:textSize">7pt</item>
-        <item name="android:background">@drawable/listitem_pmout</item>
-        <item name="android:paddingTop">3dip</item>
-        <item name="android:paddingRight">14dip</item>
-        <item name="android:paddingBottom">5dip</item>
-        <item name="android:paddingLeft">8dip</item>
-        <item name="android:layout_marginTop">5dip</item>
-        <item name="android:layout_marginRight">3dip</item>
-        <item name="android:layout_marginBottom">5dip</item>
-        <item name="android:layout_marginLeft">5dip</item>
-    </style>
-    <style name="AppTheme.AppBarOverlay" parent="AppTheme.AppBarOverlay">
+    <style name="AppTheme.AppBarOverlay">
         <item name="android:textColorPrimary">@color/colorAccent</item>
     </style>
-
-    <style name="AppTheme.PopupOverlay" parent="AppTheme.PopupOverlay" />
-
-    <style name="AppTheme.ToolbarTheme" parent="AppTheme.ToolbarTheme">
-        <item name="android:background">?attr/colorPrimary</item>
-    </style>
     <style name="NavigationDrawerStyle">
-        <item name="android:textColor">@color/colorForegroundElements</item>
+        <item name="android:textColor">@color/colorText</item>
         <!-- <item name="android:textSize">20sp</item>--><!-- text size in menu-->
         <!-- <item name="android:lines">2</item>-->
         <!-- <item name="android:ellipsize">end</item>-->
