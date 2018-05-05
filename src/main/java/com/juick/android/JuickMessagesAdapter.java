@@ -256,8 +256,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     holder.likesTextView.setVisibility(View.GONE);
                 }
             } else {
-                holder.replyQuoteTextView.setText(post.replyQuote);
-                holder.replyQuoteTextView.setVisibility(View.VISIBLE);
                 if (post.nextRid == post.rid) {
                     holder.backImageView.setVisibility(View.VISIBLE);
                     holder.backImageView.setTag(post);
@@ -285,7 +283,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 }
             }
             if (post.rid > 0 && post.replyto > 0) {
-                holder.midTextView.setText(String.format("/%1$d %2$s /%3$d", post.rid, inReplyTo, post.replyto));
+                holder.midTextView.setText(String.format("%s %s", inReplyTo, post.to.uname));
                 holder.midTextView.setVisibility(View.VISIBLE);
                 holder.midTextView.setTag(post);
                 holder.midTextView.setOnClickListener(new View.OnClickListener() {
@@ -457,7 +455,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         TextView textTextView;
         TextView repliesTextView;
         TextView likesTextView;
-        TextView replyQuoteTextView;
         TextView midTextView;
         ImageView menuImageView;
         ImageView backImageView;
@@ -471,7 +468,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             usernameTextView = itemView.findViewById(R.id.username);
             timestampTextView = itemView.findViewById(R.id.timestamp);
             tagContainerLayout = itemView.findViewById(R.id.tags_container);
-            replyQuoteTextView = itemView.findViewById(R.id.replyQuote);
             textTextView = itemView.findViewById(R.id.text);
             photoImageView = itemView.findViewById(R.id.photo);
             likesTextView = itemView.findViewById(R.id.likes);

@@ -31,6 +31,8 @@ public class Post implements IMessage {
     @JsonField
     public int replyto;
     @JsonField
+    public User to;
+    @JsonField
     public User user;
     @JsonField
     public String body;

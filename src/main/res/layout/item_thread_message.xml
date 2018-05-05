@@ -31,24 +31,10 @@
         tools:text="ugnich" />
 
     <TextView
-        android:id="@+id/replyQuote"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/menu_imageView"
-        android:layout_marginBottom="8dp"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_toEndOf="@+id/userpic"
-        android:layout_toRightOf="@+id/userpic"
-        android:linksClickable="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="@android:color/darker_gray"
-        tools:text=">quote" />
-
-    <TextView
         android:id="@+id/text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/replyQuote"
+        android:layout_below="@+id/menu_imageView"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_toEndOf="@+id/userpic"
         android:layout_toRightOf="@+id/userpic"
@@ -103,7 +89,7 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="16dp"
-        android:textColor="@android:color/darker_gray"
+        android:textColor="@color/colorAccent"
         android:textSize="14sp" />
 
     <View
