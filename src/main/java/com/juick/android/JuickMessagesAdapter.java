@@ -18,7 +18,6 @@
 package com.juick.android;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -31,6 +30,7 @@ import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,25 +38,24 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import co.lujun.androidtagview.TagContainerLayout;
-import co.lujun.androidtagview.TagView;
+
 import com.bumptech.glide.Glide;
 import com.juick.App;
-import com.juick.android.fragment.PostsPageFragment;
-import com.juick.android.fragment.ThreadFragment;
+import com.juick.R;
+import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
-import com.juick.android.widget.util.ViewUtil;
-import com.juick.R;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import co.lujun.androidtagview.TagContainerLayout;
+import co.lujun.androidtagview.TagView;
 
 /**
  *
@@ -70,8 +69,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int TYPE_THREAD_POST = 2;
 
     public static final Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
-    public static final Pattern msgPattern = Pattern.compile("#([0-9]+)");
-    private static final Pattern usrPattern = Pattern.compile("@[a-zA-Z0-9\\-]{2,16}");
     private static final DateFormat sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final DateFormat outDateFormat = new SimpleDateFormat("HH:mm dd MMM yyyy");
 
@@ -342,11 +339,11 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         // #12345
         // <a href="http://juick.com/12345">#12345</a>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A)|(?<=\\p{Punct}))#(\\d+)((?=\\s)|(?=\\Z)|(?=\\))|(?=\\.)|(?=\\,))", "$1<a href=\"http://juick.com/$2\">#$2</a>$3");
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A)|(?<=\\p{Punct}))#(\\d+)((?=\\s)|(?=\\Z)|(?=\\))|(?=\\.)|(?=\\,))", "$1<a href=\"https://juick.com/thread/$2\">#$2</a>$3");
 
         // #12345/65
         // <a href="http://juick.com/12345#65">#12345/65</a>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A)|(?<=\\p{Punct}))#(\\d+)/(\\d+)((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"http://juick.com/$2#$3\">#$2/$3</a>$4");
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A)|(?<=\\p{Punct}))#(\\d+)/(\\d+)((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"https://juick.com/thread/$2#$3\">#$2/$3</a>$4");
 
         // *bold*
         // <b>bold</b>
@@ -366,11 +363,11 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         // @username@jabber.org
         // <a href="http://juick.com/username@jabber.org/">@username@jabber.org</a>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))@([\\w\\-\\.]+@[\\w\\-\\.]+)((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"http://juick.com/$2/\">@$2</a>$3");
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))@([\\w\\-\\.]+@[\\w\\-\\.]+)((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"https://juick.com/$2/\">@$2</a>$3");
 
         // @username
         // <a href="http://juick.com/username/">@username</a>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))@([\\w\\-]{2,16})((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"http://juick.com/$2/\">@$2</a>$3");
+        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))@([\\w\\-]{2,16})((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"https://juick.com/$2/\">@$2</a>$3");
 
         // (http://juick.com/last?page=2)
         // (<a href="http://juick.com/last?page=2" rel="nofollow">juick.com</a>)
@@ -395,31 +392,26 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         Spanned text = Html.fromHtml(formatMessage(jmsg.body));
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         ssb.append(text);
-
-        // Highlight links http://example.com/
-        int pos = 0;
-        Matcher m = urlPattern.matcher(text);
-        while (m.find(pos)) {
-            ssb.setSpan(new MyClickableSpan(m.group()), m.start(), m.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            ssb.setSpan(new ForegroundColorSpan(ContextCompat.getColor(App.getInstance(), R.color.colorAccent)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            pos = m.end();
-        }
-
-        // Highlight messages #1234
-        pos = 0;
-        m = msgPattern.matcher(text);
-        while (m.find(pos)) {
-            ssb.setSpan(new MessageClickableSpan(m.group(1)), m.start(), m.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            ssb.setSpan(new ForegroundColorSpan(ContextCompat.getColor(App.getInstance(), R.color.colorAccent)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            pos = m.end();
-        }
-
-        // Highlight usernames @username
-        pos = 0;
-        m = usrPattern.matcher(text);
-        while (m.find(pos)) {
-            ssb.setSpan(new ForegroundColorSpan(ContextCompat.getColor(App.getInstance(), R.color.colorAccent)), m.start(), m.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            pos = m.end();
+        URLSpan[] urlSpans = ssb.getSpans(0, ssb.length(), URLSpan.class);
+        // handle deep links
+        for (URLSpan span : urlSpans) {
+            int start = ssb.getSpanStart(span);
+            int end = ssb.getSpanEnd(span);
+            final String link = span.getURL();
+            ssb.removeSpan(span);
+            ssb.setSpan(new ClickableSpan() {
+                @Override
+                public void onClick(View widget) {
+                    Uri data = Uri.parse(link);
+                    MainActivity activity = (MainActivity)widget.getContext();
+                    if (data.getHost().equals("juick.com")) {
+                        activity.processUri(data);
+                    } else {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, data);
+                        widget.getContext().startActivity(intent);
+                    }
+                }
+            }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         return ssb;
     }
@@ -531,39 +523,5 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public interface OnScrollListener {
         void onScrollToPost(View v, int replyTo, int rid);
-    }
-
-    public static class MyClickableSpan extends ClickableSpan {
-        String link;
-
-        public MyClickableSpan(String link) {
-            this.link = link;
-        }
-
-        @Override
-        public void onClick(View widget) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-            widget.getContext().startActivity(intent);
-        }
-    }
-
-    public static class MessageClickableSpan extends ClickableSpan {
-        String mid;
-
-        public MessageClickableSpan(String mid) {
-            this.mid = mid;
-        }
-
-        @Override
-        public void onClick(View widget) {
-            try {
-                MainActivity activity = (MainActivity) widget.getContext();
-                activity.replaceFragment(ThreadFragment.newInstance(Integer.parseInt(mid)));
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(UrlBuilder.getNormalPostById(mid)));
-                widget.getContext().startActivity(intent);
-            }
-        }
     }
 }

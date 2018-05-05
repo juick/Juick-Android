@@ -129,11 +129,8 @@ public class MainActivity extends BaseActivity
             }
         }else if(Intent.ACTION_VIEW.equals(action)){
             Uri data = intent.getData();
-            List<String> pathSegments = data.getPathSegments();
-            String threadId = (pathSegments.size() > 1) ? pathSegments.get(pathSegments.size() - 1) : pathSegments.get(0);
-            try {
-                replaceFragment(ThreadFragment.newInstance(Integer.parseInt(threadId)));
-            }catch (NumberFormatException ex){}
+            processUri(data);
+
         }
         //setIntent(null);
     }
@@ -184,5 +181,27 @@ public class MainActivity extends BaseActivity
     @Override
     public int getTabsBarLayoutId() {
         return R.id.tabs;
+    }
+
+    public void processUri(Uri data) {
+        List<String> pathSegments = data.getPathSegments();
+        switch (pathSegments.size()) {
+            case 1:
+                // blog
+                replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(pathSegments.get(0))));
+                break;
+            case 2:
+                // thread
+                String threadId = pathSegments.get(1);
+                try {
+                    replaceFragment(ThreadFragment.newInstance(Integer.parseInt(threadId)));
+                } catch (NumberFormatException ex) {
+                }
+                break;
+            default:
+                // discover
+                replaceFragment(new DiscoverFragment());
+                break;
+        }
     }
 }
