@@ -133,9 +133,7 @@ public class RestClient {
 
         @Multipart
         @POST("/post")
-        Call<Void> newPost(@Part("body") RequestBody body,
-                             @Part("lat") RequestBody lat, @Part("lon") RequestBody lon,
-                             @Part MultipartBody.Part file);
+        Call<Void> newPost(@Part("body") RequestBody body, @Part MultipartBody.Part file);
 
         @GET("")
         Call<List<Tag>> tags(@Url String url);

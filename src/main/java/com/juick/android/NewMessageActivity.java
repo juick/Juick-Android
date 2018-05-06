@@ -60,7 +60,10 @@ public class NewMessageActivity extends BaseActivity implements ITagable {
         }
     }
 
-    public static boolean sendMessage(Context context, String txt, String attachmentUri, String attachmentMime, final ProgressDialog progressDialog, final Handler progressHandler, BooleanReference progressDialogCancel) {
+    public static boolean sendMessage(Context context, String txt, String attachmentUri,
+                                   String attachmentMime, final ProgressDialog progressDialog,
+                                   final Handler progressHandler,
+                                   BooleanReference progressDialogCancel) {
 
         try {
             MultipartBody.Part body = null;
@@ -72,8 +75,6 @@ public class NewMessageActivity extends BaseActivity implements ITagable {
                 body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
             }
             return RestClient.getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
-                    RequestBody.create(MediaType.parse("text/plain"), "0.0"),
-                    RequestBody.create(MediaType.parse("text/plain"), "0.0"),
                     body
                    ).execute().isSuccessful();
         } catch (IOException e) {
