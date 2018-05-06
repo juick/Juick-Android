@@ -117,6 +117,7 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
         etMessage.setEnabled(state);
         bTags.setEnabled(state);
         bAttachment.setEnabled(state);
+        bSend.setEnabled(state);
         //setSupportProgressBarIndeterminateVisibility(state ? Boolean.FALSE : Boolean.TRUE);
     }
 
