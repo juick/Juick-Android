@@ -79,13 +79,13 @@ public class SignInActivity extends Activity implements OnClickListener {
                     return;
                 }
 
-                RestClient.auth(nick, password, new Callback<String>() {
+                RestClient.auth(nick, password, new Callback<Void>() {
                     @Override
-                    public void onResponse(Call<String> call, Response<String> response) {
-                        if (response.isSuccessful()) {
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.code() == 400) {
                             Account account = new Account(nick, getString(R.string.com_juick));
                             AccountManager am = AccountManager.get(SignInActivity.this);
-                            boolean accountCreated = am.addAccountExplicitly(account, response.body(), null);
+                            boolean accountCreated = am.addAccountExplicitly(account, password, null);
                             Bundle extras = getIntent().getExtras();
                             if (extras != null && accountCreated) {
                                 AccountAuthenticatorResponse accountAuthenticatorResponse = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
@@ -104,7 +104,7 @@ public class SignInActivity extends Activity implements OnClickListener {
                     }
 
                     @Override
-                    public void onFailure(Call<String> call, Throwable t) {
+                    public void onFailure(Call<Void> call, Throwable t) {
                         Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
                     }
                 });
