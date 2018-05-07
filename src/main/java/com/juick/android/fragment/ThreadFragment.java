@@ -302,8 +302,8 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     }
 
     private void setFormEnabled(boolean state) {
-        //etMessage.setEnabled(state);
-        //bSend.setEnabled(state);
+        etMessage.setEnabled(state);
+        bSend.setEnabled(state);
     }
 
     public void onReply(int newrid, String txt) {
