@@ -17,6 +17,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 import retrofit2.http.*;
 
 import java.io.IOException;
@@ -45,27 +46,19 @@ public class RestClient {
     public static Api getApi() {
         if (api == null) {
             OkHttpClient client = new OkHttpClient.Builder()
-                    .addInterceptor(new UpLoadProgressInterceptor(new CountingRequestBody.Listener() {
-                        @Override
-                        public void onRequestProgress(long bytesWritten, long contentLength) {
-                            LocalBroadcastManager.getInstance(App.getInstance())
-                                    .sendBroadcast(new Intent(ACTION_UPLOAD_PROGRESS)
-                                            .putExtra(EXTRA_PROGRESS, (int)(100 * bytesWritten / contentLength)));
-                        }
-                    }))
-                    .addInterceptor(new Interceptor() {
-                        @Override
-                        public Response intercept(Interceptor.Chain chain) throws IOException {
-                            Request original = chain.request();
-
-                            Request.Builder requestBuilder = original.newBuilder()
-                                    .header("Authorization", Utils.getBasicAuthString())
-                                    .header("Accept", "application/json")
-                                    .method(original.method(), original.body());
-                            //Log.e("intercept", requestBuilder.toString());
-                            Request request = requestBuilder.build();
-                            return chain.proceed(request);
-                        }
+                    .addInterceptor(new UpLoadProgressInterceptor((bytesWritten, contentLength) -> LocalBroadcastManager.getInstance(App.getInstance())
+                            .sendBroadcast(new Intent(ACTION_UPLOAD_PROGRESS)
+                                    .putExtra(EXTRA_PROGRESS, (int)(100 * bytesWritten / contentLength)))))
+                    .addInterceptor(chain -> {
+                        Request original = chain.request();
+                        HttpUrl url = original.url().newBuilder().addQueryParameter("hash",
+                                Utils.getAuthToken()).build();
+                        Request.Builder requestBuilder = original.newBuilder()
+                                .url(url)
+                                .header("Accept", "application/json")
+                                .method(original.method(), original.body());
+                        Request request = requestBuilder.build();
+                        return chain.proceed(request);
                     })
                     .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                     .build();
@@ -80,36 +73,34 @@ public class RestClient {
         return api;
     }
 
-    public static void auth(String username, String password, Callback<Void> callback) {
+    public static void auth(String username, String password, Callback<String> callback) {
         String credentials = username + ":" + password;
         final String basic =
                 "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
 
         OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Interceptor.Chain chain) throws IOException {
-                        Request original = chain.request();
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
 
-                        Request.Builder requestBuilder = original.newBuilder()
-                                .header("Authorization", basic)
-                                .header("Accept", "application/json")
-                                .method(original.method(), original.body());
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .header("Authorization", basic)
+                            .method(original.method(), original.body());
 
-                        Request request = requestBuilder.build();
-                        return chain.proceed(request);
-                    }
+                    Request request = requestBuilder.build();
+                    return chain.proceed(request);
                 }).build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getBaseUrl())
                 .client(client)
-                .addConverterFactory(LoganSquareConverterFactory.create())
+                .addConverterFactory(ScalarsConverterFactory.create())
                 .build();
-        retrofit.create(Api.class).post(null).enqueue(callback);
+        retrofit.create(Api.class).auth().enqueue(callback);
     }
 
     public interface Api {
+        @GET("/auth")
+        Call<String> auth();
 
         @GET("")
         Call<List<Post>> getPosts(@Url String url);

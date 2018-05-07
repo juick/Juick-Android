@@ -65,20 +65,18 @@ public class Utils {
         return accs.length > 0 ? accs[0].name : null;
     }
 
-    public static String getBasicAuthString() {
+    public static String getAuthToken() {
         Context context = App.getInstance();
         AccountManager am = AccountManager.get(context);
         Account accs[] = am.getAccountsByType(context.getString(R.string.com_juick));
         if (accs.length > 0) {
-            Bundle b = null;
             try {
-                b = am.getAuthToken(accs[0], "", false, null, null).getResult();
+                Bundle token = am.getAuthToken(accs[0], "", false, null, null).getResult();
+                if (token != null) {
+                    return token.getString(AccountManager.KEY_AUTHTOKEN);
+                }
             } catch (Exception e) {
-                Log.d("getBasicAuthString", Log.getStackTraceString(e));
-            }
-            if (b != null) {
-                String authStr = b.getString(AccountManager.KEY_ACCOUNT_NAME) + ":" + b.getString(AccountManager.KEY_AUTHTOKEN);
-                return "Basic " + Base64.encodeToString(authStr.getBytes(), Base64.NO_WRAP);
+                Log.d("getAuthToken", Log.getStackTraceString(e));
             }
         }
         return "";
