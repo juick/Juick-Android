@@ -102,7 +102,7 @@ public class PMFragment extends BaseFragment {
 
         adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId), new ImageLoader() {
             @Override
-            public void loadImage(ImageView imageView, String url) {
+            public void loadImage(ImageView imageView, String url, Object object) {
                 Glide.with(imageView.getContext())
                         .load(url)
                         .into(imageView);

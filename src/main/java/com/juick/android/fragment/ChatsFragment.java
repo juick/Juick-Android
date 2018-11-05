@@ -74,7 +74,7 @@ public class ChatsFragment extends BaseFragment {
 
         final DialogsListAdapter<Chat> dialogListAdapter = new DialogsListAdapter<>(new ImageLoader() {
             @Override
-            public void loadImage(ImageView imageView, String url) {
+            public void loadImage(ImageView imageView, String url, Object object) {
                 Glide.with(imageView.getContext())
                         .load(url)
                         .into(imageView);
