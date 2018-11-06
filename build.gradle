@@ -48,8 +48,8 @@ android {
     buildToolsVersion '28.0.3'
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 28
-        versionCode 87
+        targetSdkVersion 27
+        versionCode 88
         versionName '3.1'
         applicationId "com.juick"
         buildConfigField "String", "API_ENDPOINT", '"https://api.juick.com/"'
