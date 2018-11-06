@@ -2,12 +2,14 @@ package com.juick.api.model;
 
 import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
+import com.juick.api.JuickDateConverter;
 import com.juick.api.RestClient;
 import com.stfalcon.chatkit.commons.models.IDialog;
 import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,8 +24,12 @@ public class Chat implements IDialog {
     public int uid;
     @JsonField
     public int MessagesCount;
+    @JsonField(typeConverter = JuickDateConverter.class)
+    public Date lastMessageTimestamp;
+    @JsonField
+    public String lastMessageText;
 
-    public Post lastMessage;
+    private Post lastMessage;
 
     @Override
     public String getId() {
@@ -52,6 +58,8 @@ public class Chat implements IDialog {
         }
         Post dummyPost = Post.empty();
         dummyPost.user = (User) getUsers().get(0);
+        dummyPost.body = lastMessageText;
+        dummyPost.timestamp = lastMessageTimestamp;
         return dummyPost;
     }
 
