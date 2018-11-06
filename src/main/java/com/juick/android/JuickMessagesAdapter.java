@@ -20,16 +20,15 @@ package com.juick.android;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,7 +37,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
+import co.lujun.androidtagview.TagContainerLayout;
+import co.lujun.androidtagview.TagView;
 import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
@@ -53,9 +53,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import co.lujun.androidtagview.TagContainerLayout;
-import co.lujun.androidtagview.TagView;
 
 /**
  *
@@ -463,9 +460,17 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             textTextView = itemView.findViewById(R.id.text);
             photoImageView = itemView.findViewById(R.id.photo);
             likesTextView = itemView.findViewById(R.id.likes);
+            if (likesTextView != null) {
+                likesTextView.setCompoundDrawables(VectorDrawableCompat.create(itemView.getContext().getResources(),
+                        R.drawable.ic_ei_heart, null), null, null, null);
+            }
             midTextView = itemView.findViewById(R.id.mid);
             ViewUtil.setTint(likesTextView);
             repliesTextView = itemView.findViewById(R.id.replies);
+            if (repliesTextView != null) {
+                repliesTextView.setCompoundDrawables(VectorDrawableCompat.create(itemView.getContext().getResources(),
+                        R.drawable.ic_ei_comment, null), null, null, null);
+            }
             ViewUtil.setTint(repliesTextView);
             backImageView = itemView.findViewById(R.id.back_imageView);
             menuImageView = itemView.findViewById(R.id.menu_imageView);
