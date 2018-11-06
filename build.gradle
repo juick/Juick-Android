@@ -52,6 +52,7 @@ android {
         versionCode 88
         versionName '3.1'
         applicationId "com.juick"
+        vectorDrawables.useSupportLibrary = true
         buildConfigField "String", "API_ENDPOINT", '"https://api.juick.com/"'
         buildConfigField "String", "API_ENDPOINT_FALLBACK", '"http://api.juick.com/"'
         buildConfigField "String", "IMAGES_ENDPOINT", '"https://i.juick.com/"'

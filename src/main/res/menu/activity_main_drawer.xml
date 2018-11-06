@@ -4,15 +4,15 @@
         <group android:checkableBehavior="single">
             <item
                 android:id="@+id/messages"
-                android:icon="@drawable/ic_comment_black_24dp"
+                android:icon="@drawable/ic_ei_search"
                 android:title="@string/Discover"/>
             <item
                 android:id="@+id/feed"
-                android:icon="@drawable/ic_comment_black_24dp"
+                android:icon="@drawable/ic_ei_comment"
                 android:title="@string/Discussions"/>
             <item
                 android:id="@+id/chats"
-                android:icon="@drawable/ic_chat_black_24dp"
+                android:icon="@drawable/ic_ei_envelope"
                 android:title="@string/PMs"/>
         </group>
 </menu>
