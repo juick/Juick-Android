@@ -13,6 +13,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bluelinelabs.logansquare.LoganSquare;
@@ -78,10 +79,14 @@ public class FCMReceiverService extends FirebaseMessagingService {
                 title += ": " + jmsg.getTagsString();
             }
             String body;
-            if (jmsg.body.length() > 64) {
-                body = jmsg.body.substring(0, 60) + "...";
+            if (TextUtils.isEmpty(jmsg.body)) {
+                body = "sent an image";
             } else {
-                body = jmsg.body;
+                if (jmsg.body.length() > 64) {
+                    body = jmsg.body.substring(0, 60) + "...";
+                } else {
+                    body = jmsg.body;
+                }
             }
 
             PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT);
