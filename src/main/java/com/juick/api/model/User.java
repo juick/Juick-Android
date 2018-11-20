@@ -13,7 +13,7 @@ import com.stfalcon.chatkit.commons.models.IUser;
 public class User implements IUser {
 
     @JsonField
-    public Integer uid;
+    public Integer uid = 0;
     @JsonField
     public String uname;
     @JsonField
