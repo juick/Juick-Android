@@ -31,7 +31,7 @@ dependencies {
     annotationProcessor 'com.bluelinelabs:logansquare-compiler:1.3.7'
     implementation 'com.bluelinelabs:logansquare:1.3.7'
     implementation "com.github.aurae.retrofit2:converter-logansquare:1.4.1"
-    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'co.lujun:androidtagview:1.1.4'
@@ -49,7 +49,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 91
+        versionCode 92
         versionName '3.1'
         applicationId "com.juick"
         vectorDrawables.useSupportLibrary = true
