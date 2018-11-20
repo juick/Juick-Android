@@ -197,7 +197,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         final Post post = postList.get(position);
         boolean isThread = type != TYPE_THREAD_POST;
         if (post.user != null) {
-            Glide.with(holder.itemView.getContext()).load(RestClient.getImagesUrl() + "a/" + post.user.uid + ".png").into(holder.upicImageView);
+            Glide.with(holder.itemView.getContext()).load(post.user.avatar).into(holder.upicImageView);
             holder.usernameTextView.setText(post.user.uname);
             holder.timestampTextView.setText(formatMessageTimestamp(post));
             if (!isThread) {

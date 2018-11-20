@@ -137,7 +137,7 @@ public class ContactsSyncService extends Service {
 
         Bitmap photo = null;
         try {
-            photo = Glide.with(context).asBitmap().load("http://i.juick.com/a/" + user.uid + ".png")
+            photo = Glide.with(context).asBitmap().load(user.avatar)
                     .submit(200, 200)
                     .get();
         } catch (InterruptedException | ExecutionException e) {

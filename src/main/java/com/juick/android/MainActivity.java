@@ -95,7 +95,7 @@ public class MainActivity extends BaseActivity
                     List<User> users = response.body();
                     if (users != null && users.size() > 0) {
                         Utils.myId = users.get(0).uid;
-                        String avatarUrl = RestClient.getImagesUrl() + "a/" + Utils.myId + ".png";
+                        String avatarUrl = users.get(0).avatar;
                         Glide.with(imageHeader.getContext())
                                 .load(avatarUrl)
                                 .listener(GlidePalette.with(avatarUrl)

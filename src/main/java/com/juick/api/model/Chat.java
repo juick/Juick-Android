@@ -23,6 +23,8 @@ public class Chat implements IDialog {
     @JsonField
     public int uid;
     @JsonField
+    public String avatar;
+    @JsonField
     public int MessagesCount;
     @JsonField(typeConverter = JuickDateConverter.class)
     public Date lastMessageTimestamp;
@@ -38,7 +40,7 @@ public class Chat implements IDialog {
 
     @Override
     public String getDialogPhoto() {
-        return RestClient.getImagesUrl() + "a/" + uid + ".png";
+        return avatar;
     }
 
     @Override

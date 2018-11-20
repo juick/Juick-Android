@@ -1,8 +1,6 @@
 
 package com.juick.api.model;
 
-import android.os.Bundle;
-
 import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
 import com.juick.api.RestClient;
@@ -22,6 +20,8 @@ public class User implements IUser {
     public String fullname = null;
     @JsonField
     public boolean banned;
+    @JsonField
+    public String avatar;
 
     @Override
     public String getId() {
@@ -35,7 +35,7 @@ public class User implements IUser {
 
     @Override
     public String getAvatar() {
-        return RestClient.getImagesUrl() + "a/" + uid + ".png";
+        return avatar;
     }
     public static User newInstance(int uid, String uname) {
         User user = new User();

@@ -103,28 +103,25 @@ public class FCMReceiverService extends FirebaseMessagingService {
             notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.body));
 
             Handler handler = new Handler(Looper.getMainLooper());
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    GlideApp.with(App.getInstance()).asBitmap()
-                            .load(RestClient.getImagesUrl() + "a/" + jmsg.user.uid + ".png")
-                            .centerCrop()
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
-                                    notificationBuilder.setLargeIcon(resource);
-                                    if (Build.VERSION.SDK_INT < 26) {
-                                        notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
-                                                | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
-                                    }
-                                    FCMReceiverService.notify(jmsg, notificationBuilder);
+            handler.post(() -> {
+                GlideApp.with(App.getInstance()).asBitmap()
+                        .load(jmsg.user.avatar)
+                        .centerCrop()
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
+                                notificationBuilder.setLargeIcon(resource);
+                                if (Build.VERSION.SDK_INT < 26) {
+                                    notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
+                                            | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
                                 }
-                            });
+                                FCMReceiverService.notify(jmsg, notificationBuilder);
+                            }
+                        });
 
-                    notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
-                            App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
-                    FCMReceiverService.notify(jmsg, notificationBuilder);
-                }
+                notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
+                        App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
+                notify(jmsg, notificationBuilder);
             });
 
         } catch (Exception e) {
