@@ -147,10 +147,15 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.header:
+        if (v.getId() == R.id.header) {
+            if (Utils.hasAuth()) {
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
+                setTitle(R.string.Subscriptions);
+                replaceFragment(FeedBuilder.feedFor(UrlBuilder.goHome()));
+            } else {
                 showLogin();
-                break;
+            }
         }
     }
 
