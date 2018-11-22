@@ -30,12 +30,9 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
-import com.github.florent37.glidepalette.GlidePalette;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.fragment.ChatsFragment;
@@ -43,12 +40,11 @@ import com.juick.android.fragment.DiscoverFragment;
 import com.juick.android.fragment.ThreadFragment;
 import com.juick.api.RestClient;
 import com.juick.api.model.User;
-
-import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.util.List;
 
 /**
  *
@@ -86,8 +82,6 @@ public class MainActivity extends BaseActivity
         navHeader.setOnClickListener(this);
 
         final ImageView imageHeader = navigationView.getHeaderView(0).findViewById(R.id.profile_image);
-        final RelativeLayout header = navigationView.getHeaderView(0).findViewById(R.id.header);
-        final TextView usernameTitle = navigationView.getHeaderView(0).findViewById(R.id.title_textView);
         if (Utils.hasAuth()) {
             RestClient.getApi().getUsers(Utils.getNick()).enqueue(new Callback<List<User>>() {
                 @Override
@@ -98,10 +92,6 @@ public class MainActivity extends BaseActivity
                         String avatarUrl = users.get(0).avatar;
                         Glide.with(imageHeader.getContext())
                                 .load(avatarUrl)
-                                .listener(GlidePalette.with(avatarUrl)
-                                        .use(GlidePalette.Profile.MUTED)
-                                        .intoBackground(header, GlidePalette.Swatch.RGB)
-                                        .intoTextColor(usernameTitle, GlidePalette.Swatch.TITLE_TEXT_COLOR))
                                 .into(imageHeader);
                     }
                 }
@@ -183,7 +173,7 @@ public class MainActivity extends BaseActivity
             replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
