@@ -7,11 +7,12 @@ import android.util.Base64;
 import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.android.Utils;
+import com.github.aurae.retrofit2.LoganSquareConverterFactory;
+import com.juick.api.model.AuthToken;
 import com.juick.api.model.Pms;
 import com.juick.api.model.Post;
 import com.juick.api.model.Tag;
 import com.juick.api.model.User;
-import com.github.aurae.retrofit2.LoganSquareConverterFactory;
 import okhttp3.*;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -149,5 +150,13 @@ public class RestClient {
 
         @GET("/groups_pms")
         Call<Pms> groupsPms(@Query("cnt") int cnt);
+
+        @FormUrlEncoded
+        @POST("/_google")
+        Call<AuthToken> googleAuth(@Field("idToken") String token);
+        @FormUrlEncoded
+        @POST("/signup")
+        Call<Void> signup(@Field("username") String username, @Field("password") String password,
+                          @Field("verificationCode") String verificationCode);
     }
 }

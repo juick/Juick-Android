@@ -23,4 +23,9 @@
         <!-- <item name="android:ellipsize">end</item>-->
         <!-- <item name="android:textStyle">bold</item>-->
     </style>
+    <!-- Dark Buttons -->
+    <style name="ThemeOverlay.MyDarkButton" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="colorButtonNormal">@color/blue_grey_500</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
 </resources>

@@ -20,18 +20,28 @@ package com.juick.android;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
-import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.RestClient;
+import com.juick.api.model.AuthToken;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,10 +50,16 @@ import retrofit2.Response;
  *
  * @author Ugnich Anton
  */
-public class SignInActivity extends Activity implements OnClickListener {
+public class SignInActivity extends AppCompatActivity implements OnClickListener {
 
     private EditText etNick;
     private EditText etPassword;
+    private Button loginButton;
+
+    private static final int RC_SIGN_IN = 9001;
+    private static final int RC_SIGN_UP = 9002;
+
+    private GoogleSignInClient googleClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,16 +68,37 @@ public class SignInActivity extends Activity implements OnClickListener {
 
         etNick = findViewById(R.id.juickNick);
         etPassword = findViewById(R.id.juickPassword);
-        findViewById(R.id.buttonSave).setOnClickListener(this);
+        loginButton = findViewById(R.id.buttonSave);
+        loginButton.setOnClickListener(this);
+
+        // Button listeners
+        findViewById(R.id.sign_in_button).setOnClickListener(this);
+
+        // [START configure_signin]
+        // Configure sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getResources().getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        // [END configure_signin]
+
+        // [START build_client]
+        // Build a GoogleSignInClient with the options specified by gso.
+        googleClient = GoogleSignIn.getClient(this, gso);
+        // [END build_client]
+
+        // [START customize_button]
+        // Set the dimensions of the sign-in button.
+        SignInButton signInButton = findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_STANDARD);
+        signInButton.setColorScheme(SignInButton.COLOR_LIGHT);
 
         if (Utils.hasAuth()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-
-                public void onClick(DialogInterface arg0, int arg1) {
-                    setResult(RESULT_CANCELED);
-                    SignInActivity.this.finish();
-                }
+            builder.setNeutralButton(android.R.string.ok, (arg0, arg1) -> {
+                setResult(RESULT_CANCELED);
+                SignInActivity.this.finish();
             });
             builder.setMessage(R.string.Only_one_account);
             builder.show();
@@ -109,6 +146,66 @@ public class SignInActivity extends Activity implements OnClickListener {
                     }
                 });
                 break;
+            case R.id.sign_in_button:
+                signIn();
+                break;
+        }
+    }
+
+    private void signIn() {
+        Intent signInIntent = googleClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            // The Task returned from this call is always completed, no need to attach
+            // a listener.
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+        }
+        if (requestCode == RC_SIGN_UP && data != null) {
+            String nick = data.getStringExtra("nick");
+            String password = data.getStringExtra("password");
+            if (!TextUtils.isEmpty(nick)) {
+                etNick.setText(nick);
+                etPassword.setText(password);
+                loginButton.performClick();
+            }
+        }
+    }
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+
+            Log.i("GMS", "Success " + account.getIdToken());
+            RestClient.getApi().googleAuth(account.getIdToken()).enqueue(new Callback<AuthToken>() {
+                @Override
+                public void onResponse(Call<AuthToken> call, Response<AuthToken> response) {
+                    if (response.isSuccessful()) {
+                        Log.i("SERVER", response.body().getAuthCode());
+                        Intent signupIntent = new Intent(SignInActivity.this, SignUpActivity.class);
+                        signupIntent.putExtra("email", response.body().getAccount());
+                        signupIntent.putExtra("authCode", response.body().getAuthCode());
+                        startActivityForResult(signupIntent, RC_SIGN_UP);
+                    } else {
+                        Toast.makeText(App.getInstance(), "Email already registered", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<AuthToken> call, Throwable t) {
+
+                }
+            });
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Log.w("GMS", "signInResult:failed code=" + e.getStatusCode());
         }
     }
 }

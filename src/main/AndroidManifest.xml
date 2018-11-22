@@ -54,6 +54,10 @@
                 android:theme="@style/AppTheme.NoActionBar"
                 android:name=".android.SignInActivity"
                 android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
+        <activity
+                android:theme="@style/AppTheme.NoActionBar"
+                android:name=".android.SignUpActivity"
+                android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
         <activity android:name="com.juick.android.NewMessageActivity" android:label="@string/Juick" android:theme="@style/Theme.AppCompat.Light" android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>

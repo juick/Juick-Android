@@ -7,4 +7,6 @@
     <color name="colorPrimaryDark">#888888</color>
     <color name="colorClassic">#ddddd5</color>
     <color name="colorFunny">#ec4b98</color>
+    <color name="blue_grey_500">#607D8B</color>
+    <color name="blue_grey_900">#263238</color>
 </resources>

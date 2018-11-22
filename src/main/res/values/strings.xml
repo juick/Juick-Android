@@ -131,4 +131,6 @@
     <string name="Are_you_sure_delete">Are you sure delete message ?</string>
     <string name="Deleted">Deleted</string>
 
+    <string name="sign_out">Sign Out</string>
+    <string name="disconnect">Disconnect</string>
 </resources>
