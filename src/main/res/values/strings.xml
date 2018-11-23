@@ -35,6 +35,7 @@
     <string name="Juick_profile">Juick profile</string>
 
     <string name="network_error">Network error</string>
+    <string name="blacklist_error">User is in blacklist</string>
     
     <!-- Pull-to-refresh -->
     <string name="pull_to_refresh_pull_label">Pull to refresh...</string>

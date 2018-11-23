@@ -127,13 +127,10 @@ public class PMFragment extends BaseFragment {
             }
         });
         MessageInput messageInput = getActivity().findViewById(R.id.input);
-        messageInput.setInputListener(new MessageInput.InputListener() {
-            @Override
-            public boolean onSubmit(CharSequence input) {
-                postText(input.toString());
-                ViewUtil.hideKeyboard(getActivity());
-                return true;
-            }
+        messageInput.setInputListener(input -> {
+            postText(input.toString());
+            ViewUtil.hideKeyboard(getActivity());
+            return true;
         });
     }
 
@@ -150,9 +147,13 @@ public class PMFragment extends BaseFragment {
         RestClient.getApi().postPm(uname, body).enqueue(new Callback<Post>() {
             @Override
             public void onResponse(Call<Post> call, final Response<Post> response) {
-                onNewMessages(new ArrayList<Post>() {{
-                    add(response.body());
-                }});
+                if (response.isSuccessful()) {
+                    onNewMessages(new ArrayList<Post>() {{
+                        add(response.body());
+                    }});
+                } else {
+                    Toast.makeText(App.getInstance(), R.string.blacklist_error, Toast.LENGTH_LONG).show();
+                }
             }
 
             @Override
