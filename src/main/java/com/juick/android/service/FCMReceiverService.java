@@ -15,7 +15,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.bluelinelabs.logansquare.LoganSquare;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -25,7 +24,6 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.android.MainActivity;
 import com.juick.api.GlideApp;
-import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 
 import java.util.Map;
@@ -138,7 +136,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
     }
 
     private static Integer getId(Post jmsg) {
-        return jmsg.mid != 0 ? jmsg.mid + jmsg.rid : jmsg.user.uid;
+        return jmsg.mid != 0 ? jmsg.mid : jmsg.user.uid;
     }
 
     public static Intent getIntent(String msgStr, Post jmsg) {
