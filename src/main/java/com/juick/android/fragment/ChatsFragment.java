@@ -95,9 +95,10 @@ public class ChatsFragment extends BaseFragment {
             @Override
             public void onResponse(Call<Pms> call, Response<Pms> response) {
                 if (response.isSuccessful()) {
-                    dialogListAdapter.setItems(
-                            response.body().pms
-                    );
+                    Pms pms = response.body();
+                    if (pms.pms != null) {
+                        dialogListAdapter.setItems(pms.pms);
+                    }
                 }
             }
 

@@ -100,15 +100,10 @@ public class PMFragment extends BaseFragment {
 
         getActivity().setTitle(uname);
 
-        adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId), new ImageLoader() {
-            @Override
-            public void loadImage(ImageView imageView, String url, Object object) {
-                Glide.with(imageView.getContext())
+        adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId),
+                (imageView, url, object) -> Glide.with(imageView.getContext())
                         .load(url)
-                        .into(imageView);
-
-            }
-        });
+                        .into(imageView));
         MessagesList messagesList = getActivity().findViewById(R.id.messagesList);
         messagesList.setAdapter(adapter);
 

@@ -54,19 +54,16 @@ public class RestClient {
                                             .putExtra(EXTRA_PROGRESS, (int)(100 * bytesWritten / contentLength)));
                         }
                     }))
-                    .addInterceptor(new Interceptor() {
-                        @Override
-                        public Response intercept(Interceptor.Chain chain) throws IOException {
-                            Request original = chain.request();
+                    .addInterceptor(chain -> {
+                        Request original = chain.request();
 
-                            Request.Builder requestBuilder = original.newBuilder()
-                                    .header("Authorization", Utils.getBasicAuthString())
-                                    .header("Accept", "application/json")
-                                    .method(original.method(), original.body());
-                            //Log.e("intercept", requestBuilder.toString());
-                            Request request = requestBuilder.build();
-                            return chain.proceed(request);
-                        }
+                        Request.Builder requestBuilder = original.newBuilder()
+                                .header("Authorization", Utils.getBasicAuthString())
+                                .header("Accept", "application/json")
+                                .method(original.method(), original.body());
+                        //Log.e("intercept", requestBuilder.toString());
+                        Request request = requestBuilder.build();
+                        return chain.proceed(request);
                     })
                     .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                     .build();
@@ -87,19 +84,16 @@ public class RestClient {
                 "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
 
         OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Interceptor.Chain chain) throws IOException {
-                        Request original = chain.request();
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
 
-                        Request.Builder requestBuilder = original.newBuilder()
-                                .header("Authorization", basic)
-                                .header("Accept", "application/json")
-                                .method(original.method(), original.body());
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .header("Authorization", basic)
+                            .header("Accept", "application/json")
+                            .method(original.method(), original.body());
 
-                        Request request = requestBuilder.build();
-                        return chain.proceed(request);
-                    }
+                    Request request = requestBuilder.build();
+                    return chain.proceed(request);
                 }).build();
 
         Retrofit retrofit = new Retrofit.Builder()
