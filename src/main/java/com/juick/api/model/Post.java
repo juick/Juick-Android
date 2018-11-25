@@ -46,6 +46,8 @@ public class Post implements IMessage {
     public Video video;
     @JsonField
     public int rid;
+    @JsonField
+    private boolean service;
 
     @JsonIgnore
     public int nextRid;
@@ -90,5 +92,13 @@ public class Post implements IMessage {
         post.timestamp = new Date();
         post.body = "";
         return post;
+    }
+
+    public boolean isService() {
+        return service;
+    }
+
+    public void setService(boolean service) {
+        this.service = service;
     }
 }

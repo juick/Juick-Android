@@ -74,6 +74,10 @@ public class FCMReceiverService extends FirebaseMessagingService {
     public static void showNotification(final String msgStr) {
         try {
             final Post jmsg = LoganSquare.parse(msgStr, Post.class);
+            if (jmsg.isService()) {
+                notificationManager.cancel(getId(jmsg));
+                return;
+            }
             String title = "@" + jmsg.user.uname;
             if (!jmsg.tags.isEmpty()) {
                 title += ": " + jmsg.getTagsString();
