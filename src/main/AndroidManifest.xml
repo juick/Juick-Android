@@ -17,7 +17,7 @@
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
-    <application android:icon="@drawable/ic_launcher"
+    <application android:icon="@mipmap/ic_launcher"
                  android:theme="@style/AppTheme"
                  android:allowBackup="true"
                  android:supportsRtl="true"

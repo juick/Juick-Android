@@ -2,7 +2,7 @@
 <ContactsSource xmlns:android="http://schemas.android.com/apk/res/android">
     <ContactsDataKind
         android:mimeType="vnd.android.cursor.item/vnd.com.juick.profile"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:summaryColumn="data3"
         android:detailColumn="data4"/>
 </ContactsSource>
