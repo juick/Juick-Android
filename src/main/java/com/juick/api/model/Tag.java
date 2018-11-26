@@ -1,14 +1,16 @@
 package com.juick.api.model;
 
-import com.bluelinelabs.logansquare.annotation.JsonField;
-import com.bluelinelabs.logansquare.annotation.JsonObject;
-
 /**
  * Created by gerc on 15.02.2016.
  */
-@JsonObject
 public class Tag {
+    private String tag;
 
-    @JsonField
-    public String tag;
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 }

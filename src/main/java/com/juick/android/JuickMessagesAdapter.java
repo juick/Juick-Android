@@ -39,11 +39,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import co.lujun.androidtagview.TagContainerLayout;
 import co.lujun.androidtagview.TagView;
-import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.widget.util.ViewUtil;
-import com.juick.api.RestClient;
+import com.juick.api.GlideApp;
 import com.juick.api.model.Post;
 
 import java.text.DateFormat;
@@ -124,7 +123,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public void addDisabledItem(String txt, int position) {
         Post post = new Post();
-        post.body = txt;
+        post.setBody(txt);
         postList.add(position, post);
         notifyItemRangeInserted(position, postList.size());
     }
@@ -135,7 +134,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             return TYPE_FOOTER;
         if (position == 0 && hasHeader)
             return TYPE_HEADER;
-        if (postList.get(position).rid == 0)
+        if (postList.get(position).getRid() == 0)
             return TYPE_THREAD_POST;
         return TYPE_ITEM;
     }
@@ -196,13 +195,15 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         final VH holder = (VH) viewHolder;
         final Post post = postList.get(position);
         boolean isThread = type != TYPE_THREAD_POST;
-        if (post.user != null) {
-            Glide.with(holder.itemView.getContext()).load(post.user.avatar).into(holder.upicImageView);
-            holder.usernameTextView.setText(post.user.uname);
+        if (post.getUser() != null) {
+            GlideApp.with(holder.itemView.getContext())
+                    .load(post.getUser().getAvatar())
+                    .fallback(R.drawable.av_96).into(holder.upicImageView);
+            holder.usernameTextView.setText(post.getUser().getUname());
             holder.timestampTextView.setText(formatMessageTimestamp(post));
             if (!isThread) {
                 holder.tagContainerLayout.removeAllTags();
-                holder.tagContainerLayout.setTags(post.tags);
+                holder.tagContainerLayout.setTags(post.getTags());
                 holder.tagContainerLayout.setOnTagClickListener(new TagView.OnTagClickListener() {
                     @Override
                     public void onTagClick(int position, String text) {
@@ -211,7 +212,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                         activity.setTitle("*" + text);
                         activity.replaceFragment(
                                 FeedBuilder.feedFor(
-                                        UrlBuilder.getPostsByTag(post.user.uid, text)));
+                                        UrlBuilder.getPostsByTag(post.getUser().getUid(), text)));
                     }
 
                     @Override
@@ -225,32 +226,32 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 });
             }
             holder.textTextView.setText("");
-            if (!TextUtils.isEmpty(post.body)) {
+            if (!TextUtils.isEmpty(post.getBody())) {
                 holder.textTextView.setText(formatMessageText(post));
             }
             holder.textTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-            if (post.photo != null && post.photo.small != null) {
-                Glide.with(holder.itemView.getContext()).load(post.photo.small).into(holder.photoImageView);
+            if (post.getPhoto() != null && post.getPhoto().getSmall() != null) {
+                GlideApp.with(holder.itemView.getContext()).load(post.getPhoto().getSmall()).into(holder.photoImageView);
                 holder.photoImageView.setVisibility(View.VISIBLE);
             } else {
                 holder.photoImageView.setVisibility(View.GONE);
             }
             if (!isThread) {
-                if (post.replies > 0) {
+                if (post.getReplies() > 0) {
                     holder.repliesTextView.setVisibility(View.VISIBLE);
-                    holder.repliesTextView.setText(Integer.toString(post.replies));
+                    holder.repliesTextView.setText(Integer.toString(post.getReplies()));
                 } else {
                     holder.repliesTextView.setVisibility(View.GONE);
                 }
-                if (post.likes > 0) {
+                if (post.getLikes() > 0) {
                     holder.likesTextView.setVisibility(View.VISIBLE);
-                    holder.likesTextView.setText(Integer.toString(post.likes));
+                    holder.likesTextView.setText(Integer.toString(post.getLikes()));
                 } else {
                     holder.likesTextView.setVisibility(View.GONE);
                 }
             } else {
-                if (post.nextRid == post.rid) {
+                if (post.nextRid == post.getRid()) {
                     holder.backImageView.setVisibility(View.VISIBLE);
                     holder.backImageView.setTag(post);
                     holder.backImageView.setOnClickListener(new View.OnClickListener() {
@@ -276,8 +277,8 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorSecondary));
                 }
             }
-            if (post.rid > 0 && post.replyto > 0) {
-                holder.midTextView.setText(String.format("%s %s", inReplyTo, post.to.uname));
+            if (post.getRid() > 0 && post.getReplyto() > 0) {
+                holder.midTextView.setText(String.format("%s %s", inReplyTo, post.getTo().getUname()));
                 holder.midTextView.setVisibility(View.VISIBLE);
                 holder.midTextView.setTag(post);
                 holder.midTextView.setOnClickListener(new View.OnClickListener() {
@@ -285,7 +286,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     public void onClick(View v) {
                         Post p = ((Post) v.getTag());
                         if (scrollListener != null)
-                            scrollListener.onScrollToPost(v, p.replyto, p.rid);
+                            scrollListener.onScrollToPost(v, p.getReplyto(), p.getRid());
                     }
                 });
             } else
@@ -308,7 +309,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private String formatMessageTimestamp(Post jmsg) {
-        return outDateFormat.format(jmsg.timestamp);
+        return outDateFormat.format(jmsg.getTimestamp());
     }
 
 
@@ -386,7 +387,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private SpannableStringBuilder formatMessageText(Post jmsg) {
-        Spanned text = Html.fromHtml(formatMessage(jmsg.body));
+        Spanned text = Html.fromHtml(formatMessage(jmsg.getBody()));
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         ssb.append(text);
         URLSpan[] urlSpans = ssb.getSpans(0, ssb.length(), URLSpan.class);

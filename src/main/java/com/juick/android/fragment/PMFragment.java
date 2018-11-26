@@ -30,19 +30,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Toast;
-
-import com.bluelinelabs.logansquare.LoganSquare;
 import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.Utils;
 import com.juick.android.service.FCMReceiverService;
 import com.juick.android.widget.util.ViewUtil;
+import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
-import com.stfalcon.chatkit.commons.ImageLoader;
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
@@ -75,7 +72,7 @@ public class PMFragment extends BaseFragment {
 
             onNewMessages(new ArrayList<Post>(){{
                 try {
-                    add(LoganSquare.parse(intent.getStringExtra("message"), Post.class));
+                    add(RestClient.getJsonMapper().readValue(intent.getStringExtra("message"), Post.class));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -101,7 +98,7 @@ public class PMFragment extends BaseFragment {
         getActivity().setTitle(uname);
 
         adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId),
-                (imageView, url, object) -> Glide.with(imageView.getContext())
+                (imageView, url, object) -> GlideApp.with(imageView.getContext())
                         .load(url)
                         .into(imageView));
         MessagesList messagesList = getActivity().findViewById(R.id.messagesList);

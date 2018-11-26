@@ -32,12 +32,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.fragment.ChatsFragment;
 import com.juick.android.fragment.DiscoverFragment;
 import com.juick.android.fragment.ThreadFragment;
+import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.User;
 import retrofit2.Call;
@@ -88,10 +88,11 @@ public class MainActivity extends BaseActivity
                 public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                     List<User> users = response.body();
                     if (users != null && users.size() > 0) {
-                        Utils.myId = users.get(0).uid;
-                        String avatarUrl = users.get(0).avatar;
-                        Glide.with(imageHeader.getContext())
+                        Utils.myId = users.get(0).getUid();
+                        String avatarUrl = users.get(0).getAvatar();
+                        GlideApp.with(imageHeader.getContext())
                                 .load(avatarUrl)
+                                .placeholder(R.drawable.av_96)
                                 .into(imageHeader);
                     }
                 }

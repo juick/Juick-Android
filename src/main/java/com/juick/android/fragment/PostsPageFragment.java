@@ -107,7 +107,7 @@ public class PostsPageFragment extends BaseFragment {
         adapter.setOnItemClickListener(new JuickMessagesAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int pos) {
-                getBaseActivity().replaceFragment(ThreadFragment.newInstance(adapter.getItem(pos).mid));
+                getBaseActivity().replaceFragment(ThreadFragment.newInstance(adapter.getItem(pos).getMid()));
             }
         });
         adapter.setOnMenuListener(new JuickMessageMenu(adapter.getItems()));
@@ -121,9 +121,9 @@ public class PostsPageFragment extends BaseFragment {
                 if (loading) return true;
                 loading = true;
                 Post lastItem = adapter.getItem(adapter.getItemCount() - 1);
-                String requestUrl = apiUrl + "&before_mid=" + lastItem.mid;
+                String requestUrl = apiUrl + "&before_mid=" + lastItem.getMid();
                 if (apiUrl.equals(UrlBuilder.getDiscussions().toString())) {
-                    requestUrl = apiUrl + "?to=" + String.valueOf(lastItem.timestamp.getTime());
+                    requestUrl = apiUrl + "?to=" + String.valueOf(lastItem.getTimestamp().getTime());
                 }
                 RestClient.getApi().getPosts(requestUrl).enqueue(new Callback<List<Post>>() {
                     @Override

@@ -15,7 +15,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
-import com.bluelinelabs.logansquare.LoganSquare;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -24,6 +23,7 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.android.MainActivity;
 import com.juick.api.GlideApp;
+import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 
 import java.util.Map;
@@ -71,23 +71,23 @@ public class FCMReceiverService extends FirebaseMessagingService {
 
     public static void showNotification(final String msgStr) {
         try {
-            final Post jmsg = LoganSquare.parse(msgStr, Post.class);
+            final Post jmsg = RestClient.getJsonMapper().readValue(msgStr, Post.class);
             if (jmsg.isService()) {
                 notificationManager.cancel(getId(jmsg));
                 return;
             }
-            String title = "@" + jmsg.user.uname;
-            if (!jmsg.tags.isEmpty()) {
+            String title = "@" + jmsg.getUser().getUname();
+            if (!jmsg.getTags().isEmpty()) {
                 title += ": " + jmsg.getTagsString();
             }
             String body;
-            if (TextUtils.isEmpty(jmsg.body)) {
+            if (TextUtils.isEmpty(jmsg.getBody())) {
                 body = "sent an image";
             } else {
-                if (jmsg.body.length() > 64) {
-                    body = jmsg.body.substring(0, 60) + "...";
+                if (jmsg.getBody().length() > 64) {
+                    body = jmsg.getBody().substring(0, 60) + "...";
                 } else {
-                    body = jmsg.body;
+                    body = jmsg.getBody();
                 }
             }
 
@@ -102,12 +102,12 @@ public class FCMReceiverService extends FirebaseMessagingService {
                     .setGroup("messages")
                     .setGroupSummary(true);
             notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
-            notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.body));
+            notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.getBody()));
 
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(() -> {
                 GlideApp.with(App.getInstance()).asBitmap()
-                        .load(jmsg.user.avatar)
+                        .load(jmsg.getUser().getAvatar())
                         .centerCrop()
                         .into(new SimpleTarget<Bitmap>() {
                             @Override
@@ -136,7 +136,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
     }
 
     private static Integer getId(Post jmsg) {
-        return jmsg.mid != 0 ? jmsg.mid : jmsg.user.uid;
+        return jmsg.getMid() != 0 ? jmsg.getMid() : jmsg.getUser().getUid();
     }
 
     public static Intent getIntent(String msgStr, Post jmsg) {
@@ -144,13 +144,13 @@ public class FCMReceiverService extends FirebaseMessagingService {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.setAction(MainActivity.PUSH_ACTION);
-        intent.putExtra(MainActivity.ARG_UNAME, jmsg.user.uname);
-        intent.putExtra(MainActivity.ARG_UID, jmsg.user.uid);
-        if (jmsg.mid == 0) {
+        intent.putExtra(MainActivity.ARG_UNAME, jmsg.getUser().getUname());
+        intent.putExtra(MainActivity.ARG_UID, jmsg.getUser().getUid());
+        if (jmsg.getMid() == 0) {
             LocalBroadcastManager.getInstance(App.getInstance()).sendBroadcast(new Intent(GCM_EVENT_ACTION).putExtra("message", msgStr));
             intent.putExtra(MainActivity.PUSH_ACTION_SHOW_PM, true);
         } else {
-            intent.putExtra(MainActivity.ARG_MID, jmsg.mid);
+            intent.putExtra(MainActivity.ARG_MID, jmsg.getMid());
             intent.putExtra(MainActivity.PUSH_ACTION_SHOW_THREAD, true);
         }
         return intent;

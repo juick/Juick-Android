@@ -53,7 +53,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bluelinelabs.logansquare.LoganSquare;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.JuickMessageMenu;
@@ -163,7 +162,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
             @Override
             public void onItemClick(View view, int position) {
                 Post post = adapter.getItem(position);
-                onReply(post.rid, post.body);
+                onReply(post.getRid(), post.getBody());
             }
         });
         adapter.setOnMenuListener(new JuickMessageMenu(adapter.getItems()));
@@ -173,7 +172,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                 int pos = 0;
                 for (int i = 0; i < adapter.getItems().size(); ++i) {
                     Post p = adapter.getItems().get(i);
-                    if (p.rid == replyTo) {
+                    if (p.getRid() == replyTo) {
                         p.nextRid = replyTo;
                         if (p.prevRid == 0)
                             p.prevRid = rid;
@@ -247,14 +246,12 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                         }
                         if (jsonStr != null && !jsonStr.trim().isEmpty()) {
                             try {
-                                final Post reply = LoganSquare.parse(jsonStr, Post.class);
+                                final Post reply = RestClient.getJsonMapper().readValue(jsonStr, Post.class);
                                 ((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(250);
-                                getActivity().runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        adapter.addData(reply);
-                                        linearLayoutManager.smoothScrollToPosition(recyclerView,
-                                                new RecyclerView.State(), reply.rid);
-                                    }
+                                getActivity().runOnUiThread(() -> {
+                                    adapter.addData(reply);
+                                    linearLayoutManager.smoothScrollToPosition(recyclerView,
+                                            new RecyclerView.State(), reply.getRid());
                                 });
                             } catch (IOException e) {
                                 Log.d("Websocket", e.getLocalizedMessage());
@@ -280,7 +277,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         if (!isAdded()) {
             return;
         }
-        String replies = getResources().getString(R.string.Replies) + " (" + Integer.toString(adapter.getItemCount() - 1) + ")";
+        String replies = getResources().getString(R.string.Replies) + " (" + (adapter.getItemCount() - 1) + ")";
         adapter.addDisabledItem(replies, 1);
     }
 

@@ -1,20 +1,36 @@
 
 package com.juick.api.model;
 
-import com.bluelinelabs.logansquare.annotation.JsonField;
-import com.bluelinelabs.logansquare.annotation.JsonObject;
-
 /**
  * Created by gerc on 10.02.2016.
  */
-@JsonObject
 public class Photo {
 
-    @JsonField
-    public String thumbnail;
-    @JsonField
-    public String small;
-    @JsonField
-    public String medium;
+    private String thumbnail;
+    private String small;
+    private String medium;
 
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public String getSmall() {
+        return small;
+    }
+
+    public void setSmall(String small) {
+        this.small = small;
+    }
+
+    public String getMedium() {
+        return medium;
+    }
+
+    public void setMedium(String medium) {
+        this.medium = medium;
+    }
 }

@@ -33,6 +33,7 @@ import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.juick.R;
+import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.User;
 import retrofit2.Response;
@@ -97,7 +98,7 @@ public class ContactsSyncService extends Service {
                 List<User> friends = response.body();
                 if (friends != null) {
                     for (User user : friends) {
-                        if (!localContacts.containsKey(user.uname)) {
+                        if (!localContacts.containsKey(user.getUname())) {
                             addContact(context, account, user);
                         }
                     }
@@ -116,28 +117,29 @@ public class ContactsSyncService extends Service {
         ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(RawContacts.CONTENT_URI);
         builder.withValue(RawContacts.ACCOUNT_NAME, account.name);
         builder.withValue(RawContacts.ACCOUNT_TYPE, account.type);
-        builder.withValue(RawContacts.SYNC1, user.uname);
+        builder.withValue(RawContacts.SYNC1, user.getUname());
         operationList.add(builder.build());
 
         // Nickname
         builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
         builder.withValueBackReference(ContactsContract.CommonDataKinds.Nickname.RAW_CONTACT_ID, 0);
         builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE);
-        builder.withValue(ContactsContract.CommonDataKinds.Nickname.NAME, user.uname);
+        builder.withValue(ContactsContract.CommonDataKinds.Nickname.NAME, user.getUname());
         operationList.add(builder.build());
 
         // StructuredName
-        if (user.fullname != null) {
+        if (user.getFullname() != null) {
             builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
             builder.withValueBackReference(ContactsContract.CommonDataKinds.StructuredName.RAW_CONTACT_ID, 0);
             builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
-            builder.withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, user.fullname);
+            builder.withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, user.getFullname());
             operationList.add(builder.build());
         }
 
         Bitmap photo = null;
         try {
-            photo = Glide.with(context).asBitmap().load(user.avatar)
+            photo = GlideApp.with(context).asBitmap().load(user.getAvatar())
+                    .placeholder(R.drawable.av_96)
                     .submit(200, 200)
                     .get();
         } catch (InterruptedException | ExecutionException e) {
@@ -158,10 +160,10 @@ public class ContactsSyncService extends Service {
         builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
         builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0);
         builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.com.juick.profile");
-        builder.withValue(ContactsContract.Data.DATA1, user.uid);
-        builder.withValue(ContactsContract.Data.DATA2, user.uname);
+        builder.withValue(ContactsContract.Data.DATA1, user.getUid());
+        builder.withValue(ContactsContract.Data.DATA2, user.getUname());
         builder.withValue(ContactsContract.Data.DATA3, context.getString(R.string.Juick_profile));
-        builder.withValue(ContactsContract.Data.DATA4, user.uname);
+        builder.withValue(ContactsContract.Data.DATA4, user.getUname());
         operationList.add(builder.build());
 
         try {

@@ -135,7 +135,7 @@ public class TagsFragment extends BaseFragment {
                 progressBar.setVisibility(View.GONE);
                 List<String> listAdapter = new ArrayList<>();
                 for (Tag tag : response.body()) {
-                    listAdapter.add(tag.tag);
+                    listAdapter.add(tag.getTag());
                 }
                 adapter.addData(listAdapter);
             }

@@ -1,27 +1,18 @@
 
 package com.juick.api.model;
 
-import com.bluelinelabs.logansquare.annotation.JsonField;
-import com.bluelinelabs.logansquare.annotation.JsonObject;
-import com.juick.api.RestClient;
 import com.stfalcon.chatkit.commons.models.IUser;
 
 /**
  * Created by gerc on 10.02.2016.
  */
-@JsonObject
 public class User implements IUser {
 
-    @JsonField
-    public Integer uid = 0;
-    @JsonField
-    public String uname;
-    @JsonField
-    public String fullname = null;
-    @JsonField
-    public boolean banned;
-    @JsonField
-    public String avatar;
+    private Integer uid = 0;
+    private String uname;
+    private String fullname = null;
+    private boolean banned;
+    private String avatar;
 
     @Override
     public String getId() {
@@ -42,5 +33,41 @@ public class User implements IUser {
         user.uid = uid;
         user.uname = uname;
         return user;
+    }
+
+    public Integer getUid() {
+        return uid;
+    }
+
+    public void setUid(Integer uid) {
+        this.uid = uid;
+    }
+
+    public String getUname() {
+        return uname;
+    }
+
+    public void setUname(String uname) {
+        this.uname = uname;
+    }
+
+    public String getFullname() {
+        return fullname;
+    }
+
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
+    }
+
+    public boolean isBanned() {
+        return banned;
+    }
+
+    public void setBanned(boolean banned) {
+        this.banned = banned;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }

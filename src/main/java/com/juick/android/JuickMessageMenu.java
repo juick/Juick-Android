@@ -19,7 +19,6 @@ package com.juick.android;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -27,7 +26,6 @@ import android.view.View;
 import android.widget.Toast;
 import com.juick.App;
 import com.juick.R;
-import com.juick.android.fragment.PostsPageFragment;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
@@ -114,29 +112,29 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
         if (Utils.myId == 0) {
             menuLength = 2;
             items = Arrays.asList(
-                    '@' + selectedPost.user.uname + " " + context.getString(R.string.blog),
+                    '@' + selectedPost.getUser().getUname() + " " + context.getString(R.string.blog),
                     context.getString(R.string.Share)
             ).toArray(new CharSequence[0]);
             currentActions[0] = MENU_ACTION_BLOG;
             currentActions[1] = MENU_ACTION_SHARE;
-        } else if (selectedPost.user.uid == Utils.myId) {
+        } else if (selectedPost.getUser().getUid() == Utils.myId) {
             menuLength = 1;
             items = new CharSequence[menuLength];
-            items[0] = selectedPost.rid == 0 ? context.getString(R.string.DeletePost) : context.getString(R.string.DeleteComment);
+            items[0] = selectedPost.getRid() == 0 ? context.getString(R.string.DeletePost) : context.getString(R.string.DeleteComment);
             currentActions[0] = MENU_ACTION_DELETE_POST;
         } else {
             menuLength = 4;
-            if (selectedPost.rid == 0) {
+            if (selectedPost.getRid() == 0) {
                 menuLength++;
             }
             items = new CharSequence[menuLength];
 
             int i = 0;
-            if (selectedPost.rid == 0) {
+            if (selectedPost.getRid() == 0) {
                 items[i++] = context.getString(R.string.Recommend_message);
                 currentActions[i - 1] = MENU_ACTION_RECOMMEND;
             }
-            String UName = selectedPost.user.uname;
+            String UName = selectedPost.getUser().getUname();
             items[i++] = '@' + UName + " " + context.getString(R.string.blog);
             currentActions[i - 1] = MENU_ACTION_BLOG;
             items[i++] = App.getInstance().getResources().getString(R.string.Subscribe_to) + " @" + UName;
@@ -157,35 +155,35 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
         switch (action) {
             case MENU_ACTION_RECOMMEND:
                 confirmAction(R.string.Are_you_sure_recommend,
-                        () -> postMessage("! #" + selectedPost.mid, context.getString(R.string.Recommended)));
+                        () -> postMessage("! #" + selectedPost.getMid(), context.getString(R.string.Recommended)));
                 break;
             case MENU_ACTION_BLOG:
-                context.setTitle(selectedPost.user.uname);
+                context.setTitle(selectedPost.getUser().getUname());
                 ((BaseActivity) context).replaceFragment(
                         FeedBuilder.feedFor(
-                                UrlBuilder.getUserPostsByName(selectedPost.user.uname)
+                                UrlBuilder.getUserPostsByName(selectedPost.getUser().getUname())
                         )
                 );
                 break;
             case MENU_ACTION_SUBSCRIBE:
                 confirmAction(R.string.Are_you_sure_subscribe,
-                        () -> postMessage("S @" + selectedPost.user.uname, context.getString(R.string.Subscribed)));
+                        () -> postMessage("S @" + selectedPost.getUser().getUname(), context.getString(R.string.Subscribed)));
                 break;
             case MENU_ACTION_BLACKLIST:
                 confirmAction(R.string.Are_you_sure_blacklist,
-                        () -> postMessage("BL @" + selectedPost.user.uname, context.getString(R.string.Added_to_BL)));
+                        () -> postMessage("BL @" + selectedPost.getUser().getUname(), context.getString(R.string.Added_to_BL)));
                 break;
             case MENU_ACTION_DELETE_POST:
                 confirmAction(R.string.Are_you_sure_delete, () -> postMessage("D #" +
-                        (selectedPost.rid == 0 ?
-                                String.valueOf(selectedPost.mid) :
-                                String.format("%s/%s", selectedPost.mid, selectedPost.rid)),
+                        (selectedPost.getRid() == 0 ?
+                                String.valueOf(selectedPost.getMid()) :
+                                String.format("%s/%s", selectedPost.getMid(), selectedPost.getRid())),
                         context.getString(R.string.Deleted), true));
                 break;
             case MENU_ACTION_SHARE:
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/" + selectedPost.mid);
+                intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/" + selectedPost.getMid());
                 context.startActivity(intent);
                 break;
         }

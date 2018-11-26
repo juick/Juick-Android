@@ -1,16 +1,19 @@
 package com.juick.api.model;
 
-import com.bluelinelabs.logansquare.annotation.JsonField;
-import com.bluelinelabs.logansquare.annotation.JsonObject;
-
 import java.util.List;
 
 /**
  * Created by gerc on 11.03.2016.
  */
-@JsonObject
 public class Pms {
 
-    @JsonField
-    public List<Chat> pms;
+    private List<Chat> pms;
+
+    public List<Chat> getPms() {
+        return pms;
+    }
+
+    public void setPms(List<Chat> pms) {
+        this.pms = pms;
+    }
 }

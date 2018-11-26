@@ -236,15 +236,15 @@ public class Utils {
         Log.d(TAG, "currentToken " + prefToken);
         if (hasAuth()) {
             if (prefToken != null) {
-                RestClient.getApi().registerPush(prefToken).enqueue(new Callback<String>() {
+                RestClient.getApi().registerPush(prefToken).enqueue(new Callback<Void>() {
                     @Override
-                    public void onResponse(Call<String> call, Response<String> response) {
+                    public void onResponse(Call<Void> call, Response<Void> response) {
                         Log.d(TAG, "registerPush " + response.code());
                     }
 
                     @Override
-                    public void onFailure(Call<String> call, Throwable t) {
-                        Log.d(TAG, "Failed to unregister", t);
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Log.d(TAG, "Failed to register", t);
                     }
                 });
             }
