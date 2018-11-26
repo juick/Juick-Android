@@ -6,13 +6,11 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
         classpath 'com.google.gms:google-services:4.1.0'
     }
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.github.ben-manes.versions'
 
 repositories {
     mavenCentral()
