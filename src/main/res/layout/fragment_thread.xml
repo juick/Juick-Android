@@ -64,13 +64,14 @@
                 android:layout_weight="0"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:tint="@color/colorText"
+                android:contentDescription="@string/Attach"
                 android:src="@drawable/ic_attach_file_black_24dp"
                 android:layout_gravity="center_vertical"
                 android:padding="12dp" />
             <EditText
                 android:id="@+id/editMessage"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/avatar_size"
                 android:layout_weight="1"
                 android:inputType="textCapSentences|textMultiLine"
                 android:hint="@string/Enter_a_message" />
@@ -82,7 +83,7 @@
                 android:src="@drawable/ic_send_black_24dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:tint="@color/colorText"
-                android:text="Send"
+                android:contentDescription="@string/Send"
                 android:layout_gravity="center_vertical"
                 android:padding="12dp" />
         </LinearLayout>

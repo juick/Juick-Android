@@ -135,6 +135,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:contentDescription="@string/context_menu"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_more_vert_black_24dp"
             android:tint="@color/colorText" />

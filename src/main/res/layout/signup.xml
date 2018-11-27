@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
+              xmlns:tools="http://schemas.android.com/tools" android:layout_width="fill_parent"
               android:layout_height="match_parent"
-              xmlns:tools="http://schemas.android.com/tools"
               android:fitsSystemWindows="true"
               android:background="?attr/colorPrimary"
               android:orientation="vertical">
@@ -18,17 +17,19 @@
             <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:labelFor="@id/newNick"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp">
-            <EditText
-                    android:id="@+id/newNick"
-                    android:inputType="textPersonName"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/Nick_latin_letters_and_numbers_"
-                    android:singleLine="true"/>
+                <EditText
+                        android:id="@+id/newNick"
+                        android:inputType="textPersonName"
+                        android:layout_width="fill_parent"
+                        android:layout_height="@dimen/avatar_size"
+                        android:hint="@string/Nick_latin_letters_and_numbers_"
+                        android:singleLine="true"/>
             </android.support.design.widget.TextInputLayout>
             <android.support.design.widget.TextInputLayout
+                    android:labelFor="@id/newPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -37,7 +38,7 @@
                 <EditText
                         android:id="@+id/newPassword"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/avatar_size"
                         android:inputType="textPassword"
                         android:maxLines="1"
                         android:textColorHint="#cbcaca"
@@ -46,13 +47,14 @@
             <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:labelFor="@id/confirmPassword"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp">
 
                 <EditText
                         android:id="@+id/confirmPassword"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/avatar_size"
                         android:inputType="textPassword"
                         android:maxLines="1"
                         android:textColorHint="#cbcaca"
