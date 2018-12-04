@@ -64,7 +64,7 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         android:contentDescription="@string/context_menu"
         android:src="@drawable/ic_more_vert_black_24dp"
-        android:tint="?android:textColorPrimary" />
+        android:tint="@color/colorText" />
 
     <TextView
         android:id="@+id/timestamp"
