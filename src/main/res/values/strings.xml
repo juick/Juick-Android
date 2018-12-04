@@ -134,4 +134,5 @@
 
     <string name="sign_out">Sign Out</string>
     <string name="disconnect">Disconnect</string>
+    <string name="appCrash">Juick application crash</string>
 </resources>
