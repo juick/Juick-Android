@@ -23,17 +23,14 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -67,10 +64,6 @@ import com.juick.api.model.Post;
 import java.io.IOException;
 import java.util.List;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.WebSocket;
-import okhttp3.WebSocketListener;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -106,7 +99,6 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         }
     };
 
-    OkHttpClient ws;
     int mid = 0;
 
     RecyclerView recyclerView;
@@ -158,32 +150,26 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         adapter = new JuickMessagesAdapter();
         recyclerView.setAdapter(adapter);
         linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        adapter.setOnItemClickListener(new JuickMessagesAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                Post post = adapter.getItem(position);
-                onReply(post.getRid(), post.getBody());
-            }
+        adapter.setOnItemClickListener((view1, position) -> {
+            Post post = adapter.getItem(position);
+            onReply(post.getRid(), post.getBody());
         });
         adapter.setOnMenuListener(new JuickMessageMenu(adapter.getItems()));
-        adapter.setOnScrollListener(new JuickMessagesAdapter.OnScrollListener() {
-            @Override
-            public void onScrollToPost(View v, int replyTo, int rid) {
-                int pos = 0;
-                for (int i = 0; i < adapter.getItems().size(); ++i) {
-                    Post p = adapter.getItems().get(i);
-                    if (p.getRid() == replyTo) {
-                        p.nextRid = replyTo;
-                        if (p.prevRid == 0)
-                            p.prevRid = rid;
-                        pos = i;
-                        break;
-                    }
+        adapter.setOnScrollListener((v, replyTo, rid) -> {
+            int pos = 0;
+            for (int i = 0; i < adapter.getItems().size(); ++i) {
+                Post p = adapter.getItems().get(i);
+                if (p.getRid() == replyTo) {
+                    p.nextRid = replyTo;
+                    if (p.prevRid == 0)
+                        p.prevRid = rid;
+                    pos = i;
+                    break;
                 }
-                if (pos != 0) {
-                    adapter.notifyItemChanged(pos);
-                    recyclerView.scrollToPosition(pos);
-                }
+            }
+            if (pos != 0) {
+                adapter.notifyItemChanged(pos);
+                recyclerView.scrollToPosition(pos);
             }
         });
 
@@ -192,8 +178,6 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
 
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
-
-        initWebSocket();
         load();
     }
 
@@ -223,52 +207,6 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-    private void initWebSocket() {
-        if (ws != null) return;
-        ws = Utils.getWSFactory().build();
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                Request request = new Request.Builder()
-                        .url("wss://api.juick.com/ws/" + mid)
-                        .build();
-                ws.newWebSocket(request, new WebSocketListener() {
-                    @Override
-                    public void onMessage(WebSocket webSocket, final String jsonStr) {
-                        super.onMessage(webSocket, jsonStr);
-                        Log.d("onTextMessage", "" + jsonStr);
-                        if (!isAdded()) {
-                            return;
-                        }
-                        if (jsonStr != null && !jsonStr.trim().isEmpty()) {
-                            try {
-                                final Post reply = RestClient.getJsonMapper().readValue(jsonStr, Post.class);
-                                ((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(250);
-                                getActivity().runOnUiThread(() -> {
-                                    adapter.addData(reply);
-                                    linearLayoutManager.smoothScrollToPosition(recyclerView,
-                                            new RecyclerView.State(), reply.getRid());
-                                });
-                            } catch (IOException e) {
-                                Log.d("Websocket", e.getLocalizedMessage());
-                            }
-                        }
-                    }
-                    @Override
-                    public void onOpen(WebSocket webSocket, okhttp3.Response response) {
-                        super.onOpen(webSocket, response);
-                        Log.d("Websocket", "Websocket opened");
-                    }
-                    @Override
-                    public void onFailure(WebSocket webSocket, Throwable t, okhttp3.Response response) {
-                        super.onFailure(webSocket, t, response);
-                        Log.d("Websocket", "WS failure", t);
-                    }
-                });
             }
         });
     }
@@ -385,46 +323,35 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     public void postMedia(final String body) {
         progressDialog = new ProgressDialog(getContext());
         progressDialogCancel.bool = false;
-        progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-
-            public void onCancel(DialogInterface arg0) {
-                progressDialogCancel.bool = true;
-            }
-        });
+        progressDialog.setOnCancelListener(arg0 -> progressDialogCancel.bool = true);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setMax(0);
         progressDialog.show();
-        new Thread(new Runnable() {
-
-            public void run() {
-                final boolean res = NewMessageActivity.sendMessage(getActivity(), body, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
-                getActivity().runOnUiThread(new Runnable() {
-
-                    public void run() {
-                        if (progressDialog != null) {
-                            progressDialog.dismiss();
-                        }
-                        setFormEnabled(true);
-                        if (res) {
-                            resetForm();
-                        }
-                        if (res && attachmentUri == null) {
-                            Toast.makeText(App.getInstance(), R.string.Message_posted, Toast.LENGTH_LONG).show();
-                        } else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                            builder.setNeutralButton(android.R.string.ok, null);
-                            if (res) {
-                                builder.setIcon(android.R.drawable.ic_dialog_info);
-                                builder.setMessage(R.string.Message_posted);
-                            } else {
-                                builder.setIcon(android.R.drawable.ic_dialog_alert);
-                                builder.setMessage(R.string.Error);
-                            }
-                            builder.show();
-                        }
+        new Thread(() -> {
+            final boolean res = NewMessageActivity.sendMessage(getActivity(), body, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
+            getActivity().runOnUiThread(() -> {
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                }
+                setFormEnabled(true);
+                if (res) {
+                    resetForm();
+                }
+                if (res && attachmentUri == null) {
+                    Toast.makeText(App.getInstance(), R.string.Message_posted, Toast.LENGTH_LONG).show();
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setNeutralButton(android.R.string.ok, null);
+                    if (res) {
+                        builder.setIcon(android.R.drawable.ic_dialog_info);
+                        builder.setMessage(R.string.Message_posted);
+                    } else {
+                        builder.setIcon(android.R.drawable.ic_dialog_alert);
+                        builder.setMessage(R.string.Error);
                     }
-                });
-            }
+                    builder.show();
+                }
+            });
         }).start();
     }
 
@@ -448,6 +375,28 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                     progressHandler.sendEmptyMessage(intent.getIntExtra(RestClient.EXTRA_PROGRESS, 0));
                 }
             }
+            if (intent.getAction().equals(RestClient.ACTION_NEW_EVENT)) {
+                if (!isAdded()) {
+                    return;
+                }
+                String data = intent.getStringExtra(RestClient.NEW_EVENT_EXTRA);
+                if (data != null && !data.trim().isEmpty()) {
+                    try {
+                        final Post reply = RestClient.getJsonMapper().readValue(data, Post.class);
+                        getActivity().runOnUiThread(() -> {
+                            if (adapter.getItemCount() > 0) {
+                                if (adapter.getItem(0).getMid() == reply.getMid()) {
+                                    adapter.addData(reply);
+                                    linearLayoutManager.smoothScrollToPosition(recyclerView,
+                                            new RecyclerView.State(), reply.getRid());
+                                }
+                            }
+                        });
+                    } catch (IOException e) {
+                        Log.d("SSE", e.getLocalizedMessage());
+                    }
+                }
+            }
         }
     };
 
@@ -456,6 +405,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         super.onResume();
         getActivity().registerReceiver(broadcastReceiver, new IntentFilter(TagsFragment.TAG_SELECT_ACTION));
         LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(RestClient.ACTION_UPLOAD_PROGRESS));
+        LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(RestClient.ACTION_NEW_EVENT));
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

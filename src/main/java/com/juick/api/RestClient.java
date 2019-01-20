@@ -37,6 +37,8 @@ public class RestClient {
 
     public static final String ACTION_UPLOAD_PROGRESS = "ACTION_UPLOAD_PROGRESS";
     public static final String EXTRA_PROGRESS = "EXTRA_PROGRESS";
+    public static final String ACTION_NEW_EVENT = "ACTION_NEW_EVENT";
+    public static final String NEW_EVENT_EXTRA = "NEW_EVENT_EXTRA";
 
     public static String getBaseUrl() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ?

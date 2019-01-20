@@ -92,7 +92,7 @@ public class Utils {
 
     private static OkHttpClient.Builder WSFactoryInstance;
 
-    public static OkHttpClient.Builder getWSFactory() {
+    public static OkHttpClient.Builder getSSEFactory() {
         if (WSFactoryInstance == null) {
             WSFactoryInstance = new OkHttpClient.Builder();
         }

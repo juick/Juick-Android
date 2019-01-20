@@ -17,16 +17,22 @@
  */
 package com.juick.android;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -39,12 +45,21 @@ import com.juick.android.fragment.DiscoverFragment;
 import com.juick.android.fragment.ThreadFragment;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
+import com.juick.api.model.Post;
 import com.juick.api.model.User;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.sse.EventSource;
+import okhttp3.sse.EventSourceListener;
+import okhttp3.sse.EventSources;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -60,6 +75,8 @@ public class MainActivity extends BaseActivity
     public static final String PUSH_ACTION_SHOW_THREAD = "PUSH_ACTION_SHOW_THREAD";
     public static final String PUSH_ACTION_SHOW_PM = "PUSH_ACTION_SHOW_PM";
 
+    OkHttpClient es;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,14 +85,14 @@ public class MainActivity extends BaseActivity
         setSupportActionBar(toolbar);
         Utils.updateFCMToken();
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
 
         toggle.syncState();
 
-        final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        final NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         View navHeader = navigationView.getHeaderView(0).findViewById(R.id.header);
@@ -115,6 +132,7 @@ public class MainActivity extends BaseActivity
             addFragment(new DiscoverFragment(), false);
         }
         onNewIntent(getIntent());
+        initEventsListener();
     }
 
     @Override
@@ -152,7 +170,7 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -209,5 +227,43 @@ public class MainActivity extends BaseActivity
                 replaceFragment(new DiscoverFragment());
                 break;
         }
+    }
+    private void initEventsListener() {
+        if (es != null) return;
+        es = Utils.getSSEFactory()
+                .readTimeout(0, TimeUnit.SECONDS).build();
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                Request request = new Request.Builder()
+                        .url("https://api.juick.com/events")
+                        .build();
+                EventSource.Factory esFactory = EventSources.createFactory(es);
+                esFactory.newEventSource(request, new EventSourceListener() {
+                    @Override
+                    public void onOpen(EventSource eventSource, okhttp3.Response response) {
+                        super.onOpen(eventSource, response);
+                        Log.d("SSE", "Event listener opened");
+                    }
+
+                    @Override
+                    public void onEvent(EventSource eventSource, String id, String type, String data) {
+                        super.onEvent(eventSource, id, type, data);
+                        Log.d("SSE", "event received: " + type);
+                        if (type.equals("msg")) {
+                            LocalBroadcastManager.getInstance(App.getInstance())
+                                    .sendBroadcast(new Intent(RestClient.ACTION_NEW_EVENT)
+                                    .putExtra(RestClient.NEW_EVENT_EXTRA, data));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(EventSource eventSource, Throwable t, okhttp3.Response response) {
+                        super.onFailure(eventSource, t, response);
+                        Log.d("SSE", "ES failure", t);
+                    }
+                });
+            }
+        });
     }
 }
