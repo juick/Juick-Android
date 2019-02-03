@@ -17,19 +17,15 @@
  */
 package com.juick.android;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -38,6 +34,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.here.oksse.OkSse;
+import com.here.oksse.ServerSentEvent;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.fragment.ChatsFragment;
@@ -45,19 +43,13 @@ import com.juick.android.fragment.DiscoverFragment;
 import com.juick.android.fragment.ThreadFragment;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
-import com.juick.api.model.Post;
 import com.juick.api.model.User;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.sse.EventSource;
-import okhttp3.sse.EventSourceListener;
-import okhttp3.sse.EventSources;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -75,7 +67,7 @@ public class MainActivity extends BaseActivity
     public static final String PUSH_ACTION_SHOW_THREAD = "PUSH_ACTION_SHOW_THREAD";
     public static final String PUSH_ACTION_SHOW_PM = "PUSH_ACTION_SHOW_PM";
 
-    OkHttpClient es;
+    private OkHttpClient es;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,6 +124,11 @@ public class MainActivity extends BaseActivity
             addFragment(new DiscoverFragment(), false);
         }
         onNewIntent(getIntent());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         initEventsListener();
     }
 
@@ -232,37 +229,48 @@ public class MainActivity extends BaseActivity
         if (es != null) return;
         es = Utils.getSSEFactory()
                 .readTimeout(0, TimeUnit.SECONDS).build();
-        AsyncTask.execute(new Runnable() {
+        Request request = new Request.Builder()
+                .url("https://juick.com/api/events")
+                .build();
+        OkSse sse = new OkSse(es);
+        sse.newServerSentEvent(request, new ServerSentEvent.Listener() {
             @Override
-            public void run() {
-                Request request = new Request.Builder()
-                        .url("https://api.juick.com/events")
-                        .build();
-                EventSource.Factory esFactory = EventSources.createFactory(es);
-                esFactory.newEventSource(request, new EventSourceListener() {
-                    @Override
-                    public void onOpen(EventSource eventSource, okhttp3.Response response) {
-                        super.onOpen(eventSource, response);
-                        Log.d("SSE", "Event listener opened");
-                    }
+            public void onOpen(ServerSentEvent sse, okhttp3.Response response) {
+                Log.d("SSE", "Event listener opened");
+            }
 
-                    @Override
-                    public void onEvent(EventSource eventSource, String id, String type, String data) {
-                        super.onEvent(eventSource, id, type, data);
-                        Log.d("SSE", "event received: " + type);
-                        if (type.equals("msg")) {
-                            LocalBroadcastManager.getInstance(App.getInstance())
-                                    .sendBroadcast(new Intent(RestClient.ACTION_NEW_EVENT)
-                                    .putExtra(RestClient.NEW_EVENT_EXTRA, data));
-                        }
-                    }
+            @Override
+            public void onMessage(ServerSentEvent sse, String id, String event, String message) {
+                Log.d("SSE", "event received: " + event);
+                if (event.equals("msg")) {
+                    LocalBroadcastManager.getInstance(App.getInstance())
+                            .sendBroadcast(new Intent(RestClient.ACTION_NEW_EVENT)
+                                    .putExtra(RestClient.NEW_EVENT_EXTRA, message));
+                }
+            }
 
-                    @Override
-                    public void onFailure(EventSource eventSource, Throwable t, okhttp3.Response response) {
-                        super.onFailure(eventSource, t, response);
-                        Log.d("SSE", "ES failure", t);
-                    }
-                });
+            @Override
+            public void onComment(ServerSentEvent sse, String comment) {
+
+            }
+
+            @Override
+            public boolean onRetryTime(ServerSentEvent sse, long milliseconds) {
+                return true;
+            }
+
+            @Override
+            public boolean onRetryError(ServerSentEvent sse, Throwable throwable, okhttp3.Response response) {
+                return true;
+            }
+
+            @Override
+            public void onClosed(ServerSentEvent sse) {
+            }
+
+            @Override
+            public Request onPreRetry(ServerSentEvent sse, Request originalRequest) {
+                return originalRequest;
             }
         });
     }
