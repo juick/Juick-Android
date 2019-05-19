@@ -132,7 +132,6 @@ public class SignInActivity extends AppCompatActivity implements OnClickListener
                                 accountAuthenticatorResponse.onResult(result);
                             }
 
-                            Utils.updateFCMToken();
                             SignInActivity.this.setResult(RESULT_OK);
                             SignInActivity.this.finish();
                         } else {

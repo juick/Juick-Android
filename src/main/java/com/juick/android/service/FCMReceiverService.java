@@ -22,6 +22,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.MainActivity;
+import com.juick.android.Utils;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
@@ -154,5 +155,11 @@ public class FCMReceiverService extends FirebaseMessagingService {
             intent.putExtra(MainActivity.PUSH_ACTION_SHOW_THREAD, true);
         }
         return intent;
+    }
+
+    @Override
+    public void onNewToken(String refreshedToken) {
+        Log.d("FCMReceiverService", "Refreshed token: " + refreshedToken);
+        Utils.updateFCMToken(refreshedToken);
     }
 }

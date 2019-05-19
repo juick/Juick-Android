@@ -230,9 +230,8 @@ public class Utils {
         return "";
     }
 
-    public static void updateFCMToken() {
+    public static void updateFCMToken(String prefToken) {
         final String TAG = "updateFCMToken";
-        String prefToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "currentToken " + prefToken);
         if (hasAuth()) {
             if (prefToken != null) {
