@@ -5,8 +5,8 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
-        classpath 'com.google.gms:google-services:4.2.0'
+        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.google.gms:google-services:4.3.1'
     }
 }
 
@@ -20,24 +20,29 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.android.support:design:28.0.0'
-    implementation 'com.android.support:cardview-v7:28.0.0'
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:support-v4:28.0.0'
-    implementation 'com.google.firebase:firebase-core:16.0.9'
-    implementation 'com.google.firebase:firebase-messaging:18.0.0'
-    implementation 'com.google.android.gms:play-services-auth:16.0.1'
-    implementation 'com.squareup.okhttp3:okhttp:3.13.1'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0-alpha02'
+    implementation 'androidx.drawerlayout:drawerlayout:1.1.0-alpha03'
+    implementation 'com.google.android.material:material:1.1.0-alpha09'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.google.firebase:firebase-core:17.1.0'
+    implementation 'com.google.firebase:firebase-messaging:20.0.0'
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.1.0'
     implementation 'com.github.heremaps:oksse:0.9.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.1'
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
-    implementation 'com.squareup.retrofit2:converter-jackson:2.5.0'
-    implementation 'co.lujun:androidtagview:1.1.4'
-    implementation 'com.github.bumptech.glide:glide:4.8.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
-    implementation 'com.github.bumptech.glide:okhttp3-integration:4.8.0@aar'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.1.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.6.1'
+    implementation 'com.squareup.retrofit2:converter-jackson:2.6.1'
+    implementation 'co.lujun:androidtagview:1.1.7'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    annotationProcessor 'androidx.annotation:annotation:1.1.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+    implementation 'com.github.bumptech.glide:okhttp3-integration:4.9.0@aar'
     implementation 'com.github.stfalcon:chatkit:0.3.3'
-    implementation 'ch.acra:acra-mail:5.2.0'
+    implementation 'ch.acra:acra-mail:5.4.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
 }
 
 android {
@@ -45,7 +50,8 @@ android {
     buildToolsVersion '28.0.3'
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 27
+        targetSdkVersion 28
+        multiDexEnabled true
         versionCode 105
         versionName "3.1"
         applicationId "com.juick"
@@ -103,14 +109,14 @@ android {
     if (build_param != "dev") {
         //exclude production build
         android.variantFilter { variant ->
-            if (variant.buildType.name.equals('dev')) {
+            if (variant.buildType.name == 'dev') {
                 variant.setIgnore(true);
             }
         }
     } else {
         //exclude all except production build
         android.variantFilter { variant ->
-            if (!variant.buildType.name.equals('dev')) {
+            if (variant.buildType.name != 'dev') {
                 variant.setIgnore(true);
             }
         }
@@ -118,4 +124,6 @@ android {
 }
 
 apply plugin: "com.google.gms.google-services"
-com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true
+googleServices {
+    disableVersionCheck = true
+}

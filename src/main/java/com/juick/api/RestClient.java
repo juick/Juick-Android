@@ -2,8 +2,8 @@ package com.juick.api;
 
 import android.content.Intent;
 import android.os.Build;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.juick.App;

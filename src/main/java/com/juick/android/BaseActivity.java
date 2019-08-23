@@ -1,11 +1,11 @@
 package com.juick.android;
 
 import android.content.Intent;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 import com.juick.android.fragment.BaseFragment;
 
 /**

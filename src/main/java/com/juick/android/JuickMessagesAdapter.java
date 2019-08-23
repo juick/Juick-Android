@@ -20,9 +20,6 @@ package com.juick.android;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
-import android.support.graphics.drawable.VectorDrawableCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -37,6 +34,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import co.lujun.androidtagview.TagContainerLayout;
 import co.lujun.androidtagview.TagView;
 import com.juick.App;
@@ -218,6 +218,11 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     @Override
                     public void onTagLongClick(int position, String text) {
                         Log.d("positn", position + " " + text);
+                    }
+
+                    @Override
+                    public void onSelectedTagDrag(int position, String text) {
+
                     }
 
                     @Override
