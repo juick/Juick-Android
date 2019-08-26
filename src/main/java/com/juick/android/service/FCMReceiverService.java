@@ -158,7 +158,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
     }
 
     @Override
-    public void onNewToken(String refreshedToken) {
+    public void onNewToken(@NonNull String refreshedToken) {
         Log.d("FCMReceiverService", "Refreshed token: " + refreshedToken);
         Utils.updateFCMToken(refreshedToken);
     }

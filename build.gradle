@@ -30,9 +30,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:17.1.0'
     implementation 'com.google.firebase:firebase-messaging:20.0.0'
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.1.0'
+    // okhttp 4.x require API21
+    //noinspection GradleDependency
+    implementation 'com.squareup.okhttp3:okhttp:3.12.3'
+    //noinspection GradleDependency
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.3'
     implementation 'com.github.heremaps:oksse:0.9.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.1.0'
     implementation 'com.squareup.retrofit2:retrofit:2.6.1'
     implementation 'com.squareup.retrofit2:converter-jackson:2.6.1'
     implementation 'co.lujun:androidtagview:1.1.7'
@@ -52,7 +55,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 28
         multiDexEnabled true
-        versionCode 107
+        versionCode 108
         versionName "3.1"
         applicationId "com.juick"
         vectorDrawables.useSupportLibrary = true
