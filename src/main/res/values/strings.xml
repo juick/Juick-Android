@@ -6,8 +6,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="context_menu">Context menu</string>
-    <string name="Loading___">Loading...</string>
-    <string name="Please_wait___">Please wait...</string>
+    <string name="Loading___">Loading…</string>
+    <string name="Please_wait___">Please wait…</string>
     <string name="OK">OK</string>
     <string name="Cancel">Cancel</string>
     <string name="Yes">Yes</string>
@@ -39,10 +39,10 @@
     <string name="blacklist_error">User is in blacklist</string>
     
     <!-- Pull-to-refresh -->
-    <string name="pull_to_refresh_pull_label">Pull to refresh...</string>
-    <string name="pull_to_refresh_release_label">Release to refresh...</string>
-    <string name="pull_to_refresh_refreshing_label">Loading...</string>
-    <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
+    <string name="pull_to_refresh_pull_label">Pull to refresh…</string>
+    <string name="pull_to_refresh_release_label">Release to refresh…</string>
+    <string name="pull_to_refresh_refreshing_label">Loading…</string>
+    <string name="pull_to_refresh_tap_label">Tap to refresh…</string>
     
     <!-- MainActivity -->
     <string name="Subscriptions">My feed</string>
@@ -97,7 +97,7 @@
     <!-- PlacesActivity -->
     <string name="New_place">New place</string>
     <string name="Without_name">Without name</string>
-    <string name="Determining_your_location___">Determining your location...</string>
+    <string name="Determining_your_location___">Determining your location…</string>
     <string name="Location_determination_is_disabled">Location determination is disabled. Check settings.</string>
     <string name="Specify_a_location">Specify a location</string>
 

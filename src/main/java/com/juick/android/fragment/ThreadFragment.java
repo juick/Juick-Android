@@ -124,7 +124,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         Bundle args = getArguments();
@@ -188,27 +188,28 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     }
 
     private void load() {
-        RestClient.getApi().thread(RestClient.getBaseUrl() + "thread?mid=" + mid).enqueue(new Callback<List<Post>>() {
-            @Override
-            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                if (response.code() == 404) {
-                    Toast.makeText(App.getInstance(), R.string.post_not_found, Toast.LENGTH_LONG).show();
-                    return;
-                }
-                if (adapter.getItemCount() > 0) {
-                    initAdapterStageTwo();
-                }
-                recyclerView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
-                List<Post> list = response.body();
-                adapter.newData(list);
-            }
+        RestClient.getApi().thread(RestClient.getBaseUrl() + "thread?mid=" + mid)
+                .enqueue(new Callback<List<Post>>() {
+                    @Override
+                    public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+                        if (response.code() == 404) {
+                            Toast.makeText(App.getInstance(), R.string.post_not_found, Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        if (adapter.getItemCount() > 0) {
+                            initAdapterStageTwo();
+                        }
+                        recyclerView.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.GONE);
+                        List<Post> list = response.body();
+                        adapter.newData(list);
+                    }
 
-            @Override
-            public void onFailure(Call<List<Post>> call, Throwable t) {
-                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
-            }
-        });
+                    @Override
+                    public void onFailure(Call<List<Post>> call, Throwable t) {
+                        Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
     private void initAdapterStageTwo() {

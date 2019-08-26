@@ -5,8 +5,8 @@
 
 
 
-    <string name="Loading___">Chargement...</string>
-    <string name="Please_wait___">Veuillez patienter...</string>
+    <string name="Loading___">Chargement…</string>
+    <string name="Please_wait___">Veuillez patienter…</string>
     <string name="OK">OK</string>
     <string name="Cancel">Annuler</string>
     <string name="Yes">Oui</string>

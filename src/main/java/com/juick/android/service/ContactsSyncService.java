@@ -20,7 +20,13 @@ package com.juick.android.service;
 import android.accounts.Account;
 import android.accounts.OperationCanceledException;
 import android.app.Service;
-import android.content.*;
+import android.content.AbstractThreadedSyncAdapter;
+import android.content.ContentProviderClient;
+import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SyncResult;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -31,12 +37,10 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.RawContacts;
 import android.util.Log;
 
-import com.bumptech.glide.Glide;
 import com.juick.R;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.User;
-import retrofit2.Response;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -44,6 +48,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import retrofit2.Response;
 
 /**
  *

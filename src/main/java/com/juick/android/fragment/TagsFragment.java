@@ -28,6 +28,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,6 +40,7 @@ import com.juick.android.ITagable;
 import com.juick.android.UrlBuilder;
 import com.juick.api.RestClient;
 import com.juick.api.model.Tag;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -88,7 +90,7 @@ public class TagsFragment extends BaseFragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         Bundle args = getArguments();
@@ -107,23 +109,16 @@ public class TagsFragment extends BaseFragment {
         recyclerView.setHasFixedSize(true);
         final TagsAdapter adapter = new TagsAdapter();
         recyclerView.setAdapter(adapter);
-        adapter.setOnItemClickListener(new TagsAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                String tag = adapter.getItem(position);
-                if(mCallback != null)
-                    mCallback.onTagApplied(tag);
-                else
-                    getActivity().sendBroadcast(new Intent(TAG_SELECT_ACTION).putExtra(ARG_TAG, tag));
-            }
+        adapter.setOnItemClickListener((view1, position) -> {
+            String tag = adapter.getItem(position);
+            if(mCallback != null)
+                mCallback.onTagApplied(tag);
+            else
+                getActivity().sendBroadcast(new Intent(TAG_SELECT_ACTION).putExtra(ARG_TAG, tag));
         });
-        adapter.setOnItemLongClickListener(new TagsAdapter.OnItemLongClickListener() {
-            @Override
-            public void onItemLongClick(View view, int position){
-                ((BaseActivity) getActivity()).replaceFragment(
-                        FeedBuilder.feedFor(UrlBuilder.getPostsByTag(uid, adapter.getItem(position))));
-            }
-        });
+        adapter.setOnItemLongClickListener((view12, position) -> ((BaseActivity) getActivity())
+                .replaceFragment(FeedBuilder.feedFor(
+                        UrlBuilder.getPostsByTag(uid, adapter.getItem(position)))));
 
         String url = RestClient.getBaseUrl() + "tags";
         if (uid > 0) {
@@ -160,6 +155,7 @@ public class TagsFragment extends BaseFragment {
             notifyDataSetChanged();
         }
 
+        @NonNull
         @Override
         public VH onCreateViewHolder(ViewGroup parent, int viewType) {
             VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false));
@@ -172,18 +168,18 @@ public class TagsFragment extends BaseFragment {
         @Override
         public void onBindViewHolder(VH holder, int position) {
             String tag = items.get(position);
-            Log.d("TagsAdapter", "onBindViewHolder: " + String.valueOf(position) + " " + tag);
+            Log.d("TagsAdapter", "onBindViewHolder: " + position + " " + tag);
             holder.textView.setText(tag);
         }
 
         @Override
         public int getItemCount() {
-            Log.d("TagsAdapter", "getItemCount: " + String.valueOf(items.size()));
+            Log.d("TagsAdapter", "getItemCount: " + items.size());
             return items.size();
         }
 
         public String getItem(int position) {
-            Log.d("TagsAdapter", "getItem: " + String.valueOf(position));
+            Log.d("TagsAdapter", "getItem: " + position);
 
             return items.get(position);
         }

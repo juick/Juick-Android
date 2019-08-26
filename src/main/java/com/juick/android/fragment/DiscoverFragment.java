@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -36,7 +37,7 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(R.string.Juick);
 
@@ -48,19 +49,16 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.setVisibility(View.VISIBLE);
 
-        final FloatingActionButton fab = (FloatingActionButton) getBaseActivity().findViewById(R.id.fab);
+        final FloatingActionButton fab = getBaseActivity().findViewById(R.id.fab);
         fab.setOnClickListener(this);
         fab.show();
 
         AppBarLayout appBarLayout = getActivity().findViewById(R.id.app_bar_layout);
-        offsetChangedListener = new AppBarLayout.OnOffsetChangedListener() {
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                if (Math.abs(verticalOffset) >= (appBarLayout.getTotalScrollRange())) {
-                    fab.hide();
-                } else {
-                    fab.show();
-                }
+        offsetChangedListener = (appBarLayout1, verticalOffset) -> {
+            if (Math.abs(verticalOffset) >= (appBarLayout1.getTotalScrollRange())) {
+                fab.hide();
+            } else {
+                fab.show();
             }
         };
         appBarLayout.addOnOffsetChangedListener(offsetChangedListener);
@@ -107,9 +105,8 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
             super(fm);
         }
 
-
-
         @Override
+        @NonNull
         public Fragment getItem(int position) {
             UrlBuilder u;
             switch (position){

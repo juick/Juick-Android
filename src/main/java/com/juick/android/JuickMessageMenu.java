@@ -63,13 +63,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setIcon(android.R.drawable.ic_dialog_alert);
         builder.setMessage(App.getInstance().getResources().getString(resId));
-        builder.setPositiveButton(R.string.Yes, new OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                action.run();
-            }
-        });
+        builder.setPositiveButton(R.string.Yes, (dialog, which) -> action.run());
         builder.setNegativeButton(R.string.Cancel, null);
         builder.show();
     }

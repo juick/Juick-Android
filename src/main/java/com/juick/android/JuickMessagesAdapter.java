@@ -34,6 +34,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
@@ -151,7 +153,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_FOOTER) {
             return onCreateFooterViewHolder(parent);
         } else if (viewType == TYPE_HEADER) {
@@ -183,7 +185,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
         int type = getItemViewType(position);
         if (type == TYPE_FOOTER) {
             onBindFooterViewHolder(viewHolder);
@@ -259,24 +261,16 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 if (post.nextRid == post.getRid()) {
                     holder.backImageView.setVisibility(View.VISIBLE);
                     holder.backImageView.setTag(post);
-                    holder.backImageView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Post p = ((Post) v.getTag());
-                            if (scrollListener != null)
-                                scrollListener.onScrollToPost(v, p.prevRid, 0);
-                            v.setVisibility(View.GONE);
-                        }
+                    holder.backImageView.setOnClickListener(v -> {
+                        Post p = ((Post) v.getTag());
+                        if (scrollListener != null)
+                            scrollListener.onScrollToPost(v, p.prevRid, 0);
+                        v.setVisibility(View.GONE);
                     });
 
                     holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorPrimary));
                     handler.removeCallbacksAndMessages(null);
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorSecondary));
-                        }
-                    }, 600);
+                    handler.postDelayed(() -> holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorSecondary)), 600);
                 } else {
                     holder.backImageView.setVisibility(View.GONE);
                     holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorSecondary));
@@ -286,13 +280,10 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 holder.midTextView.setText(String.format("%s %s", inReplyTo, post.getTo().getUname()));
                 holder.midTextView.setVisibility(View.VISIBLE);
                 holder.midTextView.setTag(post);
-                holder.midTextView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Post p = ((Post) v.getTag());
-                        if (scrollListener != null)
-                            scrollListener.onScrollToPost(v, p.getReplyto(), p.getRid());
-                    }
+                holder.midTextView.setOnClickListener(v -> {
+                    Post p = ((Post) v.getTag());
+                    if (scrollListener != null)
+                        scrollListener.onScrollToPost(v, p.getReplyto(), p.getRid());
                 });
             } else
                 holder.midTextView.setVisibility(View.GONE);

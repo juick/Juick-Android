@@ -5,8 +5,8 @@
 
 
 
-    <string name="Loading___">Загрузка...</string>
-    <string name="Please_wait___">Пожалуйста, ждите...</string>
+    <string name="Loading___">Загрузка…</string>
+    <string name="Please_wait___">Пожалуйста, ждите…</string>
     <string name="OK">ОК</string>
     <string name="Cancel">Отмена</string>
     <string name="Yes">Да</string>
@@ -37,10 +37,10 @@
     <string name="network_error">Ошибка сети, проверьте подключение к интернету</string>
 
     <!-- Pull-to-refresh -->
-    <string name="pull_to_refresh_pull_label">Тяните, чтобы обновить...</string>
-    <string name="pull_to_refresh_release_label">Отпустите, чтобы обновить...</string>
-    <string name="pull_to_refresh_refreshing_label">Загрузка...</string>
-    <string name="pull_to_refresh_tap_label">Нажмите, чтобы обновить...</string>
+    <string name="pull_to_refresh_pull_label">Тяните, чтобы обновить…</string>
+    <string name="pull_to_refresh_release_label">Отпустите, чтобы обновить…</string>
+    <string name="pull_to_refresh_refreshing_label">Загрузка…</string>
+    <string name="pull_to_refresh_tap_label">Нажмите, чтобы обновить…</string>
 
     <!-- MainActivity -->
     <string name="Subscriptions">Лента</string>
@@ -94,7 +94,7 @@
     <!-- PlacesActivity -->
     <string name="New_place">Новое место</string>
     <string name="Without_name">Без названия</string>
-    <string name="Determining_your_location___">Определение местоположения...</string>
+    <string name="Determining_your_location___">Определение местоположения…</string>
     <string name="Location_determination_is_disabled">Определение местоположения отключено. Проверьте настройки.</string>
     <string name="Specify_a_location">Указать местоположение</string>
 

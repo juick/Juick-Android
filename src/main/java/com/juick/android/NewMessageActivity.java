@@ -85,6 +85,7 @@ public class NewMessageActivity extends BaseActivity implements ITagable {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == NewPostFragment.ACTIVITY_ATTACHMENT_IMAGE && data != null) {
                 NewPostFragment currentFragment = getCommonFragment();

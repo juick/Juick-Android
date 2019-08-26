@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -94,7 +95,7 @@ public class PostsPageFragment extends BaseFragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         progressBar = view.findViewById(R.id.progressBar);
@@ -104,12 +105,8 @@ public class PostsPageFragment extends BaseFragment {
         recyclerView.setHasFixedSize(true);
 
         recyclerView.setAdapter(adapter);
-        adapter.setOnItemClickListener(new JuickMessagesAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int pos) {
-                getBaseActivity().replaceFragment(ThreadFragment.newInstance(adapter.getItem(pos).getMid()));
-            }
-        });
+        adapter.setOnItemClickListener((view1, pos) -> getBaseActivity().replaceFragment(
+                ThreadFragment.newInstance(adapter.getItem(pos).getMid())));
         adapter.setOnMenuListener(new JuickMessageMenu(adapter.getItems()));
         adapter.setOnLoadMoreRequestListener(new JuickMessagesAdapter.OnLoadMoreRequestListener() {
             boolean loading;
@@ -123,7 +120,7 @@ public class PostsPageFragment extends BaseFragment {
                 Post lastItem = adapter.getItem(adapter.getItemCount() - 1);
                 String requestUrl = apiUrl + "&before_mid=" + lastItem.getMid();
                 if (apiUrl.equals(UrlBuilder.getDiscussions().toString())) {
-                    requestUrl = apiUrl + "?to=" + String.valueOf(lastItem.getTimestamp().getTime());
+                    requestUrl = apiUrl + "?to=" + lastItem.getTimestamp().getTime();
                 }
                 RestClient.getApi().getPosts(requestUrl).enqueue(new Callback<List<Post>>() {
                     @Override
@@ -147,12 +144,7 @@ public class PostsPageFragment extends BaseFragment {
         swipeRefreshLayout = view.findViewById(R.id.swipe_container);
         swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(App.getInstance(), R.color.colorAccent));
     //    swipeRefreshLayout.setRefreshing(true);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                load(true);
-            }
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> load(true));
 
         if (adapter.getItemCount() == 0) {
             recyclerView.setVisibility(View.GONE);

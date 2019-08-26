@@ -86,7 +86,7 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
         return inflater.inflate(R.layout.fragment_new_posts, container, false);
     }
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(R.string.New_message);
         etMessage = view.findViewById(R.id.editMessage);
@@ -189,47 +189,36 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
         if (attachmentUri != null) {
             progressDialog = new ProgressDialog(getActivity());
             progressDialogCancel.bool = false;
-            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-
-                public void onCancel(DialogInterface arg0) {
-                    NewPostFragment.this.progressDialogCancel.bool = true;
-                }
-            });
+            progressDialog.setOnCancelListener(arg0 -> NewPostFragment.this.progressDialogCancel.bool = true);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setMax(0);
             progressDialog.show();
         }
-        Thread thr = new Thread(new Runnable() {
-
-            public void run() {
-                final boolean res = NewMessageActivity.sendMessage(getActivity(), msg, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
-                NewPostFragment.this.getBaseActivity().runOnUiThread(new Runnable() {
-
-                    public void run() {
-                        if (progressDialog != null) {
-                            progressDialog.dismiss();
-                        }
-                        setFormEnabled(true);
-                        if (res) {
-                            resetForm();
-                        }
-                        if ((res && attachmentUri == null) || getActivity().isFinishing()) {
-                            Toast.makeText(getActivity(), res ? R.string.Message_posted : R.string.Error, Toast.LENGTH_LONG).show();
-                        } else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setNeutralButton(android.R.string.ok, null);
-                            if (res) {
-                                builder.setIcon(android.R.drawable.ic_dialog_info);
-                                builder.setMessage(R.string.Message_posted);
-                            } else {
-                                builder.setIcon(android.R.drawable.ic_dialog_alert);
-                                builder.setMessage(R.string.Error);
-                            }
-                            builder.show();
-                        }
+        Thread thr = new Thread(() -> {
+            final boolean res = NewMessageActivity.sendMessage(getActivity(), msg, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
+            NewPostFragment.this.getBaseActivity().runOnUiThread(() -> {
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                }
+                setFormEnabled(true);
+                if (res) {
+                    resetForm();
+                }
+                if ((res && attachmentUri == null) || getActivity().isFinishing()) {
+                    Toast.makeText(getActivity(), res ? R.string.Message_posted : R.string.Error, Toast.LENGTH_LONG).show();
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setNeutralButton(android.R.string.ok, null);
+                    if (res) {
+                        builder.setIcon(android.R.drawable.ic_dialog_info);
+                        builder.setMessage(R.string.Message_posted);
+                    } else {
+                        builder.setIcon(android.R.drawable.ic_dialog_alert);
+                        builder.setMessage(R.string.Error);
                     }
-                });
-            }
+                    builder.show();
+                }
+            });
         });
         thr.start();
     }
