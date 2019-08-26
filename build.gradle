@@ -52,7 +52,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 28
         multiDexEnabled true
-        versionCode 106
+        versionCode 107
         versionName "3.1"
         applicationId "com.juick"
         vectorDrawables.useSupportLibrary = true
