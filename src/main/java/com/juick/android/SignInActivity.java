@@ -45,6 +45,10 @@ import retrofit2.Response;
  */
 public class SignInActivity extends AppCompatActivity {
 
+    public enum SignInStatus {
+        SIGNED_OUT, SIGN_IN_PROGRESS, SIGNED_IN
+    }
+
     private AccountAuthenticatorResponse authenticatorResponse;
 
     public static final String EXTRA_ACTION = "EXTRA_ACTION";

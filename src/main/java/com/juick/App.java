@@ -36,6 +36,7 @@ import com.juick.android.ErrorReporter;
 import com.juick.android.JuickConfig;
 import com.juick.android.LinkPreviewer;
 import com.juick.android.NotificationSender;
+import com.juick.android.SignInActivity;
 import com.juick.android.SignInProvider;
 import com.juick.android.Utils;
 import com.juick.api.Api;
@@ -93,10 +94,6 @@ public class App extends MultiDexApplication {
 
     public interface MessageListener {
         void onMessageSent(Post newMessage);
-    }
-
-    public interface ChatsListener {
-        void onChatsReceived(List<Chat> chats);
     }
 
     private OnProgressListener callback;
@@ -282,5 +279,10 @@ public class App extends MultiDexApplication {
             newMessage = new MutableLiveData<>();
         }
         return newMessage;
+    }
+
+    private MutableLiveData<SignInActivity.SignInStatus> signInStatus = new MutableLiveData<>(SignInActivity.SignInStatus.SIGNED_OUT);
+    public MutableLiveData<SignInActivity.SignInStatus> getSignInStatus() {
+        return signInStatus;
     }
 }

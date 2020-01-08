@@ -16,15 +16,13 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/nav_header_height"
-    android:background="@color/colorFunny"
-    android:id="@+id/header"
-    android:orientation="vertical"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:theme="@style/AppTheme">
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".android.MainActivity">
 
     <ImageView
         android:id="@+id/profile_image"
@@ -33,35 +31,25 @@
         android:src="@drawable/ic_logo"
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:paddingBottom="10dp"
         android:layout_alignParentStart="true"
         android:contentDescription="@string/user_photo" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/press_to_sign_in"
-        android:textSize="14sp"
-        android:textColor="@color/white"
-        android:textStyle="bold"
-        android:gravity="start"
-        android:paddingBottom="4dp"
-        android:id="@+id/title_textView"
-        android:layout_above="@+id/subtitle_textView"
-        android:layout_alignLeft="@+id/profile_image"
-        android:layout_alignStart="@+id/profile_image" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
+        tools:text="ugnich"
         android:id="@+id/subtitle_textView"
         android:gravity="start"
         android:layout_marginBottom="8dp"
         android:textSize="14sp"
-        android:textColor="#000"
-        android:layout_alignParentBottom="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profile_image"
         android:layout_alignLeft="@+id/title_textView"
         android:layout_alignStart="@+id/title_textView" />
-
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

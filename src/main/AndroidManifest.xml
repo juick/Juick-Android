@@ -62,8 +62,7 @@
             android:name=".android.MainActivity"
             android:exported="true"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:logo="@drawable/ic_logo"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:logo="@drawable/ic_logo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

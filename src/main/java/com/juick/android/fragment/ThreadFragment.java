@@ -30,6 +30,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,9 +39,9 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.android.JuickMessageMenu;
 import com.juick.android.JuickMessagesAdapter;
-import com.juick.android.NewMessageActivity;
 import com.juick.android.SignInActivity;
 import com.juick.android.Utils;
+import com.juick.android.screens.home.HomeFragmentDirections;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.model.Post;
 import com.juick.databinding.FragmentThreadBinding;
@@ -56,32 +58,20 @@ import retrofit2.Response;
  *
  * @author Ugnich Anton
  */
-public class ThreadFragment extends BaseFragment {
+public class ThreadFragment extends Fragment {
 
     private FragmentThreadBinding model;
-
-    private static final String ARG_MID = "ARG_MID";
 
     private int rid = 0;
     private Uri attachmentUri = null;
     private String attachmentMime = null;
     private ProgressDialog progressDialog;
-    private final NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
-
     private int mid = 0;
 
     private LinearLayoutManager linearLayoutManager;
     private JuickMessagesAdapter adapter;
 
     private ActivityResultLauncher<String> attachmentLauncher;
-
-    public static ThreadFragment newInstance(int mid) {
-        ThreadFragment fragment = new ThreadFragment();
-        Bundle bundle = new Bundle();
-        bundle.putInt(ARG_MID, mid);
-        fragment.setArguments(bundle);
-        return fragment;
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -115,7 +105,7 @@ public class ThreadFragment extends BaseFragment {
 
         Bundle args = getArguments();
         if (args != null) {
-            mid = args.getInt(ARG_MID, 0);
+            mid = ThreadFragmentArgs.fromBundle(args).getMid();
         }
         if (mid == 0) {
             return;
@@ -201,12 +191,6 @@ public class ThreadFragment extends BaseFragment {
             }
         });
 
-        load();
-    }
-
-    @Override
-    public void reload(){
-        super.reload();
         load();
     }
 
@@ -300,8 +284,8 @@ public class ThreadFragment extends BaseFragment {
 
     public void postMedia(final String body) throws FileNotFoundException {
         progressDialog = new ProgressDialog(getContext());
-        progressDialogCancel.bool = false;
-        progressDialog.setOnCancelListener(arg0 -> progressDialogCancel.bool = true);
+        /*progressDialogCancel.bool = false;
+        progressDialog.setOnCancelListener(arg0 -> progressDialogCancel.bool = true);*/
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setMax(0);
         progressDialog.show();
@@ -319,7 +303,10 @@ public class ThreadFragment extends BaseFragment {
             setFormEnabled(true);
             if (newMessage != null) {
                 int mid = newMessage.getMid();
-                getBaseActivity().replaceFragment(ThreadFragment.newInstance(mid));
+                HomeFragmentDirections.ActionDiscoverFragmentToThreadFragment discoverAction =
+                        HomeFragmentDirections.actionDiscoverFragmentToThreadFragment();
+                discoverAction.setMid(mid);
+                Navigation.findNavController(getView()).navigate(discoverAction);
             }else {
                 Toast.makeText(getContext(), R.string.Error, Toast.LENGTH_LONG).show();
             }

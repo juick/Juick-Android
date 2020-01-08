@@ -40,6 +40,7 @@
     <!-- MainActivity -->
     <string name="Subscriptions">Лента</string>
     <string name="Last_messages">Все</string>
+    <string name="Me">Я</string>
     <string name="Top_messages">Топ</string>
     <string name="With_photos">Фото</string>
     <string name="Discussions">Диалоги</string>

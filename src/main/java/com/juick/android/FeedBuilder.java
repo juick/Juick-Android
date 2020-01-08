@@ -34,12 +34,4 @@ public class FeedBuilder {
         fragment.setArguments(args);
         return fragment;
     }
-    public static PMFragment chatFor(String uname, int uid) {
-        PMFragment fragment = new PMFragment();
-        Bundle args = new Bundle();
-        args.putString(PMFragment.ARG_UNAME, uname);
-        args.putInt(PMFragment.ARG_UID, uid);
-        fragment.setArguments(args);
-        return fragment;
-    }
 }

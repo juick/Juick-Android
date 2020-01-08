@@ -32,11 +32,13 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.juick.App;
 import com.juick.R;
-import com.juick.android.NewMessageActivity;
 import com.juick.android.Utils;
+import com.juick.android.screens.home.HomeFragmentDirections;
 import com.juick.api.GlideApp;
 import com.juick.databinding.FragmentNewPostBinding;
 import com.juick.util.StringUtils;
@@ -49,11 +51,21 @@ import java.io.InputStream;
  * Created by alx on 02.01.17.
  */
 
-public class NewPostFragment extends BaseFragment {
+public class NewPostFragment extends Fragment {
     private Uri attachmentUri = null;
     private String attachmentMime = null;
     private ProgressDialog progressDialog;
-    private final NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
+    private final BooleanReference progressDialogCancel = new BooleanReference(false);
+
+    public static class BooleanReference {
+
+        public boolean bool;
+
+        public BooleanReference(boolean bool) {
+            this.bool = bool;
+        }
+    }
+
 
     private FragmentNewPostBinding model;
 
@@ -75,7 +87,7 @@ public class NewPostFragment extends BaseFragment {
         model.buttonTags.setOnClickListener(v -> {
             TagsFragment tagsFragment = TagsFragment.newInstance(Utils.myId);
             tagsFragment.setOnTagAppliedListener(this::applyTag);
-            getBaseActivity().addFragment(tagsFragment, true);
+            //getBaseActivity().addFragment(tagsFragment, true);
         });
         model.buttonAttachment.setOnClickListener(v -> {
             if (attachmentUri == null) {
@@ -101,7 +113,7 @@ public class NewPostFragment extends BaseFragment {
         });
 
         resetForm();
-        handleIntent(getBaseActivity().getIntent());
+        //handleIntent(getBaseActivity().getIntent());
     }
 
     public void resetForm() {
@@ -138,7 +150,7 @@ public class NewPostFragment extends BaseFragment {
     private void sendMessage() throws FileNotFoundException {
         final String msg = model.editMessage.getText().toString();
         if (msg.length() < 3 && attachmentUri == null) {
-            Toast.makeText(getBaseActivity(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getBaseActivity(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
             return;
         }
         setFormEnabled(false);
@@ -167,7 +179,10 @@ public class NewPostFragment extends BaseFragment {
                 Toast.makeText(getActivity(), R.string.Error, Toast.LENGTH_LONG).show();
             } else {
                 int mid = newMessage.getMid();
-                getBaseActivity().replaceFragment(ThreadFragment.newInstance(mid));
+                HomeFragmentDirections.ActionDiscoverFragmentToThreadFragment discoverAction =
+                        HomeFragmentDirections.actionDiscoverFragmentToThreadFragment();
+                discoverAction.setMid(mid);
+                Navigation.findNavController(getView()).navigate(discoverAction);
             }
         });
     }

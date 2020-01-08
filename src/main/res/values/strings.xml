@@ -43,9 +43,10 @@
     <!-- MainActivity -->
     <string name="Subscriptions">My feed</string>
     <string name="Last_messages">Last</string>
+    <string name="Me">Me</string>
     <string name="Top_messages">Top</string>
     <string name="With_photos">Photos</string>
-    <string name="PMs">Private messages</string>
+    <string name="PMs">PMs</string>
     <string name="Discussions">Discussions</string>
     
     <!-- ExploreActivity -->

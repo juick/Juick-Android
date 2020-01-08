@@ -17,10 +17,10 @@
   -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="BaseTheme" parent="Theme.AppCompat.Light">
+    <style name="BaseTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/colorDimmed</item>
         <item name="viewInflaterClass">androidx.appcompat.app.AppCompatViewInflater</item>
     </style>
     <style name="AppTheme" parent="BaseTheme">
@@ -33,6 +33,7 @@
     </style>
     <style name="AppTheme.AppBarOverlay">
         <item name="android:textColorPrimary">@color/colorAccent</item>
+        <item name="backgroundColor">@color/white</item>
     </style>
     <style name="NavigationDrawerStyle">
         <item name="android:textColor">@color/colorText</item>

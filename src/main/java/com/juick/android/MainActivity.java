@@ -16,6 +16,8 @@
  */
 package com.juick.android;
 
+import static android.content.Intent.ACTION_VIEW;
+
 import android.Manifest;
 import android.accounts.Account;
 import android.content.ContentResolver;
@@ -28,52 +30,57 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 
-import com.google.android.material.navigation.NavigationView;
+//import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.R;
-import com.juick.android.fragment.ChatsFragment;
-import com.juick.android.fragment.DiscoverFragment;
-import com.juick.android.fragment.ThreadFragment;
+import com.juick.android.screens.chats.ChatsFragmentDirections;
+import com.juick.android.screens.home.HomeFragmentDirections;
+import com.juick.android.screens.me.MeViewModel;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
-import com.juick.api.model.Pms;
 import com.juick.api.model.Post;
-import com.juick.api.model.SecureUser;
 import com.juick.databinding.ActivityMainBinding;
 import com.juick.util.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import static android.content.Intent.ACTION_VIEW;
-import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-
 /**
  * @author Ugnich Anton
  */
-public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding model;
 
     private NotificationManager notificationManager;
+
+    private ActivityResultLauncher<Intent> loginLauncher;
+
+    public void showLogin() {
+        if (!Utils.hasAuth()) {
+            loginLauncher.launch(new Intent(this, SignInActivity.class));
+        }
+    }
+
+    AppBarConfiguration appBarConfiguration;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,46 +88,32 @@ public class MainActivity extends BaseActivity
         model = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(model.getRoot());
         Toolbar toolbar = model.toolbar;
+        //toolbar.inflateMenu(R.menu.toolbar);
         setSupportActionBar(toolbar);
-
-        DrawerLayout drawer = model.drawerLayout;
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-
-        toggle.syncState();
-
-        final NavigationView navigationView = model.navView;
-        navigationView.setNavigationItemSelectedListener(this);
-
-        View navHeader = navigationView.getHeaderView(0).findViewById(R.id.header);
-        navHeader.setOnClickListener(this);
-
-        final ImageView imageHeader = navigationView.getHeaderView(0).findViewById(R.id.profile_image);
+        //CollapsingToolbarLayout layout = model.collapsingToolbarLayout;
+        BottomNavigationView navView = model.bottomNav;
+        // Passing each menu ID as a set of Ids because each
+        // menu should be considered as top level destinations.
+        appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.home,
+                R.id.discover,
+                R.id.chats,
+                R.id.no_auth,
+                R.id.profile,
+                R.id.newPostFragment
+        )
+        .build();
+        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+        NavController navController = navHostFragment.getNavController();
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        //NavigationUI.setupWithNavController(toolbar, navController);
+        NavigationUI.setupWithNavController(navView, navController);
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            int id = destination.getId();
+            int visibility = shouldHideNavView(id) ? View.GONE : View.VISIBLE;
+            navView.setVisibility(visibility);
+        });
         if (Utils.hasAuth()) {
-            App.getInstance().getApi().me().enqueue(new Callback<SecureUser>() {
-                @Override
-                public void onResponse(@NonNull Call<SecureUser> call, @NonNull Response<SecureUser> response) {
-                    SecureUser me = response.body();
-                    Utils.myId = me.getUid();
-                    String avatarUrl = me.getAvatar();
-                    GlideApp.with(imageHeader.getContext())
-                            .load(avatarUrl)
-                            .transition(withCrossFade())
-                            .fallback(R.drawable.av_96)
-                            .placeholder(R.drawable.av_96)
-                            .into(imageHeader);
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<SecureUser> call, @NonNull Throwable t) {
-                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
-                }
-            });
-            TextView titleHeader = navigationView.getHeaderView(0).findViewById(R.id.title_textView);
-            if (!TextUtils.isEmpty(Utils.getNick())) {
-                titleHeader.setText(Utils.getNick());
-            }
             notificationManager = new NotificationManager();
             Account account = Utils.getAccount();
             if (Build.VERSION.SDK_INT >= 23
@@ -137,12 +130,27 @@ public class MainActivity extends BaseActivity
             JuickConfig.refresh();
         }
 
-        navigationView.getMenu().findItem(R.id.chats).setVisible(Utils.hasAuth());
-        navigationView.getMenu().findItem(R.id.feed).setVisible(Utils.hasAuth());
+        App.getInstance().setAuthorizationCallback(() -> {
+            Intent updatePasswordIntent = new Intent(this, SignInActivity.class);
+            updatePasswordIntent.putExtra(SignInActivity.EXTRA_ACTION, SignInActivity.ACTION_PASSWORD_UPDATE);
+            loginLauncher.launch(updatePasswordIntent);
+        });
+        loginLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), response -> {
+            if (response.getResultCode() == RESULT_OK) {
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
+        });
+        App.getInstance().getSignInStatus().observe(this, signInStatus -> {
+            if (signInStatus == SignInActivity.SignInStatus.SIGN_IN_PROGRESS) {
+                showLogin();
+            }
+        });
+    }
 
-        if (savedInstanceState == null) {
-            addFragment(new DiscoverFragment(), false);
-        }
+    boolean shouldHideNavView(int view) {
+        return view == R.id.thread || view == R.id.PMFragment;
     }
 
     @Override
@@ -159,12 +167,22 @@ public class MainActivity extends BaseActivity
                 Post jmsg = App.getInstance().getJsonMapper().readValue(msg, Post.class);
                 if (jmsg.getUser().getUid() == 0) {
                     setTitle(R.string.Discussions);
-                    replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
+                    //replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
                 } else {
                     if (jmsg.getMid() == 0) {
-                        replaceFragment(FeedBuilder.chatFor(jmsg.getUser().getUname(), jmsg.getUser().getUid()));
+                        ChatsFragmentDirections.ActionChatsToPMFragment chatAction =
+                                ChatsFragmentDirections.actionChatsToPMFragment(jmsg.getUser().getUname());
+                        chatAction.setUid(jmsg.getUser().getUid());
+                        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+                        NavController navController = navHostFragment.getNavController();
+                        navController.navigate(chatAction);
                     } else {
-                        replaceFragment(ThreadFragment.newInstance(jmsg.getMid()));
+                        HomeFragmentDirections.ActionDiscoverFragmentToThreadFragment discoverAction =
+                                HomeFragmentDirections.actionDiscoverFragmentToThreadFragment();
+                        discoverAction.setMid(jmsg.getMid());
+                        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+                        NavController navController = navHostFragment.getNavController();
+                        navController.navigate(discoverAction);
                     }
                 }
             } catch (IOException e) {
@@ -184,7 +202,7 @@ public class MainActivity extends BaseActivity
                         queryResult.close();
                         if (!TextUtils.isEmpty(name)) {
                             setTitle(name);
-                            replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(name)));
+                            //replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(name)));
                         }
                     }
                 }
@@ -205,97 +223,53 @@ public class MainActivity extends BaseActivity
 
 
     @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.header) {
-            DrawerLayout drawer = findViewById(R.id.drawer_layout);
-            drawer.closeDrawer(GravityCompat.START);
-            if (Utils.hasAuth()) {
-                setTitle(R.string.Subscriptions);
-                replaceFragment(FeedBuilder.feedFor(UrlBuilder.goHome()));
-            } else {
-                showLogin();
-            }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.chats) {
-            ChatsFragment chatsFragment = new ChatsFragment();
-            replaceFragment(chatsFragment);
-            App.getInstance().getApi().groupsPms(10).enqueue(new Callback<Pms>() {
-                @Override
-                public void onResponse(@NonNull Call<Pms> call, @NonNull Response<Pms> response) {
-                    if (response.isSuccessful()) {
-                        Pms pms = response.body();
-                        ((App.ChatsListener)chatsFragment).onChatsReceived(pms.getPms());
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Pms> call, @NonNull Throwable t) {
-                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
-                }
-            });
-        } else if (id == R.id.messages) {
-            replaceFragment(new DiscoverFragment());
-        } else if (id == R.id.feed) {
-            setTitle(R.string.Discussions);
-            replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
-        }
-
-        DrawerLayout drawer = model.drawerLayout;
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    @Override
-    public int fragmentContainerLayoutId() {
-        return R.id.fragment_container;
-    }
-
-    @Override
-    public int getTabsBarLayoutId() {
-        return R.id.tabs;
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     public void processUri(Uri data) {
         List<String> pathSegments = data.getPathSegments();
+        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+        NavController navController = navHostFragment.getNavController();
         switch (pathSegments.size()) {
             case 1:
                 // blog
-                replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(pathSegments.get(0))));
+                //replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(pathSegments.get(0))));
                 break;
             case 2:
                 // thread
                 String threadId = pathSegments.get(1);
-                try {
-                    replaceFragment(ThreadFragment.newInstance(Integer.parseInt(threadId)));
-                } catch (NumberFormatException ex) {
-                }
+                HomeFragmentDirections.ActionDiscoverFragmentToThreadFragment action
+                        = HomeFragmentDirections.actionDiscoverFragmentToThreadFragment();
+                action.setMid(Integer.parseInt(threadId));
+                navController.navigate(action);
                 break;
             default:
                 // discover
-                replaceFragment(new DiscoverFragment());
+                navController.navigate(R.id.home);
                 break;
         }
     }
 
     @Override
+    public boolean onSupportNavigateUp() {
+        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+        NavController navController = navHostFragment.getNavController();
+        return navController.navigateUp() || super.onSupportNavigateUp();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+        NavController navController = navHostFragment.getNavController();
+        return NavigationUI.onNavDestinationSelected(item, navController)
+                || super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == ViewUtil.REQUEST_CODE_SYNC_CONTACTS) {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

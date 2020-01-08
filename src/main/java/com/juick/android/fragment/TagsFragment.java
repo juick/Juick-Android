@@ -26,10 +26,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import com.juick.App;
 import com.juick.R;
-import com.juick.android.BaseActivity;
 import com.juick.android.FeedBuilder;
 import com.juick.android.UrlBuilder;
 import com.juick.api.model.Tag;
@@ -46,7 +46,7 @@ import java.util.List;
  *
  * @author Ugnich Anton
  */
-public class TagsFragment extends BaseFragment {
+public class TagsFragment extends Fragment {
 
     private FragmentTagsListBinding model;
 
@@ -97,13 +97,13 @@ public class TagsFragment extends BaseFragment {
         adapter.setOnItemClickListener((view1, position) -> {
             String tag = adapter.getItem(position);
             if (callback != null) {
-                getBaseActivity().getSupportFragmentManager().popBackStackImmediate();
+                //getBaseActivity().getSupportFragmentManager().popBackStackImmediate();
                 callback.onTagApplied(tag);
             }
         });
-        adapter.setOnItemLongClickListener((view12, position) -> ((BaseActivity) getActivity())
+       /* adapter.setOnItemLongClickListener((view12, position) -> ((BaseActivity) getActivity())
                 .replaceFragment(FeedBuilder.feedFor(
-                        UrlBuilder.getPostsByTag(uid, adapter.getItem(position)))));
+                        UrlBuilder.getPostsByTag(uid, adapter.getItem(position)))));*/
 
         App.getInstance().getApi().tags(uid).enqueue(new Callback<List<Tag>>() {
             @Override

@@ -16,11 +16,19 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<resources>
-    <color name="colorPrimary">#f8f8f8</color>
-    <color name="colorAccent">#3c77aa</color>
-    <color name="colorSecondary">#fdfdff</color>
-    <color name="colorText">#222222</color>
-    <color name="colorFunny">#ff339a</color>
-    <color name="colorDimmed">#88859d</color>
-</resources>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_search"
+        android:title="Search"
+        android:icon="@drawable/ic_ei_search"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+    <item
+        android:title="@string/Juick_profile"
+        android:id="@+id/profile"
+        app:showAsAction="always"
+        app:actionLayout="@layout/profile_menu_layout"
+        app:actionProviderClass="com.juick.android.screens.menu.ProfileProvider"
+        />
+</menu>

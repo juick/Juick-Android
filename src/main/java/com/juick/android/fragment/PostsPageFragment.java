@@ -24,12 +24,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.JuickMessageMenu;
 import com.juick.android.JuickMessagesAdapter;
 import com.juick.android.UrlBuilder;
+import com.juick.android.screens.home.HomeFragmentDirections;
 import com.juick.api.model.Post;
 import com.juick.databinding.FragmentPostsPageBinding;
 
@@ -42,7 +45,7 @@ import retrofit2.Response;
 /**
  * Created by gerc on 10.01.2016.
  */
-public class PostsPageFragment extends BaseFragment {
+public class PostsPageFragment extends Fragment {
 
     public static final String ARG_URL = "ARG_URL";
 
@@ -62,11 +65,6 @@ public class PostsPageFragment extends BaseFragment {
             if(url != null)
                 apiUrl = url.toString();
         }
-    }
-    @Override
-    public void reload() {
-        super.reload();
-        load(true);
     }
     private void load(final boolean isReload) {
         App.getInstance().getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
@@ -113,8 +111,11 @@ public class PostsPageFragment extends BaseFragment {
         model.list.setAdapter(adapter);
         adapter.setOnItemClickListener((widget, pos) -> {
             if (widget.getTag() == null || !widget.getTag().equals("clicked")) {
-                getBaseActivity().replaceFragment(
-                        ThreadFragment.newInstance(adapter.getItem(pos).getMid()));
+                int mid = adapter.getItem(pos).getMid();
+                HomeFragmentDirections.ActionDiscoverFragmentToThreadFragment action
+                        = HomeFragmentDirections.actionDiscoverFragmentToThreadFragment();
+                action.setMid(mid);
+                Navigation.findNavController(view).navigate(action);
             }
         });
         adapter.setOnMenuListener(new JuickMessageMenu(adapter.getItems()));

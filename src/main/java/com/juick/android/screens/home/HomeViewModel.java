@@ -15,17 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.juick.android.fragment;
+package com.juick.android.screens.home;
 
-import com.juick.R;
+import com.juick.android.UrlBuilder;
+import com.juick.android.Utils;
+import com.juick.android.screens.FeedViewModel;
 
-/**
- * Created by alx on 13.12.16.
- */
-
-public class NoAuthFragment extends BaseFragment {
-
-    public NoAuthFragment() {
-        super(R.layout.fragment_noauth);
+public class HomeViewModel extends FeedViewModel {
+    public HomeViewModel() {
+        if (Utils.hasAuth()) {
+            setUrl(UrlBuilder.goHome().toString());
+        } else {
+            setUrl(UrlBuilder.getDiscussions().toString());
+        }
     }
 }

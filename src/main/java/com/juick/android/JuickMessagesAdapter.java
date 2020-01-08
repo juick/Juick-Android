@@ -264,9 +264,9 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     widget.setTag("clicked");
                     MainActivity activity = (MainActivity)widget.getContext();
                     activity.setTitle("#" + tag);
-                    activity.replaceFragment(
+                    /*activity.replaceFragment(
                             FeedBuilder.feedFor(
-                                    UrlBuilder.getPostsByTag(jmsg.getUser().getUid(), tag)));
+                                    UrlBuilder.getPostsByTag(jmsg.getUser().getUid(), tag)));*/
                 }
             }, nextSpanStart, nextSpanStart + text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             ssb.append(" ");

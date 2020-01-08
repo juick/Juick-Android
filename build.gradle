@@ -5,6 +5,7 @@ buildscript {
         maven { url 'https://developer.huawei.com/repo/' }
     }
     dependencies {
+        classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:2.5.2'
         classpath 'com.android.tools.build:gradle:7.3.0'
         classpath 'com.google.gms:google-services:4.3.14'
         classpath 'com.huawei.agconnect:agcp:1.7.2.300'
@@ -12,6 +13,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'androidx.navigation.safeargs'
 
 repositories {
     mavenCentral()
@@ -105,6 +107,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.drawerlayout:drawerlayout:1.1.1'
+    implementation 'androidx.navigation:navigation-fragment:2.5.2'
+    implementation 'androidx.navigation:navigation-ui:2.5.2'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.google.android.material:material:1.6.1'
     googleImplementation 'com.google.android.gms:play-services-auth:20.3.0'

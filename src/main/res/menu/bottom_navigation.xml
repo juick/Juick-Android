@@ -16,11 +16,17 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<resources>
-    <color name="colorPrimary">#f8f8f8</color>
-    <color name="colorAccent">#3c77aa</color>
-    <color name="colorSecondary">#fdfdff</color>
-    <color name="colorText">#222222</color>
-    <color name="colorFunny">#ff339a</color>
-    <color name="colorDimmed">#88859d</color>
-</resources>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/home"
+        android:icon="@drawable/ic_ei_clock"
+        android:title="@string/Subscriptions" />
+    <item
+        android:id="@+id/discover"
+        android:icon="@drawable/ic_ei_search"
+        android:title="@string/Discover" />
+    <item
+        android:id="@+id/chats"
+        android:icon="@drawable/ic_ei_envelope"
+        android:title="@string/PMs" />
+</menu>

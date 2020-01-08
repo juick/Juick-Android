@@ -77,26 +77,18 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 Toast.makeText(App.getInstance(), (response.isSuccessful()) ? ok : App.getInstance().getResources().getString(R.string.Error), Toast.LENGTH_SHORT).show();
-                if(isReload)
-                    reloadView();
+                /*if(isReload)
+                    reloadView();*/
             }
 
             @Override
             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                if(isReload)
-                    reloadView();
+                /*if(isReload)
+                    reloadView();*/
 
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void reloadView(){
-        if(context != null)
-        {
-            BaseActivity activity = (BaseActivity) context;
-            activity.reloadFragment();
-        }
     }
 
     @Override
@@ -155,11 +147,11 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
                 break;
             case MENU_ACTION_BLOG:
                 ((Activity)context).setTitle(selectedPost.getUser().getUname());
-                ((BaseActivity) context).replaceFragment(
+               /* ((BaseActivity) context).replaceFragment(
                         FeedBuilder.feedFor(
                                 UrlBuilder.getUserPostsByName(selectedPost.getUser().getUname())
                         )
-                );
+                );*/
                 break;
             case MENU_ACTION_SUBSCRIBE:
                 confirmAction(R.string.Are_you_sure_subscribe,

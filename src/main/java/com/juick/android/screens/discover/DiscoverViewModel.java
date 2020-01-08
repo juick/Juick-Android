@@ -15,30 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.juick.android.fragment;
+package com.juick.android.screens.discover;
 
-import androidx.fragment.app.Fragment;
+import com.juick.android.UrlBuilder;
+import com.juick.android.screens.FeedViewModel;
 
-import com.juick.android.BaseActivity;
-
-/**
- * Created by gerc on 10.01.2016.
- */
-public class BaseFragment extends Fragment {
-
-    public BaseFragment() {
-
-    }
-
-    public BaseFragment(int layoutId) {
-        super(layoutId);
-    }
-
-    BaseActivity getBaseActivity() {
-        return (BaseActivity) getActivity();
-    }
-
-    public void reload(){
-
+public class DiscoverViewModel extends FeedViewModel {
+    public DiscoverViewModel() {
+        setUrl(UrlBuilder.getLast().toString());
     }
 }

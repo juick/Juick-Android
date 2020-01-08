@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.juick.android.fragment;
+package com.juick.android.screens.chats;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
@@ -23,24 +23,26 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 
-import com.juick.App;
 import com.juick.R;
-import com.juick.android.FeedBuilder;
 import com.juick.api.GlideApp;
 import com.juick.api.model.Chat;
 import com.juick.databinding.FragmentDialogListBinding;
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
 
-import java.util.List;
-
 /**
  *
  * @author ugnich
  */
-public class ChatsFragment extends BaseFragment implements App.ChatsListener {
+public class ChatsFragment extends Fragment {
 
     private FragmentDialogListBinding model;
+    private ChatsViewModel vm;
 
     private final DialogsListAdapter<Chat> chatsAdapter;
 
@@ -51,8 +53,14 @@ public class ChatsFragment extends BaseFragment implements App.ChatsListener {
                         .load(url)
                         .transition(withCrossFade())
                         .into(imageView));
-        chatsAdapter.setOnDialogClickListener(dialog -> getBaseActivity().replaceFragment(
-                FeedBuilder.chatFor(dialog.getDialogName(), Integer.parseInt(dialog.getId()))));
+        chatsAdapter.setOnDialogClickListener(dialog -> {
+            NavController navController = Navigation.findNavController(getView());
+            ChatsFragmentDirections.ActionChatsToPMFragment action =
+                    ChatsFragmentDirections.actionChatsToPMFragment(dialog.getDialogName());
+            action.setUid(Integer.parseInt(dialog.getId()));
+            action.setUname(dialog.getDialogName());
+            navController.navigate(action);
+        });
     }
 
     @Override
@@ -63,11 +71,17 @@ public class ChatsFragment extends BaseFragment implements App.ChatsListener {
 
         model = FragmentDialogListBinding.bind(view);
         model.dialogsList.setAdapter(chatsAdapter);
-    }
-
-    @Override
-    public void onChatsReceived(List<Chat> chats) {
-        chatsAdapter.setItems(chats);
+        vm = new ViewModelProvider(this).get(ChatsViewModel.class);
+        vm.getChats().observe(getViewLifecycleOwner(), chatsAdapter::setItems);
+        vm.isAuthenticated().observe(getViewLifecycleOwner(), isAuthenticated -> {
+            NavController navController = Navigation.findNavController(getView());
+            if (!isAuthenticated) {
+                NavDirections action = ChatsFragmentDirections.actionChatsToNoAuth();
+                navController.navigate(action);
+            } else {
+                navController.popBackStack(R.id.chats, false);
+            }
+        });
     }
 
     @Override

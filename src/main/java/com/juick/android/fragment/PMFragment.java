@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.juick.App;
 import com.juick.R;
@@ -47,13 +48,7 @@ import retrofit2.Response;
  *
  * @author ugnich
  */
-public class PMFragment extends BaseFragment {
-
-    public static final String ARG_UID = "ARG_UID";
-    public static final String ARG_UNAME = "ARG_UNAME";
-
-    String uname;
-    int uid;
+public class PMFragment extends Fragment {
 
     private FragmentPmBinding model;
 
@@ -63,50 +58,53 @@ public class PMFragment extends BaseFragment {
         super(R.layout.fragment_pm);
     }
 
+    private String uname;
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         model = FragmentPmBinding.bind(view);
+        Bundle arguments = getArguments();
 
-        uname = getArguments().getString(ARG_UNAME);
-        uid = getArguments().getInt(ARG_UID, 0);
+        if (arguments != null) {
+            uname = PMFragmentArgs.fromBundle(getArguments()).getUname();
+            getActivity().setTitle(uname);
 
-        getActivity().setTitle(uname);
+            adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId),
+                    (imageView, url, object) -> GlideApp.with(imageView.getContext())
+                            .load(url)
+                            .transition(withCrossFade())
+                            .into(imageView));
+            model.messagesList.setAdapter(adapter);
 
-        adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId),
-                (imageView, url, object) -> GlideApp.with(imageView.getContext())
-                        .load(url)
-                        .transition(withCrossFade())
-                        .into(imageView));
-        model.messagesList.setAdapter(adapter);
-
-        App.getInstance().getApi().pm(uname).enqueue(new Callback<List<Post>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
-                if (response.isSuccessful() && isAdded()) {
-                    List<Post> newPms = response.body();
-                    if (newPms != null) {
-                        adapter.addToEnd(newPms, false);
+            App.getInstance().getApi().pm(uname).enqueue(new Callback<List<Post>>() {
+                @Override
+                public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
+                    if (response.isSuccessful() && isAdded()) {
+                        List<Post> newPms = response.body();
+                        if (newPms != null) {
+                            adapter.addToEnd(newPms, false);
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
-                if (isAdded()) {
-                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                @Override
+                public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
+                    if (isAdded()) {
+                        Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                    }
                 }
-            }
-        });
-        model.input.setInputListener(input -> {
-            postText(input.toString());
-            ViewUtil.hideKeyboard(getActivity());
-            return true;
-        });
-        App.getInstance().getNewMessage().observe(getViewLifecycleOwner(), (post) -> {
-            onNewMessages(Collections.singletonList(post));
-        });
+            });
+            model.input.setInputListener(input -> {
+                postText(input.toString());
+                ViewUtil.hideKeyboard(getActivity());
+                return true;
+            });
+            App.getInstance().getNewMessage().observe(getViewLifecycleOwner(), (post) -> {
+                onNewMessages(Collections.singletonList(post));
+            });
+        }
     }
 
     public void onNewMessages(List<Post> posts) {

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2008-2022, Juick
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/home">
+    <fragment
+        android:id="@+id/home"
+        android:name="com.juick.android.screens.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_posts_page"
+        >
+        <action
+            android:id="@+id/action_discoverFragment_to_threadFragment"
+            app:destination="@id/thread"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/home" />
+    </fragment>
+    <fragment
+        android:id="@+id/profile"
+        android:name="com.juick.android.screens.me.MeFragment"
+        android:label="@string/Me"
+        tools:layout="@layout/fragment_me" />
+    <fragment
+        android:id="@+id/newPostFragment"
+        android:name="com.juick.android.fragment.NewPostFragment"
+        android:label="NewPostFragment"
+        tools:layout="@layout/fragment_new_post">
+        <action
+            android:id="@+id/action_newPostFragment_to_tagsFragment"
+            app:destination="@id/tagsFragment"
+            app:popUpTo="@id/newPostFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/tagsFragment"
+        android:name="com.juick.android.fragment.TagsFragment"
+        android:label="TagsFragment" />
+    <fragment
+        android:id="@+id/thread"
+        android:name="com.juick.android.fragment.ThreadFragment"
+        tools:layout="@layout/fragment_thread"
+        android:label="Thread" >
+        <argument
+            android:name="mid"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+    <fragment
+        android:id="@+id/PMFragment"
+        tools:layout="@layout/fragment_pm"
+        android:name="com.juick.android.fragment.PMFragment"
+        android:label="{uname}" >
+        <argument
+            android:name="uname"
+            app:argType="string" />
+        <argument
+            android:name="uid"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+    <fragment
+        android:id="@+id/chats"
+        android:name="com.juick.android.screens.chats.ChatsFragment"
+        tools:layout="@layout/fragment_dialog_list"
+        android:label="Chats" >
+        <action
+            android:id="@+id/action_chats_to_PMFragment"
+            app:destination="@id/PMFragment"
+            app:popUpTo="@id/chats" />
+        <action
+            android:id="@+id/action_chats_to_no_auth"
+            app:destination="@id/no_auth"
+            app:popUpTo="@id/chats" />
+    </fragment>
+    <fragment
+        android:id="@+id/discover"
+        tools:layout="@layout/fragment_posts_page"
+        android:name="com.juick.android.screens.discover.DiscoverFragment"
+        android:label="Discover" >
+        <action
+            android:id="@+id/action_discover_to_thread"
+            app:destination="@id/thread"
+            app:popUpTo="@id/discover" />
+    </fragment>
+    <fragment
+        android:id="@+id/no_auth"
+        tools:layout="@layout/fragment_no_auth"
+        android:name="com.juick.android.screens.chats.NoAuthFragment"
+        android:label="Chats" />
+</navigation>

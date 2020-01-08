@@ -16,11 +16,14 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<resources>
-    <color name="colorPrimary">#f8f8f8</color>
-    <color name="colorAccent">#3c77aa</color>
-    <color name="colorSecondary">#fdfdff</color>
-    <color name="colorText">#222222</color>
-    <color name="colorFunny">#ff339a</color>
-    <color name="colorDimmed">#88859d</color>
-</resources>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/profile_image"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/av_96"
+        android:padding="6dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/user_photo" />
+</FrameLayout>
