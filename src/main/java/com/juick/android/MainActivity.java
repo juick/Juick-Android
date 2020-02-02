@@ -33,7 +33,11 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.here.oksse.OkSse;
 import com.here.oksse.ServerSentEvent;
 import com.juick.App;
@@ -114,6 +118,10 @@ public class MainActivity extends BaseActivity
             if (!TextUtils.isEmpty(Utils.getNick())) {
                 titleHeader.setText(Utils.getNick());
             }
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> {
+                String token = instanceIdResult.getToken();
+                Utils.updateFCMToken(token);
+            });
         }
 
         navigationView.getMenu().findItem(R.id.chats).setVisible(Utils.hasAuth());
