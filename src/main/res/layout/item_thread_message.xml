@@ -38,7 +38,7 @@
         android:layout_toEndOf="@+id/userpic"
         android:layout_toRightOf="@+id/userpic"
         android:linksClickable="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textColor="@color/colorText"
         tools:text="This is reply markup" />
 
