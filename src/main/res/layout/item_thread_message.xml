@@ -13,7 +13,9 @@
         android:layout_alignParentTop="true"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin" />
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_alignParentStart="true"
+        android:contentDescription="@string/user_photo" />
 
     <TextView
         android:id="@+id/username"
@@ -27,7 +29,10 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textColor="@color/colorAccent"
         android:textIsSelectable="false"
-        tools:text="ugnich" />
+        tools:text="ugnich"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_toStartOf="@+id/menu_imageView"
+        android:layout_toEndOf="@id/userpic" />
 
     <TextView
         android:id="@+id/text"
@@ -40,7 +45,8 @@
         android:linksClickable="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textColor="@color/colorText"
-        tools:text="This is reply markup" />
+        tools:text="This is reply markup"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin" />
 
     <ImageView
         android:id="@+id/photo"
@@ -49,7 +55,8 @@
         android:layout_below="@id/text"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:contentDescription="@string/user_photo" />
 
     <ImageView
         android:id="@+id/menu_imageView"
@@ -64,7 +71,8 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         android:contentDescription="@string/context_menu"
         android:src="@drawable/ic_more_vert_black_24dp"
-        android:tint="@color/colorText" />
+        android:tint="@color/colorText"
+        android:layout_alignParentEnd="true" />
 
     <TextView
         android:id="@+id/timestamp"

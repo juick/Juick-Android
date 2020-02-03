@@ -3,10 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".android.MainActivity">
 
     <com.stfalcon.chatkit.dialogs.DialogsList
         android:id="@+id/dialogsList"
+        app:dialogTitleTextSize="14sp"
+        app:dialogMessageTextSize="14sp"
+        app:dialogDateSize="14sp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

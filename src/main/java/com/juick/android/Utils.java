@@ -36,7 +36,6 @@ import android.util.Base64;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.RestClient;

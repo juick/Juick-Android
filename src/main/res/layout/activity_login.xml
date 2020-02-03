@@ -13,7 +13,8 @@
             android:layout_gravity="center_horizontal"
             android:src="@drawable/ic_logo"
             android:layout_above="@+id/linearLayout"
-            android:layout_centerHorizontal="true"/>
+            android:layout_centerHorizontal="true"
+        android:contentDescription="@string/logo" />
 
     <LinearLayout
             android:orientation="vertical"
@@ -36,13 +37,15 @@
                 android:layout_marginBottom="8dp">
 
             <EditText
-                    android:id="@+id/juickNick"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/avatar_size"
-                    android:inputType="textPersonName"
-                    android:maxLines="1"
-                    android:hint="Your nickname"
-                    android:textColorHint="#cbcaca"/>
+                android:id="@+id/juickNick"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/avatar_size"
+                android:autofillHints="username"
+                android:hint="@string/your_nickname"
+                android:inputType="textPersonName"
+                android:maxLines="1"
+                android:textColorHint="#cbcaca"
+                tools:targetApi="o" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -53,13 +56,15 @@
                 android:layout_marginBottom="8dp">
 
             <EditText
-                    android:id="@+id/juickPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/avatar_size"
-                    android:inputType="textPassword"
-                    android:maxLines="1"
-                    android:textColorHint="#cbcaca"
-                    android:hint="Password"/>
+                android:id="@+id/juickPassword"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/avatar_size"
+                android:autofillHints="password"
+                android:hint="@string/Password"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:textColorHint="#cbcaca"
+                tools:targetApi="o" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <androidx.appcompat.widget.AppCompatButton
@@ -71,7 +76,7 @@
                 android:padding="12dp"
                 android:background="@color/colorFunny"
                 android:textColor="@color/white"
-                android:text="Login"/>
+                android:text="@string/login"/>
 
         <RelativeLayout
                 android:layout_width="fill_parent"

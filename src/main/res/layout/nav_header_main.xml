@@ -16,16 +16,18 @@
         android:src="@drawable/ic_logo"
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
-        android:paddingBottom="10dp" />
+        android:paddingBottom="10dp"
+        android:layout_alignParentStart="true"
+        android:contentDescription="@string/user_photo" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Нажмите, чтобы войти"
+        android:text="@string/press_to_sign_in"
         android:textSize="14sp"
         android:textColor="@color/white"
         android:textStyle="bold"
-        android:gravity="left"
+        android:gravity="start"
         android:paddingBottom="4dp"
         android:id="@+id/title_textView"
         android:layout_above="@+id/subtitle_textView"
@@ -37,7 +39,7 @@
         android:layout_height="wrap_content"
         android:text=""
         android:id="@+id/subtitle_textView"
-        android:gravity="left"
+        android:gravity="start"
         android:layout_marginBottom="8dp"
         android:textSize="14sp"
         android:textColor="#000"

@@ -1,73 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools" android:layout_width="fill_parent"
-              android:layout_height="match_parent"
-              android:fitsSystemWindows="true"
-              android:background="?attr/colorPrimary"
-              android:orientation="vertical">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorPrimary"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
     <ScrollView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1">
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
         <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical"
-                android:padding="5dip">
-            <android.support.design.widget.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:labelFor="@id/newNick"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp">
-                <EditText
-                        android:id="@+id/newNick"
-                        android:inputType="textPersonName"
-                        android:layout_width="fill_parent"
-                        android:layout_height="@dimen/avatar_size"
-                        android:hint="@string/Nick_latin_letters_and_numbers_"
-                        android:singleLine="true"/>
-            </android.support.design.widget.TextInputLayout>
-            <android.support.design.widget.TextInputLayout
-                    android:labelFor="@id/newPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp">
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="5dip">
 
-                <EditText
-                        android:id="@+id/newPassword"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/avatar_size"
-                        android:inputType="textPassword"
-                        android:maxLines="1"
-                        android:textColorHint="#cbcaca"
-                        android:hint="Password"/>
-            </android.support.design.widget.TextInputLayout>
             <android.support.design.widget.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:labelFor="@id/confirmPassword"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:labelFor="@id/newNick">
 
-                <EditText
-                        android:id="@+id/confirmPassword"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/avatar_size"
-                        android:inputType="textPassword"
-                        android:maxLines="1"
-                        android:textColorHint="#cbcaca"
-                        android:hint="Confirm password"/>
-            </android.support.design.widget.TextInputLayout>
-            <android.support.v7.widget.AppCompatButton
-                    android:id="@+id/buttonCreate"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/newNick"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@color/colorFunny"
-                    android:textColor="@color/white"
-                    android:text="@string/Create"/>
+                    android:layout_height="@dimen/avatar_size"
+                    android:hint="@string/Nick_latin_letters_and_numbers_"
+                    android:inputType="textPersonName"
+                    android:singleLine="true"
+                    android:autofillHints="username"
+                    tools:targetApi="o" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:labelFor="@id/newPassword">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/newPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/avatar_size"
+                    android:hint="@string/Password"
+                    android:inputType="textPassword"
+                    android:maxLines="1"
+                    android:textColorHint="#cbcaca"
+                    android:autofillHints="password"
+                    tools:targetApi="o" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:labelFor="@id/confirmPassword">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/confirmPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/avatar_size"
+                    android:hint="Confirm password"
+                    android:inputType="textPassword"
+                    android:maxLines="1"
+                    android:textColorHint="#cbcaca"
+                    android:autofillHints="password_new"
+                    tools:targetApi="o" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/buttonCreate"
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@color/colorFunny"
+                android:text="@string/Create"
+                android:textColor="@color/white" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

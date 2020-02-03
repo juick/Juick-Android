@@ -43,6 +43,7 @@
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@drawable/ic_ei_pencil"
         android:tint="@color/white"
-        app:borderWidth="0dp" />
+        app:borderWidth="0dp"
+        tools:targetApi="lollipop" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -5,8 +5,5 @@
     <color name="colorSecondary">#fdfdff</color>
     <color name="colorText">#222222</color>
     <color name="colorPrimaryDark">#888888</color>
-    <color name="colorClassic">#ddddd5</color>
     <color name="colorFunny">#ff339a</color>
-    <color name="blue_grey_500">#607D8B</color>
-    <color name="blue_grey_900">#263238</color>
 </resources>
