@@ -58,7 +58,7 @@ public class AuthenticationService extends Service {
 
         private Context mContext;
 
-        public AccountAuthenticatorImpl(Context context) {
+        AccountAuthenticatorImpl(Context context) {
             super(context);
             mContext = context;
         }

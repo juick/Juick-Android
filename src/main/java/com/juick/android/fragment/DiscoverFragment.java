@@ -28,7 +28,7 @@ import com.juick.android.Utils;
  */
 public class DiscoverFragment extends BaseFragment implements View.OnClickListener {
 
-    AppBarLayout.OnOffsetChangedListener offsetChangedListener;
+    private AppBarLayout.OnOffsetChangedListener offsetChangedListener;
 
     @Nullable
     @Override

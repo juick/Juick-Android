@@ -15,7 +15,6 @@ import com.juick.R;
  */
 
 public class NoAuthFragment extends BaseFragment {
-    TextView msg;
 
     public NoAuthFragment(){}
 
@@ -28,7 +27,7 @@ public class NoAuthFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        msg = view.findViewById(R.id.msg);
+        TextView msg = view.findViewById(R.id.msg);
         msg.setText(R.string.NoAuthMessage);
     }
 }

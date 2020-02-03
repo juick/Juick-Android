@@ -20,7 +20,6 @@ package com.juick.android;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -106,13 +105,13 @@ public class NewMessageActivity extends BaseActivity implements ITagable {
 
     @Override
     public void onTagApplied(String tag) {
-        Log.d("NewMessageActivity", "onTagApplied: " + tag);
+        Log.d(NewMessageActivity.class.getSimpleName(), "onTagApplied: " + tag);
         this.getSupportFragmentManager().popBackStackImmediate();
         NewPostFragment commonFragment = getCommonFragment();
         if(commonFragment != null){
             commonFragment.applyTag(tag);
         }else{
-            Log.d("NewMessageActivity", "fucking shit: ");
+            Log.d(NewMessageActivity.class.getSimpleName(), "fucking shit: ");
         }
     }
 

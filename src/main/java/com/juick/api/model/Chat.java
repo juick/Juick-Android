@@ -40,7 +40,7 @@ public class Chat implements IDialog {
 
     @Override
     public List<? extends IUser> getUsers() {
-        return Collections.singletonList(User.newInstance(uid, uname));
+        return Collections.singletonList(new User(uid, uname));
     }
 
     @Override

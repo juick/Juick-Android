@@ -181,12 +181,12 @@ public class SignInActivity extends AppCompatActivity implements OnClickListener
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
 
-            Log.i("GMS", "Success " + account.getIdToken());
+            Log.i(SignInActivity.class.getSimpleName(), "Success " + account.getIdToken());
             RestClient.getApi().googleAuth(account.getIdToken()).enqueue(new Callback<AuthToken>() {
                 @Override
                 public void onResponse(Call<AuthToken> call, Response<AuthToken> response) {
                     if (response.isSuccessful()) {
-                        Log.i("SERVER", response.body().getAuthCode());
+                        Log.i(SignInActivity.class.getSimpleName(), response.body().getAuthCode());
                         Intent signupIntent = new Intent(SignInActivity.this, SignUpActivity.class);
                         signupIntent.putExtra("email", response.body().getAccount());
                         signupIntent.putExtra("authCode", response.body().getAuthCode());
@@ -204,7 +204,7 @@ public class SignInActivity extends AppCompatActivity implements OnClickListener
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w("GMS", "signInResult:failed code=" + e.getStatusCode());
+            Log.w(SignInActivity.class.getSimpleName(), "signInResult:failed code=" + e.getStatusCode());
         }
     }
 }

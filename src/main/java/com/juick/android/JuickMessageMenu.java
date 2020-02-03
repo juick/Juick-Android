@@ -49,11 +49,11 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
     private final static int MENU_ACTION_DELETE_POST = 6;
     private final static int MENU_ACTION_SOME_LAST_CMD = 7;
 
-    Activity context;
-    List<Post> postList;
-    Post selectedPost;
-    int menuLength;
-    int[] currentActions = new int[MENU_ACTION_SOME_LAST_CMD];
+    private Activity context;
+    private List<Post> postList;
+    private Post selectedPost;
+    private int menuLength;
+    private int[] currentActions = new int[MENU_ACTION_SOME_LAST_CMD];
 
     public JuickMessageMenu(List<Post> postList) {
         this.postList = postList;

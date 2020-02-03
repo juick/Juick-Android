@@ -62,7 +62,7 @@ public class ContactsSyncService extends Service {
 
     private static class SyncAdapterImpl extends AbstractThreadedSyncAdapter {
 
-        public SyncAdapterImpl(Context context) {
+        SyncAdapterImpl(Context context) {
             super(context, true);
         }
 
@@ -71,6 +71,7 @@ public class ContactsSyncService extends Service {
             try {
                 ContactsSyncService.performSync(getContext(), account, extras, authority, provider, syncResult);
             } catch (OperationCanceledException e) {
+                Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
             }
         }
     }
@@ -97,6 +98,7 @@ public class ContactsSyncService extends Service {
         while (c1.moveToNext()) {
             localContacts.put(c1.getString(1), c1.getLong(0));
         }
+        c1.close();
 
         try {
             Response<List<User>> response = RestClient.getApi().getFriends().execute();
@@ -111,7 +113,7 @@ public class ContactsSyncService extends Service {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
         }
     }
 
@@ -149,7 +151,7 @@ public class ContactsSyncService extends Service {
                     .submit(200, 200)
                     .get();
         } catch (InterruptedException | ExecutionException e) {
-            Log.w("JuickContacts", "Avatar error", e);
+            Log.w(ContactsSyncService.class.getSimpleName(), "Avatar error", e);
         }
         // Photo
         if (photo != null) {
@@ -175,8 +177,7 @@ public class ContactsSyncService extends Service {
         try {
             mContentResolver.applyBatch(ContactsContract.AUTHORITY, operationList);
         } catch (Exception e) {
-//      Log.e(TAG, "Something went wrong during creation! " + e);
-            e.printStackTrace();
+            Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
         }
     }
 }

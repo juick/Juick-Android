@@ -313,7 +313,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     private static Pattern regexLinks2 = Pattern.compile("((?<=\\s)|(?<=\\A))([\\[\\{]|&lt;)((?:ht|f)tps?://(?:www\\.)?([^\\/\\s\\\"\\)\\!]+)/?(?:[^\\]\\}](?<!&gt;))*)([\\]\\}]|&gt;)");
 
-    public static String formatMessage(String msg) {
+    private static String formatMessage(String msg) {
         msg = msg.replaceAll("&", "&amp;");
         msg = msg.replaceAll("<", "&lt;");
         msg = msg.replaceAll(">", "&gt;");
@@ -489,11 +489,11 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             }
         }
 
-        public void setOnItemClickListener(OnItemClickListener listener) {
+        void setOnItemClickListener(OnItemClickListener listener) {
             itemClickListener = listener;
         }
 
-        public void setOnMenuClickListener(OnItemClickListener listener) {
+        void setOnMenuClickListener(OnItemClickListener listener) {
             menuClickListener = listener;
         }
     }
@@ -501,7 +501,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     protected class FH extends RecyclerView.ViewHolder {
         ProgressBar progressBar;
 
-        public FH(View itemView) {
+        FH(View itemView) {
             super(itemView);
             progressBar = itemView.findViewById(R.id.progressBar);
         }

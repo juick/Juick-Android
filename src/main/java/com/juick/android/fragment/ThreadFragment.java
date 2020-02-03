@@ -74,20 +74,20 @@ import retrofit2.Response;
  */
 public class ThreadFragment extends BaseFragment implements View.OnClickListener {
 
-    public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
+    private static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
 
-    public static final String ARG_MID = "ARG_MID";
+    private static final String ARG_MID = "ARG_MID";
 
-    TextView tvReplyTo;
-    EditText etMessage;
-    ImageView bSend;
-    ImageView bAttach;
-    int rid = 0;
-    String attachmentUri = null;
-    String attachmentMime = null;
-    ProgressDialog progressDialog;
-    NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
-    Handler progressHandler = new Handler() {
+    private TextView tvReplyTo;
+    private EditText etMessage;
+    private ImageView bSend;
+    private ImageView bAttach;
+    private int rid = 0;
+    private String attachmentUri = null;
+    private String attachmentMime = null;
+    private ProgressDialog progressDialog;
+    private NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
+    private Handler progressHandler = new Handler() {
 
         @Override
         public void handleMessage(Message msg) {
@@ -99,15 +99,12 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         }
     };
 
-    int mid = 0;
+    private int mid = 0;
 
-    RecyclerView recyclerView;
-    LinearLayoutManager linearLayoutManager;
-    ProgressBar progressBar;
-    JuickMessagesAdapter adapter;
-
-    public ThreadFragment() {
-    }
+    private RecyclerView recyclerView;
+    private LinearLayoutManager linearLayoutManager;
+    private ProgressBar progressBar;
+    private JuickMessagesAdapter adapter;
 
     public static ThreadFragment newInstance(int mid) {
         ThreadFragment fragment = new ThreadFragment();
@@ -242,7 +239,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         bSend.setEnabled(state);
     }
 
-    public void onReply(int newrid, String txt) {
+    private void onReply(int newrid, String txt) {
         rid = newrid;
         if (rid > 0) {
             SpannableStringBuilder ssb = new SpannableStringBuilder();

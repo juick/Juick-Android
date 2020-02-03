@@ -35,10 +35,10 @@ public class PostsPageFragment extends BaseFragment {
 
     public static final String ARG_URL = "ARG_URL";
 
-    RecyclerView recyclerView;
-    SwipeRefreshLayout swipeRefreshLayout;
-    ProgressBar progressBar;
-    JuickMessagesAdapter adapter;
+    private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private ProgressBar progressBar;
+    private JuickMessagesAdapter adapter;
 
     String apiUrl;
 

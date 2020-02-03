@@ -1,5 +1,7 @@
 package com.juick.api.model;
 
+import androidx.annotation.NonNull;
+
 import java.util.List;
 
 /**
@@ -9,6 +11,7 @@ public class Pms {
 
     private List<Chat> pms;
 
+    @NonNull
     public List<Chat> getPms() {
         return pms;
     }

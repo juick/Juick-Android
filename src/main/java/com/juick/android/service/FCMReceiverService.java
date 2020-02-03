@@ -66,7 +66,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage message) {
         Map<String,String> data = message.getData();
         String msg = data.get("message");
-        Log.d("FCMReceiverService", "onMessageReceived " + data.toString());
+        Log.d(FCMReceiverService.class.getSimpleName(), "onMessageReceived " + data.toString());
         showNotification(msg);
     }
 
@@ -128,7 +128,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
             });
 
         } catch (Exception e) {
-            Log.e("GCMIntentService", "GCM message error", e);
+            Log.e(FCMReceiverService.class.getSimpleName(), "GCM message error", e);
         }
     }
 
@@ -159,7 +159,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
 
     @Override
     public void onNewToken(@NonNull String refreshedToken) {
-        Log.d("FCMReceiverService", "Refreshed token: " + refreshedToken);
+        Log.d(FCMReceiverService.class.getSimpleName(), "Refreshed token: " + refreshedToken);
         Utils.updateFCMToken(refreshedToken);
     }
 }

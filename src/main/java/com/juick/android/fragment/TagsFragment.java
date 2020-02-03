@@ -55,17 +55,14 @@ import java.util.List;
 public class TagsFragment extends BaseFragment {
 
     private static final String ARG_UID = "ARG_UID";
-    public static final String ARG_TAG = "ARG_TAG";
+    static final String ARG_TAG = "ARG_TAG";
 
-    public static final String TAG_SELECT_ACTION = "TAG_SELECT_ACTION";
+    static final String TAG_SELECT_ACTION = "TAG_SELECT_ACTION";
 
-    int uid = 0;
-    ITagable mCallback;
+    private int uid = 0;
+    private ITagable mCallback;
 
-    public TagsFragment() {
-    }
-
-    public static TagsFragment newInstance(int uid) {
+    static TagsFragment newInstance(int uid) {
         TagsFragment fragment = new TagsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_UID, uid);
@@ -74,12 +71,12 @@ public class TagsFragment extends BaseFragment {
     }
 
     @Override
-    public void onAttach(Context c) {
+    public void onAttach(@NonNull Context c) {
         super.onAttach(c);
         try {
             mCallback = (ITagable) c;
         } catch (ClassCastException e) {
-
+            Log.d(TagsFragment.class.getSimpleName(), "Invalid callback", e);
         }
     }
 
@@ -152,7 +149,7 @@ public class TagsFragment extends BaseFragment {
         OnItemClickListener itemClickListener;
         OnItemLongClickListener itemLongClickListener;
 
-        public void addData(List<String> newItems) {
+        void addData(List<String> newItems) {
             items.clear();
             items.addAll(newItems);
             notifyDataSetChanged();
@@ -181,17 +178,17 @@ public class TagsFragment extends BaseFragment {
             return items.size();
         }
 
-        public String getItem(int position) {
+        String getItem(int position) {
             Log.d("TagsAdapter", "getItem: " + position);
 
             return items.get(position);
         }
 
-        public void setOnItemClickListener(OnItemClickListener itemClickListener) {
+        void setOnItemClickListener(OnItemClickListener itemClickListener) {
             this.itemClickListener = itemClickListener;
         }
 
-        public void setOnItemLongClickListener(OnItemLongClickListener itemClickListener) {
+        void setOnItemLongClickListener(OnItemLongClickListener itemClickListener) {
             this.itemLongClickListener = itemClickListener;
         }
 
@@ -209,7 +206,7 @@ public class TagsFragment extends BaseFragment {
             OnItemClickListener itemClickListener;
             OnItemLongClickListener itemLongClickListener;
 
-            public VH(View itemView) {
+            VH(View itemView) {
                 super(itemView);
                 textView = itemView.findViewById(android.R.id.text1);
 
@@ -217,11 +214,11 @@ public class TagsFragment extends BaseFragment {
                 itemView.setOnLongClickListener(this);
             }
 
-            public void setOnItemClickListener(OnItemClickListener listener) {
+            void setOnItemClickListener(OnItemClickListener listener) {
                 itemClickListener = listener;
             }
 
-            public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+            void setOnItemLongClickListener(OnItemLongClickListener listener) {
                 itemLongClickListener = listener;
             }
 

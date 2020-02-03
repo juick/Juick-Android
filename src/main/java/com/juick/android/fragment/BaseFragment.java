@@ -13,7 +13,7 @@ import com.juick.android.BaseActivity;
  */
 public class BaseFragment extends Fragment {
 
-    public BaseActivity getBaseActivity() {
+    BaseActivity getBaseActivity() {
         return (BaseActivity) getActivity();
     }
 

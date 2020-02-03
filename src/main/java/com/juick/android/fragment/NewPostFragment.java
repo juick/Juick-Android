@@ -38,15 +38,15 @@ import com.juick.api.RestClient;
 
 public class NewPostFragment extends BaseFragment implements View.OnClickListener {
     public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
-    EditText etMessage;
-    ImageView bTags;
-    ImageView bAttachment;
-    ImageView bSend;
-    String attachmentUri = null;
-    String attachmentMime = null;
-    ProgressDialog progressDialog = null;
-    NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
-    Handler progressHandler = new Handler() {
+    private EditText etMessage;
+    private ImageView bTags;
+    private ImageView bAttachment;
+    private ImageView bSend;
+    private String attachmentUri = null;
+    private String attachmentMime = null;
+    private ProgressDialog progressDialog = null;
+    private NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
+    private Handler progressHandler = new Handler() {
 
         @Override
         public void handleMessage(Message msg) {
@@ -58,7 +58,7 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
         }
     };
 
-    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(TagsFragment.TAG_SELECT_ACTION)) {
