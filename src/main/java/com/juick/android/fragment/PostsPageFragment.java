@@ -67,15 +67,17 @@ public class PostsPageFragment extends BaseFragment {
         RestClient.getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                swipeRefreshLayout.setRefreshing(false);
-                recyclerView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
-                List<Post> posts = response.body();
-                if(posts != null) {
-                    if(isReload)
-                        adapter.newData(posts);
-                    else
-                        adapter.addData(posts);
+                if (response.isSuccessful() && isAdded()) {
+                    swipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
+                    List<Post> posts = response.body();
+                    if(posts != null) {
+                        if(isReload)
+                            adapter.newData(posts);
+                        else
+                            adapter.addData(posts);
+                    }
                 }
             }
 

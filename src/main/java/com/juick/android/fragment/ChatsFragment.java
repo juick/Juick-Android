@@ -75,11 +75,9 @@ public class ChatsFragment extends BaseFragment {
         RestClient.getApi().groupsPms(10).enqueue(new Callback<Pms>() {
             @Override
             public void onResponse(Call<Pms> call, Response<Pms> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && isAdded()) {
                     Pms pms = response.body();
-                    if (pms.getPms() != null) {
-                        dialogListAdapter.setItems(pms.getPms());
-                    }
+                    dialogListAdapter.setItems(pms.getPms());
                 }
             }
 

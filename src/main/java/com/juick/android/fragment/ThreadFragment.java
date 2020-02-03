@@ -299,11 +299,11 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         }
     }
 
-    public void postText(final String body) {
+    private void postText(final String body) {
         RestClient.getApi().post(body).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response != null) {
+                if (response.isSuccessful() && isAdded()) {
                     Toast.makeText(App.getInstance(), R.string.Message_posted, Toast.LENGTH_SHORT).show();
                     resetForm();
                     ViewUtil.hideKeyboard(getActivity());

@@ -108,8 +108,7 @@ public class PMFragment extends BaseFragment {
         RestClient.getApi().pm(uname).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                // progressBar.setVisibility(View.GONE);
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && isAdded()) {
                     adapter.addToEnd(response.body(), false);
                 }
             }
@@ -140,7 +139,7 @@ public class PMFragment extends BaseFragment {
         RestClient.getApi().postPm(uname, body).enqueue(new Callback<Post>() {
             @Override
             public void onResponse(Call<Post> call, final Response<Post> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && isAdded()) {
                     onNewMessages(new ArrayList<Post>() {{
                         add(response.body());
                     }});

@@ -128,11 +128,14 @@ public class TagsFragment extends BaseFragment {
             @Override
             public void onResponse(Call<List<Tag>> call, Response<List<Tag>> response) {
                 progressBar.setVisibility(View.GONE);
-                List<String> listAdapter = new ArrayList<>();
-                for (Tag tag : response.body()) {
-                    listAdapter.add(tag.getTag());
+                if (response.isSuccessful() && isAdded()) {
+                    progressBar.setVisibility(View.GONE);
+                    List<String> listAdapter = new ArrayList<>();
+                    for (Tag tag : response.body()) {
+                        listAdapter.add(tag.getTag());
+                    }
+                    adapter.addData(listAdapter);
                 }
-                adapter.addData(listAdapter);
             }
 
             @Override
