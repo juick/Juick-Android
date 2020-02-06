@@ -132,7 +132,7 @@ public class RestClient {
 
     public interface Api {
 
-        @GET("")
+        @GET()
         Call<List<Post>> getPosts(@Url String url);
 
         @GET("/users/friends")
@@ -156,11 +156,11 @@ public class RestClient {
         @POST("/post")
         Call<Void> newPost(@Part("body") RequestBody body, @Part MultipartBody.Part file);
 
-        @GET("")
-        Call<List<Tag>> tags(@Url String url);
+        @GET("/tags")
+        Call<List<Tag>> tags(@Query("user_id") int userId);
 
-        @GET("")
-        Call<List<Post>> thread(@Url String url);
+        @GET("/thread")
+        Call<List<Post>> thread(@Query("mid") int messageId);
 
         @GET("/android/register")
         Call<Void> registerPush(@Query("regid") String login);

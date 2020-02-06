@@ -184,7 +184,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     }
 
     private void load() {
-        RestClient.getApi().thread(RestClient.getBaseUrl() + "thread?mid=" + mid)
+        RestClient.getApi().thread(mid)
                 .enqueue(new Callback<List<Post>>() {
                     @Override
                     public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
