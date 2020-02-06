@@ -34,6 +34,8 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.here.oksse.OkSse;
@@ -135,7 +137,11 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        initEventsListener();
+        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+        != ConnectionResult.SUCCESS) {
+            Log.d(this.getClass().getSimpleName(), "Play Services unavailable, using direct connection");
+            initEventsListener();
+        }
     }
 
     @Override
