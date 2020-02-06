@@ -114,6 +114,14 @@ public class PostsPageFragment extends BaseFragment {
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        swipeRefreshLayout = getActivity().findViewById(R.id.swipe_container);
+        swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(App.getInstance(), R.color.colorAccent));
+        swipeRefreshLayout.setOnRefreshListener(() -> load(true));
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -159,11 +167,6 @@ public class PostsPageFragment extends BaseFragment {
                 return true;
             }
         });
-
-        swipeRefreshLayout = view.findViewById(R.id.swipe_container);
-        swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(App.getInstance(), R.color.colorAccent));
-    //    swipeRefreshLayout.setRefreshing(true);
-        swipeRefreshLayout.setOnRefreshListener(() -> load(true));
 
         if (adapter.getItemCount() == 0) {
             recyclerView.setVisibility(View.GONE);
