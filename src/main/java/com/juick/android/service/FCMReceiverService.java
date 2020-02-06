@@ -84,7 +84,15 @@ public class FCMReceiverService extends FirebaseMessagingService {
         Map<String,String> data = message.getData();
         String msg = data.get("message");
         Log.d(FCMReceiverService.class.getSimpleName(), "onMessageReceived " + data.toString());
-        showNotification(msg);
+        boolean isForegroundMessage = message.getNotification() != null;
+        if (isForegroundMessage) {
+            Log.d(FCMReceiverService.class.getSimpleName(), "Message received in foreground");
+            LocalBroadcastManager.getInstance(App.getInstance())
+                    .sendBroadcast(new Intent(RestClient.ACTION_NEW_EVENT)
+                            .putExtra(RestClient.NEW_EVENT_EXTRA, msg));
+        } else {
+            showNotification(msg);
+        }
     }
 
     public static void showNotification(final String msgStr) {
