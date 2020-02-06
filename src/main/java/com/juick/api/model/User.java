@@ -18,6 +18,8 @@
 
 package com.juick.api.model;
 
+import androidx.annotation.NonNull;
+
 import com.stfalcon.chatkit.commons.models.IUser;
 
 /**
@@ -30,6 +32,7 @@ public class User implements IUser {
     private String fullname = null;
     private boolean banned;
     private String avatar;
+    private int unreadCount;
 
     public User() {}
 
@@ -68,5 +71,9 @@ public class User implements IUser {
 
     public boolean isBanned() {
         return banned;
+    }
+
+    public int getUnreadCount() {
+        return unreadCount;
     }
 }

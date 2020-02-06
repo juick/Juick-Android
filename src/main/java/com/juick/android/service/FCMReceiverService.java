@@ -146,9 +146,10 @@ public class FCMReceiverService extends FirebaseMessagingService {
                                 FCMReceiverService.notify(jmsg, notificationBuilder);
                             }
                         });
-
-                notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
-                        App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
+                if (jmsg.getUser().getUid() > 0) {
+                    notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
+                            App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
+                }
                 notify(jmsg, notificationBuilder);
             });
 
@@ -172,12 +173,16 @@ public class FCMReceiverService extends FirebaseMessagingService {
         intent.setAction(MainActivity.PUSH_ACTION);
         intent.putExtra(MainActivity.ARG_UNAME, jmsg.getUser().getUname());
         intent.putExtra(MainActivity.ARG_UID, jmsg.getUser().getUid());
-        if (jmsg.getMid() == 0) {
-            LocalBroadcastManager.getInstance(App.getInstance()).sendBroadcast(new Intent(GCM_EVENT_ACTION).putExtra("message", msgStr));
-            intent.putExtra(MainActivity.PUSH_ACTION_SHOW_PM, true);
+        if (jmsg.getUser().getUid() == 0) {
+            intent.putExtra(MainActivity.PUSH_ACTION_SHOW_DISCUSSIONS, true);
         } else {
-            intent.putExtra(MainActivity.ARG_MID, jmsg.getMid());
-            intent.putExtra(MainActivity.PUSH_ACTION_SHOW_THREAD, true);
+            if (jmsg.getMid() == 0) {
+                LocalBroadcastManager.getInstance(App.getInstance()).sendBroadcast(new Intent(GCM_EVENT_ACTION).putExtra("message", msgStr));
+                intent.putExtra(MainActivity.PUSH_ACTION_SHOW_PM, true);
+            } else {
+                intent.putExtra(MainActivity.ARG_MID, jmsg.getMid());
+                intent.putExtra(MainActivity.PUSH_ACTION_SHOW_THREAD, true);
+            }
         }
         return intent;
     }

@@ -33,6 +33,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -45,6 +48,7 @@ import com.juick.R;
 import com.juick.android.fragment.ChatsFragment;
 import com.juick.android.fragment.DiscoverFragment;
 import com.juick.android.fragment.ThreadFragment;
+import com.juick.android.service.MessageChecker;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.User;
@@ -71,6 +75,7 @@ public class MainActivity extends BaseActivity
     public static final String PUSH_ACTION = "PUSH_ACTION";
     public static final String PUSH_ACTION_SHOW_THREAD = "PUSH_ACTION_SHOW_THREAD";
     public static final String PUSH_ACTION_SHOW_PM = "PUSH_ACTION_SHOW_PM";
+    public static final String PUSH_ACTION_SHOW_DISCUSSIONS = "PUSH_ACTION_SHOW_DISCUSSIONS";
 
     private OkHttpClient es;
 
@@ -119,10 +124,20 @@ public class MainActivity extends BaseActivity
             if (!TextUtils.isEmpty(Utils.getNick())) {
                 titleHeader.setText(Utils.getNick());
             }
-            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> {
-                String token = instanceIdResult.getToken();
-                Utils.updateFCMToken(token);
-            });
+            if (GoogleApiAvailability.getInstance()
+                    .isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS) {
+                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> {
+                    String token = instanceIdResult.getToken();
+                    Utils.updateFCMToken(token);
+                });
+            } else {
+                PeriodicWorkRequest periodicWorkRequest =
+                        new PeriodicWorkRequest.Builder(MessageChecker.class, 1, TimeUnit.HOURS)
+                                .build();
+                WorkManager workManager = WorkManager.getInstance();
+                workManager.enqueueUniquePeriodicWork(this.getClass().getSimpleName(),
+                        ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
+            }
         }
 
         navigationView.getMenu().findItem(R.id.chats).setVisible(Utils.hasAuth());
@@ -154,6 +169,9 @@ public class MainActivity extends BaseActivity
                 replaceFragment(FeedBuilder.chatFor(intent.getStringExtra(ARG_UNAME), intent.getIntExtra(ARG_UID, 0)));
             } else if (intent.getBooleanExtra(PUSH_ACTION_SHOW_THREAD, false)) {
                 replaceFragment(ThreadFragment.newInstance(intent.getIntExtra(ARG_MID, 0)));
+            } else if (intent.getBooleanExtra(PUSH_ACTION_SHOW_DISCUSSIONS, false)) {
+                setTitle(R.string.Discussions);
+                replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
             }
         }else if(Intent.ACTION_VIEW.equals(action)){
             Uri data = intent.getData();

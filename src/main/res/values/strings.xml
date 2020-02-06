@@ -84,4 +84,5 @@
     <string name="login">Login</string>
     <string name="divider">Divider</string>
     <string name="press_to_sign_in">Press to sign in</string>
+    <string name="unread_discussions">You have unread discussions</string>
 </resources>

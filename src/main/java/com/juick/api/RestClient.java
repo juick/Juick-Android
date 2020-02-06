@@ -132,6 +132,9 @@ public class RestClient {
 
     public interface Api {
 
+        @GET("/me")
+        Call<User> me();
+
         @GET()
         Call<List<Post>> getPosts(@Url String url);
 
