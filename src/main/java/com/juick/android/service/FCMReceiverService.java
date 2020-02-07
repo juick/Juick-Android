@@ -27,11 +27,15 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
+
 import android.text.TextUtils;
 import android.util.Log;
+
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -66,7 +70,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
         }
 
         channelId = getApplicationContext().getString(R.string.default_notification_channel_id);
-        NotificationChannel channel =  notificationManager.getNotificationChannel(channelId);
+        NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
         if (channel == null) {
             channel = new NotificationChannel(channelId,
                     "Juick",
@@ -81,7 +85,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage message) {
-        Map<String,String> data = message.getData();
+        Map<String, String> data = message.getData();
         String msg = data.get("message");
         Log.d(FCMReceiverService.class.getSimpleName(), "onMessageReceived " + data.toString());
         boolean isForegroundMessage = message.getNotification() != null;
@@ -98,68 +102,66 @@ public class FCMReceiverService extends FirebaseMessagingService {
     public static void showNotification(final String msgStr) {
         try {
             final Post jmsg = RestClient.getJsonMapper().readValue(msgStr, Post.class);
-            if (jmsg.isService()) {
-                notificationManager.cancel(getId(jmsg));
-                return;
-            }
-            String title = "@" + jmsg.getUser().getUname();
-            if (!jmsg.getTags().isEmpty()) {
-                title += ": " + jmsg.getTagsString();
-            }
-            String body;
-            if (TextUtils.isEmpty(jmsg.getBody())) {
-                body = "sent an image";
-            } else {
-                if (jmsg.getBody().length() > 64) {
-                    body = jmsg.getBody().substring(0, 60) + "...";
-                } else {
-                    body = jmsg.getBody();
-                }
-            }
-
-            PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT);
-            final NotificationCompat.Builder notificationBuilder = Build.VERSION.SDK_INT < 26 ?
-                    new NotificationCompat.Builder(App.getInstance()) : new NotificationCompat.Builder(App.getInstance(), channelId);
-            notificationBuilder.setSmallIcon(R.drawable.ic_notification)
-                    .setContentTitle(title)
-                    .setContentText(body)
-                    .setAutoCancel(true).setWhen(0)
-                    .setContentIntent(contentIntent)
-                    .setGroup("messages")
-                    .setGroupSummary(true);
-            notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
-            notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.getBody()));
-
             Handler handler = new Handler(Looper.getMainLooper());
-            handler.post(() -> {
-                GlideApp.with(App.getInstance()).asBitmap()
-                        .load(jmsg.getUser().getAvatar())
-                        .centerCrop()
-                        .into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
-                                notificationBuilder.setLargeIcon(resource);
-                                if (Build.VERSION.SDK_INT < 26) {
-                                    notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
-                                            | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
-                                }
-                                FCMReceiverService.notify(jmsg, notificationBuilder);
-                            }
-                        });
-                if (jmsg.getUser().getUid() > 0) {
-                    notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
-                            App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
+            if (jmsg.isService()) {
+                handler.post(() -> notificationManager.cancel(String.valueOf(getId(jmsg)), 0));
+            } else {
+                String title = "@" + jmsg.getUser().getUname();
+                if (!jmsg.getTags().isEmpty()) {
+                    title += ": " + jmsg.getTagsString();
                 }
-                notify(jmsg, notificationBuilder);
-            });
+                String body;
+                if (TextUtils.isEmpty(jmsg.getBody())) {
+                    body = "sent an image";
+                } else {
+                    if (jmsg.getBody().length() > 64) {
+                        body = jmsg.getBody().substring(0, 60) + "...";
+                    } else {
+                        body = jmsg.getBody();
+                    }
+                }
 
+                PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT);
+                final NotificationCompat.Builder notificationBuilder = Build.VERSION.SDK_INT < 26 ?
+                        new NotificationCompat.Builder(App.getInstance()) : new NotificationCompat.Builder(App.getInstance(), channelId);
+                notificationBuilder.setSmallIcon(R.drawable.ic_notification)
+                        .setContentTitle(title)
+                        .setContentText(body)
+                        .setAutoCancel(true).setWhen(0)
+                        .setContentIntent(contentIntent)
+                        .setGroup("messages")
+                        .setGroupSummary(true);
+                notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
+                notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.getBody()));
+                handler.post(() -> {
+                    GlideApp.with(App.getInstance()).asBitmap()
+                            .load(jmsg.getUser().getAvatar())
+                            .centerCrop()
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
+                                    notificationBuilder.setLargeIcon(resource);
+                                    if (Build.VERSION.SDK_INT < 26) {
+                                        notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
+                                                | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
+                                    }
+                                    FCMReceiverService.notify(jmsg, notificationBuilder);
+                                }
+                            });
+                    if (jmsg.getUser().getUid() > 0) {
+                        notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
+                                App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
+                    }
+                    notify(jmsg, notificationBuilder);
+                });
+            }
         } catch (Exception e) {
             Log.e(FCMReceiverService.class.getSimpleName(), "GCM message error", e);
         }
     }
 
     private static void notify(Post jmsg, NotificationCompat.Builder notificationBuilder) {
-        notificationManager.notify(getId(jmsg), notificationBuilder.build());
+        notificationManager.notify(String.valueOf(getId(jmsg)), 0, notificationBuilder.build());
     }
 
     private static Integer getId(Post jmsg) {
