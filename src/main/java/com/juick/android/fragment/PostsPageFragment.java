@@ -57,26 +57,21 @@ public class PostsPageFragment extends BaseFragment {
     private ProgressBar progressBar;
     private JuickMessagesAdapter adapter;
 
-    String apiUrl;
+    private String apiUrl;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new JuickMessagesAdapter();
-        apiUrl = null;
         Bundle args = getArguments();
         if (args != null) {
             UrlBuilder url = args.getParcelable(ARG_URL);
             if(url != null)
                 apiUrl = url.toString();
         }
-        if(apiUrl != null)
-            load(false);
-
-        Log.d("PostsPageFragment", "load");
     }
     @Override
-    public void reload(){
+    public void reload() {
         super.reload();
         load(true);
     }
@@ -119,6 +114,7 @@ public class PostsPageFragment extends BaseFragment {
         swipeRefreshLayout = getActivity().findViewById(R.id.swipe_container);
         swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(App.getInstance(), R.color.colorAccent));
         swipeRefreshLayout.setOnRefreshListener(() -> load(true));
+        load(false);
     }
 
     @Override
