@@ -73,14 +73,14 @@ public class FCMReceiverService extends FirebaseMessagingService {
         NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
         if (channel == null) {
             channel = new NotificationChannel(channelId,
-                    channelId,
+                    getApplicationContext().getString(R.string.Juick),
                     NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription("Juick notifications");
             channel.enableLights(true);
             channel.enableVibration(true);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             notificationManager.createNotificationChannel(channel);
         }
+        channel.setDescription(getApplicationContext().getString(R.string.juick_notifications));
     }
 
     @Override
