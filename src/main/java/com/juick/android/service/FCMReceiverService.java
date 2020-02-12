@@ -41,6 +41,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.juick.App;
+import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.MainActivity;
 import com.juick.android.Utils;
@@ -54,8 +55,6 @@ import java.util.Map;
  * Created by vt on 03/12/15.
  */
 public class FCMReceiverService extends FirebaseMessagingService {
-
-    public final static String GCM_EVENT_ACTION = FCMReceiverService.class.getName() + "_GCM_EVENT_ACTION";
 
     private static String channelId;
 
@@ -92,8 +91,8 @@ public class FCMReceiverService extends FirebaseMessagingService {
         if (isForegroundMessage) {
             Log.d(FCMReceiverService.class.getSimpleName(), "Message received in foreground");
             LocalBroadcastManager.getInstance(App.getInstance())
-                    .sendBroadcast(new Intent(RestClient.ACTION_NEW_EVENT)
-                            .putExtra(RestClient.NEW_EVENT_EXTRA, msg));
+                    .sendBroadcast(new Intent(BuildConfig.INTENT_NEW_EVENT_ACTION)
+                            .putExtra(getString(R.string.notification_extra), msg));
         } else {
             showNotification(msg);
         }
@@ -121,9 +120,11 @@ public class FCMReceiverService extends FirebaseMessagingService {
                     }
                 }
 
-                PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(),
+                        getId(jmsg), createNewEventIntent(msgStr), PendingIntent.FLAG_UPDATE_CURRENT);
                 final NotificationCompat.Builder notificationBuilder = Build.VERSION.SDK_INT < 26 ?
-                        new NotificationCompat.Builder(App.getInstance()) : new NotificationCompat.Builder(App.getInstance(), channelId);
+                        new NotificationCompat.Builder(App.getInstance()) :
+                        new NotificationCompat.Builder(App.getInstance(), channelId);
                 notificationBuilder.setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle(title)
                         .setContentText(body)
@@ -149,8 +150,11 @@ public class FCMReceiverService extends FirebaseMessagingService {
                                 }
                             });
                     if (jmsg.getUser().getUid() > 0) {
-                        notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ? R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
-                                App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(), getId(jmsg), getIntent(msgStr, jmsg), PendingIntent.FLAG_UPDATE_CURRENT));
+                        notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ?
+                                        R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
+                                App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(),
+                                        getId(jmsg), createNewEventIntent(msgStr),
+                                        PendingIntent.FLAG_UPDATE_CURRENT));
                     }
                     notify(jmsg, notificationBuilder);
                 });
@@ -168,24 +172,12 @@ public class FCMReceiverService extends FirebaseMessagingService {
         return jmsg.getMid() != 0 ? jmsg.getMid() : jmsg.getUser().getUid();
     }
 
-    public static Intent getIntent(String msgStr, Post jmsg) {
+    public static Intent createNewEventIntent(String jmsg) {
         Intent intent = new Intent(App.getInstance(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        intent.setAction(MainActivity.PUSH_ACTION);
-        intent.putExtra(MainActivity.ARG_UNAME, jmsg.getUser().getUname());
-        intent.putExtra(MainActivity.ARG_UID, jmsg.getUser().getUid());
-        if (jmsg.getUser().getUid() == 0) {
-            intent.putExtra(MainActivity.PUSH_ACTION_SHOW_DISCUSSIONS, true);
-        } else {
-            if (jmsg.getMid() == 0) {
-                LocalBroadcastManager.getInstance(App.getInstance()).sendBroadcast(new Intent(GCM_EVENT_ACTION).putExtra("message", msgStr));
-                intent.putExtra(MainActivity.PUSH_ACTION_SHOW_PM, true);
-            } else {
-                intent.putExtra(MainActivity.ARG_MID, jmsg.getMid());
-                intent.putExtra(MainActivity.PUSH_ACTION_SHOW_THREAD, true);
-            }
-        }
+        intent.setAction(BuildConfig.INTENT_NEW_EVENT_ACTION);
+        intent.putExtra(App.getInstance().getString(R.string.notification_extra), jmsg);
         return intent;
     }
 

@@ -50,6 +50,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.juick.App;
+import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.JuickMessageMenu;
 import com.juick.android.JuickMessagesAdapter;
@@ -372,11 +373,11 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                     progressHandler.sendEmptyMessage(intent.getIntExtra(RestClient.EXTRA_PROGRESS, 0));
                 }
             }
-            if (intent.getAction().equals(RestClient.ACTION_NEW_EVENT)) {
+            if (intent.getAction().equals(BuildConfig.INTENT_NEW_EVENT_ACTION)) {
                 if (!isAdded()) {
                     return;
                 }
-                String data = intent.getStringExtra(RestClient.NEW_EVENT_EXTRA);
+                String data = intent.getStringExtra(getString(R.string.notification_extra));
                 if (data != null && !data.trim().isEmpty()) {
                     try {
                         final Post reply = RestClient.getJsonMapper().readValue(data, Post.class);
@@ -402,7 +403,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         super.onResume();
         getActivity().registerReceiver(broadcastReceiver, new IntentFilter(TagsFragment.TAG_SELECT_ACTION));
         LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(RestClient.ACTION_UPLOAD_PROGRESS));
-        LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(RestClient.ACTION_NEW_EVENT));
+        LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(BuildConfig.INTENT_NEW_EVENT_ACTION));
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

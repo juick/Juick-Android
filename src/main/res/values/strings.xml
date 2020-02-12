@@ -3,6 +3,7 @@
     <string name="com_juick" translatable="false">com.juick</string>
     <string name="Juick" translatable="false">Juick</string>
     <string name="default_notification_channel_id" translatable="false">default</string>
+    <string name="notification_extra" translatable="false">message</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="context_menu">Context menu</string>

@@ -32,10 +32,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.juick.App;
+import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.Utils;
-import com.juick.android.service.FCMReceiverService;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
@@ -58,8 +59,8 @@ import retrofit2.Response;
  */
 public class PMFragment extends BaseFragment {
 
-    private static final String ARG_UID = "ARG_UID";
-    private static final String ARG_UNAME = "ARG_UNAME";
+    public static final String ARG_UID = "ARG_UID";
+    public static final String ARG_UNAME = "ARG_UNAME";
 
     String uname;
     int uid;
@@ -74,7 +75,7 @@ public class PMFragment extends BaseFragment {
                 try {
                     add(RestClient.getJsonMapper().readValue(intent.getStringExtra("message"), Post.class));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.d(this.getClass().getSimpleName(), "Invalid JSON data", e);
                 }
             }});
         }
@@ -157,7 +158,7 @@ public class PMFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter(FCMReceiverService.GCM_EVENT_ACTION));
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter(BuildConfig.INTENT_NEW_EVENT_ACTION));
     }
 
     @Override

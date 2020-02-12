@@ -37,6 +37,7 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.navigation.NavigationView;
@@ -44,6 +45,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.here.oksse.OkSse;
 import com.here.oksse.ServerSentEvent;
 import com.juick.App;
+import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.fragment.ChatsFragment;
 import com.juick.android.fragment.DiscoverFragment;
@@ -51,9 +53,12 @@ import com.juick.android.fragment.ThreadFragment;
 import com.juick.android.service.MessageChecker;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
+import com.juick.api.model.Post;
 import com.juick.api.model.User;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -63,19 +68,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- *
  * @author Ugnich Anton
  */
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
-
-    public static final String ARG_UID = "ARG_UID";
-    public static final String ARG_MID = "ARG_MID";
-    public static final String ARG_UNAME = "ARG_UNAME";
-    public static final String PUSH_ACTION = "PUSH_ACTION";
-    public static final String PUSH_ACTION_SHOW_THREAD = "PUSH_ACTION_SHOW_THREAD";
-    public static final String PUSH_ACTION_SHOW_PM = "PUSH_ACTION_SHOW_PM";
-    public static final String PUSH_ACTION_SHOW_DISCUSSIONS = "PUSH_ACTION_SHOW_DISCUSSIONS";
 
     private OkHttpClient es;
 
@@ -146,14 +142,33 @@ public class MainActivity extends BaseActivity
         if (savedInstanceState == null) {
             addFragment(new DiscoverFragment(), false);
         }
-        onNewIntent(getIntent());
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        if (BuildConfig.INTENT_NEW_EVENT_ACTION.equals(action)) {
+            String msg = intent.getStringExtra(getString(R.string.notification_extra));
+            try {
+                Post jmsg = RestClient.getJsonMapper().readValue(msg, Post.class);
+                if (jmsg.getUser().getUid() == 0) {
+                    setTitle(R.string.Discussions);
+                    replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
+                } else {
+                    if (jmsg.getMid() == 0) {
+                        replaceFragment(FeedBuilder.chatFor(jmsg.getUser().getUname(), jmsg.getUser().getUid()));
+                    } else {
+                        replaceFragment(ThreadFragment.newInstance(jmsg.getMid()));
+                    }
+                }
+            } catch (IOException e) {
+                Log.d(this.getClass().getSimpleName(), "Invalid JSON data", e);
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
-        != ConnectionResult.SUCCESS) {
+                != ConnectionResult.SUCCESS) {
             Log.d(this.getClass().getSimpleName(), "Play Services unavailable, using direct connection");
             initEventsListener();
         }
@@ -163,22 +178,10 @@ public class MainActivity extends BaseActivity
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         String action = intent.getAction();
-
-        if (PUSH_ACTION.equals(action)) {
-            if (intent.getBooleanExtra(PUSH_ACTION_SHOW_PM, false)) {
-                replaceFragment(FeedBuilder.chatFor(intent.getStringExtra(ARG_UNAME), intent.getIntExtra(ARG_UID, 0)));
-            } else if (intent.getBooleanExtra(PUSH_ACTION_SHOW_THREAD, false)) {
-                replaceFragment(ThreadFragment.newInstance(intent.getIntExtra(ARG_MID, 0)));
-            } else if (intent.getBooleanExtra(PUSH_ACTION_SHOW_DISCUSSIONS, false)) {
-                setTitle(R.string.Discussions);
-                replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
-            }
-        }else if(Intent.ACTION_VIEW.equals(action)){
+        if (Intent.ACTION_VIEW.equals(action)) {
             Uri data = intent.getData();
             processUri(data);
-
         }
-        //setIntent(null);
     }
 
     @Override
@@ -212,7 +215,7 @@ public class MainActivity extends BaseActivity
 
         if (id == R.id.chats) {
             replaceFragment(ChatsFragment.newInstance());
-        } else if(id == R.id.messages) {
+        } else if (id == R.id.messages) {
             replaceFragment(new DiscoverFragment());
         } else if (id == R.id.feed) {
             setTitle(R.string.Discussions);
@@ -255,12 +258,13 @@ public class MainActivity extends BaseActivity
                 break;
         }
     }
+
     private void initEventsListener() {
         if (es != null) return;
         es = Utils.getSSEFactory()
                 .readTimeout(0, TimeUnit.SECONDS).build();
         Request request = new Request.Builder()
-                .url("https://juick.com/api/events")
+                .url(BuildConfig.EVENTS_ENDPOINT)
                 .build();
         OkSse sse = new OkSse(es);
         sse.newServerSentEvent(request, new ServerSentEvent.Listener() {
@@ -274,8 +278,8 @@ public class MainActivity extends BaseActivity
                 Log.d("SSE", "event received: " + event);
                 if (event.equals("msg")) {
                     LocalBroadcastManager.getInstance(App.getInstance())
-                            .sendBroadcast(new Intent(RestClient.ACTION_NEW_EVENT)
-                                    .putExtra(RestClient.NEW_EVENT_EXTRA, message));
+                            .sendBroadcast(new Intent(BuildConfig.INTENT_NEW_EVENT_ACTION)
+                                    .putExtra(getString(R.string.notification_extra), message));
                 }
             }
 

@@ -63,7 +63,13 @@ android {
         versionName "3.1"
         applicationId "com.juick"
         vectorDrawables.useSupportLibrary = true
-        buildConfigField "String", "API_ENDPOINT", '"https://api.juick.com/"'
+        def addConstant = {constantName, constantValue ->
+            manifestPlaceholders += [ (constantName):constantValue]
+            buildConfigField "String", "${constantName}", "\"${constantValue}\""
+        }
+        addConstant("API_ENDPOINT", "https://api.juick.com/")
+        addConstant("EVENTS_ENDPOINT", "https://juick.com/api/events")
+        addConstant("INTENT_NEW_EVENT_ACTION", "com.juick.NEW_EVENT_ACTION")
     }
     lintOptions {
         checkReleaseBuilds false

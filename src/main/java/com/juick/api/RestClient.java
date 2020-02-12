@@ -18,7 +18,6 @@
 package com.juick.api;
 
 import android.content.Intent;
-import android.os.Build;
 import android.util.Base64;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -54,8 +53,6 @@ public class RestClient {
 
     public static final String ACTION_UPLOAD_PROGRESS = "ACTION_UPLOAD_PROGRESS";
     public static final String EXTRA_PROGRESS = "EXTRA_PROGRESS";
-    public static final String ACTION_NEW_EVENT = "ACTION_NEW_EVENT";
-    public static final String NEW_EVENT_EXTRA = "NEW_EVENT_EXTRA";
 
     public static String getBaseUrl() {
         return BuildConfig.API_ENDPOINT;
