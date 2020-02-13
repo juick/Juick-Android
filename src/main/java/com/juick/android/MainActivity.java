@@ -37,7 +37,6 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.navigation.NavigationView;
@@ -58,7 +57,6 @@ import com.juick.api.model.User;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -187,9 +185,9 @@ public class MainActivity extends BaseActivity
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.header) {
+            DrawerLayout drawer = findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
             if (Utils.hasAuth()) {
-                DrawerLayout drawer = findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
                 setTitle(R.string.Subscriptions);
                 replaceFragment(FeedBuilder.feedFor(UrlBuilder.goHome()));
             } else {
