@@ -85,7 +85,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage message) {
         Map<String, String> data = message.getData();
-        String msg = data.get("message");
+        String msg = data.get(App.getInstance().getString(R.string.notification_extra));
         Log.d(FCMReceiverService.class.getSimpleName(), "onMessageReceived " + data.toString());
         boolean isForegroundMessage = message.getNotification() != null;
         if (isForegroundMessage) {

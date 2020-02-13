@@ -73,7 +73,10 @@ public class PMFragment extends BaseFragment {
 
             onNewMessages(new ArrayList<Post>(){{
                 try {
-                    add(RestClient.getJsonMapper().readValue(intent.getStringExtra("message"), Post.class));
+                    add(RestClient.getJsonMapper().readValue(
+                            intent.getStringExtra(
+                                    App.getInstance().getString(R.string.notification_extra)),
+                            Post.class));
                 } catch (IOException e) {
                     Log.d(this.getClass().getSimpleName(), "Invalid JSON data", e);
                 }
