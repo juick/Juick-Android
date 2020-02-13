@@ -115,7 +115,7 @@ public class SignInActivity extends AppCompatActivity implements OnClickListener
                     return;
                 }
 
-                RestClient.auth(nick, password, new Callback<Void>() {
+                RestClient.getInstance().auth(nick, password, new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.code() == 400) {
@@ -181,7 +181,7 @@ public class SignInActivity extends AppCompatActivity implements OnClickListener
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
 
             Log.i(SignInActivity.class.getSimpleName(), "Success " + account.getIdToken());
-            RestClient.getApi().googleAuth(account.getIdToken()).enqueue(new Callback<AuthToken>() {
+            RestClient.getInstance().getApi().googleAuth(account.getIdToken()).enqueue(new Callback<AuthToken>() {
                 @Override
                 public void onResponse(Call<AuthToken> call, Response<AuthToken> response) {
                     if (response.isSuccessful()) {

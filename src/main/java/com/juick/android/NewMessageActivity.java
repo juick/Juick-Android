@@ -16,11 +16,8 @@
  */
 package com.juick.android;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 
 import com.juick.R;
@@ -58,11 +55,7 @@ public class NewMessageActivity extends BaseActivity {
         }
     }
 
-    public static boolean sendMessage(Context context, String txt, String attachmentUri,
-                                   String attachmentMime, final ProgressDialog progressDialog,
-                                   final Handler progressHandler,
-                                   BooleanReference progressDialogCancel) {
-
+    public static boolean sendMessage(String txt, String attachmentUri, String attachmentMime) {
         try {
             MultipartBody.Part body = null;
             if(attachmentUri != null) {
@@ -72,7 +65,7 @@ public class NewMessageActivity extends BaseActivity {
                         RequestBody.create(MediaType.parse("multipart/form-data"), file);
                 body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
             }
-            return RestClient.getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
+            return RestClient.getInstance().getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
                     body
                    ).execute().isSuccessful();
         } catch (IOException e) {

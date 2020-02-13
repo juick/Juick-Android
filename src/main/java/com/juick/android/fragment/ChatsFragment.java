@@ -71,7 +71,7 @@ public class ChatsFragment extends BaseFragment {
         final DialogsList dialogsList = getBaseActivity().findViewById(R.id.dialogsList);
         dialogsList.setAdapter(dialogListAdapter);
 
-        RestClient.getApi().groupsPms(10).enqueue(new Callback<Pms>() {
+        RestClient.getInstance().getApi().groupsPms(10).enqueue(new Callback<Pms>() {
             @Override
             public void onResponse(Call<Pms> call, Response<Pms> response) {
                 if (response.isSuccessful() && isAdded()) {

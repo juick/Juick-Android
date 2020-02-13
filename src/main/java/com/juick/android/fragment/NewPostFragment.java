@@ -19,16 +19,11 @@ package com.juick.android.fragment;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,9 +34,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.juick.App;
 import com.juick.R;
 import com.juick.android.NewMessageActivity;
 import com.juick.android.Utils;
@@ -62,29 +55,6 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
     private String attachmentMime = null;
     private ProgressDialog progressDialog = null;
     private NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
-    private Handler progressHandler = new Handler() {
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (progressDialog.getMax() < msg.what) {
-                progressDialog.setMax(msg.what);
-            } else {
-                progressDialog.setProgress(msg.what);
-            }
-        }
-    };
-
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(RestClient.ACTION_UPLOAD_PROGRESS)) {
-                if (progressDialog != null) {
-                    progressHandler.sendEmptyMessage(intent.getIntExtra(RestClient.EXTRA_PROGRESS, 0));
-                }
-            }
-        }
-    };
-
 
     public static NewPostFragment newInstance() {
         NewPostFragment fragment = new NewPostFragment();
@@ -208,9 +178,18 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setMax(0);
             progressDialog.show();
+            RestClient.getInstance().setOnProgressListener(progressPercentage -> {
+                if (progressDialog != null) {
+                    if (progressDialog.getMax() < progressPercentage) {
+                        progressDialog.setMax((int)progressPercentage);
+                    } else {
+                        progressDialog.setProgress((int)progressPercentage);
+                    }
+                }
+            });
         }
         Thread thr = new Thread(() -> {
-            final boolean res = NewMessageActivity.sendMessage(getActivity(), msg, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
+            final boolean res = NewMessageActivity.sendMessage(msg, attachmentUri, attachmentMime);
             NewPostFragment.this.getBaseActivity().runOnUiThread(() -> {
                 if (progressDialog != null) {
                     progressDialog.dismiss();
@@ -254,18 +233,6 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
         }else{
             Toast.makeText(getActivity(), R.string.WrongImageFormat, Toast.LENGTH_LONG).show();
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(RestClient.ACTION_UPLOAD_PROGRESS));
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(App.getInstance()).unregisterReceiver(broadcastReceiver);
     }
 
     public void applyTag(String tag) {

@@ -108,7 +108,7 @@ public class TagsFragment extends BaseFragment {
                 .replaceFragment(FeedBuilder.feedFor(
                         UrlBuilder.getPostsByTag(uid, adapter.getItem(position)))));
 
-        RestClient.getApi().tags(uid).enqueue(new Callback<List<Tag>>() {
+        RestClient.getInstance().getApi().tags(uid).enqueue(new Callback<List<Tag>>() {
             @Override
             public void onResponse(Call<List<Tag>> call, Response<List<Tag>> response) {
                 progressBar.setVisibility(View.GONE);

@@ -105,7 +105,7 @@ public class PMFragment extends BaseFragment {
         MessagesList messagesList = getActivity().findViewById(R.id.messagesList);
         messagesList.setAdapter(adapter);
 
-        RestClient.getApi().pm(uname).enqueue(new Callback<List<Post>>() {
+        RestClient.getInstance().getApi().pm(uname).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
                 if (response.isSuccessful() && isAdded()) {
@@ -136,7 +136,7 @@ public class PMFragment extends BaseFragment {
     }
 
     public void postText(final String body) {
-        RestClient.getApi().postPm(uname, body).enqueue(new Callback<Post>() {
+        RestClient.getInstance().getApi().postPm(uname, body).enqueue(new Callback<Post>() {
             @Override
             public void onResponse(Call<Post> call, final Response<Post> response) {
                 if (response.isSuccessful() && isAdded()) {

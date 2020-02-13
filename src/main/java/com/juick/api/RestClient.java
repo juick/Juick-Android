@@ -17,15 +17,20 @@
 
 package com.juick.api;
 
-import android.content.Intent;
 import android.util.Base64;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.android.Utils;
-import com.juick.api.model.*;
+import com.juick.api.model.AuthToken;
+import com.juick.api.model.Pms;
+import com.juick.api.model.Post;
+import com.juick.api.model.Tag;
+import com.juick.api.model.User;
+
+import java.util.List;
+
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -44,18 +49,13 @@ import retrofit2.http.Part;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 
-import java.util.List;
-
 /**
  * Created by gerc on 14.02.2016.
  */
 public class RestClient {
 
-    public static final String ACTION_UPLOAD_PROGRESS = "ACTION_UPLOAD_PROGRESS";
-    public static final String EXTRA_PROGRESS = "EXTRA_PROGRESS";
-
-    public static String getBaseUrl() {
-        return BuildConfig.API_ENDPOINT;
+    public interface OnProgressListener {
+        void onProgress(long progressPercentage);
     }
 
     private static ObjectMapper jsonMapper;
@@ -68,40 +68,57 @@ public class RestClient {
         return jsonMapper;
     }
 
-    private static Api api;
+    private OnProgressListener callback;
 
-    public static Api getApi() {
-        if (api == null) {
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .addInterceptor(new UpLoadProgressInterceptor((bytesWritten, contentLength) ->
-                            LocalBroadcastManager.getInstance(App.getInstance())
-                                    .sendBroadcast(new Intent(ACTION_UPLOAD_PROGRESS)
-                                            .putExtra(EXTRA_PROGRESS, (int) (100 * bytesWritten / contentLength)))))
-                    .addInterceptor(chain -> {
-                        Request original = chain.request();
+    public void setOnProgressListener(OnProgressListener callback) {
+        this.callback = callback;
+    }
 
-                        Request.Builder requestBuilder = original.newBuilder()
-                                .header("Authorization", Utils.getBasicAuthString())
-                                .header("Accept", "application/json")
-                                .method(original.method(), original.body());
-                        //Log.e("intercept", requestBuilder.toString());
-                        Request request = requestBuilder.build();
-                        return chain.proceed(request);
-                    })
-                    .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-                    .build();
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(getBaseUrl())
-                    .client(client)
-                    .addConverterFactory(JacksonConverterFactory.create(getJsonMapper()))
-                    .build();
+    private static RestClient instance;
 
-            api = retrofit.create(Api.class);
-        }
+    private Api api;
+
+    public Api getApi() {
         return api;
     }
 
-    public static void auth(String username, String password, Callback<Void> callback) {
+    public static RestClient getInstance() {
+        if (instance == null) {
+            instance = new RestClient();
+        }
+        return instance;
+    }
+
+    private RestClient() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new UpLoadProgressInterceptor((bytesWritten, contentLength) -> {
+                    if (callback != null) {
+                        callback.onProgress(100 * bytesWritten / contentLength);
+                    }
+                }))
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .header("Authorization", Utils.getBasicAuthString())
+                            .header("Accept", "application/json")
+                            .method(original.method(), original.body());
+                    //Log.e("intercept", requestBuilder.toString());
+                    Request request = requestBuilder.build();
+                    return chain.proceed(request);
+                })
+                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BuildConfig.API_ENDPOINT)
+                .client(client)
+                .addConverterFactory(JacksonConverterFactory.create(getJsonMapper()))
+                .build();
+
+        api = retrofit.create(Api.class);
+    }
+
+    public void auth(String username, String password, Callback<Void> callback) {
         String credentials = username + ":" + password;
         final String basic =
                 "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
@@ -120,7 +137,7 @@ public class RestClient {
                 }).build();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(getBaseUrl())
+                .baseUrl(BuildConfig.API_ENDPOINT)
                 .client(client)
                 .addConverterFactory(JacksonConverterFactory.create(getJsonMapper()))
                 .build();

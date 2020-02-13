@@ -87,17 +87,6 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     private String attachmentMime = null;
     private ProgressDialog progressDialog;
     private NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
-    private Handler progressHandler = new Handler() {
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (progressDialog.getMax() < msg.what) {
-                progressDialog.setMax(msg.what);
-            } else {
-                progressDialog.setProgress(msg.what);
-            }
-        }
-    };
 
     private int mid = 0;
 
@@ -185,7 +174,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     }
 
     private void load() {
-        RestClient.getApi().thread(mid)
+        RestClient.getInstance().getApi().thread(mid)
                 .enqueue(new Callback<List<Post>>() {
                     @Override
                     public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
@@ -296,7 +285,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     }
 
     private void postText(final String body) {
-        RestClient.getApi().post(body).enqueue(new Callback<Void>() {
+        RestClient.getInstance().getApi().post(body).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful() && isAdded()) {
@@ -324,8 +313,15 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setMax(0);
         progressDialog.show();
+        RestClient.getInstance().setOnProgressListener(progress -> {
+            if (progressDialog.getMax() < progress) {
+                progressDialog.setMax((int)progress);
+            } else {
+                progressDialog.setProgress((int)progress);
+            }
+        });
         new Thread(() -> {
-            final boolean res = NewMessageActivity.sendMessage(getActivity(), body, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel);
+            final boolean res = NewMessageActivity.sendMessage(body, attachmentUri, attachmentMime);
             getActivity().runOnUiThread(() -> {
                 if (progressDialog != null) {
                     progressDialog.dismiss();
@@ -367,11 +363,6 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(RestClient.ACTION_UPLOAD_PROGRESS)) {
-                if (progressDialog != null) {
-                    progressHandler.sendEmptyMessage(intent.getIntExtra(RestClient.EXTRA_PROGRESS, 0));
-                }
-            }
             if (intent.getAction().equals(BuildConfig.INTENT_NEW_EVENT_ACTION)) {
                 if (!isAdded()) {
                     return;
@@ -400,7 +391,6 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     @Override
     public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(RestClient.ACTION_UPLOAD_PROGRESS));
         LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(BuildConfig.INTENT_NEW_EVENT_ACTION));
     }
     @Override

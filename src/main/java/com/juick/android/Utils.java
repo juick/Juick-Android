@@ -233,7 +233,7 @@ public class Utils {
         Log.d(TAG, "currentToken " + prefToken);
         if (hasAuth()) {
             if (prefToken != null) {
-                RestClient.getApi().registerPush(prefToken).enqueue(new Callback<Void>() {
+                RestClient.getInstance().getApi().registerPush(prefToken).enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         Log.d(TAG, "registerPush " + response.code());

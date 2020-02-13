@@ -76,7 +76,7 @@ public class PostsPageFragment extends BaseFragment {
         load(true);
     }
     private void load(final boolean isReload) {
-        RestClient.getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
+        RestClient.getInstance().getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
                 if (response.isSuccessful() && isAdded()) {
@@ -145,7 +145,7 @@ public class PostsPageFragment extends BaseFragment {
                 if (apiUrl.equals(UrlBuilder.getDiscussions().toString())) {
                     requestUrl = apiUrl + "?to=" + lastItem.getTimestamp().getTime();
                 }
-                RestClient.getApi().getPosts(requestUrl).enqueue(new Callback<List<Post>>() {
+                RestClient.getInstance().getApi().getPosts(requestUrl).enqueue(new Callback<List<Post>>() {
                     @Override
                     public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
                         loading = false;

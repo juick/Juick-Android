@@ -100,7 +100,7 @@ public class ContactsSyncService extends Service {
         c1.close();
 
         try {
-            Response<List<User>> response = RestClient.getApi().getFriends().execute();
+            Response<List<User>> response = RestClient.getInstance().getApi().getFriends().execute();
             if (response.isSuccessful()) {
                 List<User> friends = response.body();
                 if (friends != null) {

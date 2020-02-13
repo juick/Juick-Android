@@ -97,7 +97,7 @@ public class MainActivity extends BaseActivity
 
         final ImageView imageHeader = navigationView.getHeaderView(0).findViewById(R.id.profile_image);
         if (Utils.hasAuth()) {
-            RestClient.getApi().getUsers(Utils.getNick()).enqueue(new Callback<List<User>>() {
+            RestClient.getInstance().getApi().getUsers(Utils.getNick()).enqueue(new Callback<List<User>>() {
                 @Override
                 public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                     List<User> users = response.body();

@@ -58,7 +58,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             Toast.makeText(this,"Passwords did not match", Toast.LENGTH_LONG).show();
             return;
         }
-        RestClient.getApi().signup(nick, password, authCode).enqueue(new Callback<Void>() {
+        RestClient.getInstance().getApi().signup(nick, password, authCode).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {

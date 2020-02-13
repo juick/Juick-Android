@@ -46,7 +46,7 @@ public class MessageChecker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        RestClient.getApi().me().enqueue(new Callback<User>() {
+        RestClient.getInstance().getApi().me().enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful()) {
