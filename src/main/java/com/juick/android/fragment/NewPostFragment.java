@@ -21,7 +21,6 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -30,7 +29,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +40,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.NewMessageActivity;
@@ -78,10 +77,7 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(TagsFragment.TAG_SELECT_ACTION)) {
-                etMessage.setText("*" + intent.getStringExtra(TagsFragment.ARG_TAG) + " " + etMessage.getText());
-                Log.d("broadcastReceiver", intent.getStringExtra(TagsFragment.ARG_TAG));
-            } else if (intent.getAction().equals(RestClient.ACTION_UPLOAD_PROGRESS)) {
+            if (intent.getAction().equals(RestClient.ACTION_UPLOAD_PROGRESS)) {
                 if (progressDialog != null) {
                     progressHandler.sendEmptyMessage(intent.getIntExtra(RestClient.EXTRA_PROGRESS, 0));
                 }
@@ -160,7 +156,9 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
                 sendMessage();
                 break;
             case R.id.buttonTags:
-                getBaseActivity().replaceFragment(TagsFragment.newInstance(Utils.myId));
+                TagsFragment tagsFragment = TagsFragment.newInstance(Utils.myId);
+                tagsFragment.setOnTagAppliedListener(this::applyTag);
+                getBaseActivity().replaceFragment(tagsFragment);
                 break;
             case R.id.buttonAttachment:
                 if (Build.VERSION.SDK_INT >= 23 && getBaseActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -261,14 +259,12 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().registerReceiver(broadcastReceiver, new IntentFilter(TagsFragment.TAG_SELECT_ACTION));
         LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(RestClient.ACTION_UPLOAD_PROGRESS));
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        getActivity().unregisterReceiver(broadcastReceiver);
         LocalBroadcastManager.getInstance(App.getInstance()).unregisterReceiver(broadcastReceiver);
     }
 

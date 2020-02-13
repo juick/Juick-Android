@@ -16,8 +16,6 @@
  */
 package com.juick.android.fragment;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,7 +33,6 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.android.BaseActivity;
 import com.juick.android.FeedBuilder;
-import com.juick.android.ITagable;
 import com.juick.android.UrlBuilder;
 import com.juick.api.RestClient;
 import com.juick.api.model.Tag;
@@ -53,13 +50,14 @@ import java.util.List;
  */
 public class TagsFragment extends BaseFragment {
 
-    private static final String ARG_UID = "ARG_UID";
-    static final String ARG_TAG = "ARG_TAG";
+    public interface OnTagAppliedListener {
+        void onTagApplied(String tag);
+    }
 
-    static final String TAG_SELECT_ACTION = "TAG_SELECT_ACTION";
+    private static final String ARG_UID = "ARG_UID";
 
     private int uid = 0;
-    private ITagable mCallback;
+    private OnTagAppliedListener callback;
 
     static TagsFragment newInstance(int uid) {
         TagsFragment fragment = new TagsFragment();
@@ -69,14 +67,8 @@ public class TagsFragment extends BaseFragment {
         return fragment;
     }
 
-    @Override
-    public void onAttach(@NonNull Context c) {
-        super.onAttach(c);
-        try {
-            mCallback = (ITagable) c;
-        } catch (ClassCastException e) {
-            Log.d(TagsFragment.class.getSimpleName(), "Invalid callback", e);
-        }
+    public void setOnTagAppliedListener(@NonNull OnTagAppliedListener callback) {
+        this.callback = callback;
     }
 
     @Nullable
@@ -107,10 +99,10 @@ public class TagsFragment extends BaseFragment {
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener((view1, position) -> {
             String tag = adapter.getItem(position);
-            if(mCallback != null)
-                mCallback.onTagApplied(tag);
-            else
-                getActivity().sendBroadcast(new Intent(TAG_SELECT_ACTION).putExtra(ARG_TAG, tag));
+            if (callback != null) {
+                getBaseActivity().getSupportFragmentManager().popBackStackImmediate();
+                callback.onTagApplied(tag);
+            }
         });
         adapter.setOnItemLongClickListener((view12, position) -> ((BaseActivity) getActivity())
                 .replaceFragment(FeedBuilder.feedFor(

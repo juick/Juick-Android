@@ -39,7 +39,7 @@ import okhttp3.RequestBody;
  *
  * @author Ugnich Anton
  */
-public class NewMessageActivity extends BaseActivity implements ITagable {
+public class NewMessageActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,18 +100,6 @@ public class NewMessageActivity extends BaseActivity implements ITagable {
             return (NewPostFragment)currentFragment;
         }
         return null;
-    }
-
-    @Override
-    public void onTagApplied(String tag) {
-        Log.d(NewMessageActivity.class.getSimpleName(), "onTagApplied: " + tag);
-        this.getSupportFragmentManager().popBackStackImmediate();
-        NewPostFragment commonFragment = getCommonFragment();
-        if(commonFragment != null){
-            commonFragment.applyTag(tag);
-        }else{
-            Log.d(NewMessageActivity.class.getSimpleName(), "fucking shit: ");
-        }
     }
 
     public static class BooleanReference {
