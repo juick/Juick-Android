@@ -17,6 +17,7 @@
 package com.juick.android;
 
 import android.accounts.Account;
+import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.content.Intent;
@@ -41,6 +42,8 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.api.RestClient;
 import com.juick.api.model.AuthToken;
+import com.juick.api.model.SecureUser;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -49,7 +52,11 @@ import retrofit2.Response;
  *
  * @author Ugnich Anton
  */
-public class SignInActivity extends AppCompatActivity implements OnClickListener {
+public class SignInActivity extends AccountAuthenticatorActivity implements OnClickListener {
+
+    public static final String EXTRA_ACTION = "EXTRA_ACTION";
+
+    public static final int ACTION_PASSWORD_UPDATE = 1;
 
     private EditText etNick;
     private EditText etPassword;
@@ -59,6 +66,8 @@ public class SignInActivity extends AppCompatActivity implements OnClickListener
     private static final int RC_SIGN_UP = 9002;
 
     private GoogleSignInClient googleClient;
+
+    private int currentAction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +102,9 @@ public class SignInActivity extends AppCompatActivity implements OnClickListener
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         signInButton.setColorScheme(SignInButton.COLOR_LIGHT);
 
-        if (Utils.hasAuth()) {
+        currentAction = getIntent().getIntExtra(EXTRA_ACTION, 0);
+
+        if (Utils.hasAuth() && currentAction != ACTION_PASSWORD_UPDATE) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setNeutralButton(android.R.string.ok, (arg0, arg1) -> {
                 setResult(RESULT_CANCELED);
@@ -115,22 +126,25 @@ public class SignInActivity extends AppCompatActivity implements OnClickListener
                     return;
                 }
 
-                RestClient.getInstance().auth(nick, password, new Callback<Void>() {
+                RestClient.getInstance().auth(nick, password, new Callback<SecureUser>() {
                     @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.code() == 400) {
+                    public void onResponse(Call<SecureUser> call, Response<SecureUser> response) {
+                        if (response.isSuccessful() && response.code() == 200) {
                             Account account = new Account(nick, getString(R.string.com_juick));
                             AccountManager am = AccountManager.get(SignInActivity.this);
-                            boolean accountCreated = am.addAccountExplicitly(account, password, null);
-                            Bundle extras = getIntent().getExtras();
-                            if (extras != null && accountCreated) {
-                                AccountAuthenticatorResponse accountAuthenticatorResponse = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
-                                Bundle result = new Bundle();
-                                result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
-                                result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick));
-                                accountAuthenticatorResponse.onResult(result);
+                            String hash = response.body().getHash();
+                            if (currentAction == ACTION_PASSWORD_UPDATE) {
+                                am.setAuthToken(account, "", hash);
+                            } else {
+                                Bundle userData = new Bundle();
+                                userData.putString("hash", hash);
+                                am.addAccountExplicitly(account, "", userData);
                             }
-
+                            Bundle result = new Bundle();
+                            result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
+                            result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick));
+                            result.putString(AccountManager.KEY_AUTHTOKEN, hash);
+                            setAccountAuthenticatorResult(result);
                             SignInActivity.this.setResult(RESULT_OK);
                             SignInActivity.this.finish();
                         } else {
@@ -139,7 +153,7 @@ public class SignInActivity extends AppCompatActivity implements OnClickListener
                     }
 
                     @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
+                    public void onFailure(Call<SecureUser> call, Throwable t) {
                         Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
                     }
                 });

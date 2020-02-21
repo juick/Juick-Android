@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.juick.R;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
+import com.juick.api.model.SecureUser;
 import com.juick.api.model.User;
 
 import retrofit2.Call;
@@ -46,9 +47,9 @@ public class MessageChecker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        RestClient.getInstance().getApi().me().enqueue(new Callback<User>() {
+        RestClient.getInstance().getApi().me().enqueue(new Callback<SecureUser>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(Call<SecureUser> call, Response<SecureUser> response) {
                 if (response.isSuccessful()) {
                     User me = response.body();
                     if (me != null && me.getUnreadCount() > 0) {
@@ -68,7 +69,7 @@ public class MessageChecker extends Worker {
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(Call<SecureUser> call, Throwable t) {
                 Log.w(this.getClass().getSimpleName(), "Network error", t);
             }
         });

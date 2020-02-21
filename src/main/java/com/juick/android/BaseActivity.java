@@ -18,12 +18,16 @@
 package com.juick.android;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
+
 import com.juick.android.fragment.BaseFragment;
+import com.juick.api.RestClient;
 
 /**
  * Created by gerc on 03.06.2016.
@@ -36,6 +40,16 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (!Utils.hasAuth()) {
             startActivityForResult(new Intent(this, SignInActivity.class), REQUEST_CODE_LOGIN);
         }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        RestClient.getInstance().setAuthorizationCallback(() -> {
+            Intent updatePasswordIntent = new Intent(this, SignInActivity.class);
+            updatePasswordIntent.putExtra(SignInActivity.EXTRA_ACTION, SignInActivity.ACTION_PASSWORD_UPDATE);
+            startActivityForResult(updatePasswordIntent, REQUEST_CODE_LOGIN);
+        });
+        super.onCreate(savedInstanceState);
     }
 
     @Override

@@ -17,7 +17,10 @@
 
 package com.juick.api;
 
-import android.util.Base64;
+import android.accounts.AccountManager;
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,15 +29,18 @@ import com.juick.android.Utils;
 import com.juick.api.model.AuthToken;
 import com.juick.api.model.Pms;
 import com.juick.api.model.Post;
+import com.juick.api.model.SecureUser;
 import com.juick.api.model.Tag;
 import com.juick.api.model.User;
 
 import java.util.List;
 
+import okhttp3.Credentials;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -58,6 +64,10 @@ public class RestClient {
         void onProgress(long progressPercentage);
     }
 
+    public interface AuthorizationListener {
+        void onUnauthorized();
+    }
+
     private static ObjectMapper jsonMapper;
 
     public static ObjectMapper getJsonMapper() {
@@ -72,6 +82,12 @@ public class RestClient {
 
     public void setOnProgressListener(OnProgressListener callback) {
         this.callback = callback;
+    }
+
+    private AuthorizationListener authorizationCallback;
+
+    public void setAuthorizationCallback(AuthorizationListener authorizationCallback) {
+        this.authorizationCallback = authorizationCallback;
     }
 
     private static RestClient instance;
@@ -100,12 +116,27 @@ public class RestClient {
                     Request original = chain.request();
 
                     Request.Builder requestBuilder = original.newBuilder()
-                            .header("Authorization", Utils.getBasicAuthString())
                             .header("Accept", "application/json")
                             .method(original.method(), original.body());
-                    //Log.e("intercept", requestBuilder.toString());
+                    Bundle accountData = Utils.getAccountData();
+                    if (accountData != null) {
+                        String hash = accountData.getString(AccountManager.KEY_AUTHTOKEN);
+                        if (!TextUtils.isEmpty(hash)) {
+                            requestBuilder.addHeader("Authorization", "Juick " + hash);
+                        }
+                    }
                     Request request = requestBuilder.build();
-                    return chain.proceed(request);
+                    Response response = chain.proceed(request);
+                    if (!response.isSuccessful()) {
+                        if (response.code() == 401) {
+                            if (authorizationCallback != null) {
+                                if (accountData != null) {
+                                    authorizationCallback.onUnauthorized();
+                                }
+                            }
+                        }
+                    }
+                    return response;
                 })
                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .build();
@@ -118,36 +149,28 @@ public class RestClient {
         api = retrofit.create(Api.class);
     }
 
-    public void auth(String username, String password, Callback<Void> callback) {
-        String credentials = username + ":" + password;
-        final String basic =
-                "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
-
+    public void auth(String username, String password, Callback<SecureUser> callback) {
         OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(chain -> {
-                    Request original = chain.request();
-
-                    Request.Builder requestBuilder = original.newBuilder()
-                            .header("Authorization", basic)
-                            .header("Accept", "application/json")
-                            .method(original.method(), original.body());
-
-                    Request request = requestBuilder.build();
-                    return chain.proceed(request);
-                }).build();
+                .authenticator((route, response) -> {
+                    String basicAuth = Credentials.basic(username, password);
+                    return response.request().newBuilder()
+                            .header("Authorization", basicAuth)
+                            .build();
+                })
+                .build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BuildConfig.API_ENDPOINT)
                 .client(client)
                 .addConverterFactory(JacksonConverterFactory.create(getJsonMapper()))
                 .build();
-        retrofit.create(Api.class).post(null).enqueue(callback);
+        retrofit.create(Api.class).me().enqueue(callback);
     }
 
     public interface Api {
 
         @GET("/me")
-        Call<User> me();
+        Call<SecureUser> me();
 
         @GET()
         Call<List<Post>> getPosts(@Url String url);

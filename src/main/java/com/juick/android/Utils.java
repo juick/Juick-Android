@@ -31,7 +31,6 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -63,23 +62,20 @@ public class Utils {
         return accs.length > 0 ? accs[0].name : null;
     }
 
-    public static String getBasicAuthString() {
+    public static Bundle getAccountData() {
         Context context = App.getInstance();
         AccountManager am = AccountManager.get(context);
         Account accs[] = am.getAccountsByType(context.getString(R.string.com_juick));
         if (accs.length > 0) {
             Bundle b = null;
             try {
-                b = am.getAuthToken(accs[0], "", false, null, null).getResult();
+                b = am.getAuthToken(accs[0], "", null, false, null, null).getResult();
             } catch (Exception e) {
                 Log.d("getBasicAuthString", Log.getStackTraceString(e));
             }
-            if (b != null) {
-                String authStr = b.getString(AccountManager.KEY_ACCOUNT_NAME) + ":" + b.getString(AccountManager.KEY_AUTHTOKEN);
-                return "Basic " + Base64.encodeToString(authStr.getBytes(), Base64.NO_WRAP);
-            }
+            return b;
         }
-        return "";
+        return null;
     }
 
     public static boolean isWiFiConnected(Context context) {

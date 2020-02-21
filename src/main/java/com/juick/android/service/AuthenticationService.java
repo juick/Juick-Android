@@ -76,17 +76,17 @@ public class AuthenticationService extends Service {
             final Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, mContext.getString(R.string.com_juick));
-            result.putString(AccountManager.KEY_AUTHTOKEN, AccountManager.get(mContext).getPassword(account));
+            result.putString(AccountManager.KEY_AUTHTOKEN, AccountManager.get(mContext).getUserData(account, "hash"));
             return result;
         }
 
         @Override
-        public Bundle hasFeatures(AccountAuthenticatorResponse arg0, Account arg1, String[] arg2) throws NetworkErrorException {
+        public Bundle hasFeatures(AccountAuthenticatorResponse arg0, Account arg1, String[] arg2) {
             return null;
         }
 
         @Override
-        public Bundle updateCredentials(AccountAuthenticatorResponse arg0, Account arg1, String arg2, Bundle arg3) throws NetworkErrorException {
+        public Bundle updateCredentials(AccountAuthenticatorResponse arg0, Account arg1, String arg2, Bundle arg3) {
             return null;
         }
 
@@ -96,7 +96,7 @@ public class AuthenticationService extends Service {
         }
 
         @Override
-        public Bundle confirmCredentials(AccountAuthenticatorResponse arg0, Account arg1, Bundle arg2) throws NetworkErrorException {
+        public Bundle confirmCredentials(AccountAuthenticatorResponse arg0, Account arg1, Bundle arg2) {
             return null;
         }
 
