@@ -31,6 +31,7 @@ import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.Chat;
 import com.juick.api.model.Pms;
+import com.juick.databinding.DialogListBinding;
 import com.stfalcon.chatkit.dialogs.DialogsList;
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
 
@@ -44,17 +45,13 @@ import retrofit2.Response;
  */
 public class ChatsFragment extends BaseFragment {
 
-    public ChatsFragment() {
-    }
-
-    public static ChatsFragment newInstance() {
-        return new ChatsFragment();
-    }
+    private DialogListBinding model;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_list, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        model = DialogListBinding.inflate(inflater, container, false);
+        return model.getRoot();
     }
 
     @Override
@@ -67,7 +64,7 @@ public class ChatsFragment extends BaseFragment {
                         .load(url)
                         .into(imageView));
         dialogListAdapter.setOnDialogClickListener(dialog -> getBaseActivity().replaceFragment(
-                FeedBuilder.chatFor(dialog.getDialogName(), Integer.valueOf(dialog.getId()))));
+                FeedBuilder.chatFor(dialog.getDialogName(), Integer.parseInt(dialog.getId()))));
         final DialogsList dialogsList = getBaseActivity().findViewById(R.id.dialogsList);
         dialogsList.setAdapter(dialogListAdapter);
 
@@ -85,6 +82,12 @@ public class ChatsFragment extends BaseFragment {
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        model = null;
+        super.onDestroyView();
     }
 }
 

@@ -20,15 +20,12 @@ package com.juick.android.widget.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.core.graphics.drawable.DrawableCompat;
-import com.juick.R;
 
 /**
  * Created by gerc on 14.02.2016.
@@ -53,16 +50,6 @@ public class ViewUtil {
         v.setCompoundDrawablesWithIntrinsicBounds(cs[0], cs[1], cs[2], cs[3]);
     }
 
-    public static float pxToDp(float px) {
-        float densityDpi = Resources.getSystem().getDisplayMetrics().densityDpi;
-        return px / (densityDpi / 160f);
-    }
-
-    public static int dpToPx(int dp) {
-        float density = Resources.getSystem().getDisplayMetrics().density;
-        return Math.round(dp * density);
-    }
-
     public static void hideKeyboard(@Nullable Activity activity) {
         if (activity != null) {
             InputMethodManager imm =
@@ -71,15 +58,6 @@ public class ViewUtil {
                 imm.hideSoftInputFromWindow(activity.getWindow().getDecorView().getWindowToken(), 0);
             }
         }
-    }
-
-    public static int getToolbarHeight(Context context) {
-        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
-                new int[]{R.attr.actionBarSize});
-        int toolbarHeight = (int) styledAttributes.getDimension(0, 0);
-        styledAttributes.recycle();
-
-        return toolbarHeight;
     }
 
     public static Activity getActivity(Context context) {

@@ -16,13 +16,8 @@
  */
 package com.juick.android;
 
-import android.accounts.AccountManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -59,6 +54,7 @@ import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import com.juick.api.model.User;
+import com.juick.databinding.ActivityMainBinding;
 
 import java.io.IOException;
 import java.util.List;
@@ -76,23 +72,26 @@ import retrofit2.Response;
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
+    private ActivityMainBinding model;
+
     private OkHttpClient es;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        model = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(model.getRoot());
+        Toolbar toolbar = model.toolbar;
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = model.drawerLayout;
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
 
         toggle.syncState();
 
-        final NavigationView navigationView = findViewById(R.id.nav_view);
+        final NavigationView navigationView = model.navView;;
         navigationView.setNavigationItemSelectedListener(this);
 
         View navHeader = navigationView.getHeaderView(0).findViewById(R.id.header);
@@ -217,7 +216,7 @@ public class MainActivity extends BaseActivity
         int id = item.getItemId();
 
         if (id == R.id.chats) {
-            replaceFragment(ChatsFragment.newInstance());
+            replaceFragment(new ChatsFragment());
         } else if (id == R.id.messages) {
             replaceFragment(new DiscoverFragment());
         } else if (id == R.id.feed) {
@@ -225,7 +224,7 @@ public class MainActivity extends BaseActivity
             replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
         }
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = model.drawerLayout;
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

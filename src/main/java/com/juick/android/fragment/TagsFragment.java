@@ -36,6 +36,7 @@ import com.juick.android.FeedBuilder;
 import com.juick.android.UrlBuilder;
 import com.juick.api.RestClient;
 import com.juick.api.model.Tag;
+import com.juick.databinding.TagsListBinding;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -49,6 +50,8 @@ import java.util.List;
  * @author Ugnich Anton
  */
 public class TagsFragment extends BaseFragment {
+
+    private TagsListBinding model;
 
     public interface OnTagAppliedListener {
         void onTagApplied(String tag);
@@ -74,7 +77,8 @@ public class TagsFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.tags_list, container, false);
+        model = TagsListBinding.inflate(inflater, container, false);
+        return model.getRoot();
     }
 
     @Override
@@ -90,13 +94,11 @@ public class TagsFragment extends BaseFragment {
             getActivity().setTitle(R.string.Popular_tags);
         }
 
-        final ProgressBar progressBar = view.findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.VISIBLE);
-        final RecyclerView recyclerView = view.findViewById(R.id.list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setHasFixedSize(true);
+        model.progressBar.setVisibility(View.VISIBLE);
+        model.list.setLayoutManager(new LinearLayoutManager(getActivity()));
+        model.list.setHasFixedSize(true);
         final TagsAdapter adapter = new TagsAdapter();
-        recyclerView.setAdapter(adapter);
+        model.list.setAdapter(adapter);
         adapter.setOnItemClickListener((view1, position) -> {
             String tag = adapter.getItem(position);
             if (callback != null) {
@@ -111,9 +113,9 @@ public class TagsFragment extends BaseFragment {
         RestClient.getInstance().getApi().tags(uid).enqueue(new Callback<List<Tag>>() {
             @Override
             public void onResponse(Call<List<Tag>> call, Response<List<Tag>> response) {
-                progressBar.setVisibility(View.GONE);
+                model.progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && isAdded()) {
-                    progressBar.setVisibility(View.GONE);
+                    model.progressBar.setVisibility(View.GONE);
                     List<String> listAdapter = new ArrayList<>();
                     for (Tag tag : response.body()) {
                         listAdapter.add(tag.getTag());
@@ -227,4 +229,9 @@ public class TagsFragment extends BaseFragment {
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        model = null;
+        super.onDestroyView();
+    }
 }

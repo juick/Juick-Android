@@ -74,7 +74,7 @@
                     tools:targetApi="o" />
             </android.support.design.widget.TextInputLayout>
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/buttonCreate"
                 android:layout_width="fill_parent"
                 android:layout_height="0dp"

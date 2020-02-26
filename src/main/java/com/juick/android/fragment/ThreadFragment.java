@@ -28,8 +28,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
@@ -37,10 +35,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -49,6 +43,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.R;
@@ -60,6 +55,7 @@ import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
+import com.juick.databinding.FragmentThreadBinding;
 
 import java.io.IOException;
 import java.util.List;
@@ -72,16 +68,14 @@ import retrofit2.Response;
  *
  * @author Ugnich Anton
  */
-public class ThreadFragment extends BaseFragment implements View.OnClickListener {
+public class ThreadFragment extends BaseFragment {
+
+    private FragmentThreadBinding model;
 
     private static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
 
     private static final String ARG_MID = "ARG_MID";
 
-    private TextView tvReplyTo;
-    private EditText etMessage;
-    private ImageView bSend;
-    private ImageView bAttach;
     private int rid = 0;
     private String attachmentUri = null;
     private String attachmentMime = null;
@@ -90,9 +84,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
 
     private int mid = 0;
 
-    private RecyclerView recyclerView;
     private LinearLayoutManager linearLayoutManager;
-    private ProgressBar progressBar;
     private JuickMessagesAdapter adapter;
 
     public static ThreadFragment newInstance(int mid) {
@@ -106,7 +98,8 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_thread, container, false);
+        model = FragmentThreadBinding.inflate(inflater, container, false);
+        return model.getRoot();
     }
 
     @Override
@@ -120,22 +113,54 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         if (mid == 0) {
             return;
         }
+        model.buttonSend.setOnClickListener(v -> {
+            if (!Utils.hasAuth()) {
+                startActivity(new Intent(getContext(), SignInActivity.class));
+                return;
+            }
+            String msg = model.editMessage.getText().toString();
+            if (msg.length() < 3) {
+                Toast.makeText(getContext(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
+                return;
+            }
+//        Toast.makeText(this, R.string.Please_wait___, Toast.LENGTH_SHORT).show();
 
-        tvReplyTo = view.findViewById(R.id.textReplyTo);
-        etMessage = view.findViewById(R.id.editMessage);
-        bSend = view.findViewById(R.id.buttonSend);
-        bSend.setOnClickListener(this);
-        bAttach = view.findViewById(R.id.buttonAttachment);
-        bAttach.setOnClickListener(this);
+            String msgnum = "#" + mid;
+            if (rid > 0) {
+                msgnum += "/" + rid;
+            }
+            final String body = msgnum + " " + msg;
 
-        progressBar = view.findViewById(R.id.progressBar);
+            setFormEnabled(false);
 
-        recyclerView = view.findViewById(R.id.list);
-        recyclerView.setHasFixedSize(true);
+            if (attachmentUri == null) {
+                postText(body);
+            } else {
+                postMedia(body);
+            }
+        });
+
+        model.buttonAttachment.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= 23 && getBaseActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE);
+                return;
+            }
+            if (attachmentUri == null) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent, null), ACTIVITY_ATTACHMENT_IMAGE);
+            } else {
+                attachmentUri = null;
+                attachmentMime = null;
+                model.buttonAttachment.setSelected(false);
+            }
+        });
+
+        model.list.setHasFixedSize(true);
 
         adapter = new JuickMessagesAdapter();
-        recyclerView.setAdapter(adapter);
-        linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+        model.list.setAdapter(adapter);
+        linearLayoutManager = (LinearLayoutManager) model.list.getLayoutManager();
         adapter.setOnItemClickListener((view1, position) -> {
             Post post = adapter.getItem(position);
             onReply(post.getRid(), post.getBody());
@@ -155,15 +180,15 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
             }
             if (pos != 0) {
                 adapter.notifyItemChanged(pos);
-                recyclerView.scrollToPosition(pos);
+                model.list.scrollToPosition(pos);
             }
         });
 
         SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipe_container);
         swipeRefreshLayout.setEnabled(false);
 
-        recyclerView.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
+        model.list.setVisibility(View.GONE);
+        model.progressBar.setVisibility(View.VISIBLE);
         load();
     }
 
@@ -185,8 +210,8 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                         if (adapter.getItemCount() > 0) {
                             initAdapterStageTwo();
                         }
-                        recyclerView.setVisibility(View.VISIBLE);
-                        progressBar.setVisibility(View.GONE);
+                        model.list.setVisibility(View.VISIBLE);
+                        model.progressBar.setVisibility(View.GONE);
                         List<Post> list = response.body();
                         adapter.newData(list);
                     }
@@ -214,17 +239,17 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
 
     private void resetForm() {
         rid = 0;
-        tvReplyTo.setVisibility(View.GONE);
-        etMessage.setText("");
+        model.textReplyTo.setVisibility(View.GONE);
+        model.editMessage.setText("");
         attachmentMime = null;
         attachmentUri = null;
-        bAttach.setSelected(false);
+        model.buttonAttachment.setSelected(false);
         setFormEnabled(true);
     }
 
     private void setFormEnabled(boolean state) {
-        etMessage.setEnabled(state);
-        bSend.setEnabled(state);
+        model.editMessage.setEnabled(state);
+        model.buttonSend.setEnabled(state);
     }
 
     private void onReply(int newrid, String txt) {
@@ -234,53 +259,10 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
             String inreplyto = getResources().getString(R.string.In_reply_to_) + " ";
             ssb.append(inreplyto + txt);
             ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, inreplyto.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            tvReplyTo.setText(ssb);
-            tvReplyTo.setVisibility(View.VISIBLE);
+            model.textReplyTo.setText(ssb);
+            model.textReplyTo.setVisibility(View.VISIBLE);
         } else {
-            tvReplyTo.setVisibility(View.GONE);
-        }
-    }
-
-    public void onClick(View view) {
-        if (view == bAttach) {
-            if (Build.VERSION.SDK_INT >= 23 && getBaseActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE);
-                return;
-            }
-            if (attachmentUri == null) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(Intent.createChooser(intent, null), ACTIVITY_ATTACHMENT_IMAGE);
-            } else {
-                attachmentUri = null;
-                attachmentMime = null;
-                bAttach.setSelected(false);
-            }
-        } else if (view == bSend) {
-            if (!Utils.hasAuth()) {
-                startActivity(new Intent(getContext(), SignInActivity.class));
-                return;
-            }
-            String msg = etMessage.getText().toString();
-            if (msg.length() < 3) {
-                Toast.makeText(getContext(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
-                return;
-            }
-//        Toast.makeText(this, R.string.Please_wait___, Toast.LENGTH_SHORT).show();
-
-            String msgnum = "#" + mid;
-            if (rid > 0) {
-                msgnum += "/" + rid;
-            }
-            final String body = msgnum + " " + msg;
-
-            setFormEnabled(false);
-
-            if (attachmentUri == null) {
-                postText(body);
-            } else {
-                postMedia(body);
-            }
+            model.textReplyTo.setVisibility(View.GONE);
         }
     }
 
@@ -355,7 +337,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                 attachmentUri = Utils.getPath(Uri.parse(data.getDataString()));
                 // How to get correct mime type?
                 attachmentMime = "image/jpeg";
-                bAttach.setSelected(true);
+                model.buttonAttachment.setSelected(true);
             }
         }
     }
@@ -375,7 +357,7 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
                             if (adapter.getItemCount() > 0) {
                                 if (adapter.getItem(0).getMid() == reply.getMid()) {
                                     adapter.addData(reply);
-                                    linearLayoutManager.smoothScrollToPosition(recyclerView,
+                                    linearLayoutManager.smoothScrollToPosition(model.list,
                                             new RecyclerView.State(), reply.getRid());
                                 }
                             }
@@ -398,8 +380,14 @@ public class ThreadFragment extends BaseFragment implements View.OnClickListener
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (requestCode == ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE) {
-                bAttach.performClick();
+                model.buttonAttachment.performClick();
             }
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        model = null;
+        super.onDestroyView();;
     }
 }

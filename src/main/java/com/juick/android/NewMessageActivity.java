@@ -24,6 +24,7 @@ import com.juick.R;
 import com.juick.android.fragment.BaseFragment;
 import com.juick.android.fragment.NewPostFragment;
 import com.juick.api.RestClient;
+import com.juick.databinding.ActivityNewPostBinding;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,10 +39,13 @@ import okhttp3.RequestBody;
  */
 public class NewMessageActivity extends BaseActivity {
 
+    private ActivityNewPostBinding model;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_post);
+        model = ActivityNewPostBinding.inflate(getLayoutInflater());
+        setContentView(model.getRoot());
         addFragment(NewPostFragment.newInstance(), false);
     }
 

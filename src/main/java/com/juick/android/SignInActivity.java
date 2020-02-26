@@ -18,7 +18,6 @@ package com.juick.android;
 
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
-import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,8 +28,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -43,6 +43,7 @@ import com.juick.R;
 import com.juick.api.RestClient;
 import com.juick.api.model.AuthToken;
 import com.juick.api.model.SecureUser;
+import com.juick.databinding.ActivityLoginBinding;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -52,15 +53,11 @@ import retrofit2.Response;
  *
  * @author Ugnich Anton
  */
-public class SignInActivity extends AccountAuthenticatorActivity implements OnClickListener {
+public class SignInActivity extends AccountAuthenticatorActivity {
 
     public static final String EXTRA_ACTION = "EXTRA_ACTION";
 
     public static final int ACTION_PASSWORD_UPDATE = 1;
-
-    private EditText etNick;
-    private EditText etPassword;
-    private Button loginButton;
 
     private static final int RC_SIGN_IN = 9001;
     private static final int RC_SIGN_UP = 9002;
@@ -69,36 +66,74 @@ public class SignInActivity extends AccountAuthenticatorActivity implements OnCl
 
     private int currentAction;
 
+    private ActivityLoginBinding model;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
 
-        etNick = findViewById(R.id.juickNick);
-        etPassword = findViewById(R.id.juickPassword);
-        loginButton = findViewById(R.id.buttonSave);
-        loginButton.setOnClickListener(this);
+        model = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(model.getRoot());
+
+        model.buttonSave.setOnClickListener(v -> {
+            final String nick = model.juickNick.getText().toString();
+            final String password = model.juickPassword.getText().toString();
+
+            if (nick.length() == 0 || password.length() == 0) {
+                Toast.makeText(SignInActivity.this, R.string.Enter_nick_and_password, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            RestClient.getInstance().auth(nick, password, new Callback<SecureUser>() {
+                @Override
+                public void onResponse(Call<SecureUser> call, Response<SecureUser> response) {
+                    if (response.isSuccessful() && response.code() == 200) {
+                        Account account = new Account(nick, getString(R.string.com_juick));
+                        AccountManager am = AccountManager.get(SignInActivity.this);
+                        String hash = response.body().getHash();
+                        if (currentAction == ACTION_PASSWORD_UPDATE) {
+                            am.setAuthToken(account, "", hash);
+                        } else {
+                            Bundle userData = new Bundle();
+                            userData.putString("hash", hash);
+                            am.addAccountExplicitly(account, "", userData);
+                        }
+                        Bundle result = new Bundle();
+                        result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
+                        result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick));
+                        result.putString(AccountManager.KEY_AUTHTOKEN, hash);
+                        setAccountAuthenticatorResult(result);
+                        SignInActivity.this.setResult(RESULT_OK);
+                        SignInActivity.this.finish();
+                    } else {
+                        Toast.makeText(App.getInstance(), R.string.Unknown_nick_or_wrong_password, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<SecureUser> call, Throwable t) {
+                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                }
+            });
+        });
 
         // Button listeners
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
+        model.signInButton.setOnClickListener(v -> {
+            Intent signInIntent = googleClient.getSignInIntent();
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        });
 
-        // [START configure_signin]
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getResources().getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
-        // [END configure_signin]
-
-        // [START build_client]
         // Build a GoogleSignInClient with the options specified by gso.
         googleClient = GoogleSignIn.getClient(this, gso);
-        // [END build_client]
 
-        // [START customize_button]
         // Set the dimensions of the sign-in button.
-        SignInButton signInButton = findViewById(R.id.sign_in_button);
+        SignInButton signInButton = model.signInButton;
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         signInButton.setColorScheme(SignInButton.COLOR_LIGHT);
 
@@ -113,60 +148,6 @@ public class SignInActivity extends AccountAuthenticatorActivity implements OnCl
             builder.setMessage(R.string.Only_one_account);
             builder.show();
         }
-    }
-
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.buttonSave:
-                final String nick = etNick.getText().toString();
-                final String password = etPassword.getText().toString();
-
-                if (nick.length() == 0 || password.length() == 0) {
-                    Toast.makeText(this, R.string.Enter_nick_and_password, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                RestClient.getInstance().auth(nick, password, new Callback<SecureUser>() {
-                    @Override
-                    public void onResponse(Call<SecureUser> call, Response<SecureUser> response) {
-                        if (response.isSuccessful() && response.code() == 200) {
-                            Account account = new Account(nick, getString(R.string.com_juick));
-                            AccountManager am = AccountManager.get(SignInActivity.this);
-                            String hash = response.body().getHash();
-                            if (currentAction == ACTION_PASSWORD_UPDATE) {
-                                am.setAuthToken(account, "", hash);
-                            } else {
-                                Bundle userData = new Bundle();
-                                userData.putString("hash", hash);
-                                am.addAccountExplicitly(account, "", userData);
-                            }
-                            Bundle result = new Bundle();
-                            result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
-                            result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick));
-                            result.putString(AccountManager.KEY_AUTHTOKEN, hash);
-                            setAccountAuthenticatorResult(result);
-                            SignInActivity.this.setResult(RESULT_OK);
-                            SignInActivity.this.finish();
-                        } else {
-                            Toast.makeText(App.getInstance(), R.string.Unknown_nick_or_wrong_password, Toast.LENGTH_LONG).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<SecureUser> call, Throwable t) {
-                        Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
-                    }
-                });
-                break;
-            case R.id.sign_in_button:
-                signIn();
-                break;
-        }
-    }
-
-    private void signIn() {
-        Intent signInIntent = googleClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     @Override
@@ -184,9 +165,9 @@ public class SignInActivity extends AccountAuthenticatorActivity implements OnCl
             String nick = data.getStringExtra("nick");
             String password = data.getStringExtra("password");
             if (!TextUtils.isEmpty(nick)) {
-                etNick.setText(nick);
-                etPassword.setText(password);
-                loginButton.performClick();
+                model.juickNick.setText(nick);
+                model.juickPassword.setText(password);
+                model.buttonSave.performClick();
             }
         }
     }
