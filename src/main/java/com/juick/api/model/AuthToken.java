@@ -29,11 +29,4 @@ public class AuthToken {
         return authCode;
     }
 
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public void setAuthCode(String authCode) {
-        this.authCode = authCode;
-    }
 }

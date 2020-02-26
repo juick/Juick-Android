@@ -34,6 +34,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import androidx.annotation.Nullable;
+
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.RestClient;
@@ -50,38 +52,34 @@ import retrofit2.Response;
 public class Utils {
     public static int myId = 0;
 
+    public static @Nullable Account getAccount() {
+        AccountManager am = AccountManager.get(App.getInstance());
+        Account accs[] = am.getAccountsByType(App.getInstance().getString(R.string.com_juick));
+        return accs.length > 0 ? accs[0] : null;
+    }
+
     public static boolean hasAuth() {
-        AccountManager am = AccountManager.get(App.getInstance());
-        Account accs[] = am.getAccountsByType(App.getInstance().getString(R.string.com_juick));
-        return accs.length > 0;
+        return getAccount() != null;
     }
 
-    public static String getNick() {
-        AccountManager am = AccountManager.get(App.getInstance());
-        Account accs[] = am.getAccountsByType(App.getInstance().getString(R.string.com_juick));
-        return accs.length > 0 ? accs[0].name : null;
+    public static @Nullable String getNick() {
+        Account account = getAccount();
+        return account != null ? account.name : null;
     }
 
-    public static Bundle getAccountData() {
-        Context context = App.getInstance();
-        AccountManager am = AccountManager.get(context);
-        Account accs[] = am.getAccountsByType(context.getString(R.string.com_juick));
-        if (accs.length > 0) {
+    public static @Nullable Bundle getAccountData() {
+        AccountManager am = AccountManager.get(App.getInstance());
+        Account account = getAccount();
+        if (account != null) {
             Bundle b = null;
             try {
-                b = am.getAuthToken(accs[0], "", null, false, null, null).getResult();
+                b = am.getAuthToken(account, "", null, false, null, null).getResult();
             } catch (Exception e) {
                 Log.d("getBasicAuthString", Log.getStackTraceString(e));
             }
             return b;
         }
         return null;
-    }
-
-    public static boolean isWiFiConnected(Context context) {
-        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mWiFi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        return mWiFi.isConnected();
     }
 
     private static OkHttpClient.Builder WSFactoryInstance;

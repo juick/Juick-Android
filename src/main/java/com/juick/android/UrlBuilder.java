@@ -16,10 +16,9 @@
  */
 
 package com.juick.android;
+
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.juick.api.RestClient;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

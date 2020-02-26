@@ -33,6 +33,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 public class ViewUtil {
 
     public static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 4;
+    public static final int REQUEST_CODE_SYNC_CONTACTS = 5;
 
     public static void setTint(TextView v) {
         if (v == null) return;

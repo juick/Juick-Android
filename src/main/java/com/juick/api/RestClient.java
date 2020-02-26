@@ -18,7 +18,6 @@
 package com.juick.api;
 
 import android.accounts.AccountManager;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 

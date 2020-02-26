@@ -16,9 +16,15 @@
  */
 package com.juick.android;
 
+import android.Manifest;
+import android.accounts.Account;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
@@ -50,6 +56,7 @@ import com.juick.android.fragment.ChatsFragment;
 import com.juick.android.fragment.DiscoverFragment;
 import com.juick.android.fragment.ThreadFragment;
 import com.juick.android.service.MessageChecker;
+import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
@@ -135,6 +142,16 @@ public class MainActivity extends BaseActivity
                 WorkManager workManager = WorkManager.getInstance();
                 workManager.enqueueUniquePeriodicWork(this.getClass().getSimpleName(),
                         ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
+            }
+            if (Build.VERSION.SDK_INT >= 23
+                    && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.WRITE_CONTACTS
+                }, ViewUtil.REQUEST_CODE_SYNC_CONTACTS);
+            } else {
+                Account account = Utils.getAccount();
+                ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
             }
         }
 
@@ -309,5 +326,14 @@ public class MainActivity extends BaseActivity
                 return originalRequest;
             }
         });
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == ViewUtil.REQUEST_CODE_SYNC_CONTACTS) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                ContentResolver.setSyncAutomatically(Utils.getAccount(), ContactsContract.AUTHORITY, true);
+            }
+        }
     }
 }
