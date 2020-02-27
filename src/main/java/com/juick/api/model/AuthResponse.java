@@ -17,9 +17,14 @@
 
 package com.juick.api.model;
 
-public class AuthToken {
+public class AuthResponse {
     private String account;
     private String authCode;
+    private SecureUser user;
+
+    public SecureUser getUser() {
+        return user;
+    }
 
     public String getAccount() {
         return account;

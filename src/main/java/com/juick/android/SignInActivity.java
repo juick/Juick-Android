@@ -23,10 +23,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -41,7 +37,7 @@ import com.google.android.gms.tasks.Task;
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.RestClient;
-import com.juick.api.model.AuthToken;
+import com.juick.api.model.AuthResponse;
 import com.juick.api.model.SecureUser;
 import com.juick.databinding.ActivityLoginBinding;
 
@@ -88,23 +84,7 @@ public class SignInActivity extends AccountAuthenticatorActivity {
                 @Override
                 public void onResponse(Call<SecureUser> call, Response<SecureUser> response) {
                     if (response.isSuccessful() && response.code() == 200) {
-                        Account account = new Account(nick, getString(R.string.com_juick));
-                        AccountManager am = AccountManager.get(SignInActivity.this);
-                        String hash = response.body().getHash();
-                        if (currentAction == ACTION_PASSWORD_UPDATE) {
-                            am.setAuthToken(account, "", hash);
-                        } else {
-                            Bundle userData = new Bundle();
-                            userData.putString("hash", hash);
-                            am.addAccountExplicitly(account, "", userData);
-                        }
-                        Bundle result = new Bundle();
-                        result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
-                        result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick));
-                        result.putString(AccountManager.KEY_AUTHTOKEN, hash);
-                        setAccountAuthenticatorResult(result);
-                        SignInActivity.this.setResult(RESULT_OK);
-                        SignInActivity.this.finish();
+                        updateAccount(nick, response.body().getHash(), currentAction);
                     } else {
                         Toast.makeText(App.getInstance(), R.string.Unknown_nick_or_wrong_password, Toast.LENGTH_LONG).show();
                     }
@@ -176,23 +156,26 @@ public class SignInActivity extends AccountAuthenticatorActivity {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
 
             Log.i(SignInActivity.class.getSimpleName(), "Success " + account.getIdToken());
-            RestClient.getInstance().getApi().googleAuth(account.getIdToken()).enqueue(new Callback<AuthToken>() {
+            RestClient.getInstance().getApi().googleAuth(account.getIdToken()).enqueue(new Callback<AuthResponse>() {
                 @Override
-                public void onResponse(Call<AuthToken> call, Response<AuthToken> response) {
+                public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                     if (response.isSuccessful()) {
-                        Log.i(SignInActivity.class.getSimpleName(), response.body().getAuthCode());
-                        Intent signupIntent = new Intent(SignInActivity.this, SignUpActivity.class);
-                        signupIntent.putExtra("email", response.body().getAccount());
-                        signupIntent.putExtra("authCode", response.body().getAuthCode());
-                        startActivityForResult(signupIntent, RC_SIGN_UP);
-                    } else {
-                        Toast.makeText(App.getInstance(), "Email already registered", Toast.LENGTH_LONG).show();
+                        AuthResponse data = response.body();
+                        if (data.getAuthCode() != null) {
+                            Log.i(SignInActivity.class.getSimpleName(), response.body().getAuthCode());
+                            Intent signupIntent = new Intent(SignInActivity.this, SignUpActivity.class);
+                            signupIntent.putExtra("email", response.body().getAccount());
+                            signupIntent.putExtra("authCode", response.body().getAuthCode());
+                            startActivityForResult(signupIntent, RC_SIGN_UP);
+                        } else {
+                            updateAccount(data.getUser().getName(), data.getUser().getHash(), 0);
+                        }
                     }
                 }
 
                 @Override
-                public void onFailure(Call<AuthToken> call, Throwable t) {
-
+                public void onFailure(Call<AuthResponse> call, Throwable t) {
+                    Toast.makeText(App.getInstance(), "Google error", Toast.LENGTH_LONG).show();
                 }
             });
         } catch (ApiException e) {
@@ -200,5 +183,24 @@ public class SignInActivity extends AccountAuthenticatorActivity {
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Log.w(SignInActivity.class.getSimpleName(), "signInResult:failed code=" + e.getStatusCode());
         }
+    }
+
+    private void updateAccount(String nick, String hash, int action) {
+        Account account = new Account(nick, getString(R.string.com_juick));
+        AccountManager am = AccountManager.get(SignInActivity.this);
+        if (action == ACTION_PASSWORD_UPDATE) {
+            am.setAuthToken(account, "", hash);
+        } else {
+            Bundle userData = new Bundle();
+            userData.putString("hash", hash);
+            am.addAccountExplicitly(account, "", userData);
+        }
+        Bundle result = new Bundle();
+        result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
+        result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick));
+        result.putString(AccountManager.KEY_AUTHTOKEN, hash);
+        setAccountAuthenticatorResult(result);
+        setResult(RESULT_OK);
+        finish();
     }
 }

@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.juick.BuildConfig;
 import com.juick.android.Utils;
-import com.juick.api.model.AuthToken;
+import com.juick.api.model.AuthResponse;
 import com.juick.api.model.Pms;
 import com.juick.api.model.Post;
 import com.juick.api.model.SecureUser;
@@ -206,7 +206,7 @@ public class RestClient {
 
         @FormUrlEncoded
         @POST("/_google")
-        Call<AuthToken> googleAuth(@Field("idToken") String token);
+        Call<AuthResponse> googleAuth(@Field("idToken") String token);
         @FormUrlEncoded
         @POST("/signup")
         Call<Void> signup(@Field("username") String username, @Field("password") String password,
