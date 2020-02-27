@@ -36,7 +36,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/juickNick"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/avatar_size"
@@ -55,7 +55,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/juickPassword"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/avatar_size"

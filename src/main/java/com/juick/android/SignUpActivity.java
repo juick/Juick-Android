@@ -23,7 +23,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.juick.R;
 import com.juick.api.RestClient;
 import com.juick.databinding.SignupBinding;
 
@@ -40,7 +39,7 @@ public class SignUpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         model = SignupBinding.inflate(getLayoutInflater());
-        setContentView(R.layout.signup);
+        setContentView(model.getRoot());
         authCode = getIntent().getStringExtra("authCode");
         model.buttonCreate.setOnClickListener(v -> {
             String nick = model.newNick.getText().toString();
