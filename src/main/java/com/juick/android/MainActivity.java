@@ -187,20 +187,17 @@ public class MainActivity extends BaseActivity
         if (action.equals(ACTION_VIEW)) {
             if (intent.getType().equals("vnd.android.cursor.item/vnd.com.juick.profile")) {
                 Uri contactUri = intent.getData();
-                ContentResolver contentResolver = getContentResolver();
-                Cursor queryResult = contentResolver.query(contactUri, null, null, null, null);
-                if (queryResult != null) {
-                    String name = null;
-                    while (queryResult.moveToNext()) {
-                        name = queryResult.getString(queryResult.getColumnIndex(ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY));
+                if (contactUri != null) {
+                    ContentResolver contentResolver = getContentResolver();
+                    Cursor queryResult = contentResolver.query(contactUri, null, null, null, null);
+                    if (queryResult != null) {
+                        queryResult.moveToFirst();
+                        String name = queryResult.getString(queryResult.getColumnIndex(ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY));
+                        queryResult.close();
                         if (name != null) {
-                            break;
+                            setTitle(name);
+                            replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(name)));
                         }
-                    }
-                    queryResult.close();
-                    if (name != null) {
-                        setTitle(name);
-                        replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(name)));
                     }
                 }
             }
