@@ -19,6 +19,7 @@ package com.juick.api.model;
 
 import androidx.annotation.NonNull;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -28,12 +29,12 @@ public class Pms {
 
     private List<Chat> pms;
 
+    public Pms() {
+        this.pms = Collections.emptyList();
+    }
+
     @NonNull
     public List<Chat> getPms() {
         return pms;
-    }
-
-    public void setPms(List<Chat> pms) {
-        this.pms = pms;
     }
 }
