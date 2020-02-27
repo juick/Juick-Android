@@ -199,6 +199,7 @@ public class MainActivity extends BaseActivity
                     }
                     queryResult.close();
                     if (name != null) {
+                        setTitle(name);
                         replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(name)));
                     }
                 }
