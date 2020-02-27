@@ -25,4 +25,4 @@ jobs:
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 29
-        script: sudo./gradlew --no-daemon connectedCheck -Pbuild=dev
+        script: sudo ./gradlew --no-daemon connectedCheck -Pbuild=dev
