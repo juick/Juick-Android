@@ -39,6 +39,7 @@ import android.util.Log;
 import com.juick.R;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
+import com.juick.api.model.SecureUser;
 import com.juick.api.model.User;
 
 import java.io.ByteArrayOutputStream;
@@ -100,9 +101,9 @@ public class ContactsSyncService extends Service {
         c1.close();
 
         try {
-            Response<List<User>> response = RestClient.getInstance().getApi().getFriends().execute();
+            Response<SecureUser> response = RestClient.getInstance().getApi().me().execute();
             if (response.isSuccessful()) {
-                List<User> friends = response.body();
+                List<User> friends = response.body().getRead();
                 if (friends != null) {
                     for (User user : friends) {
                         if (!localContacts.containsKey(user.getUname())) {
@@ -144,13 +145,15 @@ public class ContactsSyncService extends Service {
         }
 
         Bitmap photo = null;
-        try {
-            photo = GlideApp.with(context).asBitmap().load(user.getAvatar())
-                    .placeholder(R.drawable.av_96)
-                    .submit(200, 200)
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
-            Log.w(ContactsSyncService.class.getSimpleName(), "Avatar error", e);
+        if (user.getAvatar() != null) {
+            try {
+                photo = GlideApp.with(context).asBitmap().load(user.getAvatar())
+                        .placeholder(R.drawable.av_96)
+                        .submit(200, 200)
+                        .get();
+            } catch (InterruptedException | ExecutionException e) {
+                Log.w(ContactsSyncService.class.getSimpleName(), "Avatar error", e);
+            }
         }
         // Photo
         if (photo != null) {

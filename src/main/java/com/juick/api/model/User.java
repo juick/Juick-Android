@@ -18,9 +18,9 @@
 
 package com.juick.api.model;
 
-import androidx.annotation.NonNull;
-
 import com.stfalcon.chatkit.commons.models.IUser;
+
+import java.util.List;
 
 /**
  * Created by gerc on 10.02.2016.
@@ -33,6 +33,7 @@ public class User implements IUser {
     private boolean banned;
     private String avatar;
     private int unreadCount;
+    private List<User> read;
 
     public User() {}
 
@@ -75,5 +76,9 @@ public class User implements IUser {
 
     public int getUnreadCount() {
         return unreadCount;
+    }
+
+    public List<User> getRead() {
+        return read;
     }
 }

@@ -174,9 +174,6 @@ public class RestClient {
         @GET()
         Call<List<Post>> getPosts(@Url String url);
 
-        @GET("/users/friends")
-        Call<List<User>> getFriends();
-
         @GET("/users")
         Call<List<User>> getUsers(@Query("uname") String uname);
 
