@@ -36,7 +36,7 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.squareup.okhttp3:okhttp:3.12.8'
     //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.8'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.14.7'
     implementation 'com.github.heremaps:oksse:0.9.0'
     // retrofit 2.7.x require API21
     //noinspection GradleDependency
