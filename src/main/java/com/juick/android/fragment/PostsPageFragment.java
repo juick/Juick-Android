@@ -22,15 +22,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.JuickMessageMenu;
@@ -38,6 +36,7 @@ import com.juick.android.JuickMessagesAdapter;
 import com.juick.android.UrlBuilder;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
+import com.juick.databinding.FragmentPostsPageBinding;
 
 import java.util.List;
 
@@ -52,12 +51,11 @@ public class PostsPageFragment extends BaseFragment {
 
     public static final String ARG_URL = "ARG_URL";
 
-    private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private ProgressBar progressBar;
     private JuickMessagesAdapter adapter;
 
     private String apiUrl;
+
+    private FragmentPostsPageBinding model;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,9 +78,9 @@ public class PostsPageFragment extends BaseFragment {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
                 if (response.isSuccessful() && isAdded()) {
-                    swipeRefreshLayout.setRefreshing(false);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    progressBar.setVisibility(View.GONE);
+                    model.swipeContainer.setRefreshing(false);
+                    model.list.setVisibility(View.VISIBLE);
+                    model.progressBar.setVisibility(View.GONE);
                     List<Post> posts = response.body();
                     if(posts != null) {
                         if(isReload)
@@ -96,7 +94,7 @@ public class PostsPageFragment extends BaseFragment {
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
                 t.printStackTrace();
-                swipeRefreshLayout.setRefreshing(false);
+                model.swipeContainer.setRefreshing(false);
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
@@ -104,16 +102,16 @@ public class PostsPageFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_posts_page, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        model = FragmentPostsPageBinding.inflate(inflater, container, false);
+        return model.getRoot();
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        swipeRefreshLayout = getActivity().findViewById(R.id.swipe_container);
-        swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(App.getInstance(), R.color.colorAccent));
-        swipeRefreshLayout.setOnRefreshListener(() -> load(true));
+        model.swipeContainer.setColorSchemeColors(ContextCompat.getColor(App.getInstance(), R.color.colorAccent));
+        model.swipeContainer.setOnRefreshListener(() -> load(true));
         load(false);
     }
 
@@ -121,13 +119,10 @@ public class PostsPageFragment extends BaseFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        progressBar = view.findViewById(R.id.progressBar);
+        model.list.setLayoutManager(new LinearLayoutManager(getActivity()));
+        model.list.setHasFixedSize(true);
 
-        recyclerView = view.findViewById(R.id.list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setHasFixedSize(true);
-
-        recyclerView.setAdapter(adapter);
+        model.list.setAdapter(adapter);
         adapter.setOnItemClickListener((view1, pos) -> getBaseActivity().replaceFragment(
                 ThreadFragment.newInstance(adapter.getItem(pos).getMid())));
         adapter.setOnMenuListener(new JuickMessageMenu(adapter.getItems()));
@@ -165,11 +160,11 @@ public class PostsPageFragment extends BaseFragment {
         });
 
         if (adapter.getItemCount() == 0) {
-            recyclerView.setVisibility(View.GONE);
-            progressBar.setVisibility(View.VISIBLE);
+            model.list.setVisibility(View.GONE);
+            model.progressBar.setVisibility(View.VISIBLE);
         } else {
-            recyclerView.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.GONE);
+            model.list.setVisibility(View.VISIBLE);
+            model.progressBar.setVisibility(View.GONE);
         }
         Log.d("PostsPageFragment", "creatview "+adapter.getItemCount());
     }
@@ -177,7 +172,12 @@ public class PostsPageFragment extends BaseFragment {
     @Override
     public void onPause() {
         super.onPause();
-        swipeRefreshLayout.setRefreshing(false);
+        model.swipeContainer.setRefreshing(false);
     }
 
+    @Override
+    public void onDestroyView() {
+        model = null;
+        super.onDestroyView();
+    }
 }

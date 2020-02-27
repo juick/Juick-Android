@@ -41,8 +41,7 @@ import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
 import com.juick.api.model.Post;
-import com.stfalcon.chatkit.messages.MessageInput;
-import com.stfalcon.chatkit.messages.MessagesList;
+import com.juick.databinding.FragmentPmBinding;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 import java.io.IOException;
@@ -64,6 +63,8 @@ public class PMFragment extends BaseFragment {
 
     String uname;
     int uid;
+
+    private FragmentPmBinding model;
 
     BroadcastReceiver messageReceiver = new BroadcastReceiver() {
 
@@ -88,8 +89,9 @@ public class PMFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_pm, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        model = FragmentPmBinding.inflate(inflater, container, false);
+        return model.getRoot();
     }
 
     @Override
@@ -105,8 +107,7 @@ public class PMFragment extends BaseFragment {
                 (imageView, url, object) -> GlideApp.with(imageView.getContext())
                         .load(url)
                         .into(imageView));
-        MessagesList messagesList = getActivity().findViewById(R.id.messagesList);
-        messagesList.setAdapter(adapter);
+        model.messagesList.setAdapter(adapter);
 
         RestClient.getInstance().getApi().pm(uname).enqueue(new Callback<List<Post>>() {
             @Override
@@ -121,8 +122,7 @@ public class PMFragment extends BaseFragment {
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
-        MessageInput messageInput = getActivity().findViewById(R.id.input);
-        messageInput.setInputListener(input -> {
+        model.input.setInputListener(input -> {
             postText(input.toString());
             ViewUtil.hideKeyboard(getActivity());
             return true;
@@ -168,5 +168,11 @@ public class PMFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(messageReceiver);
+    }
+
+    @Override
+    public void onDestroyView() {
+        model = null;
+        super.onDestroyView();
     }
 }

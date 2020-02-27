@@ -27,8 +27,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -40,21 +38,20 @@ import com.juick.android.NewMessageActivity;
 import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.RestClient;
+import com.juick.databinding.FragmentNewPostsBinding;
 
 /**
  * Created by alx on 02.01.17.
  */
 
-public class NewPostFragment extends BaseFragment implements View.OnClickListener {
+public class NewPostFragment extends BaseFragment {
     public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
-    private EditText etMessage;
-    private ImageView bTags;
-    private ImageView bAttachment;
-    private ImageView bSend;
     private String attachmentUri = null;
     private String attachmentMime = null;
-    private ProgressDialog progressDialog = null;
+    private ProgressDialog progressDialog;
     private NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
+
+    private FragmentNewPostsBinding model;
 
     public static NewPostFragment newInstance() {
         NewPostFragment fragment = new NewPostFragment();
@@ -65,42 +62,64 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_new_posts, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        model = FragmentNewPostsBinding.inflate(inflater, container, false);
+        return model.getRoot();
     }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(R.string.New_message);
-        etMessage = view.findViewById(R.id.editMessage);
-        bTags = view.findViewById(R.id.buttonTags);
-        bAttachment = view.findViewById(R.id.buttonAttachment);
-        bSend = view.findViewById(R.id.buttonSend);
 
-        bTags.setOnClickListener(this);
-        bAttachment.setOnClickListener(this);
-        bSend.setOnClickListener(this);
+        model.buttonTags.setOnClickListener(v -> {
+            TagsFragment tagsFragment = TagsFragment.newInstance(Utils.myId);
+            tagsFragment.setOnTagAppliedListener(this::applyTag);
+            getBaseActivity().replaceFragment(tagsFragment);
+        });
+        model.buttonAttachment.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= 23 && getBaseActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE);
+                return;
+            }
+            if (attachmentUri == null) {
+                try {
+                    Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                    photoPickerIntent.setType("image/*");
+                    Intent chooserIntent = Intent.createChooser(photoPickerIntent, null);
+
+                    getActivity().startActivityForResult(chooserIntent, ACTIVITY_ATTACHMENT_IMAGE);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                attachmentUri = null;
+                attachmentMime = null;
+                model.buttonAttachment.setSelected(false);
+            }
+        });
+        model.buttonSend.setOnClickListener(v -> {
+            sendMessage();
+        });
 
         resetForm();
         handleIntent(getBaseActivity().getIntent());
     }
 
     public void resetForm() {
-        etMessage.setText("");
-        bAttachment.setSelected(false);
+        model.editMessage.setText("");
+        model.buttonAttachment.setSelected(false);
         attachmentUri = null;
         attachmentMime = null;
-        progressDialog = null;
         progressDialogCancel.bool = false;
-        etMessage.requestFocus();
+        model.editMessage.requestFocus();
         //setSupportProgressBarIndeterminateVisibility(Boolean.FALSE);
     }
 
     private void setFormEnabled(boolean state) {
-        etMessage.setEnabled(state);
-        bTags.setEnabled(state);
-        bAttachment.setEnabled(state);
-        bSend.setEnabled(state);
+        model.editMessage.setEnabled(state);
+        model.buttonTags.setEnabled(state);
+        model.buttonAttachment.setEnabled(state);
+        model.buttonSend.setEnabled(state);
         //setSupportProgressBarIndeterminateVisibility(state ? Boolean.FALSE : Boolean.TRUE);
     }
 
@@ -114,43 +133,10 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
             String mime = i.getType();
             Bundle extras = i.getExtras();
             if (mime.equals("text/plain")) {
-                etMessage.append(extras.getString(Intent.EXTRA_TEXT));
+                model.editMessage.append(extras.getString(Intent.EXTRA_TEXT));
             } else{
                 attachImage(extras.get(Intent.EXTRA_STREAM).toString());
             }
-        }
-    }
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.buttonSend:
-                sendMessage();
-                break;
-            case R.id.buttonTags:
-                TagsFragment tagsFragment = TagsFragment.newInstance(Utils.myId);
-                tagsFragment.setOnTagAppliedListener(this::applyTag);
-                getBaseActivity().replaceFragment(tagsFragment);
-                break;
-            case R.id.buttonAttachment:
-                if (Build.VERSION.SDK_INT >= 23 && getBaseActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE);
-                    return;
-                }
-                if (attachmentUri == null) {
-                    try {
-                        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                        photoPickerIntent.setType("image/*");
-                        Intent chooserIntent = Intent.createChooser(photoPickerIntent, null);
-
-                        getActivity().startActivityForResult(chooserIntent, ACTIVITY_ATTACHMENT_IMAGE);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    attachmentUri = null;
-                    attachmentMime = null;
-                    bAttachment.setSelected(false);
-                }
-                break;
         }
     }
 
@@ -159,14 +145,14 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (requestCode == ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE) {
-                bAttachment.performClick();
+                model.buttonAttachment.performClick();
             }
         }
     }
 
     private void sendMessage() {
-        final String msg = etMessage.getText().toString();
-        if (msg.length() < 3) {
+        final String msg = model.editMessage.getText().toString();
+        if (msg.length() < 3 && attachmentUri == null) {
             Toast.makeText(getBaseActivity(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -229,15 +215,21 @@ public class NewPostFragment extends BaseFragment implements View.OnClickListene
         if (isImageTypeAllowed(mime)) {
             attachmentUri = uri;
             attachmentMime = mime;
-            bAttachment.setSelected(true);
+            model.buttonAttachment.setSelected(true);
         }else{
             Toast.makeText(getActivity(), R.string.WrongImageFormat, Toast.LENGTH_LONG).show();
         }
     }
 
-    public void applyTag(String tag) {
-        etMessage.setText("*" + tag + " " + etMessage.getText());
-        int textLength = etMessage.getText().length();
-        etMessage.setSelection(textLength, textLength);
+    private void applyTag(String tag) {
+        model.editMessage.setText("*" + tag + " " + model.editMessage.getText());
+        int textLength = model.editMessage.getText().length();
+        model.editMessage.setSelection(textLength, textLength);
+    }
+
+    @Override
+    public void onDestroyView() {
+        model = null;
+        super.onDestroyView();
     }
 }
