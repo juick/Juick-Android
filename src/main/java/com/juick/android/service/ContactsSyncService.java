@@ -17,7 +17,6 @@
 package com.juick.android.service;
 
 import android.accounts.Account;
-import android.accounts.OperationCanceledException;
 import android.app.Service;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
@@ -45,141 +44,131 @@ import com.juick.api.model.User;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import retrofit2.Response;
 
 /**
- *
  * @author Ugnich Anton
  */
 public class ContactsSyncService extends Service {
 
-    private static SyncAdapterImpl sSyncAdapter = null;
-    private static ContentResolver mContentResolver = null;
+    private JuickContactsSyncAdapter contactsSyncAdapter;
+    private ContentResolver contentResolver;
 
-    private static class SyncAdapterImpl extends AbstractThreadedSyncAdapter {
+    class JuickContactsSyncAdapter extends AbstractThreadedSyncAdapter {
 
-        SyncAdapterImpl(Context context) {
+        JuickContactsSyncAdapter(Context context) {
             super(context, true);
+            contentResolver = context.getContentResolver();
         }
 
         @Override
-        public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        public void onPerformSync(Account account, Bundle extras, String authority,
+                                  ContentProviderClient provider, SyncResult syncResult) {
             try {
-                ContactsSyncService.performSync(getContext(), account, extras, authority, provider, syncResult);
-            } catch (OperationCanceledException e) {
+                Response<SecureUser> response = RestClient.getInstance().getApi().me().execute();
+                if (response.isSuccessful()) {
+                    List<User> friends = response.body().getRead();
+                    if (friends != null) {
+                        updateContacts(account, friends);
+                    }
+                }
+            } catch (IOException e) {
                 Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
+            }
+        }
+
+        private void updateContacts(Account account, List<User> users) {
+            Uri rawContactUri = RawContacts.CONTENT_URI.buildUpon()
+                    .appendQueryParameter(RawContacts.ACCOUNT_NAME, account.name)
+                    .appendQueryParameter(RawContacts.ACCOUNT_TYPE, account.type).build();
+            Cursor queryResult = contentResolver.query(rawContactUri, new String[]{
+                    BaseColumns._ID, RawContacts.SYNC1}, null, null, null);
+            if (queryResult != null) {
+                while (queryResult.moveToNext()) {
+                    Uri contactsUri = RawContacts.CONTENT_URI.buildUpon()
+                            .appendQueryParameter(ContactsContract.CALLER_IS_SYNCADAPTER, "true")
+                            .build();
+                    contentResolver.delete(contactsUri, ContactsContract.RawContacts._ID + " = ?",
+                            new String[] { String.valueOf(queryResult.getLong(0)) });
+                }
+                queryResult.close();
+            }
+            for (User user : users) {
+                // NOTE: single applyBatch will fail with TransactionTooLargeException
+                ArrayList<ContentProviderOperation> operationList = new ArrayList<>();
+                //Create our RawContact
+                ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(RawContacts.CONTENT_URI);
+                builder.withValue(RawContacts.ACCOUNT_NAME, account.name);
+                builder.withValue(RawContacts.ACCOUNT_TYPE, account.type);
+                builder.withValue(RawContacts.SYNC1, user.getUname());
+                operationList.add(builder.build());
+
+                // Nickname
+                builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
+                builder.withValueBackReference(ContactsContract.CommonDataKinds.Nickname.RAW_CONTACT_ID, 0);
+                builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE);
+                builder.withValue(ContactsContract.CommonDataKinds.Nickname.NAME, user.getUname());
+                operationList.add(builder.build());
+
+                // StructuredName
+                if (user.getFullname() != null) {
+                    builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
+                    builder.withValueBackReference(ContactsContract.CommonDataKinds.StructuredName.RAW_CONTACT_ID, 0);
+                    builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
+                    builder.withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, user.getFullname());
+                    operationList.add(builder.build());
+                }
+
+                Bitmap photo = null;
+                if (user.getAvatar() != null) {
+                    try {
+                        photo = GlideApp.with(getContext()).asBitmap().load(user.getAvatar())
+                                .placeholder(R.drawable.av_96)
+                                .submit()
+                                .get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        Log.w(ContactsSyncService.class.getSimpleName(), "Avatar error", e);
+                    }
+                }
+                // Photo
+                if (photo != null) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    photo.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                    builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
+                    builder.withValueBackReference(ContactsContract.CommonDataKinds.Photo.RAW_CONTACT_ID, 0);
+                    builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE);
+                    builder.withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, baos.toByteArray());
+                    operationList.add(builder.build());
+                }
+
+                // link to profile
+                builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
+                builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0);
+                builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.com.juick.profile");
+                builder.withValue(ContactsContract.Data.DATA1, user.getUid());
+                builder.withValue(ContactsContract.Data.DATA2, getContext().getString(R.string.com_juick));
+                builder.withValue(ContactsContract.Data.DATA3, user.getUname());
+                builder.withValue(ContactsContract.Data.DATA4, getContext().getString(R.string.Juick_profile));
+                operationList.add(builder.build());
+                try {
+                    contentResolver.applyBatch(ContactsContract.AUTHORITY, operationList);
+                } catch (Exception e) {
+                    Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
+                }
             }
         }
     }
 
     @Override
+    public void onCreate() {
+        contactsSyncAdapter = new JuickContactsSyncAdapter(getApplicationContext());
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
-        return getSyncAdapter().getSyncAdapterBinder();
-    }
-
-    private SyncAdapterImpl getSyncAdapter() {
-        if (sSyncAdapter == null) {
-            sSyncAdapter = new SyncAdapterImpl(this);
-        }
-        return sSyncAdapter;
-    }
-
-    private static void performSync(Context context, Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) throws OperationCanceledException {
-        HashMap<String, Long> localContacts = new HashMap<String, Long>();
-        mContentResolver = context.getContentResolver();
-
-        // Load the local contacts
-        Uri rawContactUri = RawContacts.CONTENT_URI.buildUpon().appendQueryParameter(RawContacts.ACCOUNT_NAME, account.name).appendQueryParameter(RawContacts.ACCOUNT_TYPE, account.type).build();
-        Cursor c1 = mContentResolver.query(rawContactUri, new String[]{BaseColumns._ID, RawContacts.SYNC1}, null, null, null);
-        while (c1.moveToNext()) {
-            localContacts.put(c1.getString(1), c1.getLong(0));
-        }
-        c1.close();
-
-        try {
-            Response<SecureUser> response = RestClient.getInstance().getApi().me().execute();
-            if (response.isSuccessful()) {
-                List<User> friends = response.body().getRead();
-                if (friends != null) {
-                    for (User user : friends) {
-                        if (!localContacts.containsKey(user.getUname())) {
-                            addContact(context, account, user);
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
-        }
-    }
-
-    private static void addContact(Context context, Account account, User user) {
-//     Log.i(TAG, "Adding contact: " + name);
-        ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-
-        //Create our RawContact
-        ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(RawContacts.CONTENT_URI);
-        builder.withValue(RawContacts.ACCOUNT_NAME, account.name);
-        builder.withValue(RawContacts.ACCOUNT_TYPE, account.type);
-        builder.withValue(RawContacts.SYNC1, user.getUname());
-        operationList.add(builder.build());
-
-        // Nickname
-        builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
-        builder.withValueBackReference(ContactsContract.CommonDataKinds.Nickname.RAW_CONTACT_ID, 0);
-        builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE);
-        builder.withValue(ContactsContract.CommonDataKinds.Nickname.NAME, user.getUname());
-        operationList.add(builder.build());
-
-        // StructuredName
-        if (user.getFullname() != null) {
-            builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
-            builder.withValueBackReference(ContactsContract.CommonDataKinds.StructuredName.RAW_CONTACT_ID, 0);
-            builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
-            builder.withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, user.getFullname());
-            operationList.add(builder.build());
-        }
-
-        Bitmap photo = null;
-        if (user.getAvatar() != null) {
-            try {
-                photo = GlideApp.with(context).asBitmap().load(user.getAvatar())
-                        .placeholder(R.drawable.av_96)
-                        .submit(200, 200)
-                        .get();
-            } catch (InterruptedException | ExecutionException e) {
-                Log.w(ContactsSyncService.class.getSimpleName(), "Avatar error", e);
-            }
-        }
-        // Photo
-        if (photo != null) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            photo.compress(Bitmap.CompressFormat.PNG, 100, baos);
-            builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
-            builder.withValueBackReference(ContactsContract.CommonDataKinds.Photo.RAW_CONTACT_ID, 0);
-            builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE);
-            builder.withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, baos.toByteArray());
-            operationList.add(builder.build());
-        }
-
-        // link to profile
-        builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
-        builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0);
-        builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.com.juick.profile");
-        builder.withValue(ContactsContract.Data.DATA1, user.getUid());
-        builder.withValue(ContactsContract.Data.DATA2, user.getUname());
-        builder.withValue(ContactsContract.Data.DATA3, context.getString(R.string.Juick_profile));
-        builder.withValue(ContactsContract.Data.DATA4, user.getUname());
-        operationList.add(builder.build());
-
-        try {
-            mContentResolver.applyBatch(ContactsContract.AUTHORITY, operationList);
-        } catch (Exception e) {
-            Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
-        }
+        return contactsSyncAdapter.getSyncAdapterBinder();
     }
 }

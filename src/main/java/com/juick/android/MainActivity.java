@@ -21,6 +21,7 @@ import android.accounts.Account;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -72,6 +73,8 @@ import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static android.content.Intent.ACTION_VIEW;
 
 /**
  * @author Ugnich Anton
@@ -181,6 +184,26 @@ public class MainActivity extends BaseActivity
                 Log.d(this.getClass().getSimpleName(), "Invalid JSON data", e);
             }
         }
+        if (action.equals(ACTION_VIEW)) {
+            if (intent.getType().equals("vnd.android.cursor.item/vnd.com.juick.profile")) {
+                Uri contactUri = intent.getData();
+                ContentResolver contentResolver = getContentResolver();
+                Cursor queryResult = contentResolver.query(contactUri, null, null, null, null);
+                if (queryResult != null) {
+                    String name = null;
+                    while (queryResult.moveToNext()) {
+                        name = queryResult.getString(queryResult.getColumnIndex(ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY));
+                        if (name != null) {
+                            break;
+                        }
+                    }
+                    queryResult.close();
+                    if (name != null) {
+                        replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(name)));
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -197,7 +220,7 @@ public class MainActivity extends BaseActivity
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         String action = intent.getAction();
-        if (Intent.ACTION_VIEW.equals(action)) {
+        if (ACTION_VIEW.equals(action)) {
             Uri data = intent.getData();
             processUri(data);
         }
