@@ -132,23 +132,23 @@ android {
         }
     }
     buildTypes {
-        dev {
+        debug {
 
         }
     }
     def build_param = "${build}"
 
-    if (build_param != "dev") {
+    if (build_param != "debug") {
         //exclude production build
         android.variantFilter { variant ->
-            if (variant.buildType.name == 'dev') {
+            if (variant.buildType.name == 'debug') {
                 variant.setIgnore(true)
             }
         }
     } else {
         //exclude all except production build
         android.variantFilter { variant ->
-            if (variant.buildType.name != 'dev') {
+            if (variant.buildType.name != 'debug') {
                 variant.setIgnore(true)
             }
         }
