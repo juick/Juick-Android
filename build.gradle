@@ -125,6 +125,9 @@ android {
         }
 
         buildTypes {
+            debug {
+
+            }
             release {
                 minifyEnabled false
                 signingConfig signingConfigs.release
@@ -135,22 +138,8 @@ android {
         debug {
 
         }
-    }
-    def build_param = "${build}"
+        release {
 
-    if (build_param != "debug") {
-        //exclude production build
-        android.variantFilter { variant ->
-            if (variant.buildType.name == 'debug') {
-                variant.setIgnore(true)
-            }
-        }
-    } else {
-        //exclude all except production build
-        android.variantFilter { variant ->
-            if (variant.buildType.name != 'debug') {
-                variant.setIgnore(true)
-            }
         }
     }
 }
