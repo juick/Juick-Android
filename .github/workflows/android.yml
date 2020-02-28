@@ -14,7 +14,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
-      run: sudo ./gradlew --no-daemon check -Pbuild=dev
+      run: sudo ./gradlew --no-daemon check -Pbuild=debug
   connectedCheck:
     runs-on: macos-latest
     steps:
