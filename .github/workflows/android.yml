@@ -3,7 +3,7 @@ name: Android CI
 on: [push]
 
 jobs:
-  build:
+  check:
 
     runs-on: ubuntu-latest
 
@@ -14,4 +14,16 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
-      run: sudo ./gradlew --no-daemon check -Pbuild=dev
+      run: sudo ./gradlew --no-daemon lintDebug
+  connectedCheck:
+    runs-on: macos-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: run tests
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 29
+        target: google_apis
+        script: ./gradlew --no-daemon connectedDebugAndroidTest
