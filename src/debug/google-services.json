@@ -8,7 +8,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:123456789012:android:1234567890123456",
         "android_client_info": {
-          "package_name": "com.juick"
+          "package_name": "com.juick.debug"
         }
       },
       "oauth_client": [
@@ -20,7 +20,7 @@
           "client_id": "",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.juick",
+            "package_name": "com.juick.debug",
             "certificate_hash": ""
           }
         }
@@ -29,22 +29,7 @@
         {
           "current_key": ""
         }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 2,
-          "analytics_property": {
-            "tracking_id": ""
-          }
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 1
-        }
-      }
+      ]
     }
   ],
   "configuration_version": "1"
