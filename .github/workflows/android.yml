@@ -14,7 +14,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
-      run: sudo ./gradlew --no-daemon check -Pbuild=debug
+      run: sudo ./gradlew --no-daemon lintDebug
   connectedCheck:
     runs-on: macos-latest
     steps:
@@ -26,4 +26,4 @@ jobs:
       with:
         api-level: 29
         target: google_apis
-        script: ./gradlew --no-daemon connectedCheck
+        script: ./gradlew --no-daemon connectedDebugAndroidTest
