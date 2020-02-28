@@ -86,7 +86,6 @@ android {
         addConstant("EVENTS_ENDPOINT", "https://juick.com/api/events")
         addConstant("INTENT_NEW_EVENT_ACTION", "com.juick.NEW_EVENT_ACTION")
 
-        testApplicationId "com.juick.test"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testHandleProfiling true
         testFunctionalTest true
@@ -136,7 +135,8 @@ android {
     }
     buildTypes {
         debug {
-
+            applicationIdSuffix ".debug"
+            debuggable true
         }
         release {
 
