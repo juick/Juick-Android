@@ -35,9 +35,13 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.RawContacts;
 import android.util.Log;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.juick.R;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
+import com.juick.api.model.Post;
 import com.juick.api.model.SecureUser;
 import com.juick.api.model.User;
 
@@ -55,13 +59,14 @@ import retrofit2.Response;
 public class ContactsSyncService extends Service {
 
     private JuickContactsSyncAdapter contactsSyncAdapter;
-    private ContentResolver contentResolver;
 
     class JuickContactsSyncAdapter extends AbstractThreadedSyncAdapter {
 
+        private final Context context;
+
         JuickContactsSyncAdapter(Context context) {
             super(context, true);
-            contentResolver = context.getContentResolver();
+            this.context = context;
         }
 
         @Override
@@ -70,9 +75,25 @@ public class ContactsSyncService extends Service {
             try {
                 Response<SecureUser> response = RestClient.getInstance().getApi().me().execute();
                 if (response.isSuccessful()) {
-                    List<User> friends = response.body().getRead();
+                    SecureUser me = response.body();
+                    List<User> friends = me.getRead();
                     if (friends != null) {
                         updateContacts(account, friends);
+                    }
+                    if (GoogleApiAvailability.getInstance()
+                            .isGooglePlayServicesAvailable(this.context) != ConnectionResult.SUCCESS) {
+                        if (me.getUnreadCount() > 0) {
+                            User user = new User(0, "Juick");
+                            Post announcement = new Post();
+                            announcement.setUser(user);
+                            announcement.setBody(context.getString(R.string.unread_discussions));
+                            try {
+                                String messageData = RestClient.getJsonMapper().writeValueAsString(announcement);
+                                FCMReceiverService.showNotification(messageData);
+                            } catch (JsonProcessingException e) {
+                                Log.w(this.getClass().getSimpleName(), "JSON error", e);
+                            }
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -84,14 +105,14 @@ public class ContactsSyncService extends Service {
             Uri rawContactUri = RawContacts.CONTENT_URI.buildUpon()
                     .appendQueryParameter(RawContacts.ACCOUNT_NAME, account.name)
                     .appendQueryParameter(RawContacts.ACCOUNT_TYPE, account.type).build();
-            Cursor queryResult = contentResolver.query(rawContactUri, new String[]{
+            Cursor queryResult = context.getContentResolver().query(rawContactUri, new String[]{
                     BaseColumns._ID, RawContacts.SYNC1}, null, null, null);
             if (queryResult != null) {
                 while (queryResult.moveToNext()) {
                     Uri contactsUri = RawContacts.CONTENT_URI.buildUpon()
                             .appendQueryParameter(ContactsContract.CALLER_IS_SYNCADAPTER, "true")
                             .build();
-                    contentResolver.delete(contactsUri, ContactsContract.RawContacts._ID + " = ?",
+                    context.getContentResolver().delete(contactsUri, ContactsContract.RawContacts._ID + " = ?",
                             new String[] { String.valueOf(queryResult.getLong(0)) });
                 }
                 queryResult.close();
@@ -154,7 +175,7 @@ public class ContactsSyncService extends Service {
                 builder.withValue(ContactsContract.Data.DATA4, getContext().getString(R.string.Juick_profile));
                 operationList.add(builder.build());
                 try {
-                    contentResolver.applyBatch(ContactsContract.AUTHORITY, operationList);
+                    context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, operationList);
                 } catch (Exception e) {
                     Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
                 }

@@ -40,9 +40,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -56,7 +53,6 @@ import com.juick.R;
 import com.juick.android.fragment.ChatsFragment;
 import com.juick.android.fragment.DiscoverFragment;
 import com.juick.android.fragment.ThreadFragment;
-import com.juick.android.service.MessageChecker;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
 import com.juick.api.RestClient;
@@ -138,13 +134,6 @@ public class MainActivity extends BaseActivity
                     String token = instanceIdResult.getToken();
                     Utils.updateFCMToken(token);
                 });
-            } else {
-                PeriodicWorkRequest periodicWorkRequest =
-                        new PeriodicWorkRequest.Builder(MessageChecker.class, 1, TimeUnit.HOURS)
-                                .build();
-                WorkManager workManager = WorkManager.getInstance();
-                workManager.enqueueUniquePeriodicWork(this.getClass().getSimpleName(),
-                        ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
             }
             if (Build.VERSION.SDK_INT >= 23
                     && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
@@ -154,6 +143,7 @@ public class MainActivity extends BaseActivity
                 }, ViewUtil.REQUEST_CODE_SYNC_CONTACTS);
             } else {
                 Account account = Utils.getAccount();
+                ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1);
                 ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
             }
         }
