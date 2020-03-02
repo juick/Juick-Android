@@ -21,7 +21,6 @@ import android.app.Service;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SyncResult;
@@ -56,15 +55,15 @@ import retrofit2.Response;
 /**
  * @author Ugnich Anton
  */
-public class ContactsSyncService extends Service {
+public class SyncService extends Service {
 
-    private JuickContactsSyncAdapter contactsSyncAdapter;
+    private JuickSyncAdapter contactsSyncAdapter;
 
-    class JuickContactsSyncAdapter extends AbstractThreadedSyncAdapter {
+    private static class JuickSyncAdapter extends AbstractThreadedSyncAdapter {
 
         private final Context context;
 
-        JuickContactsSyncAdapter(Context context) {
+        JuickSyncAdapter(Context context) {
             super(context, true);
             this.context = context;
         }
@@ -97,7 +96,7 @@ public class ContactsSyncService extends Service {
                     }
                 }
             } catch (IOException e) {
-                Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
+                Log.d(SyncService.class.getSimpleName(), "Sync error", e);
             }
         }
 
@@ -151,7 +150,7 @@ public class ContactsSyncService extends Service {
                                 .submit()
                                 .get();
                     } catch (InterruptedException | ExecutionException e) {
-                        Log.w(ContactsSyncService.class.getSimpleName(), "Avatar error", e);
+                        Log.w(SyncService.class.getSimpleName(), "Avatar error", e);
                     }
                 }
                 // Photo
@@ -177,7 +176,7 @@ public class ContactsSyncService extends Service {
                 try {
                     context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, operationList);
                 } catch (Exception e) {
-                    Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
+                    Log.d(SyncService.class.getSimpleName(), "Sync error", e);
                 }
             }
         }
@@ -185,7 +184,7 @@ public class ContactsSyncService extends Service {
 
     @Override
     public void onCreate() {
-        contactsSyncAdapter = new JuickContactsSyncAdapter(getApplicationContext());
+        contactsSyncAdapter = new JuickSyncAdapter(getApplicationContext());
     }
 
     @Override

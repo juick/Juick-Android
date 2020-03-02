@@ -35,36 +35,34 @@ import com.juick.android.SignInActivity;
  */
 public class AuthenticationService extends Service {
 
-    private static AccountAuthenticatorImpl sAccountAuthenticator = null;
+    private JuickAuthenticator accountAuthenticator;
 
     @Override
     public IBinder onBind(Intent intent) {
         IBinder ret = null;
         if (intent.getAction().equals(android.accounts.AccountManager.ACTION_AUTHENTICATOR_INTENT)) {
-            ret = getAuthenticator().getIBinder();
+            ret = accountAuthenticator.getIBinder();
         }
         return ret;
     }
 
-    private AccountAuthenticatorImpl getAuthenticator() {
-        if (sAccountAuthenticator == null) {
-            sAccountAuthenticator = new AccountAuthenticatorImpl(this);
-        }
-        return sAccountAuthenticator;
+    @Override
+    public void onCreate() {
+        accountAuthenticator = new JuickAuthenticator(getApplicationContext());
     }
 
-    private static class AccountAuthenticatorImpl extends AbstractAccountAuthenticator {
+    private static class JuickAuthenticator extends AbstractAccountAuthenticator {
 
-        private Context mContext;
+        private final Context context;
 
-        AccountAuthenticatorImpl(Context context) {
+        JuickAuthenticator(Context context) {
             super(context);
-            mContext = context;
+            this.context = context;
         }
 
         @Override
         public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
-            Intent i = new Intent(mContext, SignInActivity.class);
+            Intent i = new Intent(context, SignInActivity.class);
             i.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
             Bundle reply = new Bundle();
             reply.putParcelable(AccountManager.KEY_INTENT, i);
@@ -75,8 +73,8 @@ public class AuthenticationService extends Service {
         public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
             final Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
-            result.putString(AccountManager.KEY_ACCOUNT_TYPE, mContext.getString(R.string.com_juick));
-            result.putString(AccountManager.KEY_AUTHTOKEN, AccountManager.get(mContext).getUserData(account, "hash"));
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE, context.getString(R.string.com_juick));
+            result.putString(AccountManager.KEY_AUTHTOKEN, AccountManager.get(context).getUserData(account, "hash"));
             return result;
         }
 
