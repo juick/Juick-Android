@@ -95,7 +95,6 @@ public class TagsFragment extends BaseFragment {
         }
 
         model.progressBar.setVisibility(View.VISIBLE);
-        model.list.setLayoutManager(new LinearLayoutManager(getActivity()));
         model.list.setHasFixedSize(true);
         final TagsAdapter adapter = new TagsAdapter();
         model.list.setAdapter(adapter);
