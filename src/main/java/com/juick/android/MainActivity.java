@@ -154,6 +154,16 @@ public class MainActivity extends BaseActivity
         if (savedInstanceState == null) {
             addFragment(new DiscoverFragment(), false);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                != ConnectionResult.SUCCESS) {
+            Log.d(this.getClass().getSimpleName(), "Play Services unavailable, using direct connection");
+            initEventsListener();
+        }
         Intent intent = getIntent();
         String action = intent.getAction();
         if (BuildConfig.INTENT_NEW_EVENT_ACTION.equals(action)) {
@@ -175,7 +185,8 @@ public class MainActivity extends BaseActivity
             }
         }
         if (action.equals(ACTION_VIEW)) {
-            if (intent.getType().equals("vnd.android.cursor.item/vnd.com.juick.profile")) {
+            String mimeType = intent.getType();
+            if (mimeType != null && mimeType.equals("vnd.android.cursor.item/vnd.com.juick.profile")) {
                 Uri contactUri = intent.getData();
                 if (contactUri != null) {
                     ContentResolver contentResolver = getContentResolver();
@@ -190,28 +201,19 @@ public class MainActivity extends BaseActivity
                         }
                     }
                 }
+            } else {
+                Uri data = intent.getData();
+                if (data != null) {
+                    processUri(data);
+                }
             }
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
-                != ConnectionResult.SUCCESS) {
-            Log.d(this.getClass().getSimpleName(), "Play Services unavailable, using direct connection");
-            initEventsListener();
         }
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        String action = intent.getAction();
-        if (ACTION_VIEW.equals(action)) {
-            Uri data = intent.getData();
-            processUri(data);
-        }
+        setIntent(intent);
     }
 
     @Override
