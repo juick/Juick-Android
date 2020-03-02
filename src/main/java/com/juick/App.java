@@ -20,7 +20,6 @@ package com.juick;
 import android.app.Application;
 import android.content.Context;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.multidex.MultiDex;
 
 import org.acra.ACRA;
 import org.acra.annotation.AcraCore;
@@ -51,7 +50,6 @@ public class App extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        MultiDex.install(this);
         if (!BuildConfig.DEBUG) {
             ACRA.init(this);
         }
