@@ -119,7 +119,6 @@ public class PostsPageFragment extends BaseFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        model.list.setLayoutManager(new LinearLayoutManager(getActivity()));
         model.list.setHasFixedSize(true);
 
         model.list.setAdapter(adapter);
