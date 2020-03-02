@@ -186,7 +186,11 @@ public class ThreadFragment extends BaseFragment {
 
         SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipe_container);
         swipeRefreshLayout.setEnabled(false);
+    }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         model.list.setVisibility(View.GONE);
         model.progressBar.setVisibility(View.VISIBLE);
         load();
