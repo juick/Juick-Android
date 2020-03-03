@@ -122,8 +122,12 @@ public class PostsPageFragment extends BaseFragment {
         model.list.setHasFixedSize(true);
 
         model.list.setAdapter(adapter);
-        adapter.setOnItemClickListener((view1, pos) -> getBaseActivity().replaceFragment(
-                ThreadFragment.newInstance(adapter.getItem(pos).getMid())));
+        adapter.setOnItemClickListener((widget, pos) -> {
+            if (!widget.getTag().equals("clicked")) {
+                getBaseActivity().replaceFragment(
+                        ThreadFragment.newInstance(adapter.getItem(pos).getMid()));
+            }
+        });
         adapter.setOnMenuListener(new JuickMessageMenu(adapter.getItems()));
         adapter.setOnLoadMoreRequestListener(new JuickMessagesAdapter.OnLoadMoreRequestListener() {
             boolean loading;
