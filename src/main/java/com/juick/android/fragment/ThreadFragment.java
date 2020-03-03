@@ -42,7 +42,6 @@ import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.juick.App;
 import com.juick.BuildConfig;
@@ -93,6 +92,12 @@ public class ThreadFragment extends BaseFragment {
         bundle.putInt(ARG_MID, mid);
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        adapter = new JuickMessagesAdapter();
     }
 
     @Nullable
@@ -158,12 +163,13 @@ public class ThreadFragment extends BaseFragment {
 
         model.list.setHasFixedSize(true);
 
-        adapter = new JuickMessagesAdapter();
         model.list.setAdapter(adapter);
         linearLayoutManager = (LinearLayoutManager) model.list.getLayoutManager();
-        adapter.setOnItemClickListener((view1, position) -> {
-            Post post = adapter.getItem(position);
-            onReply(post.getRid(), post.getBody());
+        adapter.setOnItemClickListener((widget, position) -> {
+            if (!widget.getTag().equals("clicked")) {
+                Post post = adapter.getItem(position);
+                onReply(post.getRid(), post.getBody());
+            }
         });
         adapter.setOnMenuListener(new JuickMessageMenu(adapter.getItems()));
         adapter.setOnScrollListener((v, replyTo, rid) -> {
@@ -184,8 +190,7 @@ public class ThreadFragment extends BaseFragment {
             }
         });
 
-        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipe_container);
-        swipeRefreshLayout.setEnabled(false);
+        model.swipeContainer.setEnabled(false);
     }
 
     @Override
@@ -207,17 +212,19 @@ public class ThreadFragment extends BaseFragment {
                 .enqueue(new Callback<List<Post>>() {
                     @Override
                     public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                        if (response.code() == 404) {
-                            Toast.makeText(App.getInstance(), R.string.post_not_found, Toast.LENGTH_LONG).show();
-                            return;
+                        if (response.isSuccessful() && isAdded()) {
+                            if (response.code() == 404) {
+                                Toast.makeText(App.getInstance(), R.string.post_not_found, Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            if (adapter.getItemCount() > 0) {
+                                initAdapterStageTwo();
+                            }
+                            model.list.setVisibility(View.VISIBLE);
+                            model.progressBar.setVisibility(View.GONE);
+                            List<Post> list = response.body();
+                            adapter.newData(list);
                         }
-                        if (adapter.getItemCount() > 0) {
-                            initAdapterStageTwo();
-                        }
-                        model.list.setVisibility(View.VISIBLE);
-                        model.progressBar.setVisibility(View.GONE);
-                        List<Post> list = response.body();
-                        adapter.newData(list);
                     }
 
                     @Override

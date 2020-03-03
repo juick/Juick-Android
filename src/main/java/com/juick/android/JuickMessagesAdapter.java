@@ -394,7 +394,8 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             ssb.removeSpan(span);
             ssb.setSpan(new ClickableSpan() {
                 @Override
-                public void onClick(View widget) {
+                public void onClick(@NonNull View widget) {
+                    widget.setTag("clicked");
                     Uri data = Uri.parse(link);
                     MainActivity activity = (MainActivity)widget.getContext();
                     if (data.getHost().equals("juick.com")) {
