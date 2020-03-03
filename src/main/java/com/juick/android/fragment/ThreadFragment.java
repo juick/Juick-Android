@@ -166,7 +166,7 @@ public class ThreadFragment extends BaseFragment {
         model.list.setAdapter(adapter);
         linearLayoutManager = (LinearLayoutManager) model.list.getLayoutManager();
         adapter.setOnItemClickListener((widget, position) -> {
-            if (!widget.getTag().equals("clicked")) {
+            if (widget.getTag() == null || !widget.getTag().equals("clicked")) {
                 Post post = adapter.getItem(position);
                 onReply(post.getRid(), post.getBody());
             }

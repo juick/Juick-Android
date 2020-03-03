@@ -123,7 +123,7 @@ public class PostsPageFragment extends BaseFragment {
 
         model.list.setAdapter(adapter);
         adapter.setOnItemClickListener((widget, pos) -> {
-            if (!widget.getTag().equals("clicked")) {
+            if (widget.getTag() == null || !widget.getTag().equals("clicked")) {
                 getBaseActivity().replaceFragment(
                         ThreadFragment.newInstance(adapter.getItem(pos).getMid()));
             }
