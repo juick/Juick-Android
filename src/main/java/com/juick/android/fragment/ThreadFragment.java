@@ -52,7 +52,6 @@ import com.juick.android.NewMessageActivity;
 import com.juick.android.SignInActivity;
 import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
-import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import com.juick.databinding.FragmentThreadBinding;
 
@@ -208,7 +207,7 @@ public class ThreadFragment extends BaseFragment {
     }
 
     private void load() {
-        RestClient.getInstance().getApi().thread(mid)
+        App.getInstance().getApi().thread(mid)
                 .enqueue(new Callback<List<Post>>() {
                     @Override
                     public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
@@ -278,7 +277,7 @@ public class ThreadFragment extends BaseFragment {
     }
 
     private void postText(final String body) {
-        RestClient.getInstance().getApi().post(body).enqueue(new Callback<Void>() {
+        App.getInstance().getApi().post(body).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful() && isAdded()) {
@@ -306,7 +305,7 @@ public class ThreadFragment extends BaseFragment {
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setMax(0);
         progressDialog.show();
-        RestClient.getInstance().setOnProgressListener(progress -> {
+        App.getInstance().setOnProgressListener(progress -> {
             if (progressDialog.getMax() < progress) {
                 progressDialog.setMax((int)progress);
             } else {
@@ -363,7 +362,7 @@ public class ThreadFragment extends BaseFragment {
                 String data = intent.getStringExtra(getString(R.string.notification_extra));
                 if (data != null && !data.trim().isEmpty()) {
                     try {
-                        final Post reply = RestClient.getJsonMapper().readValue(data, Post.class);
+                        final Post reply = App.getInstance().getJsonMapper().readValue(data, Post.class);
                         getActivity().runOnUiThread(() -> {
                             if (adapter.getItemCount() > 0) {
                                 if (adapter.getItem(0).getMid() == reply.getMid()) {

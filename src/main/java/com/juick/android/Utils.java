@@ -38,7 +38,6 @@ import androidx.annotation.Nullable;
 
 import com.juick.App;
 import com.juick.R;
-import com.juick.api.RestClient;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -227,7 +226,7 @@ public class Utils {
         Log.d(TAG, "currentToken " + prefToken);
         if (hasAuth()) {
             if (prefToken != null) {
-                RestClient.getInstance().getApi().registerPush(prefToken).enqueue(new Callback<Void>() {
+                App.getInstance().getApi().registerPush(prefToken).enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         Log.d(TAG, "registerPush " + response.code());

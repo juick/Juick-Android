@@ -26,7 +26,6 @@ import android.widget.Toast;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.widget.util.ViewUtil;
-import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -71,7 +70,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
         postMessage(body, ok, false);
     }
     private void postMessage(final String body, final String ok, final boolean isReload) {
-        RestClient.getInstance().getApi().post(body).enqueue(new Callback<Void>() {
+        App.getInstance().getApi().post(body).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 Toast.makeText(App.getInstance(), (response.isSuccessful()) ? ok : App.getInstance().getResources().getString(R.string.Error), Toast.LENGTH_SHORT).show();

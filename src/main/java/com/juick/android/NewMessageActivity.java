@@ -20,10 +20,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.juick.App;
 import com.juick.R;
 import com.juick.android.fragment.BaseFragment;
 import com.juick.android.fragment.NewPostFragment;
-import com.juick.api.RestClient;
 import com.juick.databinding.ActivityNewPostBinding;
 
 import java.io.File;
@@ -69,7 +69,7 @@ public class NewMessageActivity extends BaseActivity {
                         RequestBody.create(MediaType.parse("multipart/form-data"), file);
                 body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
             }
-            return RestClient.getInstance().getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
+            return App.getInstance().getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
                     body
                    ).execute().isSuccessful();
         } catch (IOException e) {

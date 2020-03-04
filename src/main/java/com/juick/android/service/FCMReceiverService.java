@@ -46,7 +46,6 @@ import com.juick.R;
 import com.juick.android.MainActivity;
 import com.juick.android.Utils;
 import com.juick.api.GlideApp;
-import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 
 import java.util.Map;
@@ -100,7 +99,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
 
     public static void showNotification(final String msgStr) {
         try {
-            final Post jmsg = RestClient.getJsonMapper().readValue(msgStr, Post.class);
+            final Post jmsg = App.getInstance().getJsonMapper().readValue(msgStr, Post.class);
             Handler handler = new Handler(Looper.getMainLooper());
             if (jmsg.isService()) {
                 handler.post(() -> notificationManager.cancel(String.valueOf(getId(jmsg)), 0));

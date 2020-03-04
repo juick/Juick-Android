@@ -36,7 +36,6 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.juick.App;
 import com.juick.R;
-import com.juick.api.RestClient;
 import com.juick.api.model.AuthResponse;
 import com.juick.api.model.SecureUser;
 import com.juick.databinding.ActivityLoginBinding;
@@ -80,7 +79,7 @@ public class SignInActivity extends AccountAuthenticatorActivity {
                 return;
             }
 
-            RestClient.getInstance().auth(nick, password, new Callback<SecureUser>() {
+            App.getInstance().auth(nick, password, new Callback<SecureUser>() {
                 @Override
                 public void onResponse(Call<SecureUser> call, Response<SecureUser> response) {
                     if (response.isSuccessful() && response.code() == 200) {
@@ -156,7 +155,7 @@ public class SignInActivity extends AccountAuthenticatorActivity {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
 
             Log.i(SignInActivity.class.getSimpleName(), "Success " + account.getIdToken());
-            RestClient.getInstance().getApi().googleAuth(account.getIdToken()).enqueue(new Callback<AuthResponse>() {
+            App.getInstance().getApi().googleAuth(account.getIdToken()).enqueue(new Callback<AuthResponse>() {
                 @Override
                 public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                     if (response.isSuccessful()) {

@@ -55,7 +55,6 @@ import com.juick.android.fragment.DiscoverFragment;
 import com.juick.android.fragment.ThreadFragment;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
-import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import com.juick.api.model.User;
 import com.juick.databinding.ActivityMainBinding;
@@ -105,7 +104,7 @@ public class MainActivity extends BaseActivity
 
         final ImageView imageHeader = navigationView.getHeaderView(0).findViewById(R.id.profile_image);
         if (Utils.hasAuth()) {
-            RestClient.getInstance().getApi().getUsers(Utils.getNick()).enqueue(new Callback<List<User>>() {
+            App.getInstance().getApi().getUsers(Utils.getNick()).enqueue(new Callback<List<User>>() {
                 @Override
                 public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                     List<User> users = response.body();
@@ -169,7 +168,7 @@ public class MainActivity extends BaseActivity
         if (BuildConfig.INTENT_NEW_EVENT_ACTION.equals(action)) {
             String msg = intent.getStringExtra(getString(R.string.notification_extra));
             try {
-                Post jmsg = RestClient.getJsonMapper().readValue(msg, Post.class);
+                Post jmsg = App.getInstance().getJsonMapper().readValue(msg, Post.class);
                 if (jmsg.getUser().getUid() == 0) {
                     setTitle(R.string.Discussions);
                     replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));

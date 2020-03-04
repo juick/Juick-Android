@@ -28,7 +28,6 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.android.FeedBuilder;
 import com.juick.api.GlideApp;
-import com.juick.api.RestClient;
 import com.juick.api.model.Chat;
 import com.juick.api.model.Pms;
 import com.juick.databinding.DialogListBinding;
@@ -68,7 +67,7 @@ public class ChatsFragment extends BaseFragment {
         final DialogsList dialogsList = getBaseActivity().findViewById(R.id.dialogsList);
         dialogsList.setAdapter(dialogListAdapter);
 
-        RestClient.getInstance().getApi().groupsPms(10).enqueue(new Callback<Pms>() {
+        App.getInstance().getApi().groupsPms(10).enqueue(new Callback<Pms>() {
             @Override
             public void onResponse(Call<Pms> call, Response<Pms> response) {
                 if (response.isSuccessful() && isAdded()) {

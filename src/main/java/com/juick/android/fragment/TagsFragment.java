@@ -27,14 +27,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.BaseActivity;
 import com.juick.android.FeedBuilder;
 import com.juick.android.UrlBuilder;
-import com.juick.api.RestClient;
 import com.juick.api.model.Tag;
 import com.juick.databinding.TagsListBinding;
 
@@ -109,7 +107,7 @@ public class TagsFragment extends BaseFragment {
                 .replaceFragment(FeedBuilder.feedFor(
                         UrlBuilder.getPostsByTag(uid, adapter.getItem(position)))));
 
-        RestClient.getInstance().getApi().tags(uid).enqueue(new Callback<List<Tag>>() {
+        App.getInstance().getApi().tags(uid).enqueue(new Callback<List<Tag>>() {
             @Override
             public void onResponse(Call<List<Tag>> call, Response<List<Tag>> response) {
                 model.progressBar.setVisibility(View.GONE);

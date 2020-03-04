@@ -33,11 +33,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
+import com.juick.App;
 import com.juick.R;
 import com.juick.android.NewMessageActivity;
 import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
-import com.juick.api.RestClient;
 import com.juick.databinding.FragmentNewPostsBinding;
 
 /**
@@ -164,7 +164,7 @@ public class NewPostFragment extends BaseFragment {
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setMax(0);
             progressDialog.show();
-            RestClient.getInstance().setOnProgressListener(progressPercentage -> {
+            App.getInstance().setOnProgressListener(progressPercentage -> {
                 if (progressDialog != null) {
                     if (progressDialog.getMax() < progressPercentage) {
                         progressDialog.setMax((int)progressPercentage);

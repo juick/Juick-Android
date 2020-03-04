@@ -37,9 +37,9 @@ import android.util.Log;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.juick.App;
 import com.juick.R;
 import com.juick.api.GlideApp;
-import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import com.juick.api.model.SecureUser;
 import com.juick.api.model.User;
@@ -72,7 +72,7 @@ public class SyncService extends Service {
         public void onPerformSync(Account account, Bundle extras, String authority,
                                   ContentProviderClient provider, SyncResult syncResult) {
             try {
-                Response<SecureUser> response = RestClient.getInstance().getApi().me().execute();
+                Response<SecureUser> response = App.getInstance().getApi().me().execute();
                 if (response.isSuccessful()) {
                     SecureUser me = response.body();
                     List<User> friends = me.getRead();
@@ -87,7 +87,7 @@ public class SyncService extends Service {
                             announcement.setUser(user);
                             announcement.setBody(context.getString(R.string.unread_discussions));
                             try {
-                                String messageData = RestClient.getJsonMapper().writeValueAsString(announcement);
+                                String messageData = App.getInstance().getJsonMapper().writeValueAsString(announcement);
                                 FCMReceiverService.showNotification(messageData);
                             } catch (JsonProcessingException e) {
                                 Log.w(this.getClass().getSimpleName(), "JSON error", e);

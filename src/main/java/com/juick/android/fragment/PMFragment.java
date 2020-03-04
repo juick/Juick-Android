@@ -39,7 +39,6 @@ import com.juick.R;
 import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
-import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import com.juick.databinding.FragmentPmBinding;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
@@ -74,7 +73,7 @@ public class PMFragment extends BaseFragment {
 
             onNewMessages(new ArrayList<Post>(){{
                 try {
-                    add(RestClient.getJsonMapper().readValue(
+                    add(App.getInstance().getJsonMapper().readValue(
                             intent.getStringExtra(
                                     App.getInstance().getString(R.string.notification_extra)),
                             Post.class));
@@ -109,7 +108,7 @@ public class PMFragment extends BaseFragment {
                         .into(imageView));
         model.messagesList.setAdapter(adapter);
 
-        RestClient.getInstance().getApi().pm(uname).enqueue(new Callback<List<Post>>() {
+        App.getInstance().getApi().pm(uname).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
                 if (response.isSuccessful() && isAdded()) {
@@ -139,7 +138,7 @@ public class PMFragment extends BaseFragment {
     }
 
     public void postText(final String body) {
-        RestClient.getInstance().getApi().postPm(uname, body).enqueue(new Callback<Post>() {
+        App.getInstance().getApi().postPm(uname, body).enqueue(new Callback<Post>() {
             @Override
             public void onResponse(Call<Post> call, final Response<Post> response) {
                 if (response.isSuccessful() && isAdded()) {

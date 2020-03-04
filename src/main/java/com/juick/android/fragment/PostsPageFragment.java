@@ -27,14 +27,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.JuickMessageMenu;
 import com.juick.android.JuickMessagesAdapter;
 import com.juick.android.UrlBuilder;
-import com.juick.api.RestClient;
 import com.juick.api.model.Post;
 import com.juick.databinding.FragmentPostsPageBinding;
 
@@ -74,7 +72,7 @@ public class PostsPageFragment extends BaseFragment {
         load(true);
     }
     private void load(final boolean isReload) {
-        RestClient.getInstance().getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
+        App.getInstance().getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
                 if (response.isSuccessful() && isAdded()) {
@@ -143,7 +141,7 @@ public class PostsPageFragment extends BaseFragment {
                 if (apiUrl.equals(UrlBuilder.getDiscussions().toString())) {
                     requestUrl = apiUrl + "?to=" + lastItem.getTimestamp().getTime();
                 }
-                RestClient.getInstance().getApi().getPosts(requestUrl).enqueue(new Callback<List<Post>>() {
+                App.getInstance().getApi().getPosts(requestUrl).enqueue(new Callback<List<Post>>() {
                     @Override
                     public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
                         loading = false;

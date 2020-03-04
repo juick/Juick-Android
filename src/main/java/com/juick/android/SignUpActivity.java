@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.juick.api.RestClient;
+import com.juick.App;
 import com.juick.databinding.SignupBinding;
 
 import retrofit2.Call;
@@ -49,7 +49,7 @@ public class SignUpActivity extends AppCompatActivity {
                 Toast.makeText(this,"Passwords did not match", Toast.LENGTH_LONG).show();
                 return;
             }
-            RestClient.getInstance().getApi().signup(nick, password, authCode).enqueue(new Callback<Void>() {
+            App.getInstance().getApi().signup(nick, password, authCode).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {
