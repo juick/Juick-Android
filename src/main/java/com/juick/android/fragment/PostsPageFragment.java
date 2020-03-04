@@ -74,7 +74,7 @@ public class PostsPageFragment extends BaseFragment {
     private void load(final boolean isReload) {
         App.getInstance().getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
             @Override
-            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+            public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
                 if (response.isSuccessful() && isAdded()) {
                     model.swipeContainer.setRefreshing(false);
                     model.list.setVisibility(View.VISIBLE);
@@ -90,7 +90,7 @@ public class PostsPageFragment extends BaseFragment {
             }
 
             @Override
-            public void onFailure(Call<List<Post>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 model.swipeContainer.setRefreshing(false);
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
@@ -100,7 +100,8 @@ public class PostsPageFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         model = FragmentPostsPageBinding.inflate(inflater, container, false);
         return model.getRoot();
     }
@@ -143,7 +144,7 @@ public class PostsPageFragment extends BaseFragment {
                 }
                 App.getInstance().getApi().getPosts(requestUrl).enqueue(new Callback<List<Post>>() {
                     @Override
-                    public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+                    public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
                         loading = false;
                         List<Post> posts = response.body();
                         if (posts != null)
@@ -151,7 +152,7 @@ public class PostsPageFragment extends BaseFragment {
                     }
 
                     @Override
-                    public void onFailure(Call<List<Post>> call, Throwable t) {
+                    public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
                         loading = false;
                         Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
                     }

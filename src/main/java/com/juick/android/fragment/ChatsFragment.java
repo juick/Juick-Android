@@ -48,7 +48,8 @@ public class ChatsFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         model = DialogListBinding.inflate(inflater, container, false);
         return model.getRoot();
     }
@@ -69,7 +70,7 @@ public class ChatsFragment extends BaseFragment {
 
         App.getInstance().getApi().groupsPms(10).enqueue(new Callback<Pms>() {
             @Override
-            public void onResponse(Call<Pms> call, Response<Pms> response) {
+            public void onResponse(@NonNull Call<Pms> call, @NonNull Response<Pms> response) {
                 if (response.isSuccessful() && isAdded()) {
                     Pms pms = response.body();
                     dialogListAdapter.setItems(pms.getPms());
@@ -77,7 +78,7 @@ public class ChatsFragment extends BaseFragment {
             }
 
             @Override
-            public void onFailure(Call<Pms> call, Throwable t) {
+            public void onFailure(@NonNull Call<Pms> call, @NonNull Throwable t) {
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });

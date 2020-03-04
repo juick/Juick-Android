@@ -74,7 +74,8 @@ public class TagsFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         model = TagsListBinding.inflate(inflater, container, false);
         return model.getRoot();
     }
@@ -109,7 +110,7 @@ public class TagsFragment extends BaseFragment {
 
         App.getInstance().getApi().tags(uid).enqueue(new Callback<List<Tag>>() {
             @Override
-            public void onResponse(Call<List<Tag>> call, Response<List<Tag>> response) {
+            public void onResponse(@NonNull Call<List<Tag>> call, @NonNull Response<List<Tag>> response) {
                 model.progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && isAdded()) {
                     model.progressBar.setVisibility(View.GONE);
@@ -122,7 +123,7 @@ public class TagsFragment extends BaseFragment {
             }
 
             @Override
-            public void onFailure(Call<List<Tag>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<Tag>> call, @NonNull Throwable t) {
                 Log.d("", t.toString());
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }

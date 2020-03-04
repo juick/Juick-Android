@@ -101,7 +101,8 @@ public class ThreadFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         model = FragmentThreadBinding.inflate(inflater, container, false);
         return model.getRoot();
     }
@@ -127,7 +128,6 @@ public class ThreadFragment extends BaseFragment {
                 Toast.makeText(getContext(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
                 return;
             }
-//        Toast.makeText(this, R.string.Please_wait___, Toast.LENGTH_SHORT).show();
 
             String msgnum = "#" + mid;
             if (rid > 0) {
@@ -210,7 +210,7 @@ public class ThreadFragment extends BaseFragment {
         App.getInstance().getApi().thread(mid)
                 .enqueue(new Callback<List<Post>>() {
                     @Override
-                    public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+                    public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
                         if (response.isSuccessful() && isAdded()) {
                             if (response.code() == 404) {
                                 Toast.makeText(App.getInstance(), R.string.post_not_found, Toast.LENGTH_LONG).show();
@@ -227,7 +227,7 @@ public class ThreadFragment extends BaseFragment {
                     }
 
                     @Override
-                    public void onFailure(Call<List<Post>> call, Throwable t) {
+                    public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
                         Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
                     }
                 });
@@ -279,7 +279,7 @@ public class ThreadFragment extends BaseFragment {
     private void postText(final String body) {
         App.getInstance().getApi().post(body).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful() && isAdded()) {
                     Toast.makeText(App.getInstance(), R.string.Message_posted, Toast.LENGTH_SHORT).show();
                     resetForm();
@@ -291,7 +291,7 @@ public class ThreadFragment extends BaseFragment {
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 resetForm();
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }

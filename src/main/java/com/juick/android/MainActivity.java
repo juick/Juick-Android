@@ -56,6 +56,7 @@ import com.juick.android.fragment.ThreadFragment;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
 import com.juick.api.model.Post;
+import com.juick.api.model.SecureUser;
 import com.juick.api.model.User;
 import com.juick.databinding.ActivityMainBinding;
 
@@ -104,22 +105,20 @@ public class MainActivity extends BaseActivity
 
         final ImageView imageHeader = navigationView.getHeaderView(0).findViewById(R.id.profile_image);
         if (Utils.hasAuth()) {
-            App.getInstance().getApi().getUsers(Utils.getNick()).enqueue(new Callback<List<User>>() {
+            App.getInstance().getApi().me().enqueue(new Callback<SecureUser>() {
                 @Override
-                public void onResponse(Call<List<User>> call, Response<List<User>> response) {
-                    List<User> users = response.body();
-                    if (users != null && users.size() > 0) {
-                        Utils.myId = users.get(0).getUid();
-                        String avatarUrl = users.get(0).getAvatar();
-                        GlideApp.with(imageHeader.getContext())
-                                .load(avatarUrl)
-                                .placeholder(R.drawable.av_96)
-                                .into(imageHeader);
-                    }
+                public void onResponse(@NonNull Call<SecureUser> call, @NonNull Response<SecureUser> response) {
+                    SecureUser me = response.body();
+                    Utils.myId = me.getUid();
+                    String avatarUrl = me.getAvatar();
+                    GlideApp.with(imageHeader.getContext())
+                            .load(avatarUrl)
+                            .placeholder(R.drawable.av_96)
+                            .into(imageHeader);
                 }
 
                 @Override
-                public void onFailure(Call<List<User>> call, Throwable t) {
+                public void onFailure(@NonNull Call<SecureUser> call, @NonNull Throwable t) {
                     Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
                 }
             });
