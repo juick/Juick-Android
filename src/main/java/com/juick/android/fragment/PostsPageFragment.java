@@ -75,10 +75,10 @@ public class PostsPageFragment extends BaseFragment {
         App.getInstance().getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
+                model.swipeContainer.setRefreshing(false);
+                model.list.setVisibility(View.VISIBLE);
+                model.progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && isAdded()) {
-                    model.swipeContainer.setRefreshing(false);
-                    model.list.setVisibility(View.VISIBLE);
-                    model.progressBar.setVisibility(View.GONE);
                     List<Post> posts = response.body();
                     if(posts != null) {
                         if(isReload)
@@ -91,8 +91,9 @@ public class PostsPageFragment extends BaseFragment {
 
             @Override
             public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
-                t.printStackTrace();
                 model.swipeContainer.setRefreshing(false);
+                model.list.setVisibility(View.VISIBLE);
+                model.progressBar.setVisibility(View.GONE);
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
