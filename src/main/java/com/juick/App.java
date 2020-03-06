@@ -100,6 +100,15 @@ public class App extends Application {
         }
     }
 
+    private JacksonConverterFactory jacksonConverterFactory;
+
+    public JacksonConverterFactory getJacksonConverterFactory() {
+        if (jacksonConverterFactory == null) {
+            jacksonConverterFactory = JacksonConverterFactory.create(getJsonMapper());
+        }
+        return jacksonConverterFactory;
+    }
+
     public Api getApi() {
         if (api == null) {
             OkHttpClient client = new OkHttpClient.Builder()
@@ -139,7 +148,7 @@ public class App extends Application {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BuildConfig.API_ENDPOINT)
                     .client(client)
-                    .addConverterFactory(JacksonConverterFactory.create(getJsonMapper()))
+                    .addConverterFactory(getJacksonConverterFactory())
                     .build();
 
             api = retrofit.create(Api.class);
@@ -160,7 +169,7 @@ public class App extends Application {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BuildConfig.API_ENDPOINT)
                 .client(client)
-                .addConverterFactory(JacksonConverterFactory.create(getJsonMapper()))
+                .addConverterFactory(getJacksonConverterFactory())
                 .build();
         retrofit.create(Api.class).me().enqueue(callback);
     }
@@ -181,7 +190,7 @@ public class App extends Application {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl("https://www.googleapis.com/youtube/v3/")
                     .client(client)
-                    .addConverterFactory(JacksonConverterFactory.create(getJsonMapper()))
+                    .addConverterFactory(getJacksonConverterFactory())
                     .build();
 
             youTube = retrofit.create(YouTube.class);
