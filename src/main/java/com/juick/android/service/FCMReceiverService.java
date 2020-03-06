@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,6 +34,7 @@ import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -121,8 +123,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
 
                 PendingIntent contentIntent = PendingIntent.getActivity(App.getInstance(),
                         getId(jmsg), createNewEventIntent(msgStr), PendingIntent.FLAG_UPDATE_CURRENT);
-                final NotificationCompat.Builder notificationBuilder = Build.VERSION.SDK_INT < 26 ?
-                        new NotificationCompat.Builder(App.getInstance()) :
+                final NotificationCompat.Builder notificationBuilder =
                         new NotificationCompat.Builder(App.getInstance(), channelId);
                 notificationBuilder.setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle(title)
@@ -130,9 +131,18 @@ public class FCMReceiverService extends FirebaseMessagingService {
                         .setAutoCancel(true).setWhen(0)
                         .setContentIntent(contentIntent)
                         .setGroup("messages")
+                        .setColor(App.getInstance().getResources().getColor(R.color.colorAccent))
                         .setGroupSummary(true);
+
                 notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
                 notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(jmsg.getBody()));
+                if (jmsg.getUser().getUid() > 0) {
+                    notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ?
+                                    R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
+                            App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(),
+                                    getId(jmsg), createNewEventIntent(msgStr),
+                                    PendingIntent.FLAG_UPDATE_CURRENT));
+                }
                 handler.post(() -> {
                     GlideApp.with(App.getInstance()).asBitmap()
                             .load(jmsg.getUser().getAvatar())
@@ -147,15 +157,12 @@ public class FCMReceiverService extends FirebaseMessagingService {
                                     }
                                     FCMReceiverService.notify(jmsg, notificationBuilder);
                                 }
+
+                                @Override
+                                public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                    FCMReceiverService.notify(jmsg, notificationBuilder);
+                                }
                             });
-                    if (jmsg.getUser().getUid() > 0) {
-                        notificationBuilder.addAction(Build.VERSION.SDK_INT <= 19 ?
-                                        R.drawable.ic_ab_reply2 : R.drawable.ic_ab_reply,
-                                App.getInstance().getString(R.string.reply), PendingIntent.getActivity(App.getInstance(),
-                                        getId(jmsg), createNewEventIntent(msgStr),
-                                        PendingIntent.FLAG_UPDATE_CURRENT));
-                    }
-                    notify(jmsg, notificationBuilder);
                 });
             }
         } catch (Exception e) {
