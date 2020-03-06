@@ -22,6 +22,7 @@ import android.net.UrlQuerySanitizer;
 import androidx.annotation.NonNull;
 
 import com.juick.App;
+import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.api.ext.youtube.Thumbnail;
 import com.juick.api.ext.youtube.Video;
@@ -41,7 +42,7 @@ public class Previewer {
     }
     private static Pattern youtubeLink = Pattern.compile("(?:https?:)?\\/\\/(?:www\\.|m\\.|gaming\\.)?(?:youtu(?:(?:\\.be\\/|be\\.com\\/(?:v|embed)\\/)([-\\w]+)|be\\.com\\/watch)((?:(?:\\?|&(?:amp;)?)(?:\\w+=[-\\.\\w]*[-\\w]))*)|youtube\\.com\\/playlist\\?list=([-\\w]*)(&(amp;)?[-\\w\\?=]*)?)", Pattern.MULTILINE);
     public static boolean hasViewableContent(String message) {
-        return youtubeLink.matcher(message).find();
+        return youtubeLink.matcher(message).find() && !BuildConfig.DEBUG;
     }
     public static void getPreviewUrl(String message, UrlCallback callback) {
         Matcher youtubeMatcher = youtubeLink.matcher(message);
