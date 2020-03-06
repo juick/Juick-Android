@@ -22,7 +22,6 @@ import com.juick.api.model.Pms;
 import com.juick.api.model.Post;
 import com.juick.api.model.SecureUser;
 import com.juick.api.model.Tag;
-import com.juick.api.model.User;
 
 import java.util.List;
 
@@ -43,48 +42,45 @@ import retrofit2.http.Url;
  */
 public interface Api {
 
-    @GET("/me")
+    @GET("me")
     Call<SecureUser> me();
 
     @GET()
     Call<List<Post>> getPosts(@Url String url);
 
-    @GET("/users")
-    Call<List<User>> getUsers(@Query("uname") String uname);
-
-    @GET("/pm")
+    @GET("pm")
     Call<List<Post>> pm(@Query("uname") String uname);
 
     @FormUrlEncoded
-    @POST("/pm")
+    @POST("pm")
     Call<Post> postPm(@Query("uname") String uname, @Field("body") String body);
 
     @FormUrlEncoded
-    @POST("/post")
+    @POST("post")
     Call<Void> post(@Field("body") String body);
 
     @Multipart
-    @POST("/post")
+    @POST("post")
     Call<Void> newPost(@Part("body") RequestBody body, @Part MultipartBody.Part file);
 
-    @GET("/tags")
+    @GET("tags")
     Call<List<Tag>> tags(@Query("user_id") int userId);
 
-    @GET("/thread")
+    @GET("thread")
     Call<List<Post>> thread(@Query("mid") int messageId);
 
-    @GET("/android/register")
+    @GET("android/register")
     Call<Void> registerPush(@Query("regid") String login);
 
-    @GET("/groups_pms")
+    @GET("groups_pms")
     Call<Pms> groupsPms(@Query("cnt") int cnt);
 
     @FormUrlEncoded
-    @POST("/_google")
+    @POST("_google")
     Call<AuthResponse> googleAuth(@Field("idToken") String token);
 
     @FormUrlEncoded
-    @POST("/signup")
+    @POST("signup")
     Call<Void> signup(@Field("username") String username, @Field("password") String password,
                       @Field("verificationCode") String verificationCode);
 }
