@@ -27,12 +27,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
+
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.FeedBuilder;
@@ -59,12 +60,14 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(R.string.Juick);
 
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
-        ViewPager viewPager = view.findViewById(R.id.viewpager);
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(DiscoverFragment.this);
+        ViewPager2 viewPager = view.findViewById(R.id.viewpager);
         viewPager.setAdapter(sectionsPagerAdapter);
 
         TabLayout tabLayout = getBaseActivity().findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            tab.setText(sectionsPagerAdapter.getPageTitle(position));
+        }).attach();
         tabLayout.setVisibility(View.VISIBLE);
 
         final FloatingActionButton fab = getBaseActivity().findViewById(R.id.fab);
@@ -111,7 +114,7 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
         }
     }
 
-    public static class SectionsPagerAdapter extends FragmentStatePagerAdapter {
+    public static class SectionsPagerAdapter extends FragmentStateAdapter {
 
         private String tabTitles[] = new String[] {
                 App.getInstance().getString(R.string.Last_messages),
@@ -119,14 +122,14 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
                 App.getInstance().getString(R.string.Top_messages)
         };
 
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
+        public SectionsPagerAdapter(@NonNull Fragment fragment) {
+            super(fragment);
         }
 
         @Override
         @NonNull
-        public Fragment getItem(int position) {
-            UrlBuilder u;
+        public Fragment createFragment(int position) {
+            UrlBuilder u = UrlBuilder.getLast();
             switch (position){
                 case 0:
                     u = UrlBuilder.getLast();
@@ -137,22 +140,15 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
                 case 2:
                     u = UrlBuilder.getTop();
                     break;
-                default:
-                    if(Utils.hasAuth())
-                        u = UrlBuilder.getUserPostsByName(Utils.getNick());
-                    else
-                        return new NoAuthFragment();
-                    break;
             }
             return FeedBuilder.feedFor(u);
         }
 
         @Override
-        public int getCount() {
+        public int getItemCount() {
             return tabTitles.length;
         }
 
-        @Override
         public CharSequence getPageTitle(int position) {
             return tabTitles[position];
         }
