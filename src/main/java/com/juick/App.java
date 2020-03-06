@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.juick.android.Utils;
 import com.juick.api.Api;
 import com.juick.api.UpLoadProgressInterceptor;
+import com.juick.api.ext.YouTube;
 import com.juick.api.model.SecureUser;
 
 import org.acra.ACRA;
@@ -170,5 +171,21 @@ public class App extends Application {
             jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         }
         return jsonMapper;
+    }
+
+    private YouTube youTube;
+
+    public YouTube getYouTube() {
+        if (youTube == null) {
+            OkHttpClient client = new OkHttpClient.Builder().build();
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("https://www.googleapis.com/youtube/v3/")
+                    .client(client)
+                    .addConverterFactory(JacksonConverterFactory.create(getJsonMapper()))
+                    .build();
+
+            youTube = retrofit.create(YouTube.class);
+        }
+        return youTube;
     }
 }

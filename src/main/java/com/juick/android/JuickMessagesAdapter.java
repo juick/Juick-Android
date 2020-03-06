@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -238,10 +239,24 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             holder.textTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
             if (post.getPhoto() != null && post.getPhoto().getSmall() != null) {
-                GlideApp.with(holder.itemView.getContext()).load(post.getPhoto().getSmall()).into(holder.photoImageView);
-                holder.photoImageView.setVisibility(View.VISIBLE);
+                holder.photoLayout.setVisibility(View.VISIBLE);
+                holder.photoDescriptionView.setVisibility(View.GONE);
+                GlideApp.with(holder.itemView.getContext()).load(post.getPhoto().getSmall())
+                        .into(holder.photoImageView);
+            } else if (Previewer.hasViewableContent(post.getBody())) {
+                holder.photoLayout.setVisibility(View.VISIBLE);
+                Previewer.getPreviewUrl(post.getBody(), link -> {
+                    if (link != null) {
+                        GlideApp.with(holder.itemView.getContext()).load(link.getUrl())
+                                .into(holder.photoImageView);
+                        holder.photoDescriptionView.setVisibility(View.VISIBLE);
+                        holder.photoDescriptionView.setText(link.getDescription());
+                    } else {
+                        holder.photoLayout.setVisibility(View.GONE);
+                    }
+                });
             } else {
-                holder.photoImageView.setVisibility(View.GONE);
+                holder.photoLayout.setVisibility(View.GONE);
             }
             if (!isThread) {
                 if (post.getReplies() > 0) {
@@ -438,6 +453,8 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         TextView timestampTextView;
         TagContainerLayout tagContainerLayout;
         ImageView photoImageView;
+        RelativeLayout photoLayout;
+        TextView photoDescriptionView;
         TextView textTextView;
         TextView repliesTextView;
         TextView likesTextView;
@@ -455,7 +472,9 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             timestampTextView = itemView.findViewById(R.id.timestamp);
             tagContainerLayout = itemView.findViewById(R.id.tags_container);
             textTextView = itemView.findViewById(R.id.text);
+            photoLayout = itemView.findViewById(R.id.photoWrapper);
             photoImageView = itemView.findViewById(R.id.photo);
+            photoDescriptionView = itemView.findViewById(R.id.photo_description);
             likesTextView = itemView.findViewById(R.id.likes);
             if (likesTextView != null) {
                 likesTextView.setCompoundDrawables(VectorDrawableCompat.create(itemView.getContext().getResources(),

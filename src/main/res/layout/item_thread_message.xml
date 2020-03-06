@@ -48,15 +48,30 @@
         tools:text="This is reply markup"
         android:layout_marginEnd="@dimen/activity_horizontal_margin" />
 
-    <ImageView
-        android:id="@+id/photo"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/text"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
+    <RelativeLayout
+        android:id="@+id/photoWrapper"
         android:visibility="gone"
-        android:contentDescription="@string/user_photo" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/text">
+
+        <ImageView
+            android:id="@+id/photo"
+            android:contentDescription="@string/attached_photo"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/photo_description"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_marginTop="20dp"
+            android:background="#AA000000"
+            android:padding="6dp"
+            android:textColor="#ffffffff" />
+    </RelativeLayout>
 
     <ImageView
         android:id="@+id/menu_imageView"
