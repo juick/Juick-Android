@@ -112,11 +112,14 @@ public class TagsFragment extends BaseFragment {
             public void onResponse(@NonNull Call<List<Tag>> call, @NonNull Response<List<Tag>> response) {
                 model.progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && isAdded()) {
-                    List<String> listAdapter = new ArrayList<>();
-                    for (Tag tag : response.body()) {
-                        listAdapter.add(tag.getTag());
+                    List<Tag> tags = response.body();
+                    if (tags != null) {
+                        List<String> listAdapter = new ArrayList<>();
+                        for (Tag tag : tags) {
+                            listAdapter.add(tag.getTag());
+                        }
+                        adapter.addData(listAdapter);
                     }
-                    adapter.addData(listAdapter);
                 }
             }
 

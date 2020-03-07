@@ -40,7 +40,6 @@ import org.acra.annotation.AcraCore;
 import org.acra.annotation.AcraMailSender;
 
 import java.io.File;
-import java.io.IOException;
 
 import okhttp3.Credentials;
 import okhttp3.MediaType;

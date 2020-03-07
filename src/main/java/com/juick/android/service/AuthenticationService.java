@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import com.juick.R;
 import com.juick.android.SignInActivity;
+import com.juick.util.StringUtils;
 
 /**
  *
@@ -39,11 +40,11 @@ public class AuthenticationService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        IBinder ret = null;
-        if (intent.getAction().equals(android.accounts.AccountManager.ACTION_AUTHENTICATOR_INTENT)) {
-            ret = accountAuthenticator.getIBinder();
+        String action = StringUtils.defaultString(intent.getAction());
+        if (action.equals(android.accounts.AccountManager.ACTION_AUTHENTICATOR_INTENT)) {
+            return accountAuthenticator.getIBinder();
         }
-        return ret;
+        return null;
     }
 
     @Override

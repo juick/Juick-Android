@@ -183,8 +183,8 @@ public class MainActivity extends BaseActivity
             }
         }
         if (action.equals(ACTION_VIEW)) {
-            String mimeType = intent.getType();
-            if (mimeType != null && mimeType.equals("vnd.android.cursor.item/vnd.com.juick.profile")) {
+            String mimeType = StringUtils.defaultString(intent.getType());
+            if (mimeType.equals("vnd.android.cursor.item/vnd.com.juick.profile")) {
                 Uri contactUri = intent.getData();
                 if (contactUri != null) {
                     ContentResolver contentResolver = getContentResolver();
@@ -193,7 +193,7 @@ public class MainActivity extends BaseActivity
                         queryResult.moveToFirst();
                         String name = queryResult.getString(queryResult.getColumnIndex(ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY));
                         queryResult.close();
-                        if (name != null) {
+                        if (!TextUtils.isEmpty(name)) {
                             setTitle(name);
                             replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(name)));
                         }

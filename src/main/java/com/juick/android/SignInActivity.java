@@ -25,6 +25,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -158,14 +159,15 @@ public class SignInActivity extends AccountAuthenticatorActivity {
             Log.i(SignInActivity.class.getSimpleName(), "Success " + account.getIdToken());
             App.getInstance().getApi().googleAuth(account.getIdToken()).enqueue(new Callback<AuthResponse>() {
                 @Override
-                public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                public void onResponse(@NonNull Call<AuthResponse> call, @NonNull Response<AuthResponse> response) {
                     if (response.isSuccessful()) {
                         AuthResponse data = response.body();
-                        if (data.getAuthCode() != null) {
-                            Log.i(SignInActivity.class.getSimpleName(), response.body().getAuthCode());
+                        if (data != null) {
+                            String authCode = data.getAuthCode();
+                            Log.i(SignInActivity.class.getSimpleName(), authCode);
                             Intent signupIntent = new Intent(SignInActivity.this, SignUpActivity.class);
-                            signupIntent.putExtra("email", response.body().getAccount());
-                            signupIntent.putExtra("authCode", response.body().getAuthCode());
+                            signupIntent.putExtra("email", data.getAccount());
+                            signupIntent.putExtra("authCode", data.getAuthCode());
                             startActivityForResult(signupIntent, RC_SIGN_UP);
                         } else {
                             updateAccount(data.getUser().getName(), data.getUser().getHash(), 0);
@@ -174,7 +176,7 @@ public class SignInActivity extends AccountAuthenticatorActivity {
                 }
 
                 @Override
-                public void onFailure(Call<AuthResponse> call, Throwable t) {
+                public void onFailure(@NonNull Call<AuthResponse> call, @NonNull Throwable t) {
                     Toast.makeText(App.getInstance(), "Google error", Toast.LENGTH_LONG).show();
                 }
             });

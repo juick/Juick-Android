@@ -17,6 +17,8 @@
 
 package com.juick.api;
 
+import androidx.annotation.NonNull;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okio.*;
@@ -48,7 +50,8 @@ public class CountingRequestBody extends RequestBody {
         return -1;
     }
 
-    @Override public void writeTo(BufferedSink sink) throws IOException {
+    @Override
+    public void writeTo(@NonNull BufferedSink sink) throws IOException {
         BufferedSink bufferedSink;
 
         countingSink = new CountingSink(sink);
@@ -67,7 +70,7 @@ public class CountingRequestBody extends RequestBody {
             super(delegate);
         }
 
-        @Override public void write(Buffer source, long byteCount) throws IOException {
+        @Override public void write(@NonNull Buffer source, long byteCount) throws IOException {
             super.write(source, byteCount);
 
             bytesWritten += byteCount;

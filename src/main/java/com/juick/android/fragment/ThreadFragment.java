@@ -268,7 +268,7 @@ public class ThreadFragment extends BaseFragment {
         if (rid > 0) {
             SpannableStringBuilder ssb = new SpannableStringBuilder();
             String inreplyto = getResources().getString(R.string.In_reply_to_) + " ";
-            ssb.append(inreplyto + txt);
+            ssb.append(inreplyto).append(txt);
             ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, inreplyto.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             model.textReplyTo.setText(ssb);
             model.textReplyTo.setVisibility(View.VISIBLE);
@@ -350,10 +350,11 @@ public class ThreadFragment extends BaseFragment {
         }
     }
 
-    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(BuildConfig.INTENT_NEW_EVENT_ACTION)) {
+            String action = StringUtils.defaultString(intent.getAction());
+            if (action.equals(BuildConfig.INTENT_NEW_EVENT_ACTION)) {
                 if (!isAdded()) {
                     return;
                 }

@@ -17,6 +17,8 @@
 
 package com.juick.api;
 
+import androidx.annotation.NonNull;
+
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -30,7 +32,9 @@ public class UpLoadProgressInterceptor implements Interceptor {
         this.progressListener = progressListener;
     }
 
-    @Override public Response intercept(Chain chain) throws IOException {
+    @Override
+    @NonNull
+    public Response intercept(@NonNull Chain chain) throws IOException {
         Request originalRequest = chain.request();
 
         if (originalRequest.body() == null) {

@@ -34,6 +34,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.juick.App;
@@ -229,12 +230,12 @@ public class Utils {
             if (prefToken != null) {
                 App.getInstance().getApi().registerPush(prefToken).enqueue(new Callback<Void>() {
                     @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         Log.d(TAG, "registerPush " + response.code());
                     }
 
                     @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                         Log.d(TAG, "Failed to register", t);
                     }
                 });

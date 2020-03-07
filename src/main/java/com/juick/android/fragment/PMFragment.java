@@ -111,14 +111,17 @@ public class PMFragment extends BaseFragment {
 
         App.getInstance().getApi().pm(uname).enqueue(new Callback<List<Post>>() {
             @Override
-            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+            public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
                 if (response.isSuccessful() && isAdded()) {
-                    adapter.addToEnd(response.body(), false);
+                    List<Post> newPms = response.body();
+                    if (newPms != null) {
+                        adapter.addToEnd(newPms, false);
+                    }
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Post>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
@@ -141,7 +144,7 @@ public class PMFragment extends BaseFragment {
     public void postText(final String body) {
         App.getInstance().getApi().postPm(uname, body).enqueue(new Callback<Post>() {
             @Override
-            public void onResponse(Call<Post> call, final Response<Post> response) {
+            public void onResponse(@NonNull Call<Post> call, @NonNull final Response<Post> response) {
                 if (response.isSuccessful() && isAdded()) {
                     onNewMessages(new ArrayList<Post>() {{
                         add(response.body());
@@ -152,7 +155,7 @@ public class PMFragment extends BaseFragment {
             }
 
             @Override
-            public void onFailure(Call<Post> call, Throwable t) {
+            public void onFailure(@NonNull Call<Post> call, @NonNull Throwable t) {
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });

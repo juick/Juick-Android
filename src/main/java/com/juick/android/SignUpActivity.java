@@ -21,9 +21,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.juick.App;
+import com.juick.R;
 import com.juick.databinding.ActivitySignupBinding;
 
 import retrofit2.Call;
@@ -51,7 +53,7 @@ public class SignUpActivity extends AppCompatActivity {
             }
             App.getInstance().getApi().signup(nick, password, authCode).enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     if (response.isSuccessful()) {
                         Intent successIntent = new Intent();
                         successIntent.putExtra("nick", nick);
@@ -64,8 +66,8 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 }
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                    Toast.makeText(SignUpActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
                 }
             });
         });

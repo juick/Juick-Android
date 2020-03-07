@@ -116,7 +116,7 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
 
     public static class SectionsPagerAdapter extends FragmentStateAdapter {
 
-        private String tabTitles[] = new String[] {
+        private String[] tabTitles = new String[] {
                 App.getInstance().getString(R.string.Last_messages),
                 App.getInstance().getString(R.string.With_photos),
                 App.getInstance().getString(R.string.Top_messages)

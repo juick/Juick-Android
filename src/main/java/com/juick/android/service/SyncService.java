@@ -155,12 +155,12 @@ public class SyncService extends Service {
                 }
                 // Photo
                 if (photo != null) {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    photo.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                    ByteArrayOutputStream photoData = new ByteArrayOutputStream();
+                    photo.compress(Bitmap.CompressFormat.PNG, 100, photoData);
                     builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
                     builder.withValueBackReference(ContactsContract.CommonDataKinds.Photo.RAW_CONTACT_ID, 0);
                     builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE);
-                    builder.withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, baos.toByteArray());
+                    builder.withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, photoData.toByteArray());
                     operationList.add(builder.build());
                 }
 
