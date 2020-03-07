@@ -38,6 +38,7 @@ import androidx.annotation.Nullable;
 
 import com.juick.App;
 import com.juick.R;
+import com.juick.util.StringUtils;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -72,7 +73,7 @@ public class Utils {
         if (account != null) {
             Bundle b = null;
             try {
-                b = am.getAuthToken(account, "", null, false, null, null).getResult();
+                b = am.getAuthToken(account, StringUtils.EMPTY, null, false, null, null).getResult();
             } catch (Exception e) {
                 Log.d("getBasicAuthString", Log.getStackTraceString(e));
             }
@@ -218,7 +219,7 @@ public class Utils {
             }
         }
 
-        return "";
+        return StringUtils.EMPTY;
     }
 
     public static void updateFCMToken(String prefToken) {

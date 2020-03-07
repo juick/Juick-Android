@@ -20,6 +20,7 @@ package com.juick.api.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.juick.util.StringUtils;
 import com.stfalcon.chatkit.commons.models.IMessage;
 
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public class Post implements IMessage {
 
         Post post = new Post();
         post.timestamp = new Date();
-        post.body = "";
+        post.body = StringUtils.EMPTY;
         return post;
     }
 

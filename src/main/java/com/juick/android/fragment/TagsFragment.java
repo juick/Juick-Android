@@ -124,7 +124,7 @@ public class TagsFragment extends BaseFragment {
             @Override
             public void onFailure(@NonNull Call<List<Tag>> call, @NonNull Throwable t) {
                 model.progressBar.setVisibility(View.GONE);
-                Log.d("", t.toString());
+                Log.d(TagsFragment.this.getClass().getSimpleName(), t.toString());
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });

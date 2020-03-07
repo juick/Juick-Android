@@ -46,6 +46,7 @@ import com.juick.R;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
 import com.juick.api.model.Post;
+import com.juick.util.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -232,7 +233,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     }
                 });
             }
-            holder.textTextView.setText("");
+            holder.textTextView.setText(StringUtils.EMPTY);
             if (!TextUtils.isEmpty(post.getBody())) {
                 holder.textTextView.setText(formatMessageText(post));
             }
@@ -382,7 +383,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         Matcher m = regexLinks2.matcher(msg);
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
-            String url = m.group(3).replace(" ", "%20").replaceAll("\\s+", "");
+            String url = m.group(3).replace(" ", "%20").replaceAll("\\s+", StringUtils.EMPTY);
             m.appendReplacement(sb, "$1$2<a href=\"" + url + "\" rel=\"nofollow\">$4</a>$5");
         }
         m.appendTail(sb);

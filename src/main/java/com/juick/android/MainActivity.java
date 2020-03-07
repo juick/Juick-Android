@@ -57,8 +57,8 @@ import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
 import com.juick.api.model.Post;
 import com.juick.api.model.SecureUser;
-import com.juick.api.model.User;
 import com.juick.databinding.ActivityMainBinding;
+import com.juick.util.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -163,8 +163,8 @@ public class MainActivity extends BaseActivity
             initEventsListener();
         }
         Intent intent = getIntent();
-        String action = intent.getAction();
-        if (BuildConfig.INTENT_NEW_EVENT_ACTION.equals(action)) {
+        String action = StringUtils.defaultString(intent.getAction());
+        if (action.equals(BuildConfig.INTENT_NEW_EVENT_ACTION)) {
             String msg = intent.getStringExtra(getString(R.string.notification_extra));
             try {
                 Post jmsg = App.getInstance().getJsonMapper().readValue(msg, Post.class);
@@ -213,6 +213,7 @@ public class MainActivity extends BaseActivity
         super.onNewIntent(intent);
         setIntent(intent);
     }
+
 
     @Override
     public void onClick(View v) {

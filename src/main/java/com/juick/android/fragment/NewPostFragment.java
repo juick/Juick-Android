@@ -106,7 +106,7 @@ public class NewPostFragment extends BaseFragment {
     }
 
     public void resetForm() {
-        model.editMessage.setText("");
+        model.editMessage.setText(StringUtils.EMPTY);
         model.buttonAttachment.setSelected(false);
         attachmentUri = null;
         attachmentMime = null;

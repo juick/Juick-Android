@@ -39,6 +39,7 @@ import com.juick.R;
 import com.juick.api.model.AuthResponse;
 import com.juick.api.model.SecureUser;
 import com.juick.databinding.ActivityLoginBinding;
+import com.juick.util.StringUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -188,11 +189,11 @@ public class SignInActivity extends AccountAuthenticatorActivity {
         Account account = new Account(nick, getString(R.string.com_juick));
         AccountManager am = AccountManager.get(SignInActivity.this);
         if (action == ACTION_PASSWORD_UPDATE) {
-            am.setAuthToken(account, "", hash);
+            am.setAuthToken(account, StringUtils.EMPTY, hash);
         } else {
             Bundle userData = new Bundle();
             userData.putString("hash", hash);
-            am.addAccountExplicitly(account, "", userData);
+            am.addAccountExplicitly(account, StringUtils.EMPTY, userData);
         }
         Bundle result = new Bundle();
         result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
