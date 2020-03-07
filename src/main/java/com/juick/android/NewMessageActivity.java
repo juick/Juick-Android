@@ -18,20 +18,11 @@ package com.juick.android;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
-import com.juick.App;
 import com.juick.R;
 import com.juick.android.fragment.BaseFragment;
 import com.juick.android.fragment.NewPostFragment;
 import com.juick.databinding.ActivityNewPostBinding;
-
-import java.io.File;
-import java.io.IOException;
-
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 
 /**
  *
@@ -46,7 +37,7 @@ public class NewMessageActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         model = ActivityNewPostBinding.inflate(getLayoutInflater());
         setContentView(model.getRoot());
-        addFragment(NewPostFragment.newInstance(), false);
+        addFragment(new NewPostFragment(), false);
     }
 
     @Override
@@ -57,25 +48,6 @@ public class NewMessageActivity extends BaseActivity {
             currentFragment.resetForm();
             currentFragment.handleIntent(intent);
         }
-    }
-
-    public static boolean sendMessage(String txt, String attachmentUri, String attachmentMime) {
-        try {
-            MultipartBody.Part body = null;
-            if(attachmentUri != null) {
-                Log.d("sendMessage", attachmentMime + " " + attachmentUri);
-                File file = new File(attachmentUri);
-                RequestBody requestFile =
-                        RequestBody.create(MediaType.parse("multipart/form-data"), file);
-                body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
-            }
-            return App.getInstance().getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
-                    body
-                   ).execute().isSuccessful();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     @Override
@@ -91,7 +63,7 @@ public class NewMessageActivity extends BaseActivity {
         }
     }
 
-    private NewPostFragment getCommonFragment(){
+    private NewPostFragment getCommonFragment() {
         BaseFragment currentFragment = this.getCurrentFragment();
         if (currentFragment.getClass().getName().equals(NewPostFragment.class.getName())) {
             return (NewPostFragment)currentFragment;

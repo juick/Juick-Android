@@ -54,6 +54,7 @@ import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.model.Post;
 import com.juick.databinding.FragmentThreadBinding;
+import com.juick.util.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -250,7 +251,7 @@ public class ThreadFragment extends BaseFragment {
     private void resetForm() {
         rid = 0;
         model.textReplyTo.setVisibility(View.GONE);
-        model.editMessage.setText("");
+        model.editMessage.setText(StringUtils.EMPTY);
         attachmentMime = null;
         attachmentUri = null;
         model.buttonAttachment.setSelected(false);
@@ -312,32 +313,29 @@ public class ThreadFragment extends BaseFragment {
                 progressDialog.setProgress((int)progress);
             }
         });
-        new Thread(() -> {
-            final boolean res = NewMessageActivity.sendMessage(body, attachmentUri, attachmentMime);
-            getActivity().runOnUiThread(() -> {
-                if (progressDialog != null) {
-                    progressDialog.dismiss();
-                }
-                setFormEnabled(true);
-                if (res) {
-                    resetForm();
-                }
-                if (res && attachmentUri == null) {
-                    Toast.makeText(App.getInstance(), R.string.Message_posted, Toast.LENGTH_LONG).show();
+        App.getInstance().sendMessage(body, attachmentUri, attachmentMime, (success) -> {
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+            }
+            setFormEnabled(true);
+            if (success) {
+                resetForm();
+            }
+            if (success && attachmentUri == null) {
+                Toast.makeText(App.getInstance(), R.string.Message_posted, Toast.LENGTH_LONG).show();
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setNeutralButton(android.R.string.ok, null);
+                if (success) {
+                    builder.setIcon(android.R.drawable.ic_dialog_info);
+                    builder.setMessage(R.string.Message_posted);
                 } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setNeutralButton(android.R.string.ok, null);
-                    if (res) {
-                        builder.setIcon(android.R.drawable.ic_dialog_info);
-                        builder.setMessage(R.string.Message_posted);
-                    } else {
-                        builder.setIcon(android.R.drawable.ic_dialog_alert);
-                        builder.setMessage(R.string.Error);
-                    }
-                    builder.show();
+                    builder.setIcon(android.R.drawable.ic_dialog_alert);
+                    builder.setMessage(R.string.Error);
                 }
-            });
-        }).start();
+                builder.show();
+            }
+        });
     }
 
     @Override

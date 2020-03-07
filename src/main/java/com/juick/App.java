@@ -22,7 +22,9 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -37,11 +39,18 @@ import org.acra.ACRA;
 import org.acra.annotation.AcraCore;
 import org.acra.annotation.AcraMailSender;
 
+import java.io.File;
+import java.io.IOException;
+
 import okhttp3.Credentials;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -73,6 +82,10 @@ public class App extends Application {
 
     public interface AuthorizationListener {
         void onUnauthorized();
+    }
+
+    public interface MessageListener {
+        void onMessageSent(boolean success);
     }
 
     private OnProgressListener callback;
@@ -172,6 +185,30 @@ public class App extends Application {
                 .addConverterFactory(getJacksonConverterFactory())
                 .build();
         retrofit.create(Api.class).me().enqueue(callback);
+    }
+
+    public void sendMessage(String txt, String attachmentUri, String attachmentMime, MessageListener messageListener) {
+        MultipartBody.Part body = null;
+        if (attachmentUri != null) {
+            Log.d("sendMessage", attachmentMime + " " + attachmentUri);
+            File file = new File(attachmentUri);
+            RequestBody requestFile =
+                    RequestBody.create(MediaType.parse("multipart/form-data"), file);
+            body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
+        }
+        App.getInstance().getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
+                body
+        ).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull retrofit2.Response<Void> response) {
+                messageListener.onMessageSent(response.isSuccessful());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                messageListener.onMessageSent(false);
+            }
+        });
     }
 
     public ObjectMapper getJsonMapper() {

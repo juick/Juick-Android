@@ -39,6 +39,7 @@ import com.juick.android.NewMessageActivity;
 import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.databinding.FragmentNewPostsBinding;
+import com.juick.util.StringUtils;
 
 /**
  * Created by alx on 02.01.17.
@@ -52,13 +53,6 @@ public class NewPostFragment extends BaseFragment {
     private NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
 
     private FragmentNewPostsBinding model;
-
-    public static NewPostFragment newInstance() {
-        NewPostFragment fragment = new NewPostFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Nullable
     @Override
@@ -174,33 +168,29 @@ public class NewPostFragment extends BaseFragment {
                 }
             });
         }
-        Thread thr = new Thread(() -> {
-            final boolean res = NewMessageActivity.sendMessage(msg, attachmentUri, attachmentMime);
-            NewPostFragment.this.getBaseActivity().runOnUiThread(() -> {
-                if (progressDialog != null) {
-                    progressDialog.dismiss();
-                }
-                setFormEnabled(true);
-                if (res) {
-                    resetForm();
-                }
-                if ((res && attachmentUri == null) || getActivity().isFinishing()) {
-                    Toast.makeText(getActivity(), res ? R.string.Message_posted : R.string.Error, Toast.LENGTH_LONG).show();
+        App.getInstance().sendMessage(msg, attachmentUri, attachmentMime, (success) -> {
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+            }
+            setFormEnabled(true);
+            if (success) {
+                resetForm();
+            }
+            if ((success && attachmentUri == null) || getActivity().isFinishing()) {
+                Toast.makeText(getActivity(), success ? R.string.Message_posted : R.string.Error, Toast.LENGTH_LONG).show();
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setNeutralButton(android.R.string.ok, null);
+                if (success) {
+                    builder.setIcon(android.R.drawable.ic_dialog_info);
+                    builder.setMessage(R.string.Message_posted);
                 } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setNeutralButton(android.R.string.ok, null);
-                    if (res) {
-                        builder.setIcon(android.R.drawable.ic_dialog_info);
-                        builder.setMessage(R.string.Message_posted);
-                    } else {
-                        builder.setIcon(android.R.drawable.ic_dialog_alert);
-                        builder.setMessage(R.string.Error);
-                    }
-                    builder.show();
+                    builder.setIcon(android.R.drawable.ic_dialog_alert);
+                    builder.setMessage(R.string.Error);
                 }
-            });
+                builder.show();
+            }
         });
-        thr.start();
     }
 
     public void onImageAttached(Intent data){
