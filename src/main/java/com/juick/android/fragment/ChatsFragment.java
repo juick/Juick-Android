@@ -30,7 +30,7 @@ import com.juick.android.FeedBuilder;
 import com.juick.api.GlideApp;
 import com.juick.api.model.Chat;
 import com.juick.api.model.Pms;
-import com.juick.databinding.DialogListBinding;
+import com.juick.databinding.FragmentDialogListBinding;
 import com.stfalcon.chatkit.dialogs.DialogsList;
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
 
@@ -44,13 +44,13 @@ import retrofit2.Response;
  */
 public class ChatsFragment extends BaseFragment {
 
-    private DialogListBinding model;
+    private FragmentDialogListBinding model;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        model = DialogListBinding.inflate(inflater, container, false);
+        model = FragmentDialogListBinding.inflate(inflater, container, false);
         return model.getRoot();
     }
 
