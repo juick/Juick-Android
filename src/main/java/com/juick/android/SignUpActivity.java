@@ -24,7 +24,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.juick.App;
-import com.juick.databinding.SignupBinding;
+import com.juick.databinding.ActivitySignupBinding;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,12 +33,12 @@ import retrofit2.Response;
 public class SignUpActivity extends AppCompatActivity {
     private String authCode;
 
-    private SignupBinding model;
+    private ActivitySignupBinding model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = SignupBinding.inflate(getLayoutInflater());
+        model = ActivitySignupBinding.inflate(getLayoutInflater());
         setContentView(model.getRoot());
         authCode = getIntent().getStringExtra("authCode");
         model.buttonCreate.setOnClickListener(v -> {

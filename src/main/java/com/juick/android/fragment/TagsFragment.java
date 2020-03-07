@@ -21,7 +21,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +33,7 @@ import com.juick.android.BaseActivity;
 import com.juick.android.FeedBuilder;
 import com.juick.android.UrlBuilder;
 import com.juick.api.model.Tag;
-import com.juick.databinding.TagsListBinding;
+import com.juick.databinding.FragmentTagsListBinding;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -49,7 +48,7 @@ import java.util.List;
  */
 public class TagsFragment extends BaseFragment {
 
-    private TagsListBinding model;
+    private FragmentTagsListBinding model;
 
     public interface OnTagAppliedListener {
         void onTagApplied(String tag);
@@ -76,7 +75,7 @@ public class TagsFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        model = TagsListBinding.inflate(inflater, container, false);
+        model = FragmentTagsListBinding.inflate(inflater, container, false);
         return model.getRoot();
     }
 
