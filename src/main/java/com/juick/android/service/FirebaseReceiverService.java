@@ -55,7 +55,7 @@ import java.util.Map;
 /**
  * Created by vt on 03/12/15.
  */
-public class FCMReceiverService extends FirebaseMessagingService {
+public class FirebaseReceiverService extends FirebaseMessagingService {
 
     private static String channelId;
 
@@ -87,10 +87,10 @@ public class FCMReceiverService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage message) {
         Map<String, String> data = message.getData();
         String msg = data.get(App.getInstance().getString(R.string.notification_extra));
-        Log.d(FCMReceiverService.class.getSimpleName(), "onMessageReceived " + data.toString());
+        Log.d(FirebaseReceiverService.class.getSimpleName(), "onMessageReceived " + data.toString());
         boolean isForegroundMessage = message.getNotification() != null;
         if (isForegroundMessage) {
-            Log.d(FCMReceiverService.class.getSimpleName(), "Message received in foreground");
+            Log.d(FirebaseReceiverService.class.getSimpleName(), "Message received in foreground");
             LocalBroadcastManager.getInstance(App.getInstance())
                     .sendBroadcast(new Intent(BuildConfig.INTENT_NEW_EVENT_ACTION)
                             .putExtra(getString(R.string.notification_extra), msg));
@@ -155,18 +155,18 @@ public class FCMReceiverService extends FirebaseMessagingService {
                                         notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
                                                 | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
                                     }
-                                    FCMReceiverService.notify(jmsg, notificationBuilder);
+                                    FirebaseReceiverService.notify(jmsg, notificationBuilder);
                                 }
 
                                 @Override
                                 public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                                    FCMReceiverService.notify(jmsg, notificationBuilder);
+                                    FirebaseReceiverService.notify(jmsg, notificationBuilder);
                                 }
                             });
                 });
             }
         } catch (Exception e) {
-            Log.e(FCMReceiverService.class.getSimpleName(), "GCM message error", e);
+            Log.e(FirebaseReceiverService.class.getSimpleName(), "GCM message error", e);
         }
     }
 
@@ -189,7 +189,7 @@ public class FCMReceiverService extends FirebaseMessagingService {
 
     @Override
     public void onNewToken(@NonNull String refreshedToken) {
-        Log.d(FCMReceiverService.class.getSimpleName(), "Refreshed token: " + refreshedToken);
+        Log.d(FirebaseReceiverService.class.getSimpleName(), "Refreshed token: " + refreshedToken);
         Utils.updateFCMToken(refreshedToken);
     }
 }

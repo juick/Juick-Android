@@ -126,7 +126,7 @@
                 android:name="android.provider.CONTACTS_STRUCTURE"
                 android:resource="@xml/contacts" />
         </service>
-        <service android:name=".android.service.FCMReceiverService">
+        <service android:name=".android.service.FirebaseReceiverService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
