@@ -19,7 +19,6 @@ package com.juick.android.widget.util;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.graphics.drawable.Drawable;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
@@ -35,7 +34,11 @@ public class ViewUtil {
     public static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 4;
     public static final int REQUEST_CODE_SYNC_CONTACTS = 5;
 
-    public static void setTint(TextView v) {
+    /**
+     * android:drawableTint for API < 21
+     * @param v TextView
+     */
+    public static void setDrawableTint(TextView v) {
         if (v == null) return;
         Drawable[] ds = v.getCompoundDrawables();
         Drawable[] cs = new Drawable[ds.length];
@@ -59,15 +62,5 @@ public class ViewUtil {
                 imm.hideSoftInputFromWindow(activity.getWindow().getDecorView().getWindowToken(), 0);
             }
         }
-    }
-
-    public static Activity getActivity(Context context) {
-        while (context instanceof ContextWrapper) {
-            if (context instanceof Activity) {
-                return (Activity)context;
-            }
-            context = ((ContextWrapper)context).getBaseContext();
-        }
-        return null;
     }
 }

@@ -482,13 +482,13 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                         R.drawable.ic_ei_heart, null), null, null, null);
             }
             midTextView = itemView.findViewById(R.id.mid);
-            ViewUtil.setTint(likesTextView);
+            ViewUtil.setDrawableTint(likesTextView);
             repliesTextView = itemView.findViewById(R.id.replies);
             if (repliesTextView != null) {
                 repliesTextView.setCompoundDrawables(VectorDrawableCompat.create(itemView.getContext().getResources(),
                         R.drawable.ic_ei_comment, null), null, null, null);
             }
-            ViewUtil.setTint(repliesTextView);
+            ViewUtil.setDrawableTint(repliesTextView);
             backImageView = itemView.findViewById(R.id.back_imageView);
             menuImageView = itemView.findViewById(R.id.menu_imageView);
             menuImageView.setOnClickListener(this);

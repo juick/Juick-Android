@@ -18,6 +18,7 @@ package com.juick.android;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -47,7 +48,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
     private final static int MENU_ACTION_DELETE_POST = 6;
     private final static int MENU_ACTION_SOME_LAST_CMD = 7;
 
-    private Activity context;
+    private Context context;
     private List<Post> postList;
     private Post selectedPost;
     private int menuLength;
@@ -98,7 +99,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
 
     @Override
     public void onItemClick(View view, int position) {
-        context = ViewUtil.getActivity(view.getContext());
+        context = view.getContext();
         selectedPost = postList.get(position);
         CharSequence[] items;
         if (Utils.myId == 0) {
@@ -150,7 +151,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
                         () -> postMessage("! #" + selectedPost.getMid(), context.getString(R.string.Recommended)));
                 break;
             case MENU_ACTION_BLOG:
-                context.setTitle(selectedPost.getUser().getUname());
+                ((Activity)context).setTitle(selectedPost.getUser().getUname());
                 ((BaseActivity) context).replaceFragment(
                         FeedBuilder.feedFor(
                                 UrlBuilder.getUserPostsByName(selectedPost.getUser().getUname())
