@@ -63,29 +63,13 @@
             android:layout_toStartOf="@+id/menu_imageView"
             android:layout_toEndOf="@id/userpic" />
 
-        <co.lujun.androidtagview.TagContainerLayout
-            android:id="@+id/tags_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/userpic"
-            android:layout_marginTop="8dp"
-            app:container_background_color="#00ffffff"
-            app:container_border_color="#00ffffff"
-            app:container_border_radius="1dp"
-            app:container_enable_drag="false"
-            app:horizontal_interval="8dp"
-            app:tag_background_color="#00ffffff"
-            app:tag_border_color="#9f9f9f"
-            app:tag_clickable="true"
-            app:tag_corner_radius="1dp"
-            app:tag_theme="none"
-            app:vertical_interval="8dp" />
-
         <TextView
             android:id="@+id/text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/tags_container"
+            android:layout_below="@+id/userpic"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
             android:linksClickable="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textColor="@color/colorText"
@@ -145,7 +129,7 @@
             android:layout_below="@id/photoWrapper"
             android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
-            android:layout_toLeftOf="@id/replies"
+            android:layout_toStartOf="@id/replies"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:drawablePadding="3dp"
             android:paddingLeft="8dp"
@@ -155,7 +139,7 @@
             android:tint="@color/colorSecondary"
             tools:text="66"
             android:layout_marginEnd="8dp"
-            android:layout_toStartOf="@id/replies" />
+            android:layout_toLeftOf="@id/replies" />
 
         <ImageView
             android:id="@+id/menu_imageView"

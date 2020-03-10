@@ -16,6 +16,7 @@
  */
 package com.juick.android;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
@@ -50,9 +51,6 @@ import com.juick.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import co.lujun.androidtagview.TagContainerLayout;
-import co.lujun.androidtagview.TagView;
 
 /**
  *
@@ -194,35 +192,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     .fallback(R.drawable.av_96).into(holder.upicImageView);
             holder.usernameTextView.setText(post.getUser().getUname());
             holder.timestampTextView.setText(MessageUtils.formatMessageTimestamp(post));
-            if (!isThread) {
-                holder.tagContainerLayout.removeAllTags();
-                holder.tagContainerLayout.setTags(post.getTags());
-                holder.tagContainerLayout.setOnTagClickListener(new TagView.OnTagClickListener() {
-                    @Override
-                    public void onTagClick(int position, String text) {
-                        Log.d("position", position + " " + text);
-                        MainActivity activity = (MainActivity) holder.itemView.getContext();
-                        activity.setTitle("*" + text);
-                        activity.replaceFragment(
-                                FeedBuilder.feedFor(
-                                        UrlBuilder.getPostsByTag(post.getUser().getUid(), text)));
-                    }
-
-                    @Override
-                    public void onTagLongClick(int position, String text) {
-                        Log.d("positn", position + " " + text);
-                    }
-
-                    @Override
-                    public void onSelectedTagDrag(int position, String text) {
-
-                    }
-
-                    @Override
-                    public void onTagCrossClick(int position) {
-                    }
-                });
-            }
             holder.textTextView.setText(StringUtils.EMPTY);
             if (!TextUtils.isEmpty(post.getBody())) {
                 holder.textTextView.setText(formatMessageText(post));
@@ -310,10 +279,28 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private SpannableStringBuilder formatMessageText(Post jmsg) {
-        Spanned text = Html.fromHtml(MessageUtils.formatMessage(jmsg.getBody()));
         SpannableStringBuilder ssb = new SpannableStringBuilder();
+        int nextSpanStart = 0;
+        for (String tag : jmsg.getTags()) {
+            String text = String.format("#%s", tag);
+            ssb.append(text);
+            ssb.setSpan(new ClickableSpan() {
+                @Override
+                public void onClick(@NonNull View widget) {
+                    widget.setTag("clicked");
+                    MainActivity activity = (MainActivity)widget.getContext();
+                    activity.setTitle("#" + tag);
+                    activity.replaceFragment(
+                            FeedBuilder.feedFor(
+                                    UrlBuilder.getPostsByTag(jmsg.getUser().getUid(), tag)));
+                }
+            }, nextSpanStart, nextSpanStart + text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.append(" ");
+            nextSpanStart += text.length() + 1;
+        }
+        Spanned text = Html.fromHtml(MessageUtils.formatMessage(jmsg.getBody()));
         ssb.append(text);
-        URLSpan[] urlSpans = ssb.getSpans(0, ssb.length(), URLSpan.class);
+        URLSpan[] urlSpans = ssb.getSpans(nextSpanStart, ssb.length(), URLSpan.class);
         // handle deep links
         for (URLSpan span : urlSpans) {
             int start = ssb.getSpanStart(span);
@@ -364,7 +351,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         ImageView upicImageView;
         TextView usernameTextView;
         TextView timestampTextView;
-        TagContainerLayout tagContainerLayout;
         ImageView photoImageView;
         RelativeLayout photoLayout;
         TextView photoDescriptionView;
@@ -383,7 +369,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             upicImageView = itemView.findViewById(R.id.userpic);
             usernameTextView = itemView.findViewById(R.id.username);
             timestampTextView = itemView.findViewById(R.id.timestamp);
-            tagContainerLayout = itemView.findViewById(R.id.tags_container);
             textTextView = itemView.findViewById(R.id.text);
             photoLayout = itemView.findViewById(R.id.photoWrapper);
             photoImageView = itemView.findViewById(R.id.photo);

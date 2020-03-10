@@ -17,18 +17,6 @@
 
 package com.juick.util;
 
-import android.content.Intent;
-import android.net.Uri;
-import android.text.Html;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.ClickableSpan;
-import android.text.style.URLSpan;
-import android.view.View;
-
-import androidx.annotation.NonNull;
-
-import com.juick.android.MainActivity;
 import com.juick.api.model.Post;
 
 import java.text.DateFormat;
