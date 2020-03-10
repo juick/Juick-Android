@@ -39,22 +39,20 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
-import co.lujun.androidtagview.TagContainerLayout;
-import co.lujun.androidtagview.TagView;
+
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
 import com.juick.api.model.Post;
+import com.juick.util.MessageUtils;
 import com.juick.util.StringUtils;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import co.lujun.androidtagview.TagContainerLayout;
+import co.lujun.androidtagview.TagView;
 
 /**
  *
@@ -66,10 +64,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int TYPE_ITEM = 0;
     private static final int TYPE_HEADER = -1;
     private static final int TYPE_THREAD_POST = 2;
-
-    public static final Pattern urlPattern = Pattern.compile("((?<=\\A)|(?<=\\s))(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
-    private static final DateFormat sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static final DateFormat outDateFormat = new SimpleDateFormat("HH:mm dd MMM yyyy");
 
     List<Post> postList = new ArrayList<>();
     OnLoadMoreRequestListener loadMoreRequestListener;
@@ -83,17 +77,12 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     private boolean hasOldPosts = true;
     String inReplyTo = null;
 
-    static {
-        outDateFormat.setTimeZone(TimeZone.getDefault());
-        sourceDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
     public JuickMessagesAdapter() {
-        //setHasStableIds(true);
+        setHasStableIds(true);
         inReplyTo = App.getInstance().getString(R.string.In_reply_to_);
     }
 
-    /*@Override
+    @Override
     public long getItemId(int position) {
         switch (getItemViewType(position)) {
             case TYPE_FOOTER:
@@ -102,9 +91,10 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 return 0;
             default:
                 Post post = getItem(position);
-                return post == null ? 0 : post.user.uid;
+                // 123456/78 -> 1234560078
+                return post == null ? 0 : (long)post.getMid() * 10000 + post.getRid();
         }
-    }*/
+    }
 
     public void newData(List<Post> data) {
         postList.clear();
@@ -203,7 +193,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     .load(post.getUser().getAvatar())
                     .fallback(R.drawable.av_96).into(holder.upicImageView);
             holder.usernameTextView.setText(post.getUser().getUname());
-            holder.timestampTextView.setText(formatMessageTimestamp(post));
+            holder.timestampTextView.setText(MessageUtils.formatMessageTimestamp(post));
             if (!isThread) {
                 holder.tagContainerLayout.removeAllTags();
                 holder.tagContainerLayout.setTags(post.getTags());
@@ -319,86 +309,8 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         return postList.size();
     }
 
-    private String formatMessageTimestamp(Post jmsg) {
-        return outDateFormat.format(jmsg.getTimestamp());
-    }
-
-
-    // TODO: taken from juick-core, need merge
-
-    private static Pattern regexLinks2 = Pattern.compile("((?<=\\s)|(?<=\\A))([\\[\\{]|&lt;)((?:ht|f)tps?://(?:www\\.)?([^\\/\\s\\\"\\)\\!]+)/?(?:[^\\]\\}](?<!&gt;))*)([\\]\\}]|&gt;)");
-
-    private static String formatMessage(String msg) {
-        msg = msg.replaceAll("&", "&amp;");
-        msg = msg.replaceAll("<", "&lt;");
-        msg = msg.replaceAll(">", "&gt;");
-
-        // --
-        // &mdash;
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))\\-\\-?((?=\\s)|(?=\\Z))", "$1&mdash;$2");
-
-        // http://juick.com/last?page=2
-        // <a href="http://juick.com/last?page=2" rel="nofollow">juick.com</a>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))((?:ht|f)tps?://(?:www\\.)?([^\\/\\s\\n\\\"]+)/?[^\\s\\n\\\"]*)", "$1<a href=\"$2\" rel=\"nofollow\">$3</a>");
-
-        // [link text][http://juick.com/last?page=2]
-        // <a href="http://juick.com/last?page=2" rel="nofollow">link text</a>
-        msg = msg.replaceAll("\\[([^\\]]+)\\]\\[((?:ht|f)tps?://[^\\]]+)\\]", "<a href=\"$2\" rel=\"nofollow\">$1</a>");
-        msg = msg.replaceAll("\\[([^\\]]+)\\]\\(((?:ht|f)tps?://[^\\)]+)\\)", "<a href=\"$2\" rel=\"nofollow\">$1</a>");
-
-        // #12345
-        // <a href="http://juick.com/12345">#12345</a>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A)|(?<=\\p{Punct}))#(\\d+)((?=\\s)|(?=\\Z)|(?=\\))|(?=\\.)|(?=\\,))", "$1<a href=\"https://juick.com/thread/$2\">#$2</a>$3");
-
-        // #12345/65
-        // <a href="http://juick.com/12345#65">#12345/65</a>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A)|(?<=\\p{Punct}))#(\\d+)/(\\d+)((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"https://juick.com/thread/$2#$3\">#$2/$3</a>$4");
-
-        // *bold*
-        // <b>bold</b>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A)|(?<=\\p{Punct}))\\*([^\\*\\n<>]+)\\*((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<b>$2</b>$3");
-
-        // /italic/
-        // <i>italic</i>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))/([^\\/\\n<>]+)/((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<i>$2</i>$3");
-
-        // _underline_
-        // <span class="u">underline</span>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))_([^\\_\\n<>]+)_((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<span class=\"u\">$2</span>$3");
-
-        // /12
-        // <a href="#12">/12</a>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))\\/(\\d+)((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"#$2\">/$2</a>$3");
-
-        // @username@jabber.org
-        // <a href="http://juick.com/username@jabber.org/">@username@jabber.org</a>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))@([\\w\\-\\.]+@[\\w\\-\\.]+)((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"https://juick.com/$2/\">@$2</a>$3");
-
-        // @username
-        // <a href="http://juick.com/username/">@username</a>
-        msg = msg.replaceAll("((?<=\\s)|(?<=\\A))@([\\w\\-]{2,16})((?=\\s)|(?=\\Z)|(?=\\p{Punct}))", "$1<a href=\"https://juick.com/$2/\">@$2</a>$3");
-
-        // (http://juick.com/last?page=2)
-        // (<a href="http://juick.com/last?page=2" rel="nofollow">juick.com</a>)
-        Matcher m = regexLinks2.matcher(msg);
-        StringBuffer sb = new StringBuffer();
-        while (m.find()) {
-            String url = m.group(3).replace(" ", "%20").replaceAll("\\s+", StringUtils.EMPTY);
-            m.appendReplacement(sb, "$1$2<a href=\"" + url + "\" rel=\"nofollow\">$4</a>$5");
-        }
-        m.appendTail(sb);
-        msg = sb.toString();
-
-        // > citate
-        msg = msg.replaceAll("(?:(?<=\\n)|(?<=\\A))&gt; *(.*)?(\\n|(?=\\Z))", "<q>$1</q>");
-        msg = msg.replaceAll("</q><q>", "\n");
-
-        msg = msg.replaceAll("\n", "<br/>\n");
-        return msg;
-    }
-
     private SpannableStringBuilder formatMessageText(Post jmsg) {
-        Spanned text = Html.fromHtml(formatMessage(jmsg.getBody()));
+        Spanned text = Html.fromHtml(MessageUtils.formatMessage(jmsg.getBody()));
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         ssb.append(text);
         URLSpan[] urlSpans = ssb.getSpans(0, ssb.length(), URLSpan.class);
