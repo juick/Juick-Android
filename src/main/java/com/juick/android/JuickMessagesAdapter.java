@@ -69,8 +69,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     OnItemClickListener itemMenuListener;
     OnScrollListener scrollListener;
 
-    private Handler handler = new Handler();
-
     private boolean hasHeader;
     private boolean hasOldPosts = true;
     String inReplyTo = null;
@@ -241,13 +239,8 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                             scrollListener.onScrollToPost(v, p.prevRid, 0);
                         v.setVisibility(View.GONE);
                     });
-
-                    holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorPrimary));
-                    handler.removeCallbacksAndMessages(null);
-                    handler.postDelayed(() -> holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorSecondary)), 600);
                 } else {
                     holder.backImageView.setVisibility(View.GONE);
-                    holder.container.setBackgroundColor(ContextCompat.getColor(holder.container.getContext(), R.color.colorSecondary));
                 }
             }
             if (post.getRid() > 0 && post.getReplyto() > 0) {
