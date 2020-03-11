@@ -171,6 +171,9 @@ public class App extends Application {
     public void auth(String username, String password, Callback<SecureUser> callback) {
         OkHttpClient client = new OkHttpClient.Builder()
                 .authenticator((route, response) -> {
+                    if (response.request().header("Authorization") != null) {
+                        return null; // Give up, we've already failed to authenticate.
+                    }
                     String basicAuth = Credentials.basic(username, password);
                     return response.request().newBuilder()
                             .header("Authorization", basicAuth)

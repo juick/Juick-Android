@@ -60,8 +60,6 @@ public abstract class BaseActivity extends AppCompatActivity {
                 Intent intent = getIntent();
                 finish();
                 startActivity(intent);
-            } else {
-                finish();
             }
         }
     }
