@@ -168,7 +168,7 @@ public class ThreadFragment extends BaseFragment {
         adapter.setOnItemClickListener((widget, position) -> {
             if (widget.getTag() == null || !widget.getTag().equals("clicked")) {
                 Post post = adapter.getItem(position);
-                onReply(post.getRid(), post.getBody());
+                onReply(post.getRid(), StringUtils.defaultString(post.getBody()));
             }
         });
         adapter.setOnMenuListener(new JuickMessageMenu(adapter.getItems()));
