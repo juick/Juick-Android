@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -98,25 +99,31 @@ public class SignInActivity extends AccountAuthenticatorActivity {
             });
         });
 
-        // Button listeners
-        model.signInButton.setOnClickListener(v -> {
-            Intent signInIntent = googleClient.getSignInIntent();
-            startActivityForResult(signInIntent, RC_SIGN_IN);
-        });
+        String googleClientId = StringUtils.defaultString(getResources().getString(R.string.default_web_client_id));
 
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getResources().getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        // Build a GoogleSignInClient with the options specified by gso.
-        googleClient = GoogleSignIn.getClient(this, gso);
+        if (TextUtils.isEmpty(googleClientId)) {
+            model.signInButton.setVisibility(View.GONE);
+        } else {
+            // Button listeners
+            model.signInButton.setOnClickListener(v -> {
+                Intent signInIntent = googleClient.getSignInIntent();
+                startActivityForResult(signInIntent, RC_SIGN_IN);
+            });
 
-        // Set the dimensions of the sign-in button.
-        SignInButton signInButton = model.signInButton;
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
-        signInButton.setColorScheme(SignInButton.COLOR_LIGHT);
+            // Configure sign-in to request the user's ID, email address, and basic
+            // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(googleClientId)
+                    .requestEmail()
+                    .build();
+            // Build a GoogleSignInClient with the options specified by gso.
+            googleClient = GoogleSignIn.getClient(this, gso);
+
+            // Set the dimensions of the sign-in button.
+            SignInButton signInButton = model.signInButton;
+            signInButton.setSize(SignInButton.SIZE_STANDARD);
+            signInButton.setColorScheme(SignInButton.COLOR_LIGHT);
+        }
 
         currentAction = getIntent().getIntExtra(EXTRA_ACTION, 0);
 
