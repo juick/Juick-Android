@@ -108,14 +108,6 @@ public class PostsPageFragment extends BaseFragment {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        model.swipeContainer.setColorSchemeColors(ContextCompat.getColor(App.getInstance(), R.color.colorAccent));
-        model.swipeContainer.setOnRefreshListener(() -> load(true));
-        load(false);
-    }
-
-    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -169,7 +161,9 @@ public class PostsPageFragment extends BaseFragment {
             model.list.setVisibility(View.VISIBLE);
             model.progressBar.setVisibility(View.GONE);
         }
-        Log.d("PostsPageFragment", "creatview "+adapter.getItemCount());
+        model.swipeContainer.setColorSchemeColors(ContextCompat.getColor(App.getInstance(), R.color.colorAccent));
+        model.swipeContainer.setOnRefreshListener(() -> load(true));
+        load(false);
     }
 
     @Override
