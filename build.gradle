@@ -38,7 +38,7 @@ dependencies {
     implementation 'com.github.heremaps:oksse:0.9.0'
     // retrofit 2.7.x require API21
     //noinspection GradleDependency
-    implementation 'com.squareup.retrofit2:retrofit:2.6.4'
+    implementation 'com.squareup.retrofit2:retrofit:2.8.0'
     //noinspection GradleDependency
     implementation 'com.squareup.retrofit2:converter-jackson:2.6.4'
     implementation 'com.github.bumptech.glide:glide:4.11.0'
