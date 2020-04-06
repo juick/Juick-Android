@@ -69,7 +69,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 134
+        versionCode 135
         versionName "3.1"
         applicationId "com.juick"
         vectorDrawables.useSupportLibrary = true
