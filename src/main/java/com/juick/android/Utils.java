@@ -41,6 +41,9 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.util.StringUtils;
 
+import java.util.Arrays;
+
+import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -87,7 +90,8 @@ public class Utils {
 
     public static OkHttpClient.Builder getSSEFactory() {
         if (WSFactoryInstance == null) {
-            WSFactoryInstance = new OkHttpClient.Builder();
+            WSFactoryInstance = new OkHttpClient.Builder()
+            .connectionSpecs(Arrays.asList(App.getInstance().getOkHttpLegacyTls(), ConnectionSpec.CLEARTEXT));
         }
         return WSFactoryInstance;
     }
