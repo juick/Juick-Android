@@ -40,7 +40,12 @@ import org.acra.annotation.AcraCore;
 import org.acra.annotation.AcraMailSender;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import okhttp3.CipherSuite;
+import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -74,6 +79,8 @@ public class App extends Application {
     private Api api;
 
     private ObjectMapper jsonMapper;
+
+    private ConnectionSpec okHttpLegacyTls;
 
     public interface OnProgressListener {
         void onProgress(long progressPercentage);
@@ -156,6 +163,7 @@ public class App extends Application {
                         return response;
                     })
                     .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                    .connectionSpecs(Arrays.asList(getOkHttpLegacyTls(), ConnectionSpec.CLEARTEXT))
                     .build();
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BuildConfig.API_ENDPOINT)
@@ -179,6 +187,7 @@ public class App extends Application {
                             .header("Authorization", basicAuth)
                             .build();
                 })
+                .connectionSpecs(Arrays.asList(getOkHttpLegacyTls(), ConnectionSpec.CLEARTEXT))
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -225,7 +234,9 @@ public class App extends Application {
 
     public YouTube getYouTube() {
         if (youTube == null) {
-            OkHttpClient client = new OkHttpClient.Builder().build();
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .connectionSpecs(Arrays.asList(getOkHttpLegacyTls(), ConnectionSpec.CLEARTEXT))
+                    .build();
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl("https://www.googleapis.com/youtube/v3/")
                     .client(client)
@@ -235,5 +246,18 @@ public class App extends Application {
             youTube = retrofit.create(YouTube.class);
         }
         return youTube;
+    }
+
+    public ConnectionSpec getOkHttpLegacyTls() {
+        if (okHttpLegacyTls == null) {
+            List<CipherSuite> cipherSuites = new ArrayList<>(ConnectionSpec.MODERN_TLS.cipherSuites());
+            cipherSuites.add(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA);
+            cipherSuites.add(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA);
+
+            okHttpLegacyTls = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                    .cipherSuites(cipherSuites.toArray(new CipherSuite[0]))
+                    .build();
+        }
+        return okHttpLegacyTls;
     }
 }
