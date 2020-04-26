@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -41,6 +42,9 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.util.StringUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import okhttp3.ConnectionSpec;
@@ -112,6 +116,8 @@ public class Utils {
                     final String id = DocumentsContract.getDocumentId(uri);
                     final Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
                     return getDataColumn(App.getInstance(), contentUri, null, null);
+                } else if (isGoogleDriveUri(uri)) {
+                    return getDriveFilePath(uri, App.getInstance());
                 } else if (isMediaDocument(uri)) {
                     final String docId = DocumentsContract.getDocumentId(uri);
                     final String[] split = docId.split(":");
@@ -131,7 +137,7 @@ public class Utils {
                     }
 
                     final String selection = "_id=?";
-                    final String[] selectionArgs = new String[] {
+                    final String[] selectionArgs = new String[]{
                             split[1]
                     };
 
@@ -171,16 +177,61 @@ public class Utils {
         return null;
     }
 
-    public static boolean isExternalStorageDocument(Uri uri) {
+    private static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());
     }
 
-    public static boolean isDownloadsDocument(Uri uri) {
+    private static boolean isDownloadsDocument(Uri uri) {
         return "com.android.providers.downloads.documents".equals(uri.getAuthority());
     }
 
-    public static boolean isMediaDocument(Uri uri) {
+    private static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    // https://stackoverflow.com/questions/23063691/how-to-get-file-name-and-real-path-of-google-drive-document
+
+    private static boolean isGoogleDriveUri(Uri uri) {
+        return "com.google.android.apps.docs.storage".equals(uri.getAuthority()) || "com.google.android.apps.docs.storage.legacy".equals(uri.getAuthority());
+    }
+
+    private static String getDriveFilePath(Uri uri, Context context) {
+        Uri returnUri = uri;
+        Cursor returnCursor = context.getContentResolver().query(returnUri, null, null, null, null);
+        /*
+         * Get the column indexes of the data in the Cursor,
+         *     * move to the first row in the Cursor, get the data,
+         *     * and display it.
+         * */
+        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+        returnCursor.moveToFirst();
+
+        String name = (returnCursor.getString(nameIndex));
+        String size = (Long.toString(returnCursor.getLong(sizeIndex)));
+        File file = new File(context.getCacheDir(), name);
+        try {
+            InputStream inputStream = context.getContentResolver().openInputStream(uri);
+            FileOutputStream outputStream = new FileOutputStream(file);
+            int read = 0;
+            int maxBufferSize = 1 * 1024 * 1024;
+            int bytesAvailable = inputStream.available();
+
+            //int bufferSize = 1024;
+            int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+
+            final byte[] buffers = new byte[bufferSize];
+            while ((read = inputStream.read(buffers)) != -1) {
+                outputStream.write(buffers, 0, read);
+            }
+            Log.d("File Size", "Size " + file.length());
+            inputStream.close();
+            outputStream.close();
+            Log.d("File Path", "Path " + file.getPath());
+        } catch (Exception e) {
+            Log.d("Exception", e.getMessage());
+        }
+        return file.getPath();
     }
 
     public static String getMimeTypeFor(String url){

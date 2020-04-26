@@ -30,6 +30,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -343,9 +344,14 @@ public class ThreadFragment extends BaseFragment {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == ACTIVITY_ATTACHMENT_IMAGE && data != null) {
                 attachmentUri = Utils.getPath(Uri.parse(data.getDataString()));
-                // How to get correct mime type?
-                attachmentMime = "image/jpeg";
-                model.buttonAttachment.setSelected(true);
+                if (TextUtils.isEmpty(attachmentUri)) {
+                    Toast.makeText(getActivity(), R.string.error_unsupported_content, Toast.LENGTH_SHORT)
+                            .show();
+                } else {
+                    // How to get correct mime type?
+                    attachmentMime = "image/jpeg";
+                    model.buttonAttachment.setSelected(true);
+                }
             }
         }
     }

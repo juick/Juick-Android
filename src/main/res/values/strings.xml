@@ -87,4 +87,5 @@
     <string name="press_to_sign_in">Press to sign in</string>
     <string name="unread_discussions">You have unread discussions</string>
     <string name="juick_notifications">Juick notifications</string>
+    <string name="error_unsupported_content">Unsupported content</string>
 </resources>

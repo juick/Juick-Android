@@ -69,4 +69,5 @@
     <string name="Are_you_sure_delete">Вы уверены, что хотите удалить сообщение?</string>
     <string name="Deleted">Удалено</string>
     <string name="press_to_sign_in">Нажмите, чтобы войти</string>
+    <string name="error_unsupported_content">Неподдерживаемый тип данных</string>
 </resources>
