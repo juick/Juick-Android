@@ -53,41 +53,57 @@
             android:visibility="gone"
             android:paddingBottom="2dip"
             android:textColor="#000"/>
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/textReplyTo"
             android:orientation="horizontal">
-            <ImageView
-                android:id="@+id/buttonAttachment"
+            <ImageButton
+                android:id="@id/buttonAttachment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/colorText"
                 android:contentDescription="@string/Attach"
-                android:src="@drawable/ic_attach_file_black_24dp"
-                android:layout_gravity="center_vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_button_attachment"
+                android:layout_centerVertical="true"
                 android:padding="12dp" />
+
+            <Space
+                android:id="@id/attachmentButtonSpace"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_toEndOf="@id/buttonAttachment"
+                android:layout_toRightOf="@id/buttonAttachment"/>
+
             <EditText
-                android:id="@+id/editMessage"
-                android:layout_width="fill_parent"
-                android:layout_height="@dimen/avatar_size"
-                android:layout_weight="1"
-                android:inputType="textCapSentences|textMultiLine"
-                android:hint="@string/Enter_a_message"
-                android:importantForAutofill="no" />
-            <ImageView
-                android:id="@+id/buttonSend"
+                android:id="@id/editMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/attachmentButtonSpace"
+                android:layout_toLeftOf="@id/sendButtonSpace"
+                android:layout_toRightOf="@id/attachmentButtonSpace"
+                android:layout_toStartOf="@id/sendButtonSpace"
+                android:inputType="textAutoCorrect|textAutoComplete|textMultiLine|textCapSentences"/>
+
+            <Space
+                android:id="@id/sendButtonSpace"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_toLeftOf="@id/buttonSend"
+                android:layout_toStartOf="@id/buttonSend"/>
+
+            <ImageButton
+                android:id="@id/buttonSend"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:src="@drawable/ic_send_black_24dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/colorText"
+                android:src="@drawable/ic_send_black_24dp"
                 android:contentDescription="@string/Send"
-                android:layout_gravity="center_vertical"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:padding="12dp" />
-        </LinearLayout>
+        </RelativeLayout>
     </RelativeLayout>
 </LinearLayout>
