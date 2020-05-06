@@ -187,9 +187,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             holder.usernameTextView.setText(post.getUser().getUname());
             holder.timestampTextView.setText(MessageUtils.formatMessageTimestamp(post));
             holder.textTextView.setText(StringUtils.EMPTY);
-            if (!TextUtils.isEmpty(post.getBody())) {
-                holder.textTextView.setText(formatMessageText(post));
-            }
+            holder.textTextView.setText(formatMessageText(post));
             holder.textTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
             if (post.getPhoto() != null && post.getPhoto().getSmall() != null) {
@@ -287,7 +285,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             ssb.append(" ");
             nextSpanStart += text.length() + 1;
         }
-        Spanned text = Html.fromHtml(MessageUtils.formatMessage(jmsg.getBody()));
+        Spanned text = Html.fromHtml(MessageUtils.formatMessage(StringUtils.defaultString(jmsg.getBody())));
         ssb.append(text);
         URLSpan[] urlSpans = ssb.getSpans(nextSpanStart, ssb.length(), URLSpan.class);
         // handle deep links
