@@ -17,6 +17,9 @@ jobs:
       run: sudo ./gradlew --no-daemon lintDebug
   connectedCheck:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        BUILD_SDK: [16, 21, 29]
     steps:
     - name: checkout
       uses: actions/checkout@v2
@@ -24,6 +27,6 @@ jobs:
     - name: run tests
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: 29
+        api-level: ${{ matrix.BUILD_SDK }}
         target: google_apis
         script: ./gradlew --no-daemon connectedDebugAndroidTest
