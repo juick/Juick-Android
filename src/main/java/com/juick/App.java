@@ -29,6 +29,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.juick.android.NotificationSender;
 import com.juick.android.Utils;
 import com.juick.api.Api;
 import com.juick.api.UpLoadProgressInterceptor;
@@ -259,5 +260,14 @@ public class App extends Application {
                     .build();
         }
         return okHttpLegacyTls;
+    }
+
+    private NotificationSender notificationSender;
+
+    public NotificationSender getNotificationSender() {
+        if (notificationSender == null) {
+            notificationSender = new NotificationSender(this);
+        }
+        return notificationSender;
     }
 }

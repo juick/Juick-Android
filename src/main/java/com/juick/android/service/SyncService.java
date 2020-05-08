@@ -88,7 +88,7 @@ public class SyncService extends Service {
                             announcement.setBody(context.getString(R.string.unread_discussions));
                             try {
                                 String messageData = App.getInstance().getJsonMapper().writeValueAsString(announcement);
-                                FirebaseReceiverService.showNotification(messageData);
+                                App.getInstance().getNotificationSender().showNotification(messageData);
                             } catch (JsonProcessingException e) {
                                 Log.w(this.getClass().getSimpleName(), "JSON error", e);
                             }
