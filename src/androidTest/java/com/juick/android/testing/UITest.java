@@ -36,7 +36,6 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static androidx.test.espresso.Espresso.onView;
@@ -62,7 +61,7 @@ public class UITest {
     @Test
     public void isCorrectNotification_NotificationSender() throws IOException {
         InputStream notificationData = getClass().getResourceAsStream("/test_notification.json");
-        String notification = IOUtils.toString(notificationData, StandardCharsets.UTF_8);
+        String notification = IOUtils.toString(notificationData, "UTF-8");
         App.getInstance().getNotificationSender().showNotification(notification);
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         device.openNotification();
