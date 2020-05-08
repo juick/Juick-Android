@@ -72,5 +72,6 @@ public class UITest {
         device.waitForIdle();
         List<UiObject2> popups = device.findObjects(By.text("Hello, world!"));
         assertThat(popups.size(), is(1));
+        popups.get(0).click();
     }
 }
