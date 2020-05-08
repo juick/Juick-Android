@@ -25,11 +25,11 @@ import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.MainActivity;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,8 +61,8 @@ public class UITest {
     @Test
     public void isCorrectNotification_NotificationSender() throws IOException {
         InputStream notificationData = getClass().getResourceAsStream("/test_notification.json");
-        String notification = IOUtils.toString(notificationData, "UTF-8");
-        App.getInstance().getNotificationSender().showNotification(notification);
+        JsonNode notificationJson = App.getInstance().getJsonMapper().readTree(notificationData);
+        App.getInstance().getNotificationSender().showNotification(notificationJson.toString());
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         device.openNotification();
         device.waitForIdle();
