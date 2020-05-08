@@ -17,6 +17,8 @@
 
 package com.juick.android.testing;
 
+import android.os.Build;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -44,6 +46,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
@@ -60,6 +63,7 @@ public class UITest {
     }
     @Test
     public void isCorrectNotification_NotificationSender() throws IOException {
+        assumeTrue("UIAutomator tests require API18",Build.VERSION.SDK_INT >= 18);
         InputStream notificationData = getClass().getResourceAsStream("/test_notification.json");
         JsonNode notificationJson = App.getInstance().getJsonMapper().readTree(notificationData);
         App.getInstance().getNotificationSender().showNotification(notificationJson.toString());

@@ -50,8 +50,6 @@ dependencies {
     implementation 'com.github.stfalcon:chatkit:0.3.3'
     implementation 'ch.acra:acra-mail:5.5.1'
 
-    androidTestImplementation 'commons-io:commons-io:2.6'
-
     // Core library
     androidTestImplementation 'androidx.test:core:1.2.0'
 
