@@ -24,22 +24,17 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-
-import androidx.annotation.NonNull;
-
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.request.FutureTarget;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.juick.App;
@@ -51,6 +46,7 @@ import com.juick.api.GlideApp;
 import com.juick.api.model.Post;
 
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by vt on 03/12/15.
@@ -61,6 +57,8 @@ public class FirebaseReceiverService extends FirebaseMessagingService {
 
     private static NotificationManager notificationManager =
             (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
+
+    private static Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     public void onCreate() {
@@ -102,7 +100,6 @@ public class FirebaseReceiverService extends FirebaseMessagingService {
     public static void showNotification(final String msgStr) {
         try {
             final Post jmsg = App.getInstance().getJsonMapper().readValue(msgStr, Post.class);
-            Handler handler = new Handler(Looper.getMainLooper());
             if (jmsg.isService()) {
                 handler.post(() -> notificationManager.cancel(String.valueOf(getId(jmsg)), 0));
             } else {
@@ -143,27 +140,22 @@ public class FirebaseReceiverService extends FirebaseMessagingService {
                                     getId(jmsg), createNewEventIntent(msgStr),
                                     PendingIntent.FLAG_UPDATE_CURRENT));
                 }
-                handler.post(() -> {
-                    GlideApp.with(App.getInstance()).asBitmap()
-                            .load(jmsg.getUser().getAvatar())
-                            .centerCrop()
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
-                                    notificationBuilder.setLargeIcon(resource);
-                                    if (Build.VERSION.SDK_INT < 26) {
-                                        notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
-                                                | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
-                                    }
-                                    FirebaseReceiverService.notify(jmsg, notificationBuilder);
-                                }
-
-                                @Override
-                                public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                                    FirebaseReceiverService.notify(jmsg, notificationBuilder);
-                                }
-                            });
-                });
+                FutureTarget<Bitmap> avatarBitmap = GlideApp.with(App.getInstance()).asBitmap()
+                        .load(jmsg.getUser().getAvatar())
+                        .fallback(R.drawable.av_96)
+                        .placeholder(R.drawable.av_96)
+                        .centerCrop().submit();
+                try {
+                    Bitmap avatar = avatarBitmap.get();
+                    notificationBuilder.setLargeIcon(avatar);
+                } catch (ExecutionException | InterruptedException e) {
+                    Log.w(FirebaseReceiverService.class.getSimpleName(), "Avatar was not loaded", e);
+                }
+                if (Build.VERSION.SDK_INT < 26) {
+                    notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
+                            | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND));
+                }
+                FirebaseReceiverService.notify(jmsg, notificationBuilder);
             }
         } catch (Exception e) {
             Log.e(FirebaseReceiverService.class.getSimpleName(), "GCM message error", e);

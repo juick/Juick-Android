@@ -113,6 +113,7 @@ public class MainActivity extends BaseActivity
                     String avatarUrl = me.getAvatar();
                     GlideApp.with(imageHeader.getContext())
                             .load(avatarUrl)
+                            .fallback(R.drawable.av_96)
                             .placeholder(R.drawable.av_96)
                             .into(imageHeader);
                 }
