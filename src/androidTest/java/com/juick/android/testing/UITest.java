@@ -68,10 +68,13 @@ public class UITest {
         JsonNode notificationJson = App.getInstance().getJsonMapper().readTree(notificationData);
         App.getInstance().getNotificationSender().showNotification(notificationJson.toString());
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        device.waitForIdle();
         device.openNotification();
         device.waitForIdle();
         List<UiObject2> popups = device.findObjects(By.text("Hello, world!"));
         assertThat(popups.size(), is(1));
         popups.get(0).click();
+        device.pressHome();
+        device.waitForIdle();
     }
 }
