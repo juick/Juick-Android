@@ -25,7 +25,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiDevice;
-import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.juick.App;
@@ -38,14 +38,11 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assume.assumeTrue;
 
 @RunWith(AndroidJUnit4.class)
@@ -68,13 +65,7 @@ public class UITest {
         JsonNode notificationJson = App.getInstance().getJsonMapper().readTree(notificationData);
         App.getInstance().getNotificationSender().showNotification(notificationJson.toString());
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        device.waitForIdle();
         device.openNotification();
-        device.waitForIdle();
-        List<UiObject2> popups = device.findObjects(By.text("Hello, world!"));
-        assertThat(popups.size(), is(1));
-        popups.get(0).click();
-        device.pressHome();
-        device.waitForIdle();
+        device.wait(Until.hasObject(By.textStartsWith("Hello, world!")), 5000);
     }
 }
