@@ -67,5 +67,6 @@ public class UITest {
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         device.openNotification();
         device.wait(Until.hasObject(By.textStartsWith("Hello, world!")), 5000);
+        device.pressHome();
     }
 }
