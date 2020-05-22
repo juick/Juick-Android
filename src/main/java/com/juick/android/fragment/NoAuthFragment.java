@@ -18,12 +18,11 @@
 package com.juick.android.fragment;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.juick.R;
 import com.juick.databinding.FragmentNoauthBinding;
 
@@ -35,17 +34,14 @@ public class NoAuthFragment extends BaseFragment {
 
     private FragmentNoauthBinding model;
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        model = FragmentNoauthBinding.inflate(inflater, container, false);
-        return model.getRoot();
+    public NoAuthFragment() {
+        super(R.layout.fragment_noauth);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        model = FragmentNoauthBinding.bind(view);
         model.msg.setText(R.string.NoAuthMessage);
     }
 

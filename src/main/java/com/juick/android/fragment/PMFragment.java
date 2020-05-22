@@ -24,9 +24,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -86,17 +84,15 @@ public class PMFragment extends BaseFragment {
 
     private MessagesListAdapter<Post> adapter;
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        model = FragmentPmBinding.inflate(inflater, container, false);
-        return model.getRoot();
+    public PMFragment() {
+        super(R.layout.fragment_pm);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        model = FragmentPmBinding.bind(view);
 
         uname = getArguments().getString(ARG_UNAME);
         uid = getArguments().getInt(ARG_UID, 0);

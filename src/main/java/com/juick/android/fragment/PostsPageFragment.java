@@ -19,9 +19,7 @@ package com.juick.android.fragment;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -99,18 +97,15 @@ public class PostsPageFragment extends BaseFragment {
         });
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        model = FragmentPostsPageBinding.inflate(inflater, container, false);
-        return model.getRoot();
+    public PostsPageFragment() {
+        super(R.layout.fragment_posts_page);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        model = FragmentPostsPageBinding.bind(view);
         model.list.setHasFixedSize(true);
 
         model.list.setAdapter(adapter);

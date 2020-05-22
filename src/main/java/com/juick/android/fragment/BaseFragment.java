@@ -30,6 +30,14 @@ import com.juick.android.BaseActivity;
  */
 public class BaseFragment extends Fragment {
 
+    public BaseFragment() {
+
+    }
+
+    public BaseFragment(int layoutId) {
+        super(layoutId);
+    }
+
     BaseActivity getBaseActivity() {
         return (BaseActivity) getActivity();
     }

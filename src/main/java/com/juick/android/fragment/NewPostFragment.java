@@ -54,15 +54,16 @@ public class NewPostFragment extends BaseFragment {
 
     private FragmentNewPostsBinding model;
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        model = FragmentNewPostsBinding.inflate(inflater, container, false);
-        return model.getRoot();
+    public NewPostFragment() {
+        super(R.layout.fragment_new_posts);
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        model = FragmentNewPostsBinding.bind(view);
+
         getActivity().setTitle(R.string.New_message);
 
         model.buttonTags.setOnClickListener(v -> {

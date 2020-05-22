@@ -17,13 +17,12 @@
 package com.juick.android.fragment;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.FeedBuilder;
@@ -46,17 +45,16 @@ public class ChatsFragment extends BaseFragment {
 
     private FragmentDialogListBinding model;
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        model = FragmentDialogListBinding.inflate(inflater, container, false);
-        return model.getRoot();
+    public ChatsFragment() {
+        super(R.layout.fragment_dialog_list);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        model = FragmentDialogListBinding.bind(view);
+
         getActivity().setTitle(R.string.PMs);
 
         final DialogsListAdapter<Chat> dialogListAdapter = new DialogsListAdapter<>((imageView, url, object) ->

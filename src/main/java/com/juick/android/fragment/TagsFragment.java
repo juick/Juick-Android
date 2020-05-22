@@ -71,17 +71,15 @@ public class TagsFragment extends BaseFragment {
         this.callback = callback;
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        model = FragmentTagsListBinding.inflate(inflater, container, false);
-        return model.getRoot();
+    public TagsFragment() {
+        super(R.layout.fragment_tags_list);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        model = FragmentTagsListBinding.bind(view);
 
         Bundle args = getArguments();
         if (args != null) {

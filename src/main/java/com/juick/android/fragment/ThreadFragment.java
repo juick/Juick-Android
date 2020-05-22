@@ -33,9 +33,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -101,17 +99,15 @@ public class ThreadFragment extends BaseFragment {
         adapter = new JuickMessagesAdapter();
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        model = FragmentThreadBinding.inflate(inflater, container, false);
-        return model.getRoot();
+    public ThreadFragment() {
+        super(R.layout.fragment_thread);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        model = FragmentThreadBinding.bind(view);
 
         Bundle args = getArguments();
         if (args != null) {
