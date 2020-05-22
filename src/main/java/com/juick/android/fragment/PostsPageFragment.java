@@ -73,26 +73,30 @@ public class PostsPageFragment extends BaseFragment {
         App.getInstance().getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
-                model.swipeContainer.setRefreshing(false);
-                model.list.setVisibility(View.VISIBLE);
-                model.progressBar.setVisibility(View.GONE);
-                if (response.isSuccessful() && isAdded()) {
-                    List<Post> posts = response.body();
-                    if(posts != null) {
-                        if(isReload)
-                            adapter.newData(posts);
-                        else
-                            adapter.addData(posts);
+                if (isAdded()) {
+                    model.swipeContainer.setRefreshing(false);
+                    model.list.setVisibility(View.VISIBLE);
+                    model.progressBar.setVisibility(View.GONE);
+                    if (response.isSuccessful()) {
+                        List<Post> posts = response.body();
+                        if (posts != null) {
+                            if (isReload)
+                                adapter.newData(posts);
+                            else
+                                adapter.addData(posts);
+                        }
                     }
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
-                model.swipeContainer.setRefreshing(false);
-                model.list.setVisibility(View.VISIBLE);
-                model.progressBar.setVisibility(View.GONE);
-                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                if (isAdded()) {
+                    model.swipeContainer.setRefreshing(false);
+                    model.list.setVisibility(View.VISIBLE);
+                    model.progressBar.setVisibility(View.GONE);
+                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
