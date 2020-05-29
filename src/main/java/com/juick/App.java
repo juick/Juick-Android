@@ -26,6 +26,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.multidex.MultiDex;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,10 +70,6 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 @AcraCore(buildConfigClass = BuildConfig.class)
 @AcraMailSender(mailTo = "support@juick.com", resSubject = R.string.appCrash, reportFileName = "ACRA-report.txt")
 public class App extends Application {
-
-    static {
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
-    }
 
     private static App instance;
 
@@ -119,6 +116,8 @@ public class App extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+        MultiDex.install(this);
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         if (!BuildConfig.DEBUG) {
             ACRA.init(this);
         }

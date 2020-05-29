@@ -89,7 +89,6 @@ public class MainActivity extends BaseActivity
         toggle.syncState();
 
         final NavigationView navigationView = model.navView;
-        ;
         navigationView.setNavigationItemSelectedListener(this);
 
         View navHeader = navigationView.getHeaderView(0).findViewById(R.id.header);
