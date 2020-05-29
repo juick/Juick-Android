@@ -18,7 +18,6 @@
 package com.juick;
 
 import android.accounts.AccountManager;
-import android.app.Application;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -27,6 +26,7 @@ import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.multidex.MultiDexApplication;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,7 +45,6 @@ import com.juick.api.model.PostResponse;
 import com.juick.api.model.SecureUser;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +65,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Created by gerc on 14.02.2016.
  */
-public class App extends Application {
+public class App extends MultiDexApplication {
 
     static {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
