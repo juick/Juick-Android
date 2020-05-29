@@ -77,7 +77,6 @@ android {
         versionName "3.1"
         applicationId "com.juick"
         vectorDrawables.useSupportLibrary = true
-        viewBinding.enabled = true
         def addConstant = {constantName, constantValue ->
             manifestPlaceholders += [ (constantName):constantValue]
             buildConfigField "String", "${constantName}", "\"${constantValue}\""
@@ -89,6 +88,10 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testHandleProfiling true
         testFunctionalTest true
+    }
+    buildFeatures {
+        buildConfig = true
+        viewBinding = true
     }
     lintOptions {
         checkDependencies = true
