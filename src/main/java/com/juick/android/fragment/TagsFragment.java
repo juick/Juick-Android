@@ -108,8 +108,8 @@ public class TagsFragment extends BaseFragment {
         App.getInstance().getApi().tags(uid).enqueue(new Callback<List<Tag>>() {
             @Override
             public void onResponse(@NonNull Call<List<Tag>> call, @NonNull Response<List<Tag>> response) {
-                model.progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && isAdded()) {
+                    model.progressBar.setVisibility(View.GONE);
                     List<Tag> tags = response.body();
                     if (tags != null) {
                         List<String> listAdapter = new ArrayList<>();
@@ -123,9 +123,11 @@ public class TagsFragment extends BaseFragment {
 
             @Override
             public void onFailure(@NonNull Call<List<Tag>> call, @NonNull Throwable t) {
-                model.progressBar.setVisibility(View.GONE);
-                Log.d(TagsFragment.this.getClass().getSimpleName(), t.toString());
-                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                if (isAdded()) {
+                    model.progressBar.setVisibility(View.GONE);
+                    Log.d(TagsFragment.this.getClass().getSimpleName(), t.toString());
+                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                }
             }
         });
     }

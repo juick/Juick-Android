@@ -77,7 +77,9 @@ public class ChatsFragment extends BaseFragment {
 
             @Override
             public void onFailure(@NonNull Call<Pms> call, @NonNull Throwable t) {
-                Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                if (isAdded()) {
+                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                }
             }
         });
     }

@@ -226,7 +226,9 @@ public class ThreadFragment extends BaseFragment {
 
                     @Override
                     public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
-                        Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                        if (isAdded()) {
+                            Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
     }

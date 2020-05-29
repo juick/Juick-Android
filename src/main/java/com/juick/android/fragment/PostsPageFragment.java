@@ -138,15 +138,20 @@ public class PostsPageFragment extends BaseFragment {
                     @Override
                     public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
                         loading = false;
-                        List<Post> posts = response.body();
-                        if (posts != null)
-                            adapter.addData(posts);
+                        if (response.isSuccessful() && isAdded()) {
+                            List<Post> posts = response.body();
+                            if (posts != null) {
+                                adapter.addData(posts);
+                            }
+                        }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
                         loading = false;
-                        Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                        if (isAdded()) {
+                            Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
                 return true;
