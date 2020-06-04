@@ -169,7 +169,7 @@ public class SignInActivity extends AccountAuthenticatorActivity {
                 public void onResponse(@NonNull Call<AuthResponse> call, @NonNull Response<AuthResponse> response) {
                     if (response.isSuccessful()) {
                         AuthResponse data = response.body();
-                        if (data != null) {
+                        if (data.getUser() == null) {
                             String authCode = data.getAuthCode();
                             Log.i(SignInActivity.class.getSimpleName(), authCode);
                             Intent signupIntent = new Intent(SignInActivity.this, SignUpActivity.class);
