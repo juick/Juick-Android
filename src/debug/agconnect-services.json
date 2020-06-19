@@ -1,0 +1,12 @@
+{
+	"client":{
+		"cp_id":"12345678",
+		"product_id":"901234567890",
+		"client_id":"123456789",
+		"client_secret":"secret",
+		"app_id":"123456789",
+		"package_name":"com.juick.debug",
+		"api_key":"key"
+	},
+	"configuration_version":"1.0"
+}

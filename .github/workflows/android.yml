@@ -14,7 +14,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
-      run: sudo ./gradlew --no-daemon lintDebug
+      run: sudo ./gradlew --no-daemon lintGoogleDebug
   connectedCheck:
     runs-on: macos-latest
     strategy:
@@ -29,4 +29,4 @@ jobs:
       with:
         api-level: ${{ matrix.BUILD_SDK }}
         target: google_apis
-        script: ./gradlew --no-daemon connectedDebugAndroidTest
+        script: ./gradlew --no-daemon connectedGoogleDebugAndroidTest

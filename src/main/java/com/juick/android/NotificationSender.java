@@ -36,7 +36,6 @@ import com.bumptech.glide.request.FutureTarget;
 import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.R;
-import com.juick.android.service.FirebaseReceiverService;
 import com.juick.api.GlideApp;
 import com.juick.api.model.Post;
 
@@ -118,7 +117,7 @@ public class NotificationSender {
                     Bitmap avatar = avatarBitmap.get();
                     notificationBuilder.setLargeIcon(avatar);
                 } catch (ExecutionException | InterruptedException e) {
-                    Log.w(FirebaseReceiverService.class.getSimpleName(), "Avatar was not loaded", e);
+                    Log.w(NotificationSender.class.getSimpleName(), "Avatar was not loaded", e);
                 }
                 if (Build.VERSION.SDK_INT < 26) {
                     notificationBuilder.setDefaults(~(Notification.DEFAULT_LIGHTS
@@ -127,7 +126,7 @@ public class NotificationSender {
                 notify(jmsg, notificationBuilder);
             }
         } catch (Exception e) {
-            Log.e(FirebaseReceiverService.class.getSimpleName(), "GCM message error", e);
+            Log.e(NotificationSender.class.getSimpleName(), "GCM message error", e);
         }
     }
 
