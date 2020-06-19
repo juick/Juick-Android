@@ -36,7 +36,8 @@
         android:label="@string/Juick"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:replace="android:label">
+        tools:node="replace">
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
         <activity
             android:name=".android.MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
@@ -141,6 +142,12 @@
             <meta-data
                 android:name="com.google.firebase.messaging.default_notification_channel_id"
                 android:value="@string/default_notification_channel_id" />
+        </service>
+        <service
+            android:name=".android.service.HmsReceiverService">
+            <intent-filter>
+                <action android:name="com.huawei.push.action.MESSAGING_EVENT" />
+            </intent-filter>
         </service>
     </application>
 </manifest>
