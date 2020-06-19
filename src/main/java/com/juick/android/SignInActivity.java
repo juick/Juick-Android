@@ -84,7 +84,7 @@ public class SignInActivity extends AccountAuthenticatorActivity {
 
             App.getInstance().auth(nick, password, new Callback<SecureUser>() {
                 @Override
-                public void onResponse(Call<SecureUser> call, Response<SecureUser> response) {
+                public void onResponse(@NonNull Call<SecureUser> call, @NonNull Response<SecureUser> response) {
                     if (response.isSuccessful() && response.code() == 200) {
                         updateAccount(nick, response.body().getHash(), currentAction);
                     } else {
@@ -93,8 +93,10 @@ public class SignInActivity extends AccountAuthenticatorActivity {
                 }
 
                 @Override
-                public void onFailure(Call<SecureUser> call, Throwable t) {
-                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                public void onFailure(@NonNull Call<SecureUser> call, @NonNull Throwable t) {
+                    CharSequence errorMessage = App.getInstance().getText(R.string.network_error);
+                    Toast.makeText(App.getInstance(), String.format("%s: %s", errorMessage,
+                            StringUtils.defaultString(t.getMessage())), Toast.LENGTH_LONG).show();
                 }
             });
         });
