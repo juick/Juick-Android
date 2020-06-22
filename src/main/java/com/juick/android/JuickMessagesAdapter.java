@@ -193,8 +193,13 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             if (post.getPhoto() != null && post.getPhoto().getSmall() != null) {
                 holder.photoLayout.setVisibility(View.VISIBLE);
                 holder.photoDescriptionView.setVisibility(View.GONE);
-                GlideApp.with(holder.itemView.getContext()).load(post.getPhoto().getSmall())
-                        .into(holder.photoImageView);
+                if (MessageUtils.haveNSFWContent(post)) {
+                    GlideApp.with(holder.itemView.getContext()).load(R.drawable.nsfw)
+                            .into(holder.photoImageView);
+                } else {
+                    GlideApp.with(holder.itemView.getContext()).load(post.getPhoto().getSmall())
+                            .into(holder.photoImageView);
+                }
             } else if (Previewer.hasViewableContent(post.getBody())) {
                 holder.photoLayout.setVisibility(View.VISIBLE);
                 Previewer.getPreviewUrl(post.getBody(), link -> {
