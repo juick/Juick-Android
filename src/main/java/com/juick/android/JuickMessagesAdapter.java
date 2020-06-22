@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import com.juick.App;
+import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
@@ -193,7 +194,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             if (post.getPhoto() != null && post.getPhoto().getSmall() != null) {
                 holder.photoLayout.setVisibility(View.VISIBLE);
                 holder.photoDescriptionView.setVisibility(View.GONE);
-                if (MessageUtils.haveNSFWContent(post)) {
+                if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
                     GlideApp.with(holder.itemView.getContext()).load(R.drawable.nsfw)
                             .into(holder.photoImageView);
                 } else {
