@@ -85,6 +85,8 @@ android {
         addConstant("EVENTS_ENDPOINT", "https://juick.com/api/events")
         addConstant("INTENT_NEW_EVENT_ACTION", "com.juick.NEW_EVENT_ACTION")
 
+        buildConfigField "boolean", "HIDE_NSFW", "false"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testHandleProfiling true
         testFunctionalTest true
@@ -133,6 +135,11 @@ android {
             release {
                 minifyEnabled false
                 signingConfig signingConfigs.release
+            }
+            releaseSafe {
+                minifyEnabled false
+                signingConfig signingConfigs.release
+                buildConfigField "boolean", "HIDE_NSFW", "true"
             }
         }
     }
