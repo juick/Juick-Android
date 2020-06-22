@@ -113,4 +113,10 @@ public class MessageUtils {
         msg = msg.replaceAll("\n", "<br/>\n");
         return msg;
     }
+
+    public static boolean haveNSFWContent(Post post) {
+        return post.getTags().contains("NSFW")
+                || post.getTags().contains("girlz")
+                || post.getTags().contains("сиськи");
+    }
 }
