@@ -48,7 +48,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.11.0@aar'
     implementation 'com.github.stfalcon:chatkit:0.3.3'
-    implementation 'ch.acra:acra-mail:5.5.1'
+    implementation 'ch.acra:acra-mail:5.6.1'
 
     // Core library
     androidTestImplementation 'androidx.test:core:1.2.0'
