@@ -27,33 +27,9 @@ import com.huawei.hms.push.RemoteMessage;
 
 public class HmsReceiverService extends HmsMessageService {
     @Override
-    public void onCreate() {
-        super.onCreate();
-        // get token
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    // read from agconnect-services.json
-                    String appId = AGConnectServicesConfig.fromContext(HmsReceiverService.this).getString("client/app_id");
-                    String pushtoken = HmsInstanceId.getInstance(HmsReceiverService.this).getToken(appId, "HCM");
-                    if (!TextUtils.isEmpty(pushtoken)) {
-                        Log.i("HMS", "get token:" + pushtoken);
-
-                    }
-                } catch (Exception e) {
-                    Log.i("HMS", "getToken failed, " + e);
-
-                }
-            }
-        }.start();
-    }
-
-    @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d("HMS", remoteMessage.getData());
     }
-
     @Override
     public void onNewToken(String s) {
         Log.d("HMS", "Token: " + s);

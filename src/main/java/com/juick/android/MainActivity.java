@@ -39,14 +39,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.here.oksse.OkSse;
-import com.here.oksse.ServerSentEvent;
 import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.R;
@@ -62,10 +56,7 @@ import com.juick.util.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -80,7 +71,7 @@ public class MainActivity extends BaseActivity
 
     private ActivityMainBinding model;
 
-    private OkHttpClient es;
+    private NotificationManager notificationManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -127,13 +118,7 @@ public class MainActivity extends BaseActivity
             if (!TextUtils.isEmpty(Utils.getNick())) {
                 titleHeader.setText(Utils.getNick());
             }
-            if (GoogleApiAvailability.getInstance()
-                    .isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS) {
-                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> {
-                    String token = instanceIdResult.getToken();
-                    Utils.updateFCMToken(token);
-                });
-            }
+            notificationManager = new NotificationManager(this);
             if (Build.VERSION.SDK_INT >= 23
                     && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{
@@ -158,11 +143,7 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
-                != ConnectionResult.SUCCESS) {
-            Log.d(this.getClass().getSimpleName(), "Play Services unavailable, using direct connection");
-            initEventsListener();
-        }
+        notificationManager.onResume();
         Intent intent = getIntent();
         String action = StringUtils.defaultString(intent.getAction());
         if (action.equals(BuildConfig.INTENT_NEW_EVENT_ACTION)) {
@@ -289,56 +270,6 @@ public class MainActivity extends BaseActivity
                 replaceFragment(new DiscoverFragment());
                 break;
         }
-    }
-
-    private void initEventsListener() {
-        if (es != null) return;
-        es = Utils.getSSEFactory()
-                .readTimeout(0, TimeUnit.SECONDS).build();
-        Request request = new Request.Builder()
-                .url(BuildConfig.EVENTS_ENDPOINT)
-                .build();
-        OkSse sse = new OkSse(es);
-        sse.newServerSentEvent(request, new ServerSentEvent.Listener() {
-            @Override
-            public void onOpen(ServerSentEvent sse, okhttp3.Response response) {
-                Log.d("SSE", "Event listener opened");
-            }
-
-            @Override
-            public void onMessage(ServerSentEvent sse, String id, String event, String message) {
-                Log.d("SSE", "event received: " + event);
-                if (event.equals("msg")) {
-                    LocalBroadcastManager.getInstance(App.getInstance())
-                            .sendBroadcast(new Intent(BuildConfig.INTENT_NEW_EVENT_ACTION)
-                                    .putExtra(getString(R.string.notification_extra), message));
-                }
-            }
-
-            @Override
-            public void onComment(ServerSentEvent sse, String comment) {
-
-            }
-
-            @Override
-            public boolean onRetryTime(ServerSentEvent sse, long milliseconds) {
-                return true;
-            }
-
-            @Override
-            public boolean onRetryError(ServerSentEvent sse, Throwable throwable, okhttp3.Response response) {
-                return true;
-            }
-
-            @Override
-            public void onClosed(ServerSentEvent sse) {
-            }
-
-            @Override
-            public Request onPreRetry(ServerSentEvent sse, Request originalRequest) {
-                return originalRequest;
-            }
-        });
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

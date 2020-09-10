@@ -36,8 +36,7 @@
         android:label="@string/Juick"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:node="replace">
-        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+        tools:node="merge">
         <activity
             android:name=".android.MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
@@ -100,7 +99,6 @@
                 <data android:mimeType="image/png" />
             </intent-filter>
         </activity>
-
         <service
             android:name=".android.service.AuthenticationService"
             android:exported="true"
@@ -126,28 +124,6 @@
             <meta-data
                 android:name="android.provider.CONTACTS_STRUCTURE"
                 android:resource="@xml/contacts" />
-        </service>
-        <service android:name=".android.service.FirebaseReceiverService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-            <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
-                 notification message. See README(https://goo.gl/6BKBk7) for more. -->
-            <meta-data
-                android:name="com.google.firebase.messaging.default_notification_color"
-                android:resource="@color/colorAccent" />
-            <meta-data
-                android:name="com.google.firebase.messaging.default_notification_icon"
-                android:resource="@drawable/ic_notification" />
-            <meta-data
-                android:name="com.google.firebase.messaging.default_notification_channel_id"
-                android:value="@string/default_notification_channel_id" />
-        </service>
-        <service
-            android:name=".android.service.HmsReceiverService">
-            <intent-filter>
-                <action android:name="com.huawei.push.action.MESSAGING_EVENT" />
-            </intent-filter>
         </service>
     </application>
 </manifest>

@@ -88,6 +88,10 @@ android {
             }
             release {
                 minifyEnabled false
+                /*
+                shrinkResources true
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                 */
                 signingConfig signingConfigs.release
             }
         }
@@ -98,23 +102,17 @@ android {
             debuggable true
         }
         release {
-
         }
     }
     flavorDimensions "notifications"
     productFlavors {
         google {
             dimension "notifications"
-            apply plugin: "com.google.gms.google-services"
-            googleServices {
-                disableVersionCheck = true
-            }
         }
         huawei {
             dimension "notifications"
             minSdkVersion 17
             buildConfigField "boolean", "HIDE_NSFW", "true"
-            apply plugin: 'com.huawei.agconnect'
         }
         free {
             dimension "notifications"
@@ -132,8 +130,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.google.android.gms:play-services-auth:18.1.0'
     // Firebase platform
-    implementation platform('com.google.firebase:firebase-bom:25.9.0')
-    implementation 'com.google.firebase:firebase-messaging'
+    googleImplementation platform('com.google.firebase:firebase-bom:25.9.0')
+    googleImplementation 'com.google.firebase:firebase-messaging'
 
     // okhttp 3.13+ require API21
     //noinspection GradleDependency
@@ -169,4 +167,10 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     // UI Automator
     androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.3'
+}
+
+apply plugin: 'com.huawei.agconnect'
+apply plugin: 'com.google.gms.google-services'
+googleServices {
+    disableVersionCheck = true
 }

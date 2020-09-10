@@ -11,6 +11,8 @@ local.properties
 *.iml
 .DS_Store
 release/**
-releaseSafe/**
+google/**
+huawei/**
+free/**
 /google-services.json
 /agconnect-services.json
