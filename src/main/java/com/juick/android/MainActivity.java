@@ -143,7 +143,9 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        notificationManager.onResume();
+        if (notificationManager != null) {
+            notificationManager.onResume();
+        }
         Intent intent = getIntent();
         String action = StringUtils.defaultString(intent.getAction());
         if (action.equals(BuildConfig.INTENT_NEW_EVENT_ACTION)) {
