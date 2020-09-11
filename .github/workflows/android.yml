@@ -6,7 +6,9 @@ jobs:
   check:
 
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        FLAVOR: [Free, Huawei, Google]
     steps:
     - uses: actions/checkout@v2
     - name: set up JDK
@@ -14,7 +16,7 @@ jobs:
       with:
         java-version: 14
     - name: Build with Gradle
-      run: sudo ./gradlew --no-daemon lintGoogleDebug
+      run: sudo ./gradlew --no-daemon lint${{ matrix.FLAVOR }}Debug
   connectedCheck:
     runs-on: macos-latest
     strategy:
