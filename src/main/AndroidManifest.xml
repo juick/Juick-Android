@@ -35,8 +35,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/Juick"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        tools:node="merge">
+        android:theme="@style/AppTheme">
         <activity
             android:name=".android.MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
