@@ -68,40 +68,17 @@ android {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/notice.txt'
     }
-    // signing config
-    if (file("keystore.properties").exists()) {
-        Properties props = new Properties()
-        props.load(new FileInputStream(file("keystore.properties")))
-
-        signingConfigs {
-            release {
-                storeFile file(props["key.store"])
-                storePassword props["key.store.password"]
-                keyAlias props["key.alias"]
-                keyPassword props["key.alias.password"]
-            }
-        }
-
-        buildTypes {
-            debug {
-
-            }
-            release {
-                minifyEnabled false
-                /*
-                shrinkResources true
-                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-                 */
-                signingConfig signingConfigs.release
-            }
-        }
-    }
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
             debuggable true
         }
         release {
+            minifyEnabled false
+            /*
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+             */
         }
     }
     flavorDimensions "notifications"
