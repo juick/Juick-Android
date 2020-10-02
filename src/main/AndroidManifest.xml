@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.juick">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -110,7 +109,7 @@
                 android:resource="@xml/authenticator" />
         </service>
         <service
-            android:name=".android.service.SyncService"
+            android:name=".android.service.ContactsSyncService"
             android:exported="true"
             android:process=":contacts">
             <intent-filter>

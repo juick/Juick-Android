@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.juick">
+    <application
+        android:name=".App">
+        <provider
+            android:name=".android.service.MessagesProvider"
+            android:authorities="com.juick.messages"
+            android:label="@string/Discussions"
+            android:exported="false"
+            android:syncable="true"/>
+        <service
+            android:name=".android.service.MessagesSyncService"
+            android:exported="true"
+            android:process=":sync">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/sync_messages" />
+        </service>
+    </application>
+</manifest>

@@ -34,13 +34,9 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.RawContacts;
 import android.util.Log;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.GlideApp;
-import com.juick.api.model.Post;
 import com.juick.api.model.SecureUser;
 import com.juick.api.model.User;
 
@@ -55,7 +51,7 @@ import retrofit2.Response;
 /**
  * @author Ugnich Anton
  */
-public class SyncService extends Service {
+public class ContactsSyncService extends Service {
 
     private JuickSyncAdapter contactsSyncAdapter;
 
@@ -79,24 +75,9 @@ public class SyncService extends Service {
                     if (friends != null) {
                         updateContacts(account, friends);
                     }
-                    if (GoogleApiAvailability.getInstance()
-                            .isGooglePlayServicesAvailable(this.context) != ConnectionResult.SUCCESS) {
-                        if (me.getUnreadCount() > 0) {
-                            User user = new User(0, "Juick");
-                            Post announcement = new Post();
-                            announcement.setUser(user);
-                            announcement.setBody(context.getString(R.string.unread_discussions));
-                            try {
-                                String messageData = App.getInstance().getJsonMapper().writeValueAsString(announcement);
-                                App.getInstance().getNotificationSender().showNotification(messageData);
-                            } catch (JsonProcessingException e) {
-                                Log.w(this.getClass().getSimpleName(), "JSON error", e);
-                            }
-                        }
-                    }
                 }
             } catch (IOException e) {
-                Log.d(SyncService.class.getSimpleName(), "Sync error", e);
+                Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
             }
         }
 
@@ -150,7 +131,7 @@ public class SyncService extends Service {
                                 .submit()
                                 .get();
                     } catch (InterruptedException | ExecutionException e) {
-                        Log.w(SyncService.class.getSimpleName(), "Avatar error", e);
+                        Log.w(ContactsSyncService.class.getSimpleName(), "Avatar error", e);
                     }
                 }
                 // Photo
@@ -176,7 +157,7 @@ public class SyncService extends Service {
                 try {
                     context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, operationList);
                 } catch (Exception e) {
-                    Log.d(SyncService.class.getSimpleName(), "Sync error", e);
+                    Log.d(ContactsSyncService.class.getSimpleName(), "Sync error", e);
                 }
             }
         }
