@@ -29,11 +29,14 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.juick.android.JuickConfig;
+import com.juick.android.LinkPreviewer;
 import com.juick.android.NotificationSender;
+import com.juick.android.SignInProvider;
 import com.juick.android.Utils;
 import com.juick.api.Api;
 import com.juick.api.UpLoadProgressInterceptor;
-import com.juick.api.ext.YouTube;
+import com.juick.api.model.LinkPreview;
 import com.juick.api.model.SecureUser;
 
 import org.acra.ACRA;
@@ -111,6 +114,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
+        JuickConfig.init();
     }
     @Override
     protected void attachBaseContext(Context base) {
@@ -231,22 +235,32 @@ public class App extends Application {
         return jsonMapper;
     }
 
-    private YouTube youTube;
+    private List<LinkPreviewer> linkPreviewers;
 
-    public YouTube getYouTube() {
-        if (youTube == null) {
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .connectionSpecs(Arrays.asList(getOkHttpLegacyTls(), ConnectionSpec.CLEARTEXT))
-                    .build();
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://www.googleapis.com/youtube/v3/")
-                    .client(client)
-                    .addConverterFactory(getJacksonConverterFactory())
-                    .build();
-
-            youTube = retrofit.create(YouTube.class);
+    public List<LinkPreviewer> getPreviewers() {
+        if (linkPreviewers == null) {
+            linkPreviewers = new ArrayList<>();
         }
-        return youTube;
+        return linkPreviewers;
+    }
+
+    public boolean hasViewableContent(String message) {
+        for (LinkPreviewer previewer : getPreviewers()) {
+            if (previewer.hasViewableContent(message)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private SignInProvider signInProvider;
+
+    public SignInProvider getSignInProvider() {
+        return signInProvider;
+    }
+
+    public void setSignInProvider(SignInProvider provider) {
+        signInProvider = provider;
     }
 
     public ConnectionSpec getOkHttpLegacyTls() {

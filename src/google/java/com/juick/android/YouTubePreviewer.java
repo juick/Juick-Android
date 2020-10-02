@@ -24,27 +24,49 @@ import androidx.annotation.NonNull;
 import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.R;
+import com.juick.api.ext.YouTube;
 import com.juick.api.ext.youtube.Thumbnail;
 import com.juick.api.ext.youtube.Video;
 import com.juick.api.ext.youtube.VideoList;
 import com.juick.api.model.LinkPreview;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import okhttp3.ConnectionSpec;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
 
-public class Previewer {
-    interface UrlCallback {
-        void response(LinkPreview url);
+public class YouTubePreviewer implements LinkPreviewer {
+
+    private OkHttpClient youTubeClient;
+    private Retrofit youTubeMapper;
+    private YouTube youTube;
+
+
+
+    public YouTubePreviewer() {
+        youTubeClient = new OkHttpClient.Builder()
+                .connectionSpecs(Arrays.asList(App.getInstance().getOkHttpLegacyTls(), ConnectionSpec.CLEARTEXT))
+                .build();
+        youTubeMapper = new Retrofit.Builder()
+                .baseUrl("https://www.googleapis.com/youtube/v3/")
+                .client(youTubeClient)
+                .addConverterFactory(App.getInstance().getJacksonConverterFactory())
+                .build();
+
+        youTube = youTubeMapper.create(YouTube.class);
     }
+
     private static Pattern youtubeLink = Pattern.compile("(?:https?:)?\\/\\/(?:www\\.|m\\.|gaming\\.)?(?:youtu(?:(?:\\.be\\/|be\\.com\\/(?:v|embed)\\/)([-\\w]+)|be\\.com\\/watch)((?:(?:\\?|&(?:amp;)?)(?:\\w+=[-\\.\\w]*[-\\w]))*)|youtube\\.com\\/playlist\\?list=([-\\w]*)(&(amp;)?[-\\w\\?=]*)?)", Pattern.MULTILINE);
-    public static boolean hasViewableContent(String message) {
+    public boolean hasViewableContent(String message) {
         return youtubeLink.matcher(message).find() && !BuildConfig.DEBUG;
     }
-    public static void getPreviewUrl(String message, UrlCallback callback) {
+    public void getPreviewUrl(String message, UrlCallback callback) {
         Matcher youtubeMatcher = youtubeLink.matcher(message);
         if (youtubeMatcher.find()) {
             Matcher linkMatcher = youtubeLink.matcher(youtubeMatcher.group());
@@ -57,7 +79,7 @@ public class Previewer {
                     videoId = sanitizer.getValue("v");
                 }
                 if (videoId != null) {
-                    App.getInstance().getYouTube().getDescription(videoId,
+                    youTube.getDescription(videoId,
                             App.getInstance().getText(R.string.google_api_key).toString()).enqueue(new Callback<VideoList>() {
                         @Override
                         public void onResponse(@NonNull Call<VideoList> call, @NonNull Response<VideoList> response) {

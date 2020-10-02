@@ -151,5 +151,5 @@ googleServices {
 }
 apply plugin: 'com.huawei.agconnect'
 android.applicationVariants.all { variant ->
-    project.tasks.getByName('process' + variant.name.capitalize() + 'GoogleServices').enabled = variant.name.contains('Google')
+    project.tasks.getByName('process' + variant.name.capitalize() + 'GoogleServices').enabled = variant.name.contains('google')
 }

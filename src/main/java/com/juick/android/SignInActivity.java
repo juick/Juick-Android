@@ -22,23 +22,14 @@ import android.accounts.AccountManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
 import com.juick.App;
 import com.juick.R;
-import com.juick.api.model.AuthResponse;
 import com.juick.api.model.SecureUser;
 import com.juick.databinding.ActivityLoginBinding;
 import com.juick.util.StringUtils;
@@ -56,11 +47,6 @@ public class SignInActivity extends AccountAuthenticatorActivity {
     public static final String EXTRA_ACTION = "EXTRA_ACTION";
 
     public static final int ACTION_PASSWORD_UPDATE = 1;
-
-    private static final int RC_SIGN_IN = 9001;
-    private static final int RC_SIGN_UP = 9002;
-
-    private GoogleSignInClient googleClient;
 
     private int currentAction;
 
@@ -101,30 +87,13 @@ public class SignInActivity extends AccountAuthenticatorActivity {
             });
         });
 
-        String googleClientId = StringUtils.defaultString(getResources().getString(R.string.default_web_client_id));
-
-        if (TextUtils.isEmpty(googleClientId)) {
+        if (!App.getInstance().getSignInProvider().prepareSignIn(this, model.signInButton)) {
             model.signInButton.setVisibility(View.GONE);
         } else {
             // Button listeners
             model.signInButton.setOnClickListener(v -> {
-                Intent signInIntent = googleClient.getSignInIntent();
-                startActivityForResult(signInIntent, RC_SIGN_IN);
+                App.getInstance().getSignInProvider().performSignIn();
             });
-
-            // Configure sign-in to request the user's ID, email address, and basic
-            // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestIdToken(googleClientId)
-                    .requestEmail()
-                    .build();
-            // Build a GoogleSignInClient with the options specified by gso.
-            googleClient = GoogleSignIn.getClient(this, gso);
-
-            // Set the dimensions of the sign-in button.
-            SignInButton signInButton = model.signInButton;
-            signInButton.setSize(SignInButton.SIZE_STANDARD);
-            signInButton.setColorScheme(SignInButton.COLOR_LIGHT);
         }
 
         currentAction = getIntent().getIntExtra(EXTRA_ACTION, 0);
@@ -143,57 +112,15 @@ public class SignInActivity extends AccountAuthenticatorActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
-        }
-        if (requestCode == RC_SIGN_UP && data != null) {
-            String nick = data.getStringExtra("nick");
-            String password = data.getStringExtra("password");
+        App.getInstance().getSignInProvider().onSignInResult(requestCode, resultCode, data, (nick, password) -> {
             if (!TextUtils.isEmpty(nick)) {
                 model.juickNick.setText(nick);
                 model.juickPassword.setText(password);
                 model.buttonSave.performClick();
             }
-        }
-    }
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-
-            Log.i(SignInActivity.class.getSimpleName(), "Success " + account.getIdToken());
-            App.getInstance().getApi().googleAuth(account.getIdToken()).enqueue(new Callback<AuthResponse>() {
-                @Override
-                public void onResponse(@NonNull Call<AuthResponse> call, @NonNull Response<AuthResponse> response) {
-                    if (response.isSuccessful()) {
-                        AuthResponse data = response.body();
-                        if (data.getUser() == null) {
-                            String authCode = data.getAuthCode();
-                            Log.i(SignInActivity.class.getSimpleName(), authCode);
-                            Intent signupIntent = new Intent(SignInActivity.this, SignUpActivity.class);
-                            signupIntent.putExtra("email", data.getAccount());
-                            signupIntent.putExtra("authCode", data.getAuthCode());
-                            startActivityForResult(signupIntent, RC_SIGN_UP);
-                        } else {
-                            updateAccount(data.getUser().getName(), data.getUser().getHash(), 0);
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<AuthResponse> call, @NonNull Throwable t) {
-                    Toast.makeText(App.getInstance(), "Google error", Toast.LENGTH_LONG).show();
-                }
-            });
-        } catch (ApiException e) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w(SignInActivity.class.getSimpleName(), "signInResult:failed code=" + e.getStatusCode());
-        }
+        }, (username, hash) -> {
+            updateAccount(username, hash, 0);
+        });
     }
 
     private void updateAccount(String nick, String hash, int action) {

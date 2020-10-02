@@ -201,18 +201,21 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     GlideApp.with(holder.itemView.getContext()).load(post.getPhoto().getSmall())
                             .into(holder.photoImageView);
                 }
-            } else if (Previewer.hasViewableContent(post.getBody())) {
+            } else if (App.getInstance().hasViewableContent(post.getBody())) {
                 holder.photoLayout.setVisibility(View.VISIBLE);
-                Previewer.getPreviewUrl(post.getBody(), link -> {
-                    if (link != null) {
-                        GlideApp.with(holder.itemView.getContext()).load(link.getUrl())
-                                .into(holder.photoImageView);
-                        holder.photoDescriptionView.setVisibility(View.VISIBLE);
-                        holder.photoDescriptionView.setText(link.getDescription());
-                    } else {
-                        holder.photoLayout.setVisibility(View.GONE);
-                    }
-                });
+                // TODO: support multiple previewers
+                if (App.getInstance().getPreviewers().size() > 0) {
+                    App.getInstance().getPreviewers().get(0).getPreviewUrl(post.getBody(), link -> {
+                        if (link != null) {
+                            GlideApp.with(holder.itemView.getContext()).load(link.getUrl())
+                                    .into(holder.photoImageView);
+                            holder.photoDescriptionView.setVisibility(View.VISIBLE);
+                            holder.photoDescriptionView.setText(link.getDescription());
+                        } else {
+                            holder.photoLayout.setVisibility(View.GONE);
+                        }
+                    });
+                }
             } else {
                 holder.photoLayout.setVisibility(View.GONE);
             }
