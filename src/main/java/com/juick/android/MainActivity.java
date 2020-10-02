@@ -88,7 +88,8 @@ public class MainActivity extends BaseActivity
 
         toggle.syncState();
 
-        final NavigationView navigationView = model.navView;;
+        final NavigationView navigationView = model.navView;
+        ;
         navigationView.setNavigationItemSelectedListener(this);
 
         View navHeader = navigationView.getHeaderView(0).findViewById(R.id.header);
@@ -119,6 +120,7 @@ public class MainActivity extends BaseActivity
                 titleHeader.setText(Utils.getNick());
             }
             notificationManager = new NotificationManager(this);
+            Account account = Utils.getAccount();
             if (Build.VERSION.SDK_INT >= 23
                     && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{
@@ -126,10 +128,14 @@ public class MainActivity extends BaseActivity
                         Manifest.permission.WRITE_CONTACTS
                 }, ViewUtil.REQUEST_CODE_SYNC_CONTACTS);
             } else {
-                Account account = Utils.getAccount();
                 ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1);
                 ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
+                ContentResolver.addPeriodicSync(account, ContactsContract.AUTHORITY, Bundle.EMPTY, 86400L);
             }
+            String messagesProviderAuthority = getString(R.string.messages_provider_authority);
+            ContentResolver.setIsSyncable(account, messagesProviderAuthority, 1);
+            ContentResolver.setSyncAutomatically(account, messagesProviderAuthority, true);
+            ContentResolver.addPeriodicSync(account, messagesProviderAuthority, Bundle.EMPTY, 300L);
         }
 
         navigationView.getMenu().findItem(R.id.chats).setVisible(Utils.hasAuth());
@@ -273,12 +279,14 @@ public class MainActivity extends BaseActivity
                 break;
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == ViewUtil.REQUEST_CODE_SYNC_CONTACTS) {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 ContentResolver.setSyncAutomatically(Utils.getAccount(), ContactsContract.AUTHORITY, true);
+                ContentResolver.addPeriodicSync(Utils.getAccount(), ContactsContract.AUTHORITY, Bundle.EMPTY, 86400L);
             }
         }
     }
