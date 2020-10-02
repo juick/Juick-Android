@@ -14,5 +14,5 @@ release/**
 google/**
 huawei/**
 free/**
-/google-services.json
-/agconnect-services.json
+/src/release/google/google-services.json
+/src/release/huawei/agconnect-services.json
