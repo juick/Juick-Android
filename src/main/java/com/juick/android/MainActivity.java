@@ -132,10 +132,7 @@ public class MainActivity extends BaseActivity
                 ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
                 ContentResolver.addPeriodicSync(account, ContactsContract.AUTHORITY, Bundle.EMPTY, 86400L);
             }
-            String messagesProviderAuthority = getString(R.string.messages_provider_authority);
-            ContentResolver.setIsSyncable(account, messagesProviderAuthority, 1);
-            ContentResolver.setSyncAutomatically(account, messagesProviderAuthority, true);
-            ContentResolver.addPeriodicSync(account, messagesProviderAuthority, Bundle.EMPTY, 300L);
+            JuickConfig.refresh();
         }
 
         navigationView.getMenu().findItem(R.id.chats).setVisible(Utils.hasAuth());

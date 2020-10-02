@@ -23,4 +23,5 @@ public class JuickConfig {
     public static void init() {
         App.getInstance().setSignInProvider((context, button) -> false);
     }
+    public static void refresh() {}
 }

@@ -24,4 +24,5 @@ public class JuickConfig {
         App.getInstance().getPreviewers().add(new YouTubePreviewer());
         App.getInstance().setSignInProvider(new GoogleSignInProvider());
     }
+    public static void refresh() {}
 }

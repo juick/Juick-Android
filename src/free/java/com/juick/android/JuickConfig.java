@@ -17,10 +17,22 @@
 
 package com.juick.android;
 
+import android.accounts.Account;
+import android.content.ContentResolver;
+import android.os.Bundle;
+
 import com.juick.App;
+import com.juick.R;
 
 public class JuickConfig {
     public static void init() {
         App.getInstance().setSignInProvider((context, button) -> false);
+    }
+    public static void refresh() {
+        String messagesProviderAuthority = App.getInstance().getString(R.string.messages_provider_authority);
+        Account account = Utils.getAccount();
+        ContentResolver.setIsSyncable(account, messagesProviderAuthority, 1);
+        ContentResolver.setSyncAutomatically(account, messagesProviderAuthority, true);
+        ContentResolver.addPeriodicSync(account, messagesProviderAuthority, Bundle.EMPTY, 300L);
     }
 }
