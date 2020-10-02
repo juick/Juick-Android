@@ -18,19 +18,23 @@
 package com.juick.android;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.juick.R;
 
 public class NotificationManager {
     public NotificationManager(Context context) {
-        if (GoogleApiAvailability.getInstance()
-                .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
-            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> {
-                String token = instanceIdResult.getToken();
-                Utils.updateFCMToken(token);
-            });
+        if (!TextUtils.isEmpty(context.getString(R.string.gcm_defaultSenderId))) {
+            if (GoogleApiAvailability.getInstance()
+                    .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
+                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> {
+                    String token = instanceIdResult.getToken();
+                    Utils.updateFCMToken(token);
+                });
+            }
         }
     }
     public void onResume() {
