@@ -5,18 +5,14 @@ on: [push, pull_request]
 jobs:
   check:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         FLAVOR: [Free, Huawei, Google]
     steps:
-    - uses: actions/checkout@v2
-    - name: set up JDK
-      uses: actions/setup-java@v1
-      with:
-        java-version: 14
-    - name: Build with Gradle
-      run: sudo ./gradlew --no-daemon lint${{ matrix.FLAVOR }}Debug
+    - uses: actions/checkout@v2    
+    - name: Build
+      run: gradle --no-daemon lint${{ matrix.FLAVOR }}Debug
   connectedCheck:
     runs-on: macos-latest
     strategy:
@@ -31,4 +27,4 @@ jobs:
       with:
         api-level: ${{ matrix.BUILD_SDK }}
         target: google_apis
-        script: ./gradlew --no-daemon connectedGoogleDebugAndroidTest
+        script: gradle --no-daemon connectedGoogleDebugAndroidTest
