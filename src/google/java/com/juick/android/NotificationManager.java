@@ -22,7 +22,7 @@ import android.text.TextUtils;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.juick.R;
 
 public class NotificationManager {
@@ -30,8 +30,7 @@ public class NotificationManager {
         if (!TextUtils.isEmpty(context.getString(R.string.gcm_defaultSenderId))) {
             if (GoogleApiAvailability.getInstance()
                     .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
-                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> {
-                    String token = instanceIdResult.getToken();
+                FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token -> {
                     Utils.updateFCMToken(token);
                 });
             }
