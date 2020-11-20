@@ -11,7 +11,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     strategy:
       fail-fast: false
@@ -27,7 +27,7 @@ jobs:
         languages: ${{ matrix.language }}
 
     - name: Build
-      run: gradle assembleDebug
+      run: gradle assembleGoogleDebug
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
