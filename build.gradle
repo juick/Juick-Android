@@ -3,6 +3,7 @@ buildscript {
         mavenCentral()
         google()
         maven { url 'http://developer.huawei.com/repo/' }
+        maven { url 'https://repo.spring.io/plugins-release/' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.2'
