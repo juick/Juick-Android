@@ -31,6 +31,10 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 15
     - name: Cache Gradle packages
       uses: actions/cache@v2
       with:
