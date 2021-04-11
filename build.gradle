@@ -16,6 +16,7 @@ apply plugin: 'com.android.application'
 repositories {
     mavenCentral()
     google()
+    jcenter()
     maven { url 'https://jitpack.io' }
     maven { url 'https://developer.huawei.com/repo/' }
 }
@@ -123,7 +124,7 @@ dependencies {
     annotationProcessor 'androidx.annotation:annotation:1.2.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.11.0@aar'
-    implementation 'com.github.stfalcon:chatkit:0.3.3'
+    implementation 'com.github.stfalcon-studio:Chatkit:0.4.1'
     implementation 'ch.acra:acra-mail:5.7.0'
     huaweiImplementation 'com.huawei.hms:push:5.1.1.301'
 
