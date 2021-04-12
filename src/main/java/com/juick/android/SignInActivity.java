@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -86,12 +87,12 @@ public class SignInActivity extends AccountAuthenticatorActivity {
                 }
             });
         });
-
-        if (!App.getInstance().getSignInProvider().prepareSignIn(this, model.signInButton)) {
-            model.signInButton.setVisibility(View.GONE);
+        FrameLayout signInButton = (FrameLayout) App.getInstance().getSignInProvider().prepareSignIn(this, model.signInButtonPlaceholder);
+        if (signInButton == null) {
+            signInButton.setVisibility(View.GONE);
         } else {
             // Button listeners
-            model.signInButton.setOnClickListener(v -> {
+            signInButton.setOnClickListener(v -> {
                 App.getInstance().getSignInProvider().performSignIn();
             });
         }

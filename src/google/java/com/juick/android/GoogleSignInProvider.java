@@ -21,10 +21,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.FrameLayout;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -52,12 +54,13 @@ public class GoogleSignInProvider implements SignInProvider {
     private Activity context;
 
     @Override
-    public boolean prepareSignIn(Activity context, FrameLayout button) {
+    @Nullable
+    public View prepareSignIn(Activity context, RelativeLayout button) {
         this.context = context;
         String googleClientId = StringUtils.defaultString(context.getResources().getString(R.string.default_web_client_id));
 
         if (TextUtils.isEmpty(googleClientId)) {
-            return false;
+            return null;
         } else {
             // Configure sign-in to request the user's ID, email address, and basic
             // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -73,7 +76,7 @@ public class GoogleSignInProvider implements SignInProvider {
             signInButton.setSize(SignInButton.SIZE_STANDARD);
             signInButton.setColorScheme(SignInButton.COLOR_LIGHT);
             button.addView(signInButton);
-            return true;
+            return signInButton;
         }
     }
 

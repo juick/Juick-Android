@@ -19,7 +19,8 @@ package com.juick.android;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.widget.FrameLayout;
+import android.view.View;
+import android.widget.RelativeLayout;
 
 public interface SignInProvider {
     interface SignInRequestCallback {
@@ -28,7 +29,7 @@ public interface SignInProvider {
     interface SignInSuccessCallback {
         void response(String username, String hash);
     }
-    boolean prepareSignIn(Activity context, FrameLayout button);
+    View prepareSignIn(Activity context, RelativeLayout button);
     default void performSignIn() {};
     default void onSignInResult(int requestCode, int resultCode, Intent data,
                         SignInRequestCallback requestCallback, SignInSuccessCallback successCallback) {};
