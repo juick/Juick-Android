@@ -21,7 +21,7 @@ import com.juick.App;
 
 public class JuickConfig {
     public static void init() {
-        App.getInstance().setSignInProvider((context, button) -> false);
+        App.getInstance().setSignInProvider((context, button) -> null);
     }
     public static void refresh() {}
 }
