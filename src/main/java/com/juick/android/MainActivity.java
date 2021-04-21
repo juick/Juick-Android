@@ -49,6 +49,7 @@ import com.juick.android.fragment.DiscoverFragment;
 import com.juick.android.fragment.ThreadFragment;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
+import com.juick.api.model.Pms;
 import com.juick.api.model.Post;
 import com.juick.api.model.SecureUser;
 import com.juick.databinding.ActivityMainBinding;
@@ -232,7 +233,22 @@ public class MainActivity extends BaseActivity
         int id = item.getItemId();
 
         if (id == R.id.chats) {
-            replaceFragment(new ChatsFragment());
+            ChatsFragment chatsFragment = new ChatsFragment();
+            replaceFragment(chatsFragment);
+            App.getInstance().getApi().groupsPms(10).enqueue(new Callback<Pms>() {
+                @Override
+                public void onResponse(@NonNull Call<Pms> call, @NonNull Response<Pms> response) {
+                    if (response.isSuccessful()) {
+                        Pms pms = response.body();
+                        ((App.ChatsListener)chatsFragment).onChatsReceived(pms.getPms());
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Pms> call, @NonNull Throwable t) {
+                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
+                }
+            });
         } else if (id == R.id.messages) {
             replaceFragment(new DiscoverFragment());
         } else if (id == R.id.feed) {

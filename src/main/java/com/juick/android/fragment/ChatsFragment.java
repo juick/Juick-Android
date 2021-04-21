@@ -18,7 +18,6 @@ package com.juick.android.fragment;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,60 +27,44 @@ import com.juick.R;
 import com.juick.android.FeedBuilder;
 import com.juick.api.GlideApp;
 import com.juick.api.model.Chat;
-import com.juick.api.model.Pms;
 import com.juick.databinding.FragmentDialogListBinding;
-import com.stfalcon.chatkit.dialogs.DialogsList;
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.List;
 
 /**
  *
  * @author ugnich
  */
-public class ChatsFragment extends BaseFragment {
+public class ChatsFragment extends BaseFragment implements App.ChatsListener {
 
     private FragmentDialogListBinding model;
 
+    private DialogsListAdapter<Chat> chatsAdapter;
+
     public ChatsFragment() {
         super(R.layout.fragment_dialog_list);
+        chatsAdapter = new DialogsListAdapter<>((imageView, url, object) ->
+                GlideApp.with(imageView.getContext())
+                        .load(url)
+                        .into(imageView));
+        chatsAdapter.setOnDialogClickListener(dialog -> getBaseActivity().replaceFragment(
+                FeedBuilder.chatFor(dialog.getDialogName(), Integer.parseInt(dialog.getId()))));
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        model = FragmentDialogListBinding.bind(view);
-
         getActivity().setTitle(R.string.PMs);
 
-        final DialogsListAdapter<Chat> dialogListAdapter = new DialogsListAdapter<>((imageView, url, object) ->
-                GlideApp.with(imageView.getContext())
-                        .load(url)
-                        .into(imageView));
-        dialogListAdapter.setOnDialogClickListener(dialog -> getBaseActivity().replaceFragment(
-                FeedBuilder.chatFor(dialog.getDialogName(), Integer.parseInt(dialog.getId()))));
-        final DialogsList dialogsList = getBaseActivity().findViewById(R.id.dialogsList);
-        dialogsList.setAdapter(dialogListAdapter);
+        model = FragmentDialogListBinding.bind(view);
+        model.dialogsList.setAdapter(chatsAdapter);
+    }
 
-        App.getInstance().getApi().groupsPms(10).enqueue(new Callback<Pms>() {
-            @Override
-            public void onResponse(@NonNull Call<Pms> call, @NonNull Response<Pms> response) {
-                if (response.isSuccessful() && isAdded()) {
-                    Pms pms = response.body();
-                    dialogListAdapter.setItems(pms.getPms());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Pms> call, @NonNull Throwable t) {
-                if (isAdded()) {
-                    Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+    @Override
+    public void onChatsReceived(List<Chat> chats) {
+        chatsAdapter.setItems(chats);
     }
 
     @Override

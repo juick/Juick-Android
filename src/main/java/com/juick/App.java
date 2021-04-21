@@ -36,7 +36,7 @@ import com.juick.android.SignInProvider;
 import com.juick.android.Utils;
 import com.juick.api.Api;
 import com.juick.api.UpLoadProgressInterceptor;
-import com.juick.api.model.LinkPreview;
+import com.juick.api.model.Chat;
 import com.juick.api.model.SecureUser;
 
 import org.acra.ACRA;
@@ -96,6 +96,10 @@ public class App extends Application {
 
     public interface MessageListener {
         void onMessageSent(boolean success);
+    }
+
+    public interface ChatsListener {
+        void onChatsReceived(List<Chat> chats);
     }
 
     private OnProgressListener callback;

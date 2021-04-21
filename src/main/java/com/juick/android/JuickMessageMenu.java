@@ -24,16 +24,17 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.view.View;
 import android.widget.Toast;
+
 import com.juick.App;
 import com.juick.R;
-import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.model.Post;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import java.util.Arrays;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  *
