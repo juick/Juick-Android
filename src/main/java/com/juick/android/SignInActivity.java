@@ -88,9 +88,7 @@ public class SignInActivity extends AccountAuthenticatorActivity {
             });
         });
         FrameLayout signInButton = (FrameLayout) App.getInstance().getSignInProvider().prepareSignIn(this, model.signInButtonPlaceholder);
-        if (signInButton == null) {
-            signInButton.setVisibility(View.GONE);
-        } else {
+        if (signInButton != null) {
             // Button listeners
             signInButton.setOnClickListener(v -> {
                 App.getInstance().getSignInProvider().performSignIn();
