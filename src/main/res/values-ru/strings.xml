@@ -62,7 +62,7 @@
 
     <!-- ThreadActivity -->
     <string name="In_reply_to_">в ответ на</string>
-    <string name="NoAuthMessage">Вы не вошли</string>
+    <string name="no_auth_message">Вы не вошли</string>
     <string name="WrongImageFormat">Изображения в этом формате не поддерживаются</string>
     <string name="DeleteComment">Удалить комментарий</string>
     <string name="DeletePost">Удалить пост</string>
