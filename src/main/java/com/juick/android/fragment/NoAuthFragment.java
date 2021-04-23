@@ -17,14 +17,7 @@
 
 package com.juick.android.fragment;
 
-import android.os.Bundle;
-import android.view.View;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.juick.R;
-import com.juick.databinding.FragmentNoauthBinding;
 
 /**
  * Created by alx on 13.12.16.
@@ -32,22 +25,7 @@ import com.juick.databinding.FragmentNoauthBinding;
 
 public class NoAuthFragment extends BaseFragment {
 
-    private FragmentNoauthBinding model;
-
     public NoAuthFragment() {
         super(R.layout.fragment_noauth);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        model = FragmentNoauthBinding.bind(view);
-        model.msg.setText(R.string.NoAuthMessage);
-    }
-
-    @Override
-    public void onDestroyView() {
-        model = null;
-        super.onDestroyView();
     }
 }
