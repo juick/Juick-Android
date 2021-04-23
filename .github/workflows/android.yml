@@ -22,7 +22,7 @@ jobs:
        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
        restore-keys: ${{ runner.os }}-gradle    
     - name: Build
-      run: gradle --no-daemon lint${{ matrix.FLAVOR }}Debug
+      run: ./gradlew --no-daemon lint${{ matrix.FLAVOR }}Debug
   connectedCheck:
     runs-on: macos-latest
     strategy:
@@ -46,4 +46,4 @@ jobs:
       with:
         api-level: ${{ matrix.BUILD_SDK }}
         target: google_apis
-        script: gradle --no-daemon connectedGoogleDebugAndroidTest
+        script: ./gradlew --no-daemon connectedGoogleDebugAndroidTest
