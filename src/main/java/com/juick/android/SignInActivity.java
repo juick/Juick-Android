@@ -17,17 +17,17 @@
 package com.juick.android;
 
 import android.accounts.Account;
-import android.accounts.AccountAuthenticatorActivity;
+import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.juick.App;
 import com.juick.R;
@@ -43,7 +43,9 @@ import retrofit2.Response;
  *
  * @author Ugnich Anton
  */
-public class SignInActivity extends AccountAuthenticatorActivity {
+public class SignInActivity extends AppCompatActivity {
+
+    private AccountAuthenticatorResponse authenticatorResponse;
 
     public static final String EXTRA_ACTION = "EXTRA_ACTION";
 
@@ -56,6 +58,12 @@ public class SignInActivity extends AccountAuthenticatorActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        authenticatorResponse = getIntent().getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
+
+        if (authenticatorResponse != null) {
+            authenticatorResponse.onRequestContinued();
+        }
 
         model = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(model.getRoot());
@@ -136,7 +144,9 @@ public class SignInActivity extends AccountAuthenticatorActivity {
         result.putString(AccountManager.KEY_ACCOUNT_NAME, nick);
         result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick));
         result.putString(AccountManager.KEY_AUTHTOKEN, hash);
-        setAccountAuthenticatorResult(result);
+        if (authenticatorResponse != null) {
+            authenticatorResponse.onResult(result);
+        }
         setResult(RESULT_OK);
         finish();
     }
