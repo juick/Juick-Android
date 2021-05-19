@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2021, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -17,9 +17,12 @@
 
 package com.juick.api.model;
 
+import androidx.annotation.NonNull;
+
 public class SecureUser extends User {
     private String hash;
 
+    @NonNull
     public String getHash() {
         return hash;
     }

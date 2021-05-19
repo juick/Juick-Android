@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2021, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -49,11 +49,14 @@ public class SignInActivity extends AppCompatActivity {
 
     public static final String EXTRA_ACTION = "EXTRA_ACTION";
 
+    public static final int ACTION_ACCOUNT_CREATE = 0;
     public static final int ACTION_PASSWORD_UPDATE = 1;
 
     private int currentAction;
 
     private ActivityLoginBinding model;
+
+    private final App application = App.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,33 +80,32 @@ public class SignInActivity extends AppCompatActivity {
                 return;
             }
 
-            App.getInstance().auth(nick, password, new Callback<SecureUser>() {
+            application.auth(nick, password, new Callback<SecureUser>() {
                 @Override
                 public void onResponse(@NonNull Call<SecureUser> call, @NonNull Response<SecureUser> response) {
-                    if (response.isSuccessful() && response.code() == 200) {
+                    if (response.isSuccessful() && response.code() == 200 && response.body() != null) {
                         updateAccount(nick, response.body().getHash(), currentAction);
                     } else {
-                        Toast.makeText(App.getInstance(), R.string.Unknown_nick_or_wrong_password, Toast.LENGTH_LONG).show();
+                        Toast.makeText(SignInActivity.this, R.string.Unknown_nick_or_wrong_password, Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<SecureUser> call, @NonNull Throwable t) {
-                    CharSequence errorMessage = App.getInstance().getText(R.string.network_error);
-                    Toast.makeText(App.getInstance(), String.format("%s: %s", errorMessage,
+                    CharSequence errorMessage = getText(R.string.network_error);
+                    Toast.makeText(SignInActivity.this, String.format("%s: %s", errorMessage,
                             StringUtils.defaultString(t.getMessage())), Toast.LENGTH_LONG).show();
                 }
             });
         });
-        FrameLayout signInButton = (FrameLayout) App.getInstance().getSignInProvider().prepareSignIn(this, model.signInButtonPlaceholder);
+        FrameLayout signInButton = (FrameLayout) application.getSignInProvider()
+                .prepareSignIn(this, model.signInButtonPlaceholder);
         if (signInButton != null) {
             // Button listeners
-            signInButton.setOnClickListener(v -> {
-                App.getInstance().getSignInProvider().performSignIn();
-            });
+            signInButton.setOnClickListener(v -> application.getSignInProvider().performSignIn());
         }
 
-        currentAction = getIntent().getIntExtra(EXTRA_ACTION, 0);
+        currentAction = getIntent().getIntExtra(EXTRA_ACTION, ACTION_ACCOUNT_CREATE);
 
         if (Utils.hasAuth() && currentAction != ACTION_PASSWORD_UPDATE) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -119,15 +121,13 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        App.getInstance().getSignInProvider().onSignInResult(requestCode, resultCode, data, (nick, password) -> {
+        application.getSignInProvider().onSignInResult(requestCode, resultCode, data, (nick, password) -> {
             if (!TextUtils.isEmpty(nick)) {
                 model.juickNick.setText(nick);
                 model.juickPassword.setText(password);
                 model.buttonSave.performClick();
             }
-        }, (username, hash) -> {
-            updateAccount(username, hash, 0);
-        });
+        }, (username, hash) -> updateAccount(username, hash, ACTION_ACCOUNT_CREATE));
     }
 
     private void updateAccount(String nick, String hash, int action) {
