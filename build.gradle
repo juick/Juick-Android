@@ -41,7 +41,7 @@ android {
 
         buildConfigField "boolean", "HIDE_NSFW", "false"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.juick.android.testing.MultidexedTestRunner"
         testHandleProfiling true
         testFunctionalTest true
     }
