@@ -18,7 +18,6 @@
 package com.juick;
 
 import android.accounts.AccountManager;
-import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -26,6 +25,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.multidex.MultiDexApplication;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,7 +68,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  */
 @AcraCore(buildConfigClass = BuildConfig.class)
 @AcraMailSender(mailTo = "support@juick.com", resSubject = R.string.appCrash, reportFileName = "ACRA-report.txt")
-public class App extends Application {
+public class App extends MultiDexApplication {
 
     static {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
