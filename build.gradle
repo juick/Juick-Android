@@ -124,7 +124,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.12.0@aar'
     implementation 'com.github.stfalcon-studio:Chatkit:0.4.1'
-    implementation 'ch.acra:acra-mail:5.7.0'
+    implementation 'ch.acra:acra-mail:5.8.1'
     huaweiImplementation 'com.huawei.hms:push:5.3.0.301'
 
     // Core library
