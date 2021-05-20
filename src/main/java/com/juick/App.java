@@ -19,7 +19,6 @@ package com.juick;
 
 import android.accounts.AccountManager;
 import android.app.Application;
-import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,6 +30,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.juick.android.JuickConfig;
 import com.juick.android.LinkPreviewer;
+import com.juick.android.ErrorReporter;
 import com.juick.android.NotificationSender;
 import com.juick.android.SignInProvider;
 import com.juick.android.Utils;
@@ -38,10 +38,6 @@ import com.juick.api.Api;
 import com.juick.api.UpLoadProgressInterceptor;
 import com.juick.api.model.Chat;
 import com.juick.api.model.SecureUser;
-
-import org.acra.ACRA;
-import org.acra.annotation.AcraCore;
-import org.acra.annotation.AcraMailSender;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -66,8 +62,6 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Created by gerc on 14.02.2016.
  */
-@AcraCore(buildConfigClass = BuildConfig.class)
-@AcraMailSender(mailTo = "support@juick.com", resSubject = R.string.appCrash, reportFileName = "ACRA-report.txt")
 public class App extends Application {
 
     static {
@@ -114,19 +108,18 @@ public class App extends Application {
         this.authorizationCallback = authorizationCallback;
     }
 
+    private ErrorReporter errorReporter;
+
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
+        if (!BuildConfig.DEBUG) {
+            errorReporter = new ErrorReporter(this, "support@juick.com", getString(R.string.appCrash));
+        }
         JuickConfig.init();
     }
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        if (!BuildConfig.DEBUG) {
-            ACRA.init(this);
-        }
-    }
+
 
     private JacksonConverterFactory jacksonConverterFactory;
 
