@@ -27,7 +27,12 @@
     <uses-feature
         android:name="android.hardware.location.gps"
         android:required="false" />
-
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="*" />
+        </intent>
+    </queries>
     <application
         android:name=".App"
         android:allowBackup="true"
