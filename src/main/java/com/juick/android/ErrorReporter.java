@@ -17,13 +17,16 @@
 
 package com.juick.android;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 public class ErrorReporter implements Thread.UncaughtExceptionHandler {
+    private static final String TAG = ErrorReporter.class.getSimpleName();
     private final Context context;
     private final String email;
     private final String subject;
@@ -40,13 +43,20 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
     @Override
     public void uncaughtException(@NonNull Thread t, @NonNull Throwable e) {
         String stackTrace = Log.getStackTraceString(e);
-        Intent intent = new Intent (Intent.ACTION_SEND);
-        intent.setType("message/rfc822");
-        intent.putExtra (Intent.EXTRA_EMAIL, new String[] {email});
-        intent.putExtra (Intent.EXTRA_SUBJECT, subject);
-        intent.putExtra (Intent.EXTRA_TEXT, stackTrace);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        context.startActivity(intent);
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        Uri parameters = new Uri.Builder()
+                .appendQueryParameter("body", stackTrace)
+                .appendQueryParameter("subject", subject)
+                .build();
+        Uri targetUri = Uri.parse(Uri.fromParts("mailto", email, null).toString() + parameters.toString());
+        intent.setData(targetUri);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final ComponentName resolvedActivity = intent.resolveActivity(context.getPackageManager());
+        if (resolvedActivity != null) {
+            context.startActivity(intent);
+        } else {
+            Log.d(TAG, "Email client is not installed");
+        }
         defaultHandler.uncaughtException(t, e);
     }
 }
