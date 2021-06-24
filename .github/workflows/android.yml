@@ -46,5 +46,6 @@ jobs:
       with:
         api-level: ${{ matrix.BUILD_SDK }}
         emulator-build: 6110076
+        profile: Nexus 6
         target: google_apis
         script: ./gradlew --no-daemon connectedGoogleDebugAndroidTest
