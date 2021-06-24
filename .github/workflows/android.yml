@@ -45,6 +45,6 @@ jobs:
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: ${{ matrix.BUILD_SDK }}
-        emulator-build: 6499764
+        emulator-build: 6885378
         target: google_apis
         script: ./gradlew --no-daemon connectedGoogleDebugAndroidTest
