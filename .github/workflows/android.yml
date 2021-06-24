@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: ./gradlew --no-daemon lint${{ matrix.FLAVOR }}Debug
   connectedCheck:
-    runs-on: macos-11
+    runs-on: macos-latest
     strategy:
       matrix:
         BUILD_SDK: [16, 21, 29]
@@ -45,7 +45,6 @@ jobs:
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: ${{ matrix.BUILD_SDK }}
-        arch: x86_64
-        profile: Nexus 6
+        emulator-build: 6499764
         target: google_apis
         script: ./gradlew --no-daemon connectedGoogleDebugAndroidTest
