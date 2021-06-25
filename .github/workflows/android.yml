@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: ./gradlew --no-daemon lint${{ matrix.FLAVOR }}Debug
   connectedCheck:
-    runs-on: macos-latest
+    runs-on: macos-11
     strategy:
       matrix:
         BUILD_SDK: [16, 21, 29]
