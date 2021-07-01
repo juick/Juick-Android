@@ -110,7 +110,6 @@ public class PostsPageFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
 
         model = FragmentPostsPageBinding.bind(view);
-        model.list.setHasFixedSize(true);
 
         model.list.setAdapter(adapter);
         adapter.setOnItemClickListener((widget, pos) -> {

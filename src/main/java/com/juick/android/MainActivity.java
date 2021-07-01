@@ -301,5 +301,6 @@ public class MainActivity extends BaseActivity
                 ContentResolver.addPeriodicSync(Utils.getAccount(), ContactsContract.AUTHORITY, Bundle.EMPTY, 86400L);
             }
         }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }

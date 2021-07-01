@@ -5,8 +5,6 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginBottom="4dp"
-                                    android:layout_marginLeft="-2dp"
-                                    android:layout_marginRight="-2dp"
                                     android:layout_marginTop="4dp"
                                     android:clickable="true"
                                     android:orientation="horizontal"
@@ -150,7 +148,7 @@
             android:contentDescription="@string/context_menu"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_more_vert_black_24dp"
-            android:tint="@color/colorText"
+            app:tint="@color/colorText"
             android:layout_alignParentEnd="true" />
 
         <TextView

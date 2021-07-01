@@ -158,8 +158,6 @@ public class ThreadFragment extends BaseFragment {
             }
         });
 
-        model.list.setHasFixedSize(true);
-
         model.list.setAdapter(adapter);
         linearLayoutManager = (LinearLayoutManager) model.list.getLayoutManager();
         adapter.setOnItemClickListener((widget, position) -> {
