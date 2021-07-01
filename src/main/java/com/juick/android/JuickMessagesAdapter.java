@@ -17,11 +17,11 @@
 package com.juick.android;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
@@ -34,9 +34,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.R;
@@ -136,6 +139,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         };
     }
 
+    @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_FOOTER) {
@@ -247,16 +251,29 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 }
             }
             if (post.getRid() > 0 && post.getReplyto() > 0) {
-                holder.midTextView.setText(String.format("%s %s", inReplyTo, post.getTo().getUname()));
-                holder.midTextView.setVisibility(View.VISIBLE);
-                holder.midTextView.setTag(post);
-                holder.midTextView.setOnClickListener(v -> {
+                GlideApp.with(holder.itemView.getContext())
+                        .load(post.getTo().getAvatar())
+                        .fallback(R.drawable.av_96).into(new CustomTarget<Drawable>(48, 48) {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        holder.replyToTextView.setCompoundDrawablesWithIntrinsicBounds(resource, null, null, null);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        holder.replyToTextView.setCompoundDrawablesWithIntrinsicBounds(placeholder, null, null, null);
+                    }
+                });
+                holder.replyToTextView.setText(post.getTo().getUname());
+                holder.replyToTextView.setVisibility(View.VISIBLE);
+                holder.replyToTextView.setTag(post);
+                holder.replyToTextView.setOnClickListener(v -> {
                     Post p = ((Post) v.getTag());
                     if (scrollListener != null)
                         scrollListener.onScrollToPost(v, p.getReplyto(), p.getRid());
                 });
             } else
-                holder.midTextView.setVisibility(View.GONE);
+                holder.replyToTextView.setVisibility(View.GONE);
         }
     }
 
@@ -353,7 +370,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         TextView textTextView;
         TextView repliesTextView;
         TextView likesTextView;
-        TextView midTextView;
+        TextView replyToTextView;
         ImageView menuImageView;
         ImageView backImageView;
         OnItemClickListener itemClickListener;
@@ -374,7 +391,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 likesTextView.setCompoundDrawables(VectorDrawableCompat.create(itemView.getContext().getResources(),
                         R.drawable.ic_ei_heart, null), null, null, null);
             }
-            midTextView = itemView.findViewById(R.id.mid);
+            replyToTextView = itemView.findViewById(R.id.replyto);
             ViewUtil.setDrawableTint(likesTextView);
             repliesTextView = itemView.findViewById(R.id.replies);
             if (repliesTextView != null) {

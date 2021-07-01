@@ -152,7 +152,7 @@
             android:layout_alignParentEnd="true" />
 
         <TextView
-            android:id="@+id/mid"
+            android:id="@+id/replyto"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

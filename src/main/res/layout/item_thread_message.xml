@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container"
+    android:background="@android:color/background_light"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/userpic"
+        tools:src="@drawable/av_96"
         android:layout_width="@dimen/avatar_size"
         android:layout_height="@dimen/avatar_size"
         android:layout_alignParentLeft="true"
@@ -38,7 +41,7 @@
         android:id="@+id/text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/menu_imageView"
+        android:layout_below="@+id/replyto"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_toEndOf="@+id/userpic"
         android:layout_toRightOf="@+id/userpic"
@@ -86,7 +89,7 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         android:contentDescription="@string/context_menu"
         android:src="@drawable/ic_more_vert_black_24dp"
-        android:tint="@color/colorText"
+        app:tint="@color/colorText"
         android:layout_alignParentEnd="true" />
 
     <TextView
@@ -100,22 +103,20 @@
         android:textColor="@android:color/darker_gray"
         android:textSize="14sp"
         tools:text="11:11:11" />
-
     <TextView
-        android:id="@+id/mid"
+        android:id="@+id/replyto"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/photoWrapper"
-        android:layout_toEndOf="@+id/timestamp"
-        android:layout_toRightOf="@+id/timestamp"
+        android:layout_below="@+id/username"
+        android:layout_toEndOf="@+id/userpic"
+        android:layout_toRightOf="@+id/userpic"
+        android:padding="6dp"
+        android:drawablePadding="2dip"
         android:background="?attr/selectableItemBackground"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="16dp"
+        android:gravity="center_vertical"
+        tools:text="freefd"
         android:textColor="@color/colorAccent"
         android:textSize="14sp" />
-
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -137,5 +138,5 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:padding="8dp"
         android:src="@drawable/ic_undo_black_24dp"
-        android:tint="#bcbcbc" />
+        app:tint="#bcbcbc" />
 </RelativeLayout>
