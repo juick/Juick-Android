@@ -73,7 +73,7 @@ public class PostsPageFragment extends BaseFragment {
         App.getInstance().getApi().getPosts(apiUrl).enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
-                if (isAdded()) {
+                if (model != null) {
                     model.swipeContainer.setRefreshing(false);
                     model.list.setVisibility(View.VISIBLE);
                     model.progressBar.setVisibility(View.GONE);
@@ -91,7 +91,7 @@ public class PostsPageFragment extends BaseFragment {
 
             @Override
             public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
-                if (isAdded()) {
+                if (model != null) {
                     model.swipeContainer.setRefreshing(false);
                     model.list.setVisibility(View.VISIBLE);
                     model.progressBar.setVisibility(View.GONE);
