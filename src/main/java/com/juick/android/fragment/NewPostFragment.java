@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2021, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -21,14 +21,17 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -38,58 +41,58 @@ import com.juick.R;
 import com.juick.android.NewMessageActivity;
 import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
-import com.juick.databinding.FragmentNewPostsBinding;
+import com.juick.api.GlideApp;
+import com.juick.databinding.FragmentNewPostBinding;
 import com.juick.util.StringUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by alx on 02.01.17.
  */
 
 public class NewPostFragment extends BaseFragment {
-    public static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
-    private String attachmentUri = null;
+    private Uri attachmentUri = null;
     private String attachmentMime = null;
     private ProgressDialog progressDialog;
-    private NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
+    private final NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
 
-    private FragmentNewPostsBinding model;
+    private FragmentNewPostBinding model;
+
+    private final ActivityResultLauncher<String> attachmentLauncher;
 
     public NewPostFragment() {
-        super(R.layout.fragment_new_posts);
+        super(R.layout.fragment_new_post);
+        attachmentLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), this::attachImage);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        model = FragmentNewPostsBinding.bind(view);
+        model = FragmentNewPostBinding.bind(view);
 
         getActivity().setTitle(R.string.New_message);
 
         model.buttonTags.setOnClickListener(v -> {
             TagsFragment tagsFragment = TagsFragment.newInstance(Utils.myId);
             tagsFragment.setOnTagAppliedListener(this::applyTag);
-            getBaseActivity().replaceFragment(tagsFragment);
+            getBaseActivity().addFragment(tagsFragment, true);
         });
         model.buttonAttachment.setOnClickListener(v -> {
-            if (Build.VERSION.SDK_INT >= 23 && getBaseActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE);
-                return;
-            }
             if (attachmentUri == null) {
                 try {
-                    Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                    photoPickerIntent.setType("image/*");
-                    Intent chooserIntent = Intent.createChooser(photoPickerIntent, null);
-
-                    getActivity().startActivityForResult(chooserIntent, ACTIVITY_ATTACHMENT_IMAGE);
+                    attachmentLauncher.launch("image/*");
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             } else {
                 attachmentUri = null;
                 attachmentMime = null;
                 model.buttonAttachment.setSelected(false);
+                GlideApp.with(getContext())
+                        .clear(model.imagePreview);
             }
         });
         model.buttonSend.setOnClickListener(v -> {
@@ -118,10 +121,6 @@ public class NewPostFragment extends BaseFragment {
         //setSupportProgressBarIndeterminateVisibility(state ? Boolean.FALSE : Boolean.TRUE);
     }
 
-    private boolean isImageTypeAllowed(String mime){
-        return mime != null && (mime.equals("image/jpeg") || mime.equals("image/png"));
-    }
-
     public void handleIntent(Intent i) {
         String action = i.getAction();
         if (action != null && action.equals(Intent.ACTION_SEND)) {
@@ -130,17 +129,7 @@ public class NewPostFragment extends BaseFragment {
             if (mime.equals("text/plain")) {
                 model.editMessage.append(extras.getString(Intent.EXTRA_TEXT));
             } else{
-                attachImage(extras.get(Intent.EXTRA_STREAM).toString());
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            if (requestCode == ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE) {
-                model.buttonAttachment.performClick();
+                attachImage(Uri.parse(extras.get(Intent.EXTRA_STREAM).toString()));
             }
         }
     }
@@ -169,46 +158,37 @@ public class NewPostFragment extends BaseFragment {
                 }
             });
         }
-        App.getInstance().sendMessage(msg, attachmentUri, attachmentMime, (success) -> {
+        App.getInstance().sendMessage(msg, attachmentUri, attachmentMime, (newMessage) -> {
             if (progressDialog != null) {
                 progressDialog.dismiss();
             }
-            setFormEnabled(true);
-            if (success) {
-                resetForm();
-            }
-            if ((success && attachmentUri == null) || getActivity().isFinishing()) {
-                Toast.makeText(getActivity(), success ? R.string.Message_posted : R.string.Error, Toast.LENGTH_LONG).show();
+            if (newMessage == null) {
+                Toast.makeText(getActivity(), R.string.Error, Toast.LENGTH_LONG).show();
             } else {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setNeutralButton(android.R.string.ok, null);
-                if (success) {
-                    builder.setIcon(android.R.drawable.ic_dialog_info);
-                    builder.setMessage(R.string.Message_posted);
-                } else {
-                    builder.setIcon(android.R.drawable.ic_dialog_alert);
-                    builder.setMessage(R.string.Error);
-                }
-                builder.show();
+                int mid = newMessage.getMid();
+                getBaseActivity().replaceFragment(ThreadFragment.newInstance(mid));
             }
         });
     }
 
-    public void onImageAttached(Intent data){
-        if (data != null) {
-            attachImage(data.getDataString());
-        }
-    }
-
-    private void attachImage(String uri){
-        uri = Utils.getPath(Uri.parse(uri));
-        String mime = Utils.getMimeTypeFor(uri);
-        if (isImageTypeAllowed(mime)) {
-            attachmentUri = uri;
-            attachmentMime = mime;
-            model.buttonAttachment.setSelected(true);
-        }else{
-            Toast.makeText(getActivity(), R.string.WrongImageFormat, Toast.LENGTH_LONG).show();
+    private void attachImage(Uri uri) {
+        if (uri != null) {
+            String mime = Utils.getMimeTypeFor(getContext(), uri);
+            if (Utils.isImageTypeAllowed(mime)) {
+                attachmentUri = uri;
+                attachmentMime = mime;
+                model.buttonAttachment.setSelected(true);
+                try (InputStream bitmapStream = getContext().getContentResolver().openInputStream(uri)) {
+                    Bitmap image = BitmapFactory.decodeStream(bitmapStream);
+                    GlideApp.with(getContext())
+                            .load(image)
+                            .into(model.imagePreview);
+                } catch (IOException e) {
+                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(getActivity(), R.string.wrong_image_format, Toast.LENGTH_LONG).show();
+            }
         }
     }
 

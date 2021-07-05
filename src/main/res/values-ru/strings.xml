@@ -63,11 +63,10 @@
     <!-- ThreadActivity -->
     <string name="In_reply_to_">в ответ на</string>
     <string name="no_auth_message">Вы не вошли</string>
-    <string name="WrongImageFormat">Изображения в этом формате не поддерживаются</string>
+    <string name="wrong_image_format">Изображения в этом формате не поддерживаются</string>
     <string name="DeleteComment">Удалить комментарий</string>
     <string name="DeletePost">Удалить пост</string>
     <string name="Are_you_sure_delete">Вы уверены, что хотите удалить сообщение?</string>
     <string name="Deleted">Удалено</string>
     <string name="press_to_sign_in">Нажмите, чтобы войти</string>
-    <string name="error_unsupported_content">Неподдерживаемый тип данных</string>
 </resources>

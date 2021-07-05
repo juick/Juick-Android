@@ -68,7 +68,7 @@
     <string name="In_reply_to_">in reply to</string>
     <string name="post_not_found">Post not found</string>
     <string name="no_auth_message">Not authorized</string>
-    <string name="WrongImageFormat">Images of this format are not supported</string>
+    <string name="wrong_image_format">Images of this format are not supported</string>
     <string name="DeleteComment">Delete comment</string>
     <string name="DeletePost">Delete post</string>
     <string name="Are_you_sure_delete">Are you sure delete message ?</string>
@@ -87,5 +87,4 @@
     <string name="press_to_sign_in">Press to sign in</string>
     <string name="unread_discussions">You have unread discussions</string>
     <string name="juick_notifications">Juick notifications</string>
-    <string name="error_unsupported_content">Unsupported content</string>
 </resources>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2021, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -17,7 +17,6 @@
 package com.juick.android.fragment;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -36,6 +35,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -70,20 +71,20 @@ public class ThreadFragment extends BaseFragment {
 
     private FragmentThreadBinding model;
 
-    private static final int ACTIVITY_ATTACHMENT_IMAGE = 2;
-
     private static final String ARG_MID = "ARG_MID";
 
     private int rid = 0;
-    private String attachmentUri = null;
+    private Uri attachmentUri = null;
     private String attachmentMime = null;
     private ProgressDialog progressDialog;
-    private NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
+    private final NewMessageActivity.BooleanReference progressDialogCancel = new NewMessageActivity.BooleanReference(false);
 
     private int mid = 0;
 
     private LinearLayoutManager linearLayoutManager;
     private JuickMessagesAdapter adapter;
+
+    private ActivityResultLauncher<String> attachmentLauncher;
 
     public static ThreadFragment newInstance(int mid) {
         ThreadFragment fragment = new ThreadFragment();
@@ -97,6 +98,20 @@ public class ThreadFragment extends BaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new JuickMessagesAdapter();
+        attachmentLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+            if (uri != null) {
+                attachmentUri = uri;
+                String mime = Utils.getMimeTypeFor(getActivity(), uri);
+                if (Utils.isImageTypeAllowed(mime)) {
+                    attachmentMime = mime;
+                    model.buttonAttachment.setSelected(true);
+
+                } else {
+                    Toast.makeText(getActivity(), R.string.wrong_image_format, Toast.LENGTH_SHORT)
+                            .show();
+                }
+            }
+        });
     }
 
     public ThreadFragment() {
@@ -143,14 +158,8 @@ public class ThreadFragment extends BaseFragment {
         });
 
         model.buttonAttachment.setOnClickListener(v -> {
-            if (Build.VERSION.SDK_INT >= 23 && getBaseActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE);
-                return;
-            }
             if (attachmentUri == null) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(Intent.createChooser(intent, null), ACTIVITY_ATTACHMENT_IMAGE);
+                attachmentLauncher.launch("image/*");
             } else {
                 attachmentUri = null;
                 attachmentMime = null;
@@ -186,11 +195,6 @@ public class ThreadFragment extends BaseFragment {
         });
 
         model.swipeContainer.setEnabled(false);
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
         model.list.setVisibility(View.GONE);
         model.progressBar.setVisibility(View.VISIBLE);
         load();
@@ -310,46 +314,18 @@ public class ThreadFragment extends BaseFragment {
                 progressDialog.setProgress((int)progress);
             }
         });
-        App.getInstance().sendMessage(body, attachmentUri, attachmentMime, (success) -> {
+        App.getInstance().sendMessage(body, attachmentUri, attachmentMime, (newMessage) -> {
             if (progressDialog != null) {
                 progressDialog.dismiss();
             }
             setFormEnabled(true);
-            if (success) {
-                resetForm();
-            }
-            if (success && attachmentUri == null) {
-                Toast.makeText(App.getInstance(), R.string.Message_posted, Toast.LENGTH_LONG).show();
-            } else {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setNeutralButton(android.R.string.ok, null);
-                if (success) {
-                    builder.setIcon(android.R.drawable.ic_dialog_info);
-                    builder.setMessage(R.string.Message_posted);
-                } else {
-                    builder.setIcon(android.R.drawable.ic_dialog_alert);
-                    builder.setMessage(R.string.Error);
-                }
-                builder.show();
+            if (newMessage != null) {
+                int mid = newMessage.getMid();
+                getBaseActivity().replaceFragment(ThreadFragment.newInstance(mid));
+            }else {
+                Toast.makeText(getContext(), R.string.Error, Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == ACTIVITY_ATTACHMENT_IMAGE && data != null) {
-                attachmentUri = Utils.getPath(Uri.parse(data.getDataString()));
-                if (TextUtils.isEmpty(attachmentUri)) {
-                    Toast.makeText(getActivity(), R.string.error_unsupported_content, Toast.LENGTH_SHORT)
-                            .show();
-                } else {
-                    // How to get correct mime type?
-                    attachmentMime = "image/jpeg";
-                    model.buttonAttachment.setSelected(true);
-                }
-            }
-        }
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -385,15 +361,6 @@ public class ThreadFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(BuildConfig.INTENT_NEW_EVENT_ACTION));
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            if (requestCode == ViewUtil.REQUEST_CODE_READ_EXTERNAL_STORAGE) {
-                model.buttonAttachment.performClick();
-            }
-        }
     }
 
     @Override

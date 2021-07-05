@@ -19,9 +19,11 @@ package com.juick;
 
 import android.accounts.AccountManager;
 import android.app.Application;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -37,9 +39,16 @@ import com.juick.android.Utils;
 import com.juick.api.Api;
 import com.juick.api.UpLoadProgressInterceptor;
 import com.juick.api.model.Chat;
+import com.juick.api.model.Post;
+import com.juick.api.model.PostResponse;
 import com.juick.api.model.SecureUser;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,7 +98,7 @@ public class App extends Application {
     }
 
     public interface MessageListener {
-        void onMessageSent(boolean success);
+        void onMessageSent(Post newMessage);
     }
 
     public interface ChatsListener {
@@ -200,26 +209,33 @@ public class App extends Application {
         retrofit.create(Api.class).me().enqueue(callback);
     }
 
-    public void sendMessage(String txt, String attachmentUri, String attachmentMime, MessageListener messageListener) {
+    public void sendMessage(String txt, Uri attachmentUri, String attachmentMime, MessageListener messageListener) {
         MultipartBody.Part body = null;
         if (attachmentUri != null) {
-            Log.d("sendMessage", attachmentMime + " " + attachmentUri);
-            File file = new File(attachmentUri);
-            RequestBody requestFile =
-                    RequestBody.create(MediaType.parse("multipart/form-data"), file);
-            body = MultipartBody.Part.createFormData("attach", file.getName(), requestFile);
+            Log.d("sendMessage", attachmentMime + " " + attachmentUri.toString());
+            try (InputStream stream = getContentResolver().openInputStream(attachmentUri)) {
+                RequestBody requestFile =
+                        RequestBody.create(MediaType.parse("multipart/form-data"), IOUtils.toByteArray(stream));
+                body = MultipartBody.Part.createFormData("attach", String.format("attach.%s", MimeTypeMap.getSingleton().getExtensionFromMimeType(attachmentMime)), requestFile);
+            } catch (IOException e) {
+                Log.w("sendMessage", "attachment failed", e);
+            }
         }
         App.getInstance().getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
                 body
-        ).enqueue(new Callback<Void>() {
+        ).enqueue(new Callback<PostResponse>() {
             @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull retrofit2.Response<Void> response) {
-                messageListener.onMessageSent(response.isSuccessful());
+            public void onResponse(@NonNull Call<PostResponse> call, @NonNull retrofit2.Response<PostResponse> response) {
+                if (response.isSuccessful()) {
+                    messageListener.onMessageSent(response.body().getNewMessage());
+                } else {
+                    messageListener.onMessageSent(null);
+                }
             }
 
             @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                messageListener.onMessageSent(false);
+            public void onFailure(@NonNull Call<PostResponse> call, @NonNull Throwable t) {
+                messageListener.onMessageSent(null);
             }
         });
     }

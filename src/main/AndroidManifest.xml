@@ -13,7 +13,6 @@
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <uses-feature
         android:name="android.hardware.location.network"
@@ -92,6 +91,7 @@
             android:name="com.juick.android.NewMessageActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/Juick"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.AppCompat.Light">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

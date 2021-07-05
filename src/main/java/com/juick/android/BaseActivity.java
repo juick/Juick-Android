@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2021, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -22,6 +22,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
@@ -34,11 +36,11 @@ import com.juick.android.fragment.BaseFragment;
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
-    private static final int REQUEST_CODE_LOGIN = 5;
+    private ActivityResultLauncher<Intent> loginLauncher;
 
     public void showLogin() {
         if (!Utils.hasAuth()) {
-            startActivityForResult(new Intent(this, SignInActivity.class), REQUEST_CODE_LOGIN);
+            loginLauncher.launch(new Intent(this, SignInActivity.class));
         }
     }
 
@@ -47,21 +49,16 @@ public abstract class BaseActivity extends AppCompatActivity {
         App.getInstance().setAuthorizationCallback(() -> {
             Intent updatePasswordIntent = new Intent(this, SignInActivity.class);
             updatePasswordIntent.putExtra(SignInActivity.EXTRA_ACTION, SignInActivity.ACTION_PASSWORD_UPDATE);
-            startActivityForResult(updatePasswordIntent, REQUEST_CODE_LOGIN);
+            loginLauncher.launch(updatePasswordIntent);
         });
         super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_LOGIN) {
-            if (resultCode == RESULT_OK) {
+        loginLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), response -> {
+            if (response.getResultCode() == RESULT_OK) {
                 Intent intent = getIntent();
                 finish();
                 startActivity(intent);
             }
-        }
+        });
     }
 
     public void addFragment(BaseFragment fragment, boolean addToBackStack) {

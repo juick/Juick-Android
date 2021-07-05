@@ -20,6 +20,7 @@ package com.juick.api;
 import com.juick.api.model.AuthResponse;
 import com.juick.api.model.Pms;
 import com.juick.api.model.Post;
+import com.juick.api.model.PostResponse;
 import com.juick.api.model.SecureUser;
 import com.juick.api.model.Tag;
 
@@ -61,7 +62,7 @@ public interface Api {
 
     @Multipart
     @POST("post")
-    Call<Void> newPost(@Part("body") RequestBody body, @Part MultipartBody.Part file);
+    Call<PostResponse> newPost(@Part("body") RequestBody body, @Part MultipartBody.Part file);
 
     @GET("tags")
     Call<List<Tag>> tags(@Query("user_id") int userId);
