@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2021, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -30,11 +30,9 @@ import com.juick.api.ext.youtube.Video;
 import com.juick.api.ext.youtube.VideoList;
 import com.juick.api.model.LinkPreview;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -43,17 +41,12 @@ import retrofit2.Retrofit;
 
 public class YouTubePreviewer implements LinkPreviewer {
 
-    private OkHttpClient youTubeClient;
-    private Retrofit youTubeMapper;
-    private YouTube youTube;
-
-
+    private final YouTube youTube;
 
     public YouTubePreviewer() {
-        youTubeClient = new OkHttpClient.Builder()
-                .connectionSpecs(Arrays.asList(App.getInstance().getOkHttpLegacyTls(), ConnectionSpec.CLEARTEXT))
+        OkHttpClient youTubeClient = new OkHttpClient.Builder()
                 .build();
-        youTubeMapper = new Retrofit.Builder()
+        Retrofit youTubeMapper = new Retrofit.Builder()
                 .baseUrl("https://www.googleapis.com/youtube/v3/")
                 .client(youTubeClient)
                 .addConverterFactory(App.getInstance().getJacksonConverterFactory())
@@ -62,7 +55,7 @@ public class YouTubePreviewer implements LinkPreviewer {
         youTube = youTubeMapper.create(YouTube.class);
     }
 
-    private static Pattern youtubeLink = Pattern.compile("(?:https?:)?\\/\\/(?:www\\.|m\\.|gaming\\.)?(?:youtu(?:(?:\\.be\\/|be\\.com\\/(?:v|embed)\\/)([-\\w]+)|be\\.com\\/watch)((?:(?:\\?|&(?:amp;)?)(?:\\w+=[-\\.\\w]*[-\\w]))*)|youtube\\.com\\/playlist\\?list=([-\\w]*)(&(amp;)?[-\\w\\?=]*)?)", Pattern.MULTILINE);
+    private static final Pattern youtubeLink = Pattern.compile("(?:https?:)?\\/\\/(?:www\\.|m\\.|gaming\\.)?(?:youtu(?:(?:\\.be\\/|be\\.com\\/(?:v|embed)\\/)([-\\w]+)|be\\.com\\/watch)((?:(?:\\?|&(?:amp;)?)(?:\\w+=[-\\.\\w]*[-\\w]))*)|youtube\\.com\\/playlist\\?list=([-\\w]*)(&(amp;)?[-\\w\\?=]*)?)", Pattern.MULTILINE);
     public boolean hasViewableContent(String message) {
         return youtubeLink.matcher(message).find() && !BuildConfig.DEBUG;
     }

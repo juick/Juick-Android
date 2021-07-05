@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2021, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -82,8 +82,7 @@ public class Utils {
 
     public static OkHttpClient.Builder getSSEFactory() {
         if (WSFactoryInstance == null) {
-            WSFactoryInstance = new OkHttpClient.Builder()
-            .connectionSpecs(Arrays.asList(App.getInstance().getOkHttpLegacyTls(), ConnectionSpec.CLEARTEXT));
+            WSFactoryInstance = new OkHttpClient.Builder();
         }
         return WSFactoryInstance;
     }

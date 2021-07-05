@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2021, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -30,9 +30,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.juick.android.ErrorReporter;
 import com.juick.android.JuickConfig;
 import com.juick.android.LinkPreviewer;
-import com.juick.android.ErrorReporter;
 import com.juick.android.NotificationSender;
 import com.juick.android.SignInProvider;
 import com.juick.android.Utils;
@@ -45,16 +45,11 @@ import com.juick.api.model.SecureUser;
 
 import org.apache.commons.io.IOUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import okhttp3.CipherSuite;
-import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -86,8 +81,6 @@ public class App extends Application {
     private Api api;
 
     private ObjectMapper jsonMapper;
-
-    private ConnectionSpec okHttpLegacyTls;
 
     public interface OnProgressListener {
         void onProgress(long progressPercentage);
@@ -174,7 +167,6 @@ public class App extends Application {
                         return response;
                     })
                     .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-                    .connectionSpecs(Arrays.asList(getOkHttpLegacyTls(), ConnectionSpec.CLEARTEXT))
                     .build();
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BuildConfig.API_ENDPOINT)
@@ -198,7 +190,6 @@ public class App extends Application {
                             .header("Authorization", basicAuth)
                             .build();
                 })
-                .connectionSpecs(Arrays.asList(getOkHttpLegacyTls(), ConnectionSpec.CLEARTEXT))
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -274,19 +265,6 @@ public class App extends Application {
 
     public void setSignInProvider(SignInProvider provider) {
         signInProvider = provider;
-    }
-
-    public ConnectionSpec getOkHttpLegacyTls() {
-        if (okHttpLegacyTls == null) {
-            List<CipherSuite> cipherSuites = new ArrayList<>(ConnectionSpec.MODERN_TLS.cipherSuites());
-            cipherSuites.add(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA);
-            cipherSuites.add(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA);
-
-            okHttpLegacyTls = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                    .cipherSuites(cipherSuites.toArray(new CipherSuite[0]))
-                    .build();
-        }
-        return okHttpLegacyTls;
     }
 
     private NotificationSender notificationSender;
