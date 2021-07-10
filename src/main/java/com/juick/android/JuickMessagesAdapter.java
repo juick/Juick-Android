@@ -155,6 +155,11 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_thread_message, parent, false));
             vh.setOnItemClickListener(itemClickListener);
             vh.setOnMenuClickListener(itemMenuListener);
+            vh.replyToTextView.setOnClickListener(v -> {
+                Post p = ((Post) v.getTag());
+                if (scrollListener != null)
+                    scrollListener.onScrollToPost(v, p.getReplyto(), p.getRid());
+            });
             return vh;
         }
     }
@@ -267,11 +272,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 holder.replyToTextView.setText(post.getTo().getUname());
                 holder.replyToTextView.setVisibility(View.VISIBLE);
                 holder.replyToTextView.setTag(post);
-                holder.replyToTextView.setOnClickListener(v -> {
-                    Post p = ((Post) v.getTag());
-                    if (scrollListener != null)
-                        scrollListener.onScrollToPost(v, p.getReplyto(), p.getRid());
-                });
             } else
                 holder.replyToTextView.setVisibility(View.GONE);
         }
