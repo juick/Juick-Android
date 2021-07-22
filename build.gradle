@@ -105,7 +105,7 @@ dependencies {
     implementation 'androidx.drawerlayout:drawerlayout:1.1.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.google.android.material:material:1.4.0'
-    googleImplementation 'com.google.android.gms:play-services-base:17.6.0'
+    googleImplementation 'com.google.android.gms:play-services-auth:19.2.0'
     // Firebase platform
     googleImplementation platform('com.google.firebase:firebase-bom:28.2.1')
     googleImplementation 'com.google.firebase:firebase-messaging'
