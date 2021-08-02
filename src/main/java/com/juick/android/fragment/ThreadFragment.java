@@ -56,6 +56,7 @@ import com.juick.api.model.Post;
 import com.juick.databinding.FragmentThreadBinding;
 import com.juick.util.StringUtils;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -137,7 +138,7 @@ public class ThreadFragment extends BaseFragment {
                 return;
             }
             String msg = model.editMessage.getText().toString();
-            if (msg.length() < 3) {
+            if (msg.length() < 3 && attachmentUri == null) {
                 Toast.makeText(getContext(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -153,7 +154,11 @@ public class ThreadFragment extends BaseFragment {
             if (attachmentUri == null) {
                 postText(body);
             } else {
-                postMedia(body);
+                try {
+                    postMedia(body);
+                } catch (FileNotFoundException e) {
+                    Toast.makeText(getContext(), "Attachment error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -300,7 +305,7 @@ public class ThreadFragment extends BaseFragment {
         });
     }
 
-    public void postMedia(final String body) {
+    public void postMedia(final String body) throws FileNotFoundException {
         progressDialog = new ProgressDialog(getContext());
         progressDialogCancel.bool = false;
         progressDialog.setOnCancelListener(arg0 -> progressDialogCancel.bool = true);

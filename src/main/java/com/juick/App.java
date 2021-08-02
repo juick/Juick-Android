@@ -37,14 +37,14 @@ import com.juick.android.NotificationSender;
 import com.juick.android.SignInProvider;
 import com.juick.android.Utils;
 import com.juick.api.Api;
+import com.juick.api.RequestBodyUtil;
 import com.juick.api.UpLoadProgressInterceptor;
 import com.juick.api.model.Chat;
 import com.juick.api.model.Post;
 import com.juick.api.model.PostResponse;
 import com.juick.api.model.SecureUser;
 
-import org.apache.commons.io.IOUtils;
-
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -166,7 +166,7 @@ public class App extends Application {
                         }
                         return response;
                     })
-                    .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                    .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS))
                     .build();
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BuildConfig.API_ENDPOINT)
@@ -200,17 +200,15 @@ public class App extends Application {
         retrofit.create(Api.class).me().enqueue(callback);
     }
 
-    public void sendMessage(String txt, Uri attachmentUri, String attachmentMime, MessageListener messageListener) {
+    public void sendMessage(String txt, Uri attachmentUri, String attachmentMime, MessageListener messageListener) throws FileNotFoundException {
         MultipartBody.Part body = null;
         if (attachmentUri != null) {
             Log.d("sendMessage", attachmentMime + " " + attachmentUri.toString());
-            try (InputStream stream = getContentResolver().openInputStream(attachmentUri)) {
-                RequestBody requestFile =
-                        RequestBody.create(MediaType.parse("multipart/form-data"), IOUtils.toByteArray(stream));
-                body = MultipartBody.Part.createFormData("attach", String.format("attach.%s", MimeTypeMap.getSingleton().getExtensionFromMimeType(attachmentMime)), requestFile);
-            } catch (IOException e) {
-                Log.w("sendMessage", "attachment failed", e);
-            }
+            InputStream stream = getContentResolver().openInputStream(attachmentUri);
+            RequestBody requestFile =
+                    RequestBodyUtil.create(MediaType.parse("multipart/form-data"), stream);
+            body = MultipartBody.Part.createFormData("attach", String.format("attach.%s", MimeTypeMap.getSingleton().getExtensionFromMimeType(attachmentMime)), requestFile);
+
         }
         App.getInstance().getApi().newPost(RequestBody.create(MediaType.parse("text/plain"), txt),
                 body

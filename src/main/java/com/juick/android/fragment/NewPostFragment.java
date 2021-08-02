@@ -45,6 +45,7 @@ import com.juick.api.GlideApp;
 import com.juick.databinding.FragmentNewPostBinding;
 import com.juick.util.StringUtils;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -96,7 +97,11 @@ public class NewPostFragment extends BaseFragment {
             }
         });
         model.buttonSend.setOnClickListener(v -> {
-            sendMessage();
+            try {
+                sendMessage();
+            } catch (FileNotFoundException e) {
+                Toast.makeText(getActivity(), "Attachment error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
         });
 
         resetForm();
@@ -134,7 +139,7 @@ public class NewPostFragment extends BaseFragment {
         }
     }
 
-    private void sendMessage() {
+    private void sendMessage() throws FileNotFoundException {
         final String msg = model.editMessage.getText().toString();
         if (msg.length() < 3 && attachmentUri == null) {
             Toast.makeText(getBaseActivity(), R.string.Enter_a_message, Toast.LENGTH_SHORT).show();
