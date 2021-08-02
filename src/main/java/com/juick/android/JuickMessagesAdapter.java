@@ -38,6 +38,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.juick.App;
@@ -45,12 +46,15 @@ import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
+import com.juick.api.GlideRequest;
 import com.juick.api.model.Post;
 import com.juick.util.MessageUtils;
 import com.juick.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jp.wasabeef.glide.transformations.BlurTransformation;
 
 /**
  *
@@ -203,12 +207,12 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             if (post.getPhoto() != null && post.getPhoto().getSmall() != null) {
                 holder.photoLayout.setVisibility(View.VISIBLE);
                 holder.photoDescriptionView.setVisibility(View.GONE);
+                GlideRequest<Drawable> drawable = GlideApp.with(holder.itemView.getContext()).load(post.getPhoto().getSmall());
                 if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
-                    GlideApp.with(holder.itemView.getContext()).load(R.drawable.nsfw)
+                    drawable.apply(RequestOptions.bitmapTransform(new BlurTransformation(75, 3)))
                             .into(holder.photoImageView);
                 } else {
-                    GlideApp.with(holder.itemView.getContext()).load(post.getPhoto().getSmall())
-                            .into(holder.photoImageView);
+                    drawable.into(holder.photoImageView);
                 }
             } else if (App.getInstance().hasViewableContent(post.getBody())) {
                 holder.photoLayout.setVisibility(View.VISIBLE);
