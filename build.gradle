@@ -123,7 +123,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.12.0@aar'
     implementation 'com.github.stfalcon-studio:Chatkit:0.4.1'
-    huaweiImplementation 'com.huawei.hms:push:5.3.0.304'
+    huaweiImplementation 'com.huawei.hms:push:6.1.0.300'
     implementation 'jp.wasabeef:glide-transformations:4.2.0'
 
     // Core library
