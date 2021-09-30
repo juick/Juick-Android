@@ -12,38 +12,39 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v2
       with:
-        java-version: 15
-    - name: Cache Gradle packages
-      uses: actions/cache@v2
-      with:
-       path: ~/.gradle/caches
-       key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-       restore-keys: ${{ runner.os }}-gradle    
+        distribution: 'temurin'
+        java-version: '16'
+        cache: 'gradle'
     - name: Build
       run: ./gradlew --no-daemon lint${{ matrix.FLAVOR }}Debug
   connectedCheck:
     runs-on: macos-11
     strategy:
       matrix:
-        BUILD_SDK: [16, 21, 29]
+        BUILD_SDK: [16, 21, 31]
     steps:
     - name: checkout
       uses: actions/checkout@v2
     - name: Set up JDK
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v2
       with:
-        java-version: 15
-    - name: Cache Gradle packages
-      uses: actions/cache@v2
-      with:
-       path: ~/.gradle/caches
-       key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-       restore-keys: ${{ runner.os }}-gradle
+        distribution: 'temurin'
+        java-version: '16'
+        cache: 'gradle'
+    - name: Configure legacy build
+      if: matrix.BUILD_SDK == 16
+      run: |
+        echo "emulator_arch=x86" >> $GITHUB_ENV
+    - name: Configure build
+      if: matrix.BUILD_SDK != 16
+      run: |
+        echo "emulator_arch=x86_64" >> $GITHUB_ENV
     - name: run tests
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: ${{ matrix.BUILD_SDK }}
+        arch: ${{ env.emulator_arch }}
         target: google_apis
         script: ./gradlew --no-daemon connectedGoogleDebugAndroidTest
