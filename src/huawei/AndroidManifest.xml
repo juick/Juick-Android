@@ -4,6 +4,7 @@
     <application
         android:name=".App">
         <service
+            android:exported="true"
             android:name=".android.service.HmsReceiverService">
             <intent-filter>
                 <action android:name="com.huawei.push.action.MESSAGING_EVENT" />
