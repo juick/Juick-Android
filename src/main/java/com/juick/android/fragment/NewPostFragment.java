@@ -17,6 +17,8 @@
 
 package com.juick.android.fragment;
 
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -187,6 +189,7 @@ public class NewPostFragment extends BaseFragment {
                     Bitmap image = BitmapFactory.decodeStream(bitmapStream);
                     GlideApp.with(getContext())
                             .load(image)
+                            .transition(withCrossFade())
                             .into(model.imagePreview);
                 } catch (IOException e) {
                     Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();

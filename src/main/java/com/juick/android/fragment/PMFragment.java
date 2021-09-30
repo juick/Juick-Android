@@ -16,6 +16,8 @@
  */
 package com.juick.android.fragment;
 
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -102,6 +104,7 @@ public class PMFragment extends BaseFragment {
         adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId),
                 (imageView, url, object) -> GlideApp.with(imageView.getContext())
                         .load(url)
+                        .transition(withCrossFade())
                         .into(imageView));
         model.messagesList.setAdapter(adapter);
 

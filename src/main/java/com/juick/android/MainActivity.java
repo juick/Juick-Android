@@ -63,6 +63,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.content.Intent.ACTION_VIEW;
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 /**
  * @author Ugnich Anton
@@ -105,6 +106,7 @@ public class MainActivity extends BaseActivity
                     String avatarUrl = me.getAvatar();
                     GlideApp.with(imageHeader.getContext())
                             .load(avatarUrl)
+                            .transition(withCrossFade())
                             .fallback(R.drawable.av_96)
                             .placeholder(R.drawable.av_96)
                             .into(imageHeader);

@@ -16,6 +16,8 @@
  */
 package com.juick.android;
 
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -44,6 +46,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.R;
+import com.juick.android.widget.util.BlurTransformation;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.GlideApp;
 import com.juick.api.GlideRequest;
@@ -53,9 +56,6 @@ import com.juick.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import jp.wasabeef.glide.transformations.BlurTransformation;
-
 /**
  *
  * @author Ugnich Anton
@@ -197,6 +197,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         if (post.getUser() != null) {
             GlideApp.with(holder.itemView.getContext())
                     .load(post.getUser().getAvatar())
+                    .transition(withCrossFade())
                     .fallback(R.drawable.av_96).into(holder.upicImageView);
             holder.usernameTextView.setText(post.getUser().getUname());
             holder.timestampTextView.setText(MessageUtils.formatMessageTimestamp(post));
@@ -207,9 +208,11 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             if (post.getPhoto() != null && post.getPhoto().getSmall() != null) {
                 holder.photoLayout.setVisibility(View.VISIBLE);
                 holder.photoDescriptionView.setVisibility(View.GONE);
-                GlideRequest<Drawable> drawable = GlideApp.with(holder.itemView.getContext()).load(post.getPhoto().getSmall());
+                GlideRequest<Drawable> drawable = GlideApp.with(holder.itemView.getContext())
+                        .load(post.getPhoto().getSmall())
+                        .transition(withCrossFade());
                 if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
-                    drawable.apply(RequestOptions.bitmapTransform(new BlurTransformation(75, 3)))
+                    drawable.apply(RequestOptions.bitmapTransform(new BlurTransformation()))
                             .into(holder.photoImageView);
                 } else {
                     drawable.into(holder.photoImageView);
@@ -221,6 +224,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     App.getInstance().getPreviewers().get(0).getPreviewUrl(post.getBody(), link -> {
                         if (link != null) {
                             GlideApp.with(holder.itemView.getContext()).load(link.getUrl())
+                                    .transition(withCrossFade())
                                     .into(holder.photoImageView);
                             holder.photoDescriptionView.setVisibility(View.VISIBLE);
                             holder.photoDescriptionView.setText(link.getDescription());
@@ -262,6 +266,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             if (post.getRid() > 0 && post.getReplyto() > 0) {
                 GlideApp.with(holder.itemView.getContext())
                         .load(post.getTo().getAvatar())
+                        .transition(withCrossFade())
                         .fallback(R.drawable.av_96).into(new CustomTarget<Drawable>(48, 48) {
                     @Override
                     public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {

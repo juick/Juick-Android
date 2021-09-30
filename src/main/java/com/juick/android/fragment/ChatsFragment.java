@@ -16,6 +16,8 @@
  */
 package com.juick.android.fragment;
 
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+
 import android.os.Bundle;
 import android.view.View;
 
@@ -47,6 +49,7 @@ public class ChatsFragment extends BaseFragment implements App.ChatsListener {
         chatsAdapter = new DialogsListAdapter<>((imageView, url, object) ->
                 GlideApp.with(imageView.getContext())
                         .load(url)
+                        .transition(withCrossFade())
                         .into(imageView));
         chatsAdapter.setOnDialogClickListener(dialog -> getBaseActivity().replaceFragment(
                 FeedBuilder.chatFor(dialog.getDialogName(), Integer.parseInt(dialog.getId()))));
