@@ -30,7 +30,7 @@ android {
         versionName "3.1"
         applicationId "com.juick"
 
-        vectorDrawables.useSupportLibrary = true
+        vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         def addConstant = {constantName, constantValue ->
             manifestPlaceholders += [ (constantName):constantValue]
@@ -47,28 +47,21 @@ android {
         testFunctionalTest true
     }
     buildFeatures {
-        buildConfig = true
-        viewBinding = true
+        buildConfig true
+        viewBinding true
     }
     lintOptions {
-        checkDependencies = true
-        checkGeneratedSources = true
-        checkReleaseBuilds = false
+        checkDependencies true
+        checkGeneratedSources true
+        checkReleaseBuilds false
         // Or, if you prefer, you can continue to check for errors in release builds,
         // but continue the build even when errors are found:
-        abortOnError = false
+        abortOnError false
     }
     compileOptions {
         coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-    }
-    packagingOptions {
-        exclude 'META-INF/ASL2.0'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/notice.txt'
     }
     buildTypes {
         debug {
@@ -151,9 +144,9 @@ dependencies {
 }
 apply plugin: 'com.google.gms.google-services'
 googleServices {
-    disableVersionCheck = true
+    disableVersionCheck true
 }
 apply plugin: 'com.huawei.agconnect'
 android.applicationVariants.all { variant ->
-    project.tasks.getByName('process' + variant.name.capitalize() + 'GoogleServices').enabled = variant.name.contains('google')
+    project.tasks.getByName('process' + variant.name.capitalize() + 'GoogleServices').enabled variant.name.contains('google')
 }
