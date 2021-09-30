@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2021, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -31,7 +31,6 @@ import androidx.core.graphics.drawable.DrawableCompat;
  */
 public class ViewUtil {
 
-    public static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 4;
     public static final int REQUEST_CODE_SYNC_CONTACTS = 5;
 
     /**
