@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.juick">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -35,12 +36,15 @@
     <application
         android:name=".App"
         android:allowBackup="true"
+        android:fullBackupOnly="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/Juick"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:targetApi="lollipop">
         <activity
             android:name=".android.MainActivity"
+            android:exported="true"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:logo="@drawable/ic_logo"
             android:theme="@style/AppTheme.NoActionBar">
@@ -81,10 +85,12 @@
         </activity>
         <activity
             android:name=".android.SignInActivity"
+            android:exported="false"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".android.SignUpActivity"
+            android:exported="false"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -92,7 +98,8 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/Juick"
             android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.AppCompat.Light">
+            android:theme="@style/Theme.AppCompat.Light"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
