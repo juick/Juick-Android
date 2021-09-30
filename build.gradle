@@ -29,7 +29,9 @@ android {
         versionCode 146
         versionName "3.1"
         applicationId "com.juick"
+
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
         def addConstant = {constantName, constantValue ->
             manifestPlaceholders += [ (constantName):constantValue]
             buildConfigField "String", "${constantName}", "\"${constantValue}\""
@@ -57,6 +59,7 @@ android {
         abortOnError = false
     }
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -71,6 +74,7 @@ android {
         debug {
             applicationIdSuffix ".debug"
             debuggable true
+            multiDexKeepProguard file('multidex-config.pro')
         }
         release {
             minifyEnabled false
@@ -125,6 +129,9 @@ dependencies {
     implementation 'com.github.stfalcon-studio:Chatkit:0.4.1'
     huaweiImplementation 'com.huawei.hms:push:6.1.0.300'
     implementation 'jp.wasabeef:glide-transformations:4.2.0'
+
+    implementation 'androidx.multidex:multidex:2.0.1'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
     // Core library
     androidTestImplementation 'androidx.test:core:1.4.0'
