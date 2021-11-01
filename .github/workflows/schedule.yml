@@ -1,0 +1,82 @@
+name: Android CI (Connected)
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron:  '0 0 * * *'
+
+jobs:
+  check_date:
+    runs-on: ubuntu-latest
+    name: Check latest commit
+    outputs:
+      should_run: ${{ steps.should_run.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: print latest_commit
+        run: echo ${{ github.sha }}
+      - id: should_run
+        continue-on-error: true
+        name: Check latest commit is less than a day
+        if: ${{ github.event_name == 'schedule' }}
+        run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "should_run=false" >> $GITHUB_ENV
+  analyze:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
+    name: Analyze
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['java']
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Build
+      run: gradle assembleGoogleDebug
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
+  connectedCheck:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
+    runs-on: macos-11
+    strategy:
+      matrix:
+        BUILD_SDK: [16, 21, 31]
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle
+    - name: Configure legacy build
+      if: matrix.BUILD_SDK == 16
+      run: |
+        echo "emulator_arch=x86" >> $GITHUB_ENV
+    - name: Configure build
+      if: matrix.BUILD_SDK != 16
+      run: |
+        echo "emulator_arch=x86_64" >> $GITHUB_ENV
+    - name: run tests
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ matrix.BUILD_SDK }}
+        arch: ${{ env.emulator_arch }}
+        target: google_apis
+        script: ./gradlew --no-daemon connectedFreeDebugAndroidTest
