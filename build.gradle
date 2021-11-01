@@ -81,6 +81,7 @@ android {
     productFlavors {
         google {
             dimension "notifications"
+            minSdkVersion 19
         }
         huawei {
             dimension "notifications"

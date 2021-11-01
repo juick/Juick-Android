@@ -57,4 +57,4 @@ jobs:
         api-level: ${{ matrix.BUILD_SDK }}
         arch: ${{ env.emulator_arch }}
         target: google_apis
-        script: ./gradlew --no-daemon connectedGoogleDebugAndroidTest
+        script: ./gradlew --no-daemon connectedFreeDebugAndroidTest
