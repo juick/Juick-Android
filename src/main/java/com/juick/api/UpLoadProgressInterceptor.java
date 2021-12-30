@@ -26,7 +26,7 @@ import okhttp3.Response;
 import java.io.IOException;
 
 public class UpLoadProgressInterceptor implements Interceptor {
-    private CountingRequestBody.Listener progressListener;
+    private final CountingRequestBody.Listener progressListener;
 
     public UpLoadProgressInterceptor(CountingRequestBody.Listener progressListener) {
         this.progressListener = progressListener;

@@ -17,6 +17,8 @@
 
 package com.juick.api;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -46,7 +48,7 @@ public class RequestBodyUtil {
             }
 
             @Override
-            public void writeTo(BufferedSink sink) throws IOException {
+            public void writeTo(@NonNull BufferedSink sink) throws IOException {
                 Source source = null;
                 try {
                     source = Okio.source(inputStream);

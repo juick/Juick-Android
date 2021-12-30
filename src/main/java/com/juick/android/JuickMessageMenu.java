@@ -25,6 +25,8 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.model.Post;
@@ -74,14 +76,14 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
     private void postMessage(final String body, final String ok, final boolean isReload) {
         App.getInstance().getApi().post(body).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 Toast.makeText(App.getInstance(), (response.isSuccessful()) ? ok : App.getInstance().getResources().getString(R.string.Error), Toast.LENGTH_SHORT).show();
                 if(isReload)
                     reloadView();
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 if(isReload)
                     reloadView();
 
