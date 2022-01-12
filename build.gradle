@@ -23,7 +23,6 @@ repositories {
 android {
     compileSdkVersion 31
     defaultConfig {
-        minSdkVersion 16
         targetSdkVersion 31
         versionCode 147
         versionName "3.1"
@@ -89,6 +88,7 @@ android {
         }
         free {
             dimension "notifications"
+            minSdkVersion 14
         }
     }
 }
