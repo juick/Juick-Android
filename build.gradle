@@ -48,14 +48,6 @@ android {
         buildConfig true
         viewBinding true
     }
-    lintOptions {
-        checkDependencies true
-        checkGeneratedSources true
-        checkReleaseBuilds false
-        // Or, if you prefer, you can continue to check for errors in release builds,
-        // but continue the build even when errors are found:
-        abortOnError false
-    }
     compileOptions {
         coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -90,6 +82,12 @@ android {
             dimension "notifications"
             minSdkVersion 14
         }
+    }
+    lint {
+        abortOnError false
+        checkDependencies true
+        checkGeneratedSources true
+        checkReleaseBuilds false
     }
 }
 
