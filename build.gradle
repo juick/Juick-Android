@@ -24,7 +24,7 @@ android {
     compileSdkVersion 31
     defaultConfig {
         targetSdkVersion 31
-        versionCode 148
+        versionCode 149
         versionName "3.1"
         applicationId "com.juick"
 
