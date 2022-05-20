@@ -99,7 +99,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.6.0'
     googleImplementation 'com.google.android.gms:play-services-auth:20.2.0'
     // Firebase platform
-    googleImplementation platform('com.google.firebase:firebase-bom:30.0.1')
+    googleImplementation platform('com.google.firebase:firebase-bom:30.0.2')
     googleImplementation 'com.google.firebase:firebase-messaging'
 
     // okhttp 3.13+ require API21
