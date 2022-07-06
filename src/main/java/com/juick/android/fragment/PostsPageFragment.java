@@ -123,7 +123,7 @@ public class PostsPageFragment extends BaseFragment {
             boolean loading;
             @Override
             public boolean onLoadMore() {
-                if (adapter.getItemCount() == 0) {
+                if (adapter.getItemCount() <= 20) {
                     return false;
                 }
                 if (loading) return true;

@@ -123,7 +123,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public int getItemViewType(int position) {
-        if (loadMoreRequestListener != null && position == postList.size() + (hasHeader ? 1 : -1))
+        if (loadMoreRequestListener != null && position == postList.size() + (hasHeader ? 1 : 0))
             return TYPE_FOOTER;
         if (position == 0 && hasHeader)
             return TYPE_HEADER;
