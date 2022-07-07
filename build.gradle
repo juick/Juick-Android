@@ -88,6 +88,11 @@ android {
         checkGeneratedSources true
         checkReleaseBuilds false
     }
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "Juick-${variant.flavorName}-v${variant.versionName}.${variant.versionCode}.apk"
+        }
+    }
 }
 
 dependencies {
