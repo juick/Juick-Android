@@ -27,6 +27,7 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,9 +63,7 @@ import java.util.List;
  */
 public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final int TYPE_FOOTER = 1;
     private static final int TYPE_ITEM = 0;
-    private static final int TYPE_HEADER = -1;
     private static final int TYPE_THREAD_POST = 2;
 
     List<Post> postList = new ArrayList<>();
@@ -73,36 +72,29 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     OnItemClickListener itemMenuListener;
     OnScrollListener scrollListener;
 
-    private boolean hasHeader;
-    private boolean hasOldPosts = true;
-    String inReplyTo = null;
+    private boolean hasMoreData = true;
 
     public JuickMessagesAdapter() {
         setHasStableIds(true);
-        inReplyTo = App.getInstance().getString(R.string.In_reply_to_);
     }
 
     @Override
     public long getItemId(int position) {
-        switch (getItemViewType(position)) {
-            case TYPE_FOOTER:
-                return -1;
-            case TYPE_HEADER:
-                return 0;
-            default:
-                Post post = getItem(position);
-                // 123456/78 -> 1234560078
-                return post == null ? 0 : (long)post.getMid() * 10000 + post.getRid();
-        }
+        Post post = getItem(position);
+        // 123456/78 -> 1234560078
+        return post == null ? 0 : (long)post.getMid() * 10000 + post.getRid();
     }
 
     public void newData(List<Post> data) {
+        int oldCount = postList.size();
         postList.clear();
+        notifyItemRangeRemoved(0, oldCount);
         postList.addAll(data);
-        notifyDataSetChanged();
+        notifyItemRangeInserted(0, data.size());
     }
 
     public void addData(List<Post> data) {
+        hasMoreData = data.size() > 0;
         int oldCount = postList.size();
         postList.addAll(data);
         notifyItemRangeInserted(oldCount, postList.size());
@@ -123,34 +115,19 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public int getItemViewType(int position) {
-        if (loadMoreRequestListener != null && position == postList.size() + (hasHeader ? 1 : 0))
-            return TYPE_FOOTER;
-        if (position == 0 && hasHeader)
-            return TYPE_HEADER;
+        Log.d("ADAPTER", "POSIION: " + position);
+        if (hasMoreData && loadMoreRequestListener != null && position == postList.size() - 1) {
+            loadMoreRequestListener.onLoadMore();
+        }
         if (postList.get(position).getRid() == 0)
             return TYPE_THREAD_POST;
         return TYPE_ITEM;
     }
 
-    public RecyclerView.ViewHolder onCreateFooterViewHolder(ViewGroup viewGroup) {
-        final View v = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.item_footer, viewGroup, false);
-        return new FH(v);
-    }
-
-    public RecyclerView.ViewHolder onCreateHeaderViewHolder(ViewGroup viewGroup) {
-        return new RecyclerView.ViewHolder(viewGroup) {
-        };
-    }
-
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == TYPE_FOOTER) {
-            return onCreateFooterViewHolder(parent);
-        } else if (viewType == TYPE_HEADER) {
-            return onCreateHeaderViewHolder(parent);
-        } else if (viewType == TYPE_THREAD_POST) {
+        if (viewType == TYPE_THREAD_POST) {
             VH vh = new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false));
             vh.setOnItemClickListener(itemClickListener);
             vh.setOnMenuClickListener(itemMenuListener);
@@ -168,29 +145,9 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
-    public void onBindFooterViewHolder(RecyclerView.ViewHolder holder) {
-        FH footerHolder = (FH) holder;
-        footerHolder.progressBar.setVisibility(View.VISIBLE);
-        if (hasOldPosts && loadMoreRequestListener != null) {
-            if (!loadMoreRequestListener.onLoadMore()) {
-                footerHolder.progressBar.setVisibility(View.GONE);
-            }
-        }
-    }
-
-    public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder) {
-    }
-
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
         int type = getItemViewType(position);
-        if (type == TYPE_FOOTER) {
-            onBindFooterViewHolder(viewHolder);
-            return;
-        } else if (type == TYPE_HEADER) {
-            onBindHeaderViewHolder(viewHolder);
-            return;
-        }
         final VH holder = (VH) viewHolder;
         final Post post = postList.get(position);
         boolean isThread = type != TYPE_THREAD_POST;
@@ -287,11 +244,8 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     public Post getItem(int position) {
-        if (position == postList.size()) return null;
-        if (hasHeader)
-            return postList.get(position - 1);
-        else
-            return postList.get(position);
+        if (position >= postList.size()) return null;
+        return postList.get(position);
     }
 
     @Override
@@ -347,16 +301,8 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         return ssb;
     }
 
-    public void setHasHeader(boolean hasHeader) {
-        this.hasHeader = hasHeader;
-    }
-
     public void setOnLoadMoreRequestListener(OnLoadMoreRequestListener loadMoreRequestListener) {
         this.loadMoreRequestListener = loadMoreRequestListener;
-    }
-
-    public void setHasOldPosts(boolean hasOldPosts) {
-        this.hasOldPosts = hasOldPosts;
     }
 
     public List<Post> getItems() {
@@ -434,15 +380,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         void setOnMenuClickListener(OnItemClickListener listener) {
             menuClickListener = listener;
-        }
-    }
-
-    protected class FH extends RecyclerView.ViewHolder {
-        ProgressBar progressBar;
-
-        FH(View itemView) {
-            super(itemView);
-            progressBar = itemView.findViewById(R.id.progressBar);
         }
     }
 
