@@ -27,12 +27,10 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -115,7 +113,6 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public int getItemViewType(int position) {
-        Log.d("ADAPTER", "POSIION: " + position);
         if (hasMoreData && loadMoreRequestListener != null && position == postList.size() - 1) {
             loadMoreRequestListener.onLoadMore();
         }
