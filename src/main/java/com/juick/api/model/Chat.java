@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -19,7 +19,6 @@ package com.juick.api.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.stfalcon.chatkit.commons.models.IDialog;
-import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
 
 import java.util.Collections;
@@ -29,7 +28,7 @@ import java.util.List;
 /**
  * Created by gerc on 11.03.2016.
  */
-public class Chat implements IDialog {
+public class Chat implements IDialog<Post> {
 
     private String uname;
     private int uid;
@@ -38,7 +37,7 @@ public class Chat implements IDialog {
     private Date lastMessageTimestamp;
     private String lastMessageText;
 
-    private IMessage lastMessage;
+    private Post lastMessage;
 
     @Override
     public String getId() {
@@ -61,7 +60,7 @@ public class Chat implements IDialog {
     }
 
     @Override
-    public IMessage getLastMessage() {
+    public Post getLastMessage() {
         if (lastMessage != null) {
             return lastMessage;
         }
@@ -73,7 +72,7 @@ public class Chat implements IDialog {
     }
 
     @Override
-    public void setLastMessage(IMessage message) {
+    public void setLastMessage(Post message) {
         lastMessage = message;
     }
 

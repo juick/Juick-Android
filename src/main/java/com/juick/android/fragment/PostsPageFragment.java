@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -18,7 +18,6 @@
 package com.juick.android.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -122,8 +121,8 @@ public class PostsPageFragment extends BaseFragment {
         adapter.setOnLoadMoreRequestListener(new JuickMessagesAdapter.OnLoadMoreRequestListener() {
             boolean loading;
             @Override
-            public boolean onLoadMore() {
-                if (loading) return true;
+            public void onLoadMore() {
+                if (loading) return;
                 loading = true;
                 Post lastItem = adapter.getItem(adapter.getItemCount() - 1);
                 String requestUrl = apiUrl + "&before_mid=" + lastItem.getMid();
@@ -150,7 +149,6 @@ public class PostsPageFragment extends BaseFragment {
                         }
                     }
                 });
-                return true;
             }
         });
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -214,14 +214,14 @@ public class TagsFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 if (itemClickListener != null){
-                    itemClickListener.onItemClick(v, getAdapterPosition());
+                    itemClickListener.onItemClick(v, getBindingAdapterPosition());
                 }
             }
 
             @Override
             public boolean onLongClick(View v) {
                 if (itemLongClickListener != null) {
-                    itemLongClickListener.onItemLongClick(v, getAdapterPosition());
+                    itemLongClickListener.onItemLongClick(v, getBindingAdapterPosition());
                     return true;
                 }
                 return false;

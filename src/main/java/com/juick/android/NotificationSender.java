@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -31,6 +31,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.request.FutureTarget;
 import com.juick.App;
@@ -44,10 +45,10 @@ import java.util.concurrent.ExecutionException;
 public class NotificationSender {
     private static String channelId;
 
-    private static NotificationManager notificationManager =
+    private final NotificationManager notificationManager =
             (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
 
-    private static Handler handler = new Handler(Looper.getMainLooper());
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public NotificationSender(Context context) {
         if (Build.VERSION.SDK_INT >= 26) {
@@ -96,7 +97,7 @@ public class NotificationSender {
                         .setAutoCancel(true).setWhen(0)
                         .setContentIntent(contentIntent)
                         .setGroup("messages")
-                        .setColor(App.getInstance().getResources().getColor(R.color.colorAccent))
+                        .setColor(ContextCompat.getColor(App.getInstance(), R.color.colorAccent))
                         .setGroupSummary(true);
 
                 notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE);

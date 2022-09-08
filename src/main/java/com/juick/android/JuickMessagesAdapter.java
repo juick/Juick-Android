@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -307,7 +307,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     public interface OnLoadMoreRequestListener {
-        boolean onLoadMore();
+        void onLoadMore();
     }
 
     static class VH extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -362,12 +362,12 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         public void onClick(View v) {
             if (v.getId() == R.id.menu_imageView) {
                 if (menuClickListener != null){
-                    menuClickListener.onItemClick(v, getAdapterPosition());
+                    menuClickListener.onItemClick(v, getBindingAdapterPosition());
                 }
                 return;
             }
             if (itemClickListener != null){
-                itemClickListener.onItemClick(v, getAdapterPosition());
+                itemClickListener.onItemClick(v, getBindingAdapterPosition());
             }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -27,8 +27,8 @@ import java.io.IOException;
 
 public class CountingRequestBody extends RequestBody {
 
-    protected RequestBody delegate;
-    protected Listener listener;
+    private final RequestBody delegate;
+    private final Listener listener;
 
     protected CountingSink countingSink;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -22,9 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,9 +31,6 @@ import com.juick.App;
 import com.juick.R;
 import com.juick.util.StringUtils;
 
-import java.util.Arrays;
-
-import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -50,8 +45,8 @@ public class Utils {
 
     public static @Nullable Account getAccount() {
         AccountManager am = AccountManager.get(App.getInstance());
-        Account accs[] = am.getAccountsByType(App.getInstance().getString(R.string.com_juick));
-        return accs.length > 0 ? accs[0] : null;
+        Account[] accounts = am.getAccountsByType(App.getInstance().getString(R.string.com_juick));
+        return accounts.length > 0 ? accounts[0] : null;
     }
 
     public static boolean hasAuth() {

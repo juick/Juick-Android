@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -18,13 +18,11 @@ package com.juick.android.fragment;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -69,8 +67,6 @@ public class PMFragment extends BaseFragment {
 
         @Override
         public void onReceive(Context context, final Intent intent) {
-            ((Vibrator) context.getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(250);
-
             onNewMessages(new ArrayList<Post>(){{
                 try {
                     add(App.getInstance().getJsonMapper().readValue(

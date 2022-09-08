@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -38,7 +38,7 @@ public class Post implements IMessage {
     private User user;
     private String body;
     private Date timestamp;
-    private List<String> tags = new ArrayList<String>();
+    private List<String> tags = new ArrayList<>();
     private int replies;
     private int likes;
     private String repliesby;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -42,7 +42,7 @@ public class ChatsFragment extends BaseFragment implements App.ChatsListener {
 
     private FragmentDialogListBinding model;
 
-    private DialogsListAdapter<Chat> chatsAdapter;
+    private final DialogsListAdapter<Chat> chatsAdapter;
 
     public ChatsFragment() {
         super(R.layout.fragment_dialog_list);

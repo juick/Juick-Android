@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -65,9 +65,9 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
         viewPager.setAdapter(sectionsPagerAdapter);
 
         TabLayout tabLayout = getBaseActivity().findViewById(R.id.tabs);
-        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-            tab.setText(sectionsPagerAdapter.getPageTitle(position));
-        }).attach();
+        new TabLayoutMediator(tabLayout, viewPager,
+                (tab, position) -> tab.setText(sectionsPagerAdapter.getPageTitle(position)))
+                .attach();
         tabLayout.setVisibility(View.VISIBLE);
 
         final FloatingActionButton fab = getBaseActivity().findViewById(R.id.fab);
@@ -103,20 +103,18 @@ public class DiscoverFragment extends BaseFragment implements View.OnClickListen
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.fab:
-                if (Utils.hasAuth()) {
-                    startActivity(new Intent(getContext(), NewMessageActivity.class));
-                } else {
-                    getBaseActivity().showLogin();
-                }
-                break;
+        if (v.getId() == R.id.fab) {
+            if (Utils.hasAuth()) {
+                startActivity(new Intent(getContext(), NewMessageActivity.class));
+            } else {
+                getBaseActivity().showLogin();
+            }
         }
     }
 
     public static class SectionsPagerAdapter extends FragmentStateAdapter {
 
-        private String[] tabTitles = new String[] {
+        private final String[] tabTitles = new String[] {
                 App.getInstance().getString(R.string.Last_messages),
                 App.getInstance().getString(R.string.With_photos),
                 App.getInstance().getString(R.string.Top_messages)

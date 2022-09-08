@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2021, Juick
+ * Copyright (C) 2008-2022, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -78,7 +78,7 @@ public class YouTubePreviewer implements LinkPreviewer {
                         public void onResponse(@NonNull Call<VideoList> call, @NonNull Response<VideoList> response) {
                             if (response.isSuccessful()) {
                                 VideoList playlist = response.body();
-                                if (playlist.getItems().size() > 0) {
+                                if (playlist != null && playlist.getItems().size() > 0) {
                                     Video video = playlist.getItems().get(0);
                                     if (video != null) {
                                         Thumbnail thumbnail = video.getSnippet().getThumbnails().get("default");
