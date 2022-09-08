@@ -122,7 +122,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.2'
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.13.2@aar'
     implementation 'com.github.vitalyster:ChatKit:5e99a8bf3c'
-    huaweiImplementation 'com.huawei.hms:push:6.5.0.300'
+    huaweiImplementation 'com.huawei.hms:push:6.7.0.300'
 
     implementation 'androidx.multidex:multidex:2.0.1'
 
