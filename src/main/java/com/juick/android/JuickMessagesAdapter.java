@@ -36,6 +36,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
@@ -271,7 +272,10 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             ssb.append(" ");
             nextSpanStart += text.length() + 1;
         }
-        Spanned text = Html.fromHtml(MessageUtils.formatMessage(StringUtils.defaultString(jmsg.getBody())));
+        Spanned text = HtmlCompat.fromHtml(
+                MessageUtils.formatMessage(StringUtils.defaultString(jmsg.getBody())),
+                HtmlCompat.FROM_HTML_MODE_LEGACY
+        );
         ssb.append(text);
         URLSpan[] urlSpans = ssb.getSpans(nextSpanStart, ssb.length(), URLSpan.class);
         // handle deep links

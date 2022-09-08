@@ -328,7 +328,7 @@ public class ThreadFragment extends BaseFragment {
         });
     }
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = StringUtils.defaultString(intent.getAction());
@@ -366,6 +366,6 @@ public class ThreadFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         model = null;
-        super.onDestroyView();;
+        super.onDestroyView();
     }
 }
