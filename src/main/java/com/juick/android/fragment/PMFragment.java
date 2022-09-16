@@ -21,7 +21,6 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -29,10 +28,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.juick.App;
-import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
@@ -43,6 +40,7 @@ import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import retrofit2.Call;
@@ -62,23 +60,6 @@ public class PMFragment extends BaseFragment {
     int uid;
 
     private FragmentPmBinding model;
-
-    BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, final Intent intent) {
-            onNewMessages(new ArrayList<Post>(){{
-                try {
-                    add(App.getInstance().getJsonMapper().readValue(
-                            intent.getStringExtra(
-                                    App.getInstance().getString(R.string.notification_extra)),
-                            Post.class));
-                } catch (IOException e) {
-                    Log.d(this.getClass().getSimpleName(), "Invalid JSON data", e);
-                }
-            }});
-        }
-    };
 
     private MessagesListAdapter<Post> adapter;
 
@@ -127,6 +108,9 @@ public class PMFragment extends BaseFragment {
             ViewUtil.hideKeyboard(getActivity());
             return true;
         });
+        App.getInstance().getNewMessage().observe(getViewLifecycleOwner(), (post) -> {
+            onNewMessages(Collections.singletonList(post));
+        });
     }
 
     public void onNewMessages(List<Post> posts) {
@@ -156,18 +140,6 @@ public class PMFragment extends BaseFragment {
                 Toast.makeText(App.getInstance(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter(BuildConfig.INTENT_NEW_EVENT_ACTION));
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(messageReceiver);
     }
 
     @Override

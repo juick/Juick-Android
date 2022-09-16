@@ -34,7 +34,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -197,6 +196,17 @@ public class ThreadFragment extends BaseFragment {
         model.swipeContainer.setEnabled(false);
         model.list.setVisibility(View.GONE);
         model.progressBar.setVisibility(View.VISIBLE);
+
+        App.getInstance().getNewMessage().observe(getViewLifecycleOwner(), (reply) -> {
+            if (adapter.getItemCount() > 0) {
+                if (adapter.getItem(0).getMid() == reply.getMid()) {
+                    adapter.addData(reply);
+                    linearLayoutManager.smoothScrollToPosition(model.list,
+                            new RecyclerView.State(), reply.getRid());
+                }
+            }
+        });
+
         load();
     }
 
@@ -241,12 +251,6 @@ public class ThreadFragment extends BaseFragment {
         }
         String replies = getResources().getString(R.string.Replies) + " (" + (adapter.getItemCount() - 1) + ")";
         adapter.addDisabledItem(replies, 1);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(App.getInstance()).unregisterReceiver(broadcastReceiver);
     }
 
     private void resetForm() {
@@ -326,41 +330,6 @@ public class ThreadFragment extends BaseFragment {
                 Toast.makeText(getContext(), R.string.Error, Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = StringUtils.defaultString(intent.getAction());
-            if (action.equals(BuildConfig.INTENT_NEW_EVENT_ACTION)) {
-                if (!isAdded()) {
-                    return;
-                }
-                String data = intent.getStringExtra(getString(R.string.notification_extra));
-                if (data != null && !data.trim().isEmpty()) {
-                    try {
-                        final Post reply = App.getInstance().getJsonMapper().readValue(data, Post.class);
-                        getActivity().runOnUiThread(() -> {
-                            if (adapter.getItemCount() > 0) {
-                                if (adapter.getItem(0).getMid() == reply.getMid()) {
-                                    adapter.addData(reply);
-                                    linearLayoutManager.smoothScrollToPosition(model.list,
-                                            new RecyclerView.State(), reply.getRid());
-                                }
-                            }
-                        });
-                    } catch (IOException e) {
-                        Log.d("SSE", e.getLocalizedMessage());
-                    }
-                }
-            }
-        }
-    };
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(App.getInstance()).registerReceiver(broadcastReceiver, new IntentFilter(BuildConfig.INTENT_NEW_EVENT_ACTION));
     }
 
     @Override

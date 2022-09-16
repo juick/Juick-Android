@@ -18,23 +18,23 @@
 package com.juick.android;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
-
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.here.oksse.OkSse;
 import com.here.oksse.ServerSentEvent;
 import com.juick.App;
 import com.juick.BuildConfig;
-import com.juick.R;
+import com.juick.api.model.Post;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public class NotificationManager {
+
+    private static final String TAG = NotificationManager.class.getSimpleName();
 
     private Context context;
 
@@ -54,16 +54,19 @@ public class NotificationManager {
         sse.newServerSentEvent(request, new ServerSentEvent.Listener() {
             @Override
             public void onOpen(ServerSentEvent sse, okhttp3.Response response) {
-                Log.d("SSE", "Event listener opened");
+                Log.d(TAG, "Event listener opened");
             }
 
             @Override
             public void onMessage(ServerSentEvent sse, String id, String event, String message) {
-                Log.d("SSE", "event received: " + event);
+                Log.d(TAG, "event received: " + event);
                 if (event.equals("msg")) {
-                    LocalBroadcastManager.getInstance(App.getInstance())
-                            .sendBroadcast(new Intent(BuildConfig.INTENT_NEW_EVENT_ACTION)
-                                    .putExtra(context.getString(R.string.notification_extra), message));
+                    try {
+                        Post reply = App.getInstance().getJsonMapper().readValue(message, Post.class);
+                        App.getInstance().getNewMessage().postValue(reply);
+                    } catch (IOException e) {
+                        Log.d(TAG, "JSON exception: " + e.getMessage());
+                    }
                 }
             }
 

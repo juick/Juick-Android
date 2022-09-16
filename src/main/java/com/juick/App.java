@@ -26,6 +26,8 @@ import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.multidex.MultiDexApplication;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -271,5 +273,14 @@ public class App extends MultiDexApplication {
             notificationSender = new NotificationSender(this);
         }
         return notificationSender;
+    }
+
+    private MutableLiveData<Post> newMessage;
+
+    public MutableLiveData<Post> getNewMessage() {
+        if (newMessage == null) {
+            newMessage = new MutableLiveData<>();
+        }
+        return newMessage;
     }
 }

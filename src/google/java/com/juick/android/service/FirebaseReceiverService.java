@@ -17,43 +17,48 @@
 
 package com.juick.android.service;
 
-import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.juick.App;
-import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.Utils;
+import com.juick.api.model.Post;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
  * Created by vt on 03/12/15.
  */
 public class FirebaseReceiverService extends FirebaseMessagingService {
+
+    private final String TAG = FirebaseReceiverService.class.getSimpleName();
+
     @Override
     public void onMessageReceived(RemoteMessage message) {
         Map<String, String> data = message.getData();
         String msg = data.get(App.getInstance().getString(R.string.notification_extra));
-        Log.d(FirebaseReceiverService.class.getSimpleName(), "onMessageReceived " + data.toString());
+        Log.d(TAG, "onMessageReceived " + data);
         boolean isForegroundMessage = message.getNotification() != null;
         if (isForegroundMessage) {
-            Log.d(FirebaseReceiverService.class.getSimpleName(), "Message received in foreground");
-            LocalBroadcastManager.getInstance(App.getInstance())
-                    .sendBroadcast(new Intent(BuildConfig.INTENT_NEW_EVENT_ACTION)
-                            .putExtra(getString(R.string.notification_extra), msg));
+            Log.d(TAG, "Message received in foreground");
+            try {
+                Post reply = App.getInstance().getJsonMapper().readValue(msg, Post.class);
+                App.getInstance().getNewMessage().postValue(reply);
+            } catch (IOException e) {
+                Log.d(TAG, "JSON exception: " + e.getMessage());
+            }
         } else {
             App.getInstance().getNotificationSender().showNotification(msg);
         }
     }
     @Override
     public void onNewToken(@NonNull String refreshedToken) {
-        Log.d(FirebaseReceiverService.class.getSimpleName(), "Refreshed token: " + refreshedToken);
+        Log.d(TAG, "Refreshed token: " + refreshedToken);
         Utils.updateFCMToken(refreshedToken);
     }
 }
