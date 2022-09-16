@@ -23,9 +23,11 @@ import android.util.Log;
 
 import com.huawei.agconnect.AGConnectOptionsBuilder;
 import com.huawei.hms.aaid.HmsInstanceId;
+import com.juick.App;
 
 public class NotificationManager {
-    public NotificationManager(Context context) {
+    public NotificationManager() {
+        Context context = App.getInstance();
         // get token
         new Thread() {
             @Override
