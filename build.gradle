@@ -21,13 +21,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 33
     defaultConfig {
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode 151
         versionName "3.1"
         applicationId "com.juick"
-
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         def addConstant = {constantName, constantValue ->
@@ -55,10 +54,12 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
+            namespace "com.juick.debug"
             debuggable true
             multiDexKeepProguard file('multidex-config.pro')
         }
         release {
+            namespace "com.juick"
             minifyEnabled false
             /*
             shrinkResources true
