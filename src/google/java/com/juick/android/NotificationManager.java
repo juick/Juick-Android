@@ -23,10 +23,12 @@ import android.text.TextUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.juick.App;
 import com.juick.R;
 
 public class NotificationManager {
-    public NotificationManager(Context context) {
+    public NotificationManager() {
+        Context context = App.getInstance();
         if (!TextUtils.isEmpty(context.getString(R.string.gcm_defaultSenderId))) {
             if (GoogleApiAvailability.getInstance()
                     .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {

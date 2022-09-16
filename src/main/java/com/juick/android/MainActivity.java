@@ -121,7 +121,7 @@ public class MainActivity extends BaseActivity
             if (!TextUtils.isEmpty(Utils.getNick())) {
                 titleHeader.setText(Utils.getNick());
             }
-            notificationManager = new NotificationManager(this);
+            notificationManager = new NotificationManager();
             Account account = Utils.getAccount();
             if (Build.VERSION.SDK_INT >= 23
                     && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {

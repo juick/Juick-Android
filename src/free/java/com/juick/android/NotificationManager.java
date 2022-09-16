@@ -17,7 +17,6 @@
 
 package com.juick.android;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.here.oksse.OkSse;
@@ -36,13 +35,8 @@ public class NotificationManager {
 
     private static final String TAG = NotificationManager.class.getSimpleName();
 
-    private Context context;
-
     private OkHttpClient es;
 
-    public NotificationManager(Context context) {
-        this.context = context;
-    }
     public void onResume() {
         if (es != null) return;
         es = Utils.getSSEFactory()
