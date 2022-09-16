@@ -17,11 +17,8 @@
 
 package com.juick.android.service;
 
-import android.text.TextUtils;
 import android.util.Log;
 
-import com.huawei.agconnect.config.AGConnectServicesConfig;
-import com.huawei.hms.aaid.HmsInstanceId;
 import com.huawei.hms.push.HmsMessageService;
 import com.huawei.hms.push.RemoteMessage;
 

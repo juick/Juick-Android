@@ -21,7 +21,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.huawei.agconnect.config.AGConnectServicesConfig;
+import com.huawei.agconnect.AGConnectOptionsBuilder;
 import com.huawei.hms.aaid.HmsInstanceId;
 
 public class NotificationManager {
@@ -32,7 +32,7 @@ public class NotificationManager {
             public void run() {
                 try {
                     // read from agconnect-services.json
-                    String appId = AGConnectServicesConfig.fromContext(context).getString("client/app_id");
+                    String appId = new AGConnectOptionsBuilder().build(context).getString("client/app_id");
                     String pushtoken = HmsInstanceId.getInstance(context).getToken(appId, "HCM");
                     if (!TextUtils.isEmpty(pushtoken)) {
                         Log.i("HMS", "get token:" + pushtoken);
