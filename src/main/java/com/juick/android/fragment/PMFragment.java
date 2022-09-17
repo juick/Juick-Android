@@ -18,9 +18,6 @@ package com.juick.android.fragment;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -38,7 +35,6 @@ import com.juick.api.model.Post;
 import com.juick.databinding.FragmentPmBinding;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

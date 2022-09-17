@@ -17,16 +17,12 @@
 package com.juick.android.fragment;
 
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -38,7 +34,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.juick.App;
-import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.JuickMessageMenu;
 import com.juick.android.JuickMessagesAdapter;
@@ -51,7 +46,6 @@ import com.juick.databinding.FragmentThreadBinding;
 import com.juick.util.StringUtils;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
