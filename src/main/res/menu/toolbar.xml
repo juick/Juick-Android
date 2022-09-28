@@ -24,11 +24,11 @@
         android:icon="@drawable/ic_ei_search"
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
-    <item
+    <!-- item
         android:title="@string/Juick_profile"
         android:id="@+id/profile"
         app:showAsAction="always"
         app:actionLayout="@layout/profile_menu_layout"
         app:actionProviderClass="com.juick.android.screens.menu.ProfileProvider"
-        />
+        / -->
 </menu>

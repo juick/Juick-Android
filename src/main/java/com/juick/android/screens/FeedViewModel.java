@@ -47,12 +47,12 @@ public class FeedViewModel extends ViewModel {
     public LiveData<List<Post>> getFeed() {
         if (feed == null) {
             feed = new MutableLiveData<>();
-            loadFeed();
+            loadFeed(false);
         }
         return feed;
     }
 
-    private void loadFeed() {
+    public void loadFeed(boolean append) {
         App.getInstance().getApi().getPosts(apiUrl)
                 .enqueue(new Callback<List<Post>>() {
                     @Override
@@ -61,7 +61,12 @@ public class FeedViewModel extends ViewModel {
                         if (response.isSuccessful()) {
                             List<Post> posts = response.body();
                             if (posts != null) {
-                                feed.postValue(posts);
+                                if (append && feed.getValue() != null) {
+                                    feed.getValue().addAll(posts);
+                                    feed.postValue(feed.getValue());
+                                } else {
+                                    feed.postValue(posts);
+                                }
                             }
                         }
                     }
