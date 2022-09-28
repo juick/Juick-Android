@@ -38,16 +38,6 @@
         android:label="@string/Me"
         tools:layout="@layout/fragment_me" />
     <fragment
-        android:id="@+id/newPostFragment"
-        android:name="com.juick.android.fragment.NewPostFragment"
-        android:label="NewPostFragment"
-        tools:layout="@layout/fragment_new_post">
-        <action
-            android:id="@+id/action_newPostFragment_to_tagsFragment"
-            app:destination="@id/tagsFragment"
-            app:popUpTo="@id/newPostFragment" />
-    </fragment>
-    <fragment
         android:id="@+id/tagsFragment"
         android:name="com.juick.android.fragment.TagsFragment"
         android:label="TagsFragment" />

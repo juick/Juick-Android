@@ -96,8 +96,7 @@ public class MainActivity extends AppCompatActivity {
                 R.id.discover,
                 R.id.chats,
                 R.id.no_auth,
-                R.id.profile,
-                R.id.newPostFragment
+                R.id.profile
         )
         .build();
         NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
@@ -143,6 +142,13 @@ public class MainActivity extends AppCompatActivity {
         });
         App.getInstance().getSignInStatus().observe(this, signInStatus -> {
             if (signInStatus == SignInActivity.SignInStatus.SIGN_IN_PROGRESS) {
+                showLogin();
+            }
+        });
+        model.fab.setOnClickListener(fabView -> {
+            if (Utils.hasAuth()) {
+                startActivity(new Intent(this, NewMessageActivity.class));
+            } else {
                 showLogin();
             }
         });

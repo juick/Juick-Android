@@ -17,10 +17,86 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/content_main" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <EditText
+                android:id="@+id/editMessage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#00000000"
+                android:gravity="top"
+                android:importantForAutofill="no"
+                android:inputType="textCapSentences|textMultiLine"
+                android:padding="8dip"
+                tools:targetApi="o"
+                tools:text="*weather the weather is cold!" />
+
+            <ImageView
+                android:id="@+id/imagePreview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:scaleType="fitEnd"
+                tools:src="@drawable/nsfw" />
+        </RelativeLayout>
+    </ScrollView>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:padding="8dip">
+
+        <ImageView
+            android:id="@+id/buttonTags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/tags_button"
+            android:padding="10dp"
+            android:src="@drawable/ic_code_tags_black_24dp" />
+
+        <ImageView
+            android:id="@+id/buttonAttachment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/buttonTags"
+            android:layout_toRightOf="@id/buttonTags"
+            android:contentDescription="@string/attach_photo"
+            android:padding="10dp"
+            android:src="@drawable/ic_button_attachment" />
+
+        <ImageView
+            android:id="@+id/buttonSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/send_button"
+            android:padding="10dp"
+            android:src="@drawable/ic_send_black_24dp"
+            android:text="@string/Send"
+            app:tint="@color/colorAccent" />
+    </RelativeLayout>
 
 </LinearLayout>
+

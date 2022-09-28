@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package com.juick.android.fragment;
+package com.juick.android;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
@@ -25,22 +24,17 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.juick.App;
 import com.juick.R;
-import com.juick.android.Utils;
 import com.juick.android.screens.home.HomeFragmentDirections;
 import com.juick.api.GlideApp;
-import com.juick.databinding.FragmentNewPostBinding;
+import com.juick.databinding.ActivityNewPostBinding;
 import com.juick.util.StringUtils;
 
 import java.io.FileNotFoundException;
@@ -48,45 +42,29 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created by alx on 02.01.17.
+ *
+ * @author Ugnich Anton
  */
-
-public class NewPostFragment extends Fragment {
+public class NewMessageActivity extends AppCompatActivity {
     private Uri attachmentUri = null;
     private String attachmentMime = null;
     private ProgressDialog progressDialog;
     private final BooleanReference progressDialogCancel = new BooleanReference(false);
+    private ActivityNewPostBinding model;
 
-    public static class BooleanReference {
-
-        public boolean bool;
-
-        public BooleanReference(boolean bool) {
-            this.bool = bool;
-        }
-    }
-
-
-    private FragmentNewPostBinding model;
-
-    private final ActivityResultLauncher<String> attachmentLauncher;
-
-    public NewPostFragment() {
-        super(R.layout.fragment_new_post);
-        attachmentLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), this::attachImage);
-    }
+    private ActivityResultLauncher<String> attachmentLauncher;
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        model = FragmentNewPostBinding.bind(view);
-
-        getActivity().setTitle(R.string.New_message);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        model = ActivityNewPostBinding.inflate(getLayoutInflater());
+        setContentView(model.getRoot());
+        attachmentLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), this::attachImage);
+        setTitle(R.string.New_message);
 
         model.buttonTags.setOnClickListener(v -> {
-            TagsFragment tagsFragment = TagsFragment.newInstance(Utils.myId);
-            tagsFragment.setOnTagAppliedListener(this::applyTag);
+            //TagsFragment tagsFragment = TagsFragment.newInstance(Utils.myId);
+            //tagsFragment.setOnTagAppliedListener(this::applyTag);
             //getBaseActivity().addFragment(tagsFragment, true);
         });
         model.buttonAttachment.setOnClickListener(v -> {
@@ -94,13 +72,13 @@ public class NewPostFragment extends Fragment {
                 try {
                     attachmentLauncher.launch("image/*");
                 } catch (Exception e) {
-                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             } else {
                 attachmentUri = null;
                 attachmentMime = null;
                 model.buttonAttachment.setSelected(false);
-                GlideApp.with(getContext())
+                GlideApp.with(this)
                         .clear(model.imagePreview);
             }
         });
@@ -108,12 +86,19 @@ public class NewPostFragment extends Fragment {
             try {
                 sendMessage();
             } catch (FileNotFoundException e) {
-                Toast.makeText(getActivity(), "Attachment error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Attachment error: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
 
         resetForm();
-        //handleIntent(getBaseActivity().getIntent());
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        resetForm();
+        handleIntent(intent);
     }
 
     public void resetForm() {
@@ -155,9 +140,9 @@ public class NewPostFragment extends Fragment {
         }
         setFormEnabled(false);
         if (attachmentUri != null) {
-            progressDialog = new ProgressDialog(getActivity());
+            progressDialog = new ProgressDialog(this);
             progressDialogCancel.bool = false;
-            progressDialog.setOnCancelListener(arg0 -> NewPostFragment.this.progressDialogCancel.bool = true);
+            progressDialog.setOnCancelListener(arg0 -> this.progressDialogCancel.bool = true);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setMax(0);
             progressDialog.show();
@@ -176,35 +161,35 @@ public class NewPostFragment extends Fragment {
                 progressDialog.dismiss();
             }
             if (newMessage == null) {
-                Toast.makeText(getActivity(), R.string.Error, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.Error, Toast.LENGTH_LONG).show();
             } else {
                 int mid = newMessage.getMid();
                 HomeFragmentDirections.ActionDiscoverFragmentToThreadFragment discoverAction =
                         HomeFragmentDirections.actionDiscoverFragmentToThreadFragment();
                 discoverAction.setMid(mid);
-                Navigation.findNavController(getView()).navigate(discoverAction);
+                finish();
             }
         });
     }
 
     private void attachImage(Uri uri) {
         if (uri != null) {
-            String mime = Utils.getMimeTypeFor(getContext(), uri);
+            String mime = Utils.getMimeTypeFor(this, uri);
             if (Utils.isImageTypeAllowed(mime)) {
                 attachmentUri = uri;
                 attachmentMime = mime;
                 model.buttonAttachment.setSelected(true);
-                try (InputStream bitmapStream = getContext().getContentResolver().openInputStream(uri)) {
+                try (InputStream bitmapStream = getContentResolver().openInputStream(uri)) {
                     Bitmap image = BitmapFactory.decodeStream(bitmapStream);
-                    GlideApp.with(getContext())
+                    GlideApp.with(this)
                             .load(image)
                             .transition(withCrossFade())
                             .into(model.imagePreview);
                 } catch (IOException e) {
-                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             } else {
-                Toast.makeText(getActivity(), R.string.wrong_image_format, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.wrong_image_format, Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -215,9 +200,12 @@ public class NewPostFragment extends Fragment {
         model.editMessage.setSelection(textLength, textLength);
     }
 
-    @Override
-    public void onDestroyView() {
-        model = null;
-        super.onDestroyView();
+    public static class BooleanReference {
+
+        public boolean bool;
+
+        public BooleanReference(boolean bool) {
+            this.bool = bool;
+        }
     }
 }
