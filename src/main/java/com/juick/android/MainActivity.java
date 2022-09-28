@@ -33,29 +33,25 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-//import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.screens.chats.ChatsFragmentDirections;
 import com.juick.android.screens.home.HomeFragmentDirections;
-import com.juick.android.screens.me.MeViewModel;
 import com.juick.android.widget.util.ViewUtil;
-import com.juick.api.GlideApp;
 import com.juick.api.model.Post;
 import com.juick.databinding.ActivityMainBinding;
 import com.juick.util.StringUtils;
@@ -92,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         //CollapsingToolbarLayout layout = model.collapsingToolbarLayout;
         BottomNavigationView navView = model.bottomNav;
+        FloatingActionButton fab = model.fab;
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = new AppBarConfiguration.Builder(
@@ -112,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
             int id = destination.getId();
             int visibility = shouldHideNavView(id) ? View.GONE : View.VISIBLE;
             navView.setVisibility(visibility);
+            int fabVisibility = shouldViewFab(id) ? View.VISIBLE : View.GONE;
+            fab.setVisibility(fabVisibility);
         });
         if (Utils.hasAuth()) {
             notificationManager = new NotificationManager();
@@ -151,6 +150,10 @@ public class MainActivity extends AppCompatActivity {
 
     boolean shouldHideNavView(int view) {
         return view == R.id.thread || view == R.id.PMFragment;
+    }
+
+    boolean shouldViewFab(int view) {
+        return view == R.id.home || view == R.id.discover;
     }
 
     @Override
