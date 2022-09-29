@@ -61,6 +61,7 @@
         <activity
             android:name=".android.MainActivity"
             android:exported="true"
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:logo="@drawable/ic_logo">
             <intent-filter>
@@ -97,6 +98,14 @@
                 <action android:name="${INTENT_NEW_EVENT_ACTION}" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/png" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".android.SignInActivity"
@@ -108,21 +117,6 @@
             android:exported="false"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             />
-        <activity
-            android:name="com.juick.android.NewMessageActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:label="@string/Juick"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="text/plain" />
-                <data android:mimeType="image/jpeg" />
-                <data android:mimeType="image/png" />
-            </intent-filter>
-        </activity>
         <service
             android:name=".android.service.AuthenticationService"
             android:exported="true"

@@ -44,6 +44,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.juick.App;
@@ -96,18 +97,27 @@ public class MainActivity extends AppCompatActivity {
                 R.id.discover,
                 R.id.chats,
                 R.id.no_auth,
-                R.id.profile
+                R.id.profile,
+                R.id.new_post
         )
         .build();
-        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+        NavHostFragment navHostFragment = model.navHost.getFragment();
         NavController navController = navHostFragment.getNavController();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         //NavigationUI.setupWithNavController(toolbar, navController);
         NavigationUI.setupWithNavController(navView, navController);
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             int id = destination.getId();
-            int visibility = shouldHideNavView(id) ? View.GONE : View.VISIBLE;
-            navView.setVisibility(visibility);
+            int scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+                    | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
+            if (shouldHideNavView(id)) {
+                navView.setVisibility(View.GONE);
+                scrollFlags = 0;
+            } else {
+                navView.setVisibility(View.VISIBLE);
+            }
+            ((AppBarLayout.LayoutParams) toolbar.getLayoutParams())
+                    .setScrollFlags(scrollFlags);
             int fabVisibility = shouldViewFab(id) ? View.VISIBLE : View.GONE;
             fab.setVisibility(fabVisibility);
         });
@@ -147,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         });
         model.fab.setOnClickListener(fabView -> {
             if (Utils.hasAuth()) {
-                startActivity(new Intent(this, NewMessageActivity.class));
+                navController.navigate(R.id.new_post);
             } else {
                 showLogin();
             }
@@ -155,7 +165,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     boolean shouldHideNavView(int view) {
-        return view == R.id.thread || view == R.id.PMFragment;
+        return view == R.id.thread || view == R.id.PMFragment
+                || view == R.id.new_post || view == R.id.tags;
     }
 
     boolean shouldViewFab(int view) {
@@ -263,14 +274,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+        NavHostFragment navHostFragment = model.navHost.getFragment();
         NavController navController = navHostFragment.getNavController();
         return navController.navigateUp() || super.onSupportNavigateUp();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+        NavHostFragment navHostFragment = model.navHost.getFragment();
         NavController navController = navHostFragment.getNavController();
         return NavigationUI.onNavDestinationSelected(item, navController)
                 || super.onOptionsItemSelected(item);

@@ -63,6 +63,7 @@
     <!-- NewMessageActivity -->
     <string name="New_message">Новое сообщение</string>
     <string name="Attach">Добавить</string>
+    <string name="tags">Теги</string>
 
     <!-- SignIn / SignUp -->
     <string name="Nick_latin_letters_and_numbers_">Ник (латинские буквы и цифры):</string>

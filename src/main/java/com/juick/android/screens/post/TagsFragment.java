@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.juick.android.fragment;
+package com.juick.android.screens.post;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -30,8 +30,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import com.juick.App;
 import com.juick.R;
-import com.juick.android.FeedBuilder;
-import com.juick.android.UrlBuilder;
 import com.juick.api.model.Tag;
 import com.juick.databinding.FragmentTagsListBinding;
 

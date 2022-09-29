@@ -21,8 +21,6 @@
     <string name="Juick" translatable="false">Juick</string>
     <string name="default_notification_channel_id" translatable="false">default</string>
     <string name="notification_extra" translatable="false">message</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="context_menu">Context menu</string>
     <string name="Cancel">Cancel</string>
     <string name="Yes">Yes</string>
@@ -67,6 +65,7 @@
     <!-- NewMessageActivity -->
     <string name="New_message">New message</string>
     <string name="Attach">Attach</string>
+    <string name="tags">Tags</string>
 
     <!-- SignIn / SignUp -->
     <string name="Nick_latin_letters_and_numbers_">Nick (latin letters and numbers):</string>

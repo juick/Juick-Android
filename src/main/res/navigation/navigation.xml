@@ -39,7 +39,7 @@
         tools:layout="@layout/fragment_me" />
     <fragment
         android:id="@+id/tagsFragment"
-        android:name="com.juick.android.fragment.TagsFragment"
+        android:name="com.juick.android.screens.post.TagsFragment"
         android:label="TagsFragment" />
     <fragment
         android:id="@+id/thread"
@@ -93,4 +93,19 @@
         tools:layout="@layout/fragment_no_auth"
         android:name="com.juick.android.screens.chats.NoAuthFragment"
         android:label="Chats" />
+    <fragment
+        android:id="@+id/new_post"
+        android:name="com.juick.android.screens.post.NewPostFragment"
+        tools:layout="@layout/fragment_new_post"
+        android:label="@string/New_message" >
+        <action
+            android:id="@+id/action_new_post_to_tags"
+            app:destination="@id/tags"
+            app:popUpTo="@id/new_post" />
+    </fragment>
+    <fragment
+        android:id="@+id/tags"
+        tools:layout="@layout/fragment_tags_list"
+        android:name="com.juick.android.screens.post.TagsFragment"
+        android:label="@string/tags" />
 </navigation>
