@@ -59,6 +59,7 @@ public class NewMessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         model = ActivityNewPostBinding.inflate(getLayoutInflater());
         setContentView(model.getRoot());
+        setSupportActionBar(model.toolbar);
         attachmentLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), this::attachImage);
         setTitle(R.string.New_message);
 
