@@ -1,4 +1,5 @@
 buildscript {
+    ext.kotlin_version = "1.7.10"
     repositories {
         mavenCentral()
         google()
@@ -9,11 +10,14 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.3.0'
         classpath 'com.google.gms:google-services:4.3.14'
         classpath 'com.huawei.agconnect:agcp:1.7.2.300'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 apply plugin: 'com.android.application'
 apply plugin: 'androidx.navigation.safeargs'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 repositories {
     mavenCentral()
@@ -107,9 +111,11 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.drawerlayout:drawerlayout:1.1.1'
-    implementation 'androidx.navigation:navigation-fragment:2.5.2'
-    implementation 'androidx.navigation:navigation-ui:2.5.2'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.2'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.2'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
+
     implementation 'com.google.android.material:material:1.6.1'
     googleImplementation 'com.google.android.gms:play-services-auth:20.3.0'
     // Firebase platform
@@ -127,9 +133,9 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.6.4'
     //noinspection GradleDependency
     implementation 'com.squareup.retrofit2:converter-jackson:2.6.4'
-    implementation 'com.github.bumptech.glide:glide:4.14.0'
-    annotationProcessor 'androidx.annotation:annotation:1.5.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.14.0'
+    implementation 'com.github.bumptech.glide:glide:4.14.1'
+    implementation 'androidx.annotation:annotation:1.5.0'
+    kapt 'com.github.bumptech.glide:compiler:4.14.1'
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.14.0@aar'
     implementation 'com.github.vitalyster:ChatKit:5e99a8bf3c'
     huaweiImplementation 'com.huawei.hms:push:6.7.0.300'
