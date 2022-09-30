@@ -14,19 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.android.screens.home
 
-package com.juick.android.screens.home;
+import com.juick.android.screens.FeedViewModel
+import com.juick.android.UrlBuilder
+import com.juick.android.Utils
 
-import com.juick.android.UrlBuilder;
-import com.juick.android.Utils;
-import com.juick.android.screens.FeedViewModel;
-
-public class HomeViewModel extends FeedViewModel {
-    public HomeViewModel() {
+class HomeViewModel : FeedViewModel() {
+    init {
         if (Utils.hasAuth()) {
-            setUrl(UrlBuilder.goHome().toString());
+            setUrl(UrlBuilder.goHome().toString())
         } else {
-            setUrl(UrlBuilder.getDiscussions().toString());
+            setUrl(UrlBuilder.getDiscussions().toString())
         }
     }
 }
