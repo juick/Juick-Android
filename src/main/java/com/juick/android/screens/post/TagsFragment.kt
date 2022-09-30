@@ -52,7 +52,7 @@ class TagsFragment : BottomSheetDialogFragment() {
         model.list.setHasFixedSize(true)
         val adapter = TagsAdapter()
         model.list.adapter = adapter
-        adapter.setOnItemClickListener { tagItemView: View?, position: Int ->
+        adapter.setOnItemClickListener { _, position ->
             val tag = adapter.getItem(position)
             val navController = NavHostFragment.findNavController(this)
             navController.previousBackStackEntry!!.savedStateHandle.set("tag", tag)
