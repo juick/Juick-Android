@@ -58,7 +58,7 @@ interface Api {
     ): Call<PostResponse?>?
 
     @GET("tags")
-    fun tags(@Query("user_id") userId: Int): Call<List<Tag?>?>?
+    suspend fun tags(@Query("user_id") userId: Int): List<Tag>
 
     @GET("thread")
     fun thread(@Query("mid") messageId: Int): Call<List<Post?>?>?
