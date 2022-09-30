@@ -28,8 +28,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical"
-        android:clipToPadding="false"
-        app:layoutManager="LinearLayoutManager" />
+        tools:listitem="@android:layout/simple_list_item_1"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="3"
+        android:clipToPadding="false" />
 
     <ProgressBar
         android:id="@+id/progressBar"
