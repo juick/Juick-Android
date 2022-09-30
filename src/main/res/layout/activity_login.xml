@@ -37,8 +37,6 @@
             android:orientation="vertical"
             android:layout_gravity="center"
             android:layout_width="match_parent"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
@@ -47,21 +45,20 @@
             android:layout_marginRight="50dp">
 
         <com.google.android.material.textfield.TextInputLayout
-                android:labelFor="@id/juickNick"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:labelFor="@id/juickNick">
 
-            <com.google.android.material.textfield.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/juickNick"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/avatar_size"
+                android:layout_height="wrap_content"
                 android:autofillHints="username"
                 android:hint="@string/your_nickname"
                 android:inputType="textPersonName"
                 android:maxLines="1"
-                android:textColorHint="#cbcaca"
                 tools:targetApi="o" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -75,12 +72,11 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/juickPassword"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/avatar_size"
+                android:layout_height="wrap_content"
                 android:autofillHints="password"
                 android:hint="@string/Password"
                 android:inputType="textPassword"
                 android:maxLines="1"
-                android:textColorHint="#cbcaca"
                 tools:targetApi="o" />
         </com.google.android.material.textfield.TextInputLayout>
 
