@@ -21,7 +21,6 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
@@ -236,8 +235,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 holder.replyToTextView.setText(post.getTo().getUname());
                 holder.replyToTextView.setVisibility(View.VISIBLE);
                 holder.replyToTextView.setTag(post);
-            } else
-                holder.replyToTextView.setVisibility(View.GONE);
+            }
         }
     }
 
