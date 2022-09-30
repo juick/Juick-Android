@@ -25,7 +25,7 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/userpic"
+        android:id="@+id/user_picture"
         tools:src="@drawable/av_96"
         android:layout_width="@dimen/avatar_size"
         android:layout_height="@dimen/avatar_size"
@@ -44,15 +44,15 @@
         android:layout_alignParentTop="true"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:layout_toLeftOf="@+id/menu_imageView"
-        android:layout_toRightOf="@id/userpic"
+        android:layout_toLeftOf="@+id/menu_dots"
+        android:layout_toRightOf="@id/user_picture"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textColor="@color/colorAccent"
         android:textIsSelectable="false"
         tools:text="ugnich"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_toStartOf="@+id/menu_imageView"
-        android:layout_toEndOf="@id/userpic" />
+        android:layout_toStartOf="@+id/menu_dots"
+        android:layout_toEndOf="@id/user_picture" />
 
     <TextView
         android:id="@+id/text"
@@ -60,8 +60,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/replyto"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_toEndOf="@+id/userpic"
-        android:layout_toRightOf="@+id/userpic"
+        android:layout_toEndOf="@+id/user_picture"
+        android:layout_toRightOf="@+id/user_picture"
         android:linksClickable="true"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         android:textColor="@color/colorText"
@@ -94,7 +94,7 @@
     </RelativeLayout>
 
     <ImageView
-        android:id="@+id/menu_imageView"
+        android:id="@+id/menu_dots"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -115,8 +115,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/photoWrapper"
         android:layout_marginTop="16dp"
-        android:layout_toEndOf="@+id/userpic"
-        android:layout_toRightOf="@+id/userpic"
+        android:layout_toEndOf="@+id/user_picture"
+        android:layout_toRightOf="@+id/user_picture"
         android:textColor="@android:color/darker_gray"
         android:textSize="14sp"
         tools:text="11:11:11" />
@@ -125,8 +125,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/username"
-        android:layout_toEndOf="@+id/userpic"
-        android:layout_toRightOf="@+id/userpic"
+        android:layout_toEndOf="@+id/user_picture"
+        android:layout_toRightOf="@+id/user_picture"
         android:padding="6dp"
         android:drawablePadding="2dip"
         android:background="?attr/selectableItemBackground"
@@ -148,10 +148,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/view"
-        android:layout_alignEnd="@+id/userpic"
+        android:layout_alignEnd="@+id/user_picture"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/userpic"
+        android:layout_alignRight="@+id/user_picture"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:padding="8dp"
         android:src="@drawable/ic_undo_black_24dp"

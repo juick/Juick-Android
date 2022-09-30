@@ -333,7 +333,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         VH(View itemView) {
             super(itemView);
             container = itemView.findViewById(R.id.container);
-            upicImageView = itemView.findViewById(R.id.userpic);
+            upicImageView = itemView.findViewById(R.id.user_picture);
             usernameTextView = itemView.findViewById(R.id.username);
             timestampTextView = itemView.findViewById(R.id.timestamp);
             textTextView = itemView.findViewById(R.id.text);
@@ -354,7 +354,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             }
             ViewUtil.setDrawableTint(repliesTextView);
             backImageView = itemView.findViewById(R.id.back_imageView);
-            menuImageView = itemView.findViewById(R.id.menu_imageView);
+            menuImageView = itemView.findViewById(R.id.menu_dots);
             menuImageView.setOnClickListener(this);
             itemView.setOnClickListener(this);
             textTextView.setOnClickListener(this);
@@ -362,7 +362,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         @Override
         public void onClick(View v) {
-            if (v.getId() == R.id.menu_imageView) {
+            if (v.getId() == R.id.menu_dots) {
                 if (menuClickListener != null){
                     menuClickListener.onItemClick(v, getBindingAdapterPosition());
                 }
