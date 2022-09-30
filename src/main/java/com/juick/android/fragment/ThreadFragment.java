@@ -31,6 +31,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -303,10 +304,10 @@ public class ThreadFragment extends Fragment {
             setFormEnabled(true);
             if (newMessage != null) {
                 int mid = newMessage.getMid();
-                HomeFragmentDirections.ActionDiscoverFragmentToThreadFragment discoverAction =
-                        HomeFragmentDirections.actionDiscoverFragmentToThreadFragment();
-                discoverAction.setMid(mid);
-                Navigation.findNavController(getView()).navigate(discoverAction);
+                ThreadFragmentDirections.ActionThreadSelf action =
+                        ThreadFragmentDirections.actionThreadSelf();
+                action.setMid(mid);
+                Navigation.findNavController(getView()).navigate(action);
             }else {
                 Toast.makeText(getContext(), R.string.Error, Toast.LENGTH_LONG).show();
             }

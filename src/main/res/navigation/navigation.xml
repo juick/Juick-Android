@@ -46,6 +46,10 @@
             android:name="mid"
             app:argType="integer"
             android:defaultValue="0" />
+        <action
+            android:id="@+id/action_thread_self"
+            app:destination="@id/thread"
+            app:popUpTo="@id/thread" />
     </fragment>
     <fragment
         android:id="@+id/PMFragment"
