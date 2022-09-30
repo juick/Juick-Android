@@ -20,7 +20,6 @@ package com.juick.android.screens.post;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -35,6 +34,9 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.SavedStateHandle;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
@@ -86,13 +88,15 @@ public class NewPostFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         attachmentLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), this::attachImage);
-
-        getActivity().setTitle(R.string.New_message);
-
         model.buttonTags.setOnClickListener(v -> {
-            TagsFragment tagsFragment = TagsFragment.newInstance(Utils.myId);
-            tagsFragment.setOnTagAppliedListener(this::applyTag);
-            //getBaseActivity().addFragment(tagsFragment, true);
+            NavController navController = Navigation.findNavController(getView());
+            SavedStateHandle tagState = navController.getCurrentBackStackEntry()
+                    .getSavedStateHandle();
+            MutableLiveData<String> tagData = tagState.getLiveData("tag");
+            tagData.observe(getViewLifecycleOwner(), tag -> {
+                tagState.remove("tag");
+                applyTag(tag);
+            });
             NavDirections action = NewPostFragmentDirections.actionNewPostToTags();
             Navigation.findNavController(v).navigate(action);
         });
@@ -118,19 +122,14 @@ public class NewPostFragment extends Fragment {
                 Toast.makeText(getActivity(), "Attachment error: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
-        resetForm();
-        handleIntent(getActivity().getIntent());
-    }
-
-    public void resetForm() {
-        model.editMessage.setText(StringUtils.EMPTY);
-        model.buttonAttachment.setSelected(false);
-        attachmentUri = null;
-        attachmentMime = null;
-        progressDialogCancel.bool = false;
+        NewPostFragmentArgs args = NewPostFragmentArgs.fromBundle(getArguments());
+        if (!StringUtils.defaultString(args.getText()).isEmpty()) {
+            applyTag(args.getText());
+        }
+        if (!StringUtils.defaultString(args.getUri()).isEmpty()) {
+            attachImage(Uri.parse(args.getUri()));
+        }
         model.editMessage.requestFocus();
-        //setSupportProgressBarIndeterminateVisibility(Boolean.FALSE);
     }
 
     private void setFormEnabled(boolean state) {
@@ -139,19 +138,6 @@ public class NewPostFragment extends Fragment {
         model.buttonAttachment.setEnabled(state);
         model.buttonSend.setEnabled(state);
         //setSupportProgressBarIndeterminateVisibility(state ? Boolean.FALSE : Boolean.TRUE);
-    }
-
-    public void handleIntent(Intent i) {
-        String action = i.getAction();
-        if (action != null && action.equals(Intent.ACTION_SEND)) {
-            String mime = i.getType();
-            Bundle extras = i.getExtras();
-            if (mime.equals("text/plain")) {
-                model.editMessage.append(extras.getString(Intent.EXTRA_TEXT));
-            } else{
-                attachImage(Uri.parse(extras.get(Intent.EXTRA_STREAM).toString()));
-            }
-        }
     }
 
     private void sendMessage() throws FileNotFoundException {
@@ -220,6 +206,7 @@ public class NewPostFragment extends Fragment {
         model.editMessage.setText("*" + tag + " " + model.editMessage.getText());
         int textLength = model.editMessage.getText().length();
         model.editMessage.setSelection(textLength, textLength);
+        model.editMessage.requestFocus();
     }
 
     @Override

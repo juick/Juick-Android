@@ -26,78 +26,60 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.juick.App;
 import com.juick.R;
 import com.juick.api.model.Tag;
 import com.juick.databinding.FragmentTagsListBinding;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
  * @author Ugnich Anton
  */
-public class TagsFragment extends Fragment {
+public class TagsFragment extends BottomSheetDialogFragment {
 
     private FragmentTagsListBinding model;
-
-    public interface OnTagAppliedListener {
-        void onTagApplied(String tag);
-    }
 
     private static final String ARG_UID = "ARG_UID";
 
     private int uid = 0;
-    private OnTagAppliedListener callback;
 
-    static TagsFragment newInstance(int uid) {
-        TagsFragment fragment = new TagsFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_UID, uid);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public void setOnTagAppliedListener(@NonNull OnTagAppliedListener callback) {
-        this.callback = callback;
-    }
-
-    public TagsFragment() {
-        super(R.layout.fragment_tags_list);
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        model = FragmentTagsListBinding.inflate(inflater, container, false);
+        return model.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        model = FragmentTagsListBinding.bind(view);
-
         Bundle args = getArguments();
         if (args != null) {
             uid = args.getInt(ARG_UID, 0);
-        }
-
-        if (uid == 0) {
-            getActivity().setTitle(R.string.Popular_tags);
         }
 
         model.progressBar.setVisibility(View.VISIBLE);
         model.list.setHasFixedSize(true);
         final TagsAdapter adapter = new TagsAdapter();
         model.list.setAdapter(adapter);
-        adapter.setOnItemClickListener((view1, position) -> {
+        adapter.setOnItemClickListener((tagItemView, position) -> {
             String tag = adapter.getItem(position);
-            if (callback != null) {
-                //getBaseActivity().getSupportFragmentManager().popBackStackImmediate();
-                callback.onTagApplied(tag);
-            }
+            NavController navController = NavHostFragment.findNavController(this);
+            navController.getPreviousBackStackEntry().getSavedStateHandle().set("tag", tag);
+            TagsFragment.this.dismiss();
         });
        /* adapter.setOnItemLongClickListener((view12, position) -> ((BaseActivity) getActivity())
                 .replaceFragment(FeedBuilder.feedFor(

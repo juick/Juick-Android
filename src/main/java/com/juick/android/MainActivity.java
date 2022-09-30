@@ -40,6 +40,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -52,6 +53,7 @@ import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.screens.chats.ChatsFragmentDirections;
 import com.juick.android.screens.home.HomeFragmentDirections;
+import com.juick.android.screens.post.NewPostFragmentArgs;
 import com.juick.android.widget.util.ViewUtil;
 import com.juick.api.model.Post;
 import com.juick.databinding.ActivityMainBinding;
@@ -193,14 +195,14 @@ public class MainActivity extends AppCompatActivity {
                         ChatsFragmentDirections.ActionChatsToPMFragment chatAction =
                                 ChatsFragmentDirections.actionChatsToPMFragment(jmsg.getUser().getUname());
                         chatAction.setUid(jmsg.getUser().getUid());
-                        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+                        NavHostFragment navHostFragment = model.navHost.getFragment();
                         NavController navController = navHostFragment.getNavController();
                         navController.navigate(chatAction);
                     } else {
                         HomeFragmentDirections.ActionDiscoverFragmentToThreadFragment discoverAction =
                                 HomeFragmentDirections.actionDiscoverFragmentToThreadFragment();
                         discoverAction.setMid(jmsg.getMid());
-                        NavHostFragment navHostFragment = (NavHostFragment) model.navHost.getFragment();
+                        NavHostFragment navHostFragment = model.navHost.getFragment();
                         NavController navController = navHostFragment.getNavController();
                         navController.navigate(discoverAction);
                     }
@@ -232,6 +234,19 @@ public class MainActivity extends AppCompatActivity {
                     processUri(data);
                 }
             }
+        }
+        if (action.equals(Intent.ACTION_SEND)) {
+            String mime = intent.getType();
+            Bundle extras = intent.getExtras();
+            Bundle postArgs = new Bundle();
+            if (mime.equals("text/plain")) {
+                postArgs.putString("text", extras.getString(Intent.EXTRA_TEXT));
+            } else{
+                postArgs.putString("uri", extras.get(Intent.EXTRA_STREAM).toString());
+            }
+            NavHostFragment navHostFragment = model.navHost.getFragment();
+            NavController navController = navHostFragment.getNavController();
+            navController.navigate(R.id.new_post, postArgs);
         }
     }
 

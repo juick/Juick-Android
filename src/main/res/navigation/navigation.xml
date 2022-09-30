@@ -38,10 +38,6 @@
         android:label="@string/Me"
         tools:layout="@layout/fragment_me" />
     <fragment
-        android:id="@+id/tagsFragment"
-        android:name="com.juick.android.screens.post.TagsFragment"
-        android:label="TagsFragment" />
-    <fragment
         android:id="@+id/thread"
         android:name="com.juick.android.fragment.ThreadFragment"
         tools:layout="@layout/fragment_thread"
@@ -102,8 +98,18 @@
             android:id="@+id/action_new_post_to_tags"
             app:destination="@id/tags"
             app:popUpTo="@id/new_post" />
+        <argument
+            android:name="text"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="uri"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
-    <fragment
+    <dialog
         android:id="@+id/tags"
         tools:layout="@layout/fragment_tags_list"
         android:name="com.juick.android.screens.post.TagsFragment"
