@@ -27,11 +27,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.Utils;
 import com.juick.android.widget.util.ViewUtil;
-import com.juick.api.GlideApp;
 import com.juick.api.model.Post;
 import com.juick.databinding.FragmentPmBinding;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
@@ -72,7 +72,7 @@ public class PMFragment extends Fragment {
             getActivity().setTitle(uname);
 
             adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId),
-                    (imageView, url, object) -> GlideApp.with(imageView.getContext())
+                    (imageView, url, object) -> Glide.with(imageView.getContext())
                             .load(url)
                             .transition(withCrossFade())
                             .into(imageView));

@@ -29,8 +29,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
+import com.bumptech.glide.Glide;
 import com.juick.R;
-import com.juick.api.GlideApp;
 import com.juick.api.model.Chat;
 import com.juick.databinding.FragmentDialogListBinding;
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
@@ -49,7 +49,7 @@ public class ChatsFragment extends Fragment {
     public ChatsFragment() {
         super(R.layout.fragment_dialog_list);
         chatsAdapter = new DialogsListAdapter<>((imageView, url, object) ->
-                GlideApp.with(imageView.getContext())
+                Glide.with(imageView.getContext())
                         .load(url)
                         .transition(withCrossFade())
                         .into(imageView));

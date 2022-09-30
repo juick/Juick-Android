@@ -30,10 +30,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
 import com.juick.android.screens.home.HomeFragmentDirections;
-import com.juick.api.GlideApp;
 import com.juick.databinding.ActivityNewPostBinding;
 import com.juick.util.StringUtils;
 
@@ -79,7 +79,7 @@ public class NewMessageActivity extends AppCompatActivity {
                 attachmentUri = null;
                 attachmentMime = null;
                 model.buttonAttachment.setSelected(false);
-                GlideApp.with(this)
+                Glide.with(this)
                         .clear(model.imagePreview);
             }
         });
@@ -182,7 +182,7 @@ public class NewMessageActivity extends AppCompatActivity {
                 model.buttonAttachment.setSelected(true);
                 try (InputStream bitmapStream = getContentResolver().openInputStream(uri)) {
                     Bitmap image = BitmapFactory.decodeStream(bitmapStream);
-                    GlideApp.with(this)
+                    Glide.with(this)
                             .load(image)
                             .transition(withCrossFade())
                             .into(model.imagePreview);

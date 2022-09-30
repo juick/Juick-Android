@@ -33,11 +33,11 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.FutureTarget;
 import com.juick.App;
 import com.juick.BuildConfig;
 import com.juick.R;
-import com.juick.api.GlideApp;
 import com.juick.api.model.Post;
 
 import java.util.concurrent.ExecutionException;
@@ -109,7 +109,7 @@ public class NotificationSender {
                                     getId(jmsg), createNewEventIntent(msgStr),
                                     PendingIntent.FLAG_UPDATE_CURRENT));
                 }
-                FutureTarget<Bitmap> avatarBitmap = GlideApp.with(App.getInstance()).asBitmap()
+                FutureTarget<Bitmap> avatarBitmap = Glide.with(App.getInstance()).asBitmap()
                         .load(jmsg.getUser().getAvatar())
                         .fallback(R.drawable.av_96)
                         .placeholder(R.drawable.av_96)

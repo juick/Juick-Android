@@ -31,9 +31,9 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 
+import com.bumptech.glide.Glide;
 import com.juick.R;
 import com.juick.android.screens.me.MeViewModel;
-import com.juick.api.GlideApp;
 import com.juick.databinding.ProfileMenuLayoutBinding;
 
 public class ProfileProvider extends ActionProvider {
@@ -48,7 +48,7 @@ public class ProfileProvider extends ActionProvider {
             if (user.getUid() > 0) {
                 ImageView profileImage = binding.profileImage;
                 String avatarUrl = user.getAvatar();
-                GlideApp.with(context)
+                Glide.with(context)
                         .load(avatarUrl)
                         .placeholder(R.drawable.av_96)
                         .into(profileImage);

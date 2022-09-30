@@ -40,6 +40,8 @@ import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -48,8 +50,6 @@ import com.juick.BuildConfig;
 import com.juick.R;
 import com.juick.android.widget.util.BlurTransformation;
 import com.juick.android.widget.util.ViewUtil;
-import com.juick.api.GlideApp;
-import com.juick.api.GlideRequest;
 import com.juick.api.model.Post;
 import com.juick.util.MessageUtils;
 import com.juick.util.StringUtils;
@@ -150,7 +150,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
         final Post post = postList.get(position);
         boolean isThread = type != TYPE_THREAD_POST;
         if (post.getUser() != null) {
-            GlideApp.with(holder.itemView.getContext())
+            Glide.with(holder.itemView.getContext())
                     .load(post.getUser().getAvatar())
                     .transition(withCrossFade())
                     .fallback(R.drawable.av_96).into(holder.upicImageView);
@@ -163,7 +163,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
             if (post.getPhoto() != null && post.getPhoto().getSmall() != null) {
                 holder.photoLayout.setVisibility(View.VISIBLE);
                 holder.photoDescriptionView.setVisibility(View.GONE);
-                GlideRequest<Drawable> drawable = GlideApp.with(holder.itemView.getContext())
+                RequestBuilder<Drawable> drawable = Glide.with(holder.itemView.getContext())
                         .load(post.getPhoto().getSmall())
                         .transition(withCrossFade());
                 if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
@@ -178,7 +178,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 if (App.getInstance().getPreviewers().size() > 0) {
                     App.getInstance().getPreviewers().get(0).getPreviewUrl(post.getBody(), link -> {
                         if (link != null) {
-                            GlideApp.with(holder.itemView.getContext()).load(link.getUrl())
+                            Glide.with(holder.itemView.getContext()).load(link.getUrl())
                                     .transition(withCrossFade())
                                     .into(holder.photoImageView);
                             holder.photoDescriptionView.setVisibility(View.VISIBLE);
@@ -219,7 +219,7 @@ public class JuickMessagesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 }
             }
             if (post.getRid() > 0 && post.getReplyto() > 0) {
-                GlideApp.with(holder.itemView.getContext())
+                Glide.with(holder.itemView.getContext())
                         .load(post.getTo().getAvatar())
                         .transition(withCrossFade())
                         .fallback(R.drawable.av_96).into(new CustomTarget<Drawable>(48, 48) {

@@ -34,9 +34,9 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.RawContacts;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
 import com.juick.App;
 import com.juick.R;
-import com.juick.api.GlideApp;
 import com.juick.api.model.SecureUser;
 import com.juick.api.model.User;
 
@@ -126,7 +126,7 @@ public class ContactsSyncService extends Service {
                 Bitmap photo = null;
                 if (user.getAvatar() != null) {
                     try {
-                        photo = GlideApp.with(getContext()).asBitmap().load(user.getAvatar())
+                        photo = Glide.with(getContext()).asBitmap().load(user.getAvatar())
                                 .placeholder(R.drawable.av_96)
                                 .submit()
                                 .get();
