@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.android.screens.discover
 
-package com.juick.android.screens.discover;
+import com.juick.android.screens.FeedViewModel
+import com.juick.android.UrlBuilder
 
-import com.juick.android.UrlBuilder;
-import com.juick.android.screens.FeedViewModel;
-
-public class DiscoverViewModel extends FeedViewModel {
-    public DiscoverViewModel() {
-        setUrl(UrlBuilder.getLast().toString());
+class DiscoverViewModel : FeedViewModel() {
+    init {
+        setUrl(UrlBuilder.getLast().toString())
     }
 }
