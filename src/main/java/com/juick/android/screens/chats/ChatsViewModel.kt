@@ -26,7 +26,7 @@ import com.juick.android.Utils
 import kotlinx.coroutines.Dispatchers
 
 class ChatsViewModel : ViewModel() {
-    fun getChats() = liveData(Dispatchers.IO) {
+    var chats = liveData(Dispatchers.IO) {
         emit(Resource.loading(null))
         try {
             emit(Resource.success(data = App.getInstance().api.groupsPms(10).pms))

@@ -69,7 +69,6 @@ public class PMFragment extends Fragment {
 
         if (arguments != null) {
             uname = PMFragmentArgs.fromBundle(getArguments()).getUname();
-            getActivity().setTitle(uname);
 
             adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId),
                     (imageView, url, object) -> Glide.with(imageView.getContext())

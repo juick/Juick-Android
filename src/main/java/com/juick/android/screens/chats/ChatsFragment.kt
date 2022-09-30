@@ -27,7 +27,6 @@ import androidx.navigation.Navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.R
-import com.juick.android.Status
 import com.juick.android.Status.*
 import com.juick.api.model.Chat
 import com.juick.databinding.FragmentDialogListBinding
@@ -72,7 +71,7 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
         super.onViewCreated(view, savedInstanceState)
         model.dialogsList.setAdapter(chatsAdapter)
         vm = ViewModelProvider(this)[ChatsViewModel::class.java]
-        vm.getChats().observe(viewLifecycleOwner) { resource ->
+        vm.chats.observe(viewLifecycleOwner) { resource ->
             when (resource.status) {
                 SUCCESS -> {
                     model.dialogsList.visibility = View.VISIBLE
@@ -88,9 +87,9 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
                 }
             }
         }
-        vm.isAuthenticated().observe(viewLifecycleOwner) { isAuthenticated: Boolean? ->
+        vm.isAuthenticated().observe(viewLifecycleOwner) { authenticated ->
             val navController = findNavController(requireView())
-            if (!isAuthenticated!!) {
+            if (!authenticated) {
                 val action = ChatsFragmentDirections.actionChatsToNoAuth()
                 navController.navigate(action)
             } else {
