@@ -64,7 +64,7 @@ interface Api {
     fun thread(@Query("mid") messageId: Int): Call<List<Post?>?>?
 
     @GET("android/register")
-    fun registerPush(@Query("regid") login: String?): Call<Void?>?
+    suspend fun registerPush(@Query("regid") login: String)
 
     @GET("groups_pms")
     suspend fun groupsPms(@Query("cnt") cnt: Int): Pms

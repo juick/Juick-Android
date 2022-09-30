@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (Utils.hasAuth()) {
             notificationManager = NotificationManager()
-            val account = Utils.getAccount()
+            val account = Utils.account
             if (Build.VERSION.SDK_INT >= 23
                 && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
             ) {
@@ -299,12 +299,12 @@ class MainActivity : AppCompatActivity() {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 ContentResolver.setSyncAutomatically(
-                    Utils.getAccount(),
+                    Utils.account,
                     ContactsContract.AUTHORITY,
                     true
                 )
                 ContentResolver.addPeriodicSync(
-                    Utils.getAccount(),
+                    Utils.account,
                     ContactsContract.AUTHORITY,
                     Bundle.EMPTY,
                     86400L

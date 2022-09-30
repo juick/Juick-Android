@@ -70,7 +70,7 @@ public class PMFragment extends Fragment {
         if (arguments != null) {
             uname = PMFragmentArgs.fromBundle(getArguments()).getUname();
 
-            adapter = new MessagesListAdapter<>(String.valueOf(Utils.myId),
+            adapter = new MessagesListAdapter<>(String.valueOf(Utils.getMyId()),
                     (imageView, url, object) -> Glide.with(imageView.getContext())
                             .load(url)
                             .transition(withCrossFade())

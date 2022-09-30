@@ -14,29 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.android
 
-package com.juick.android;
+import com.juick.android.Utils.updateFCMToken
+import android.content.Context
+import com.juick.App
+import android.text.TextUtils
+import com.juick.R
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.common.ConnectionResult
+import com.google.firebase.messaging.FirebaseMessaging
 
-import android.content.Context;
-import android.text.TextUtils;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.juick.App;
-import com.juick.R;
-
-public class NotificationManager {
-    public NotificationManager() {
-        Context context = App.getInstance();
+class NotificationManager {
+    init {
+        val context: Context = App.getInstance()
         if (!TextUtils.isEmpty(context.getString(R.string.gcm_defaultSenderId))) {
             if (GoogleApiAvailability.getInstance()
-                    .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
-                FirebaseMessaging.getInstance().getToken().addOnSuccessListener(Utils::updateFCMToken);
+                    .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+            ) {
+                FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                    updateFCMToken(token)
+                }
             }
         }
     }
-    public void onResume() {
 
-    }
+    fun onResume() {}
 }

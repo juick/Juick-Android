@@ -97,7 +97,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
         selectedPost = postList.get(position);
         CharSequence[] items;
         int menuLength;
-        if (Utils.myId == 0) {
+        if (Utils.getMyId() == 0) {
             menuLength = 2;
             items = Arrays.asList(
                     '@' + selectedPost.getUser().getUname() + " " + context.getString(R.string.blog),
@@ -105,7 +105,7 @@ public class JuickMessageMenu implements OnClickListener, JuickMessagesAdapter.O
             ).toArray(new CharSequence[0]);
             currentActions[0] = MENU_ACTION_BLOG;
             currentActions[1] = MENU_ACTION_SHARE;
-        } else if (selectedPost.getUser().getUid() == Utils.myId) {
+        } else if (selectedPost.getUser().getUid() == Utils.getMyId()) {
             menuLength = 1;
             items = new CharSequence[menuLength];
             items[0] = selectedPost.getRid() == 0 ? context.getString(R.string.DeletePost) : context.getString(R.string.DeleteComment);
