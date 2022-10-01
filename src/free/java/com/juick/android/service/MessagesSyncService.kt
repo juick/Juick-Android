@@ -17,19 +17,22 @@
 package com.juick.android.service
 
 import android.accounts.Account
-import android.app.Service
 import android.content.*
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import com.fasterxml.jackson.core.JsonProcessingException
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
 import com.juick.App
 import com.juick.R
 import com.juick.api.model.Post
 import com.juick.api.model.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-class MessagesSyncService : Service() {
-    private class MessagesSyncAdapter(private val appContext: Context) :
+class MessagesSyncService : LifecycleService() {
+    private class MessagesSyncAdapter(private val lifecycleScope: CoroutineScope,
+                                      private val appContext: Context) :
         AbstractThreadedSyncAdapter(appContext, true) {
         override fun onPerformSync(
             account: Account,
@@ -38,31 +41,35 @@ class MessagesSyncService : Service() {
             provider: ContentProviderClient,
             syncResult: SyncResult
         ) {
-            val me = App.instance.me.value
-            if ((me?.unreadCount ?: 0) > 0) {
-                val user = User(0, "Juick")
-                val announcement = Post()
-                announcement.setUser(user)
-                announcement.setBody(context.getString(R.string.unread_discussions))
+            lifecycleScope.launch {
                 try {
-                    val messageData: String =
-                        App.instance.jsonMapper.writeValueAsString(announcement)
-                    App.instance.notificationSender?.showNotification(messageData)
-                } catch (e: JsonProcessingException) {
-                    Log.w(this.javaClass.simpleName, "JSON error", e)
+                    val me = App.instance.api.me()
+                    if (me.unreadCount > 0) {
+                        val user = User(0, "Juick")
+                        val announcement = Post()
+                        announcement.setUser(user)
+                        announcement.setBody(context.getString(R.string.unread_discussions))
+                        val messageData = App.instance.jsonMapper.writeValueAsString(announcement)
+                        App.instance.notificationSender?.showNotification(messageData)
+                    }
+                } catch (e: Exception) {
+                    Log.w(this.javaClass.simpleName, "Sync error", e)
                 }
             }
         }
     }
 
-    private var messagesSyncAdapter: MessagesSyncAdapter? = null
+    private lateinit var messagesSyncAdapter: MessagesSyncAdapter
     override fun onCreate() {
+        super.onCreate()
         messagesSyncAdapter = MessagesSyncAdapter(
+            lifecycleScope,
             applicationContext
         )
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        return messagesSyncAdapter!!.syncAdapterBinder
+        super.onBind(intent)
+        return messagesSyncAdapter.syncAdapterBinder
     }
 }
