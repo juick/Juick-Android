@@ -29,6 +29,10 @@ import com.juick.App
 import com.juick.R
 import com.juick.api.model.Post
 import com.juick.api.model.SecureUser
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -51,23 +55,16 @@ class JuickMessageMenu(private val context: LifecycleOwner, private val postList
     }
 
     private fun postMessage(body: String, ok: String, isReload: Boolean = false) {
-        App.instance.api.post(body)?.enqueue(object : Callback<Void?> {
-            override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
-                Toast.makeText(
-                    App.instance,
-                    if (response.isSuccessful) ok else App.instance.resources.getString(R.string.Error),
-                    Toast.LENGTH_SHORT
-                ).show()
-                /*if(isReload)
-                    reloadView();*/
+        try {
+            CoroutineScope(Dispatchers.IO).launch {
+                App.instance.api.post(body)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(App.instance, ok, Toast.LENGTH_LONG).show()
+                }
             }
-
-            override fun onFailure(call: Call<Void?>, t: Throwable) {
-                /*if(isReload)
-                    reloadView();*/
-                Toast.makeText(App.instance, R.string.network_error, Toast.LENGTH_LONG).show()
-            }
-        })
+        } catch (e: Exception) {
+            Toast.makeText(App.instance, R.string.network_error, Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onItemClick(view: View?, position: Int) {

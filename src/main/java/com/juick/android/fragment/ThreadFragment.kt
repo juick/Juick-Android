@@ -255,24 +255,22 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     }
 
     private fun postText(body: String) {
-        App.instance.api.post(body)?.enqueue(object : Callback<Void?> {
-            override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
-                if (response.isSuccessful && isAdded) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                App.instance.api.post(body)
+                withContext(Dispatchers.Main) {
                     Toast.makeText(App.instance, R.string.Message_posted, Toast.LENGTH_SHORT)
                         .show()
                     resetForm()
                     ViewUtil.hideKeyboard(activity)
-                } else {
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
                     Toast.makeText(App.instance, R.string.Error, Toast.LENGTH_SHORT).show()
                     setFormEnabled(true)
                 }
             }
-
-            override fun onFailure(call: Call<Void?>, t: Throwable) {
-                resetForm()
-                Toast.makeText(App.instance, R.string.network_error, Toast.LENGTH_LONG).show()
-            }
-        })
+        }
     }
 
     @Throws(FileNotFoundException::class)

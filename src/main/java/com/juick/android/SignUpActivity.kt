@@ -24,6 +24,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.juick.App
 import com.juick.R
 import com.juick.databinding.ActivitySignupBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -44,27 +48,25 @@ class SignUpActivity : AppCompatActivity() {
                 Toast.makeText(this, "Passwords did not match", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
-            App.instance.api.signup(nick, password, authCode)!!.enqueue(object : Callback<Void?> {
-                override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
-                    if (response.isSuccessful) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    App.instance.api.signup(nick, password, authCode)
+                    withContext(Dispatchers.Main) {
                         val successIntent = Intent()
                         successIntent.putExtra("nick", nick)
                         successIntent.putExtra("password", password)
                         setResult(RESULT_OK, successIntent)
                         finish()
-                    } else {
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
                         Toast.makeText(
                             this@SignUpActivity,
                             "Username is not correct (already taken?)", Toast.LENGTH_LONG
                         ).show()
                     }
                 }
-
-                override fun onFailure(call: Call<Void?>, t: Throwable) {
-                    Toast.makeText(this@SignUpActivity, R.string.network_error, Toast.LENGTH_LONG)
-                        .show()
-                }
-            })
+            }
         }
     }
 }

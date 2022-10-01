@@ -22,7 +22,6 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
-import android.widget.Toast
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -32,15 +31,15 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.juick.App
 import com.juick.R
-import com.juick.api.model.AuthResponse
 import com.juick.util.StringUtils
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class GoogleSignInProvider : SignInProvider {
-    private var googleClient: GoogleSignInClient? = null
-    private var context: Activity? = null
+    private lateinit var googleClient: GoogleSignInClient
+    private lateinit var context: Activity
     override fun prepareSignIn(context: Activity, button: RelativeLayout): View? {
         this.context = context
         val googleClientId =
@@ -88,50 +87,46 @@ class GoogleSignInProvider : SignInProvider {
     }
 
     override fun performSignIn() {
-        val signInIntent = googleClient!!.signInIntent
-        context!!.startActivityForResult(signInIntent, RC_SIGN_IN)
+        val signInIntent = googleClient.signInIntent
+        context.startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
     private fun handleSignInResult(
         completedTask: Task<GoogleSignInAccount>,
         successCallback: SignInSuccessCallback
     ) {
-        try {
-            val account = completedTask.getResult(ApiException::class.java)
-            Log.i(SignInActivity::class.java.simpleName, "Success " + account.idToken)
-            App.instance.api.googleAuth(account.idToken)
-                ?.enqueue(object : Callback<AuthResponse?> {
-                    override fun onResponse(
-                        call: Call<AuthResponse?>,
-                        response: Response<AuthResponse?>
-                    ) {
-                        if (response.isSuccessful) {
-                            response.body()?.let {
-                                data ->
-                                if (data.user == null) {
-                                    data.authCode?.let { authCode ->
-                                        Log.i(SignInActivity::class.java.simpleName, authCode)
-                                        val signupIntent =
-                                            Intent(context, SignUpActivity::class.java)
-                                        signupIntent.putExtra("email", data.account)
-                                        signupIntent.putExtra("authCode", data.authCode)
-                                        context!!.startActivityForResult(signupIntent, RC_SIGN_UP)
-                                    }
-                                } else {
-                                    successCallback.invoke(data.user.name, data.user.hash!!)
-                                }
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val account = completedTask.getResult(ApiException::class.java)
+                account.idToken?.let {
+                    token ->
+                    Log.i(SignInActivity::class.java.simpleName, "Success: $token")
+                    val data = App.instance.api.googleAuth(token)
+                    if (data.user == null) {
+                        data.authCode?.let { authCode ->
+                            Log.i(SignInActivity::class.java.simpleName, authCode)
+                            withContext(Dispatchers.Main) {
+                                val signupIntent =
+                                    Intent(context, SignUpActivity::class.java)
+                                signupIntent.putExtra("email", data.account)
+                                signupIntent.putExtra("authCode", data.authCode)
+                                context.startActivityForResult(signupIntent, RC_SIGN_UP)
                             }
                         }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            successCallback.invoke(data.user.name, data.user.hash!!)
+                        }
                     }
-
-                    override fun onFailure(call: Call<AuthResponse?>, t: Throwable) {
-                        Toast.makeText(App.instance, "Google error", Toast.LENGTH_LONG).show()
-                    }
-                })
-        } catch (e: ApiException) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w(SignInActivity::class.java.simpleName, "signInResult:failed code=" + e.statusCode)
+                }
+            } catch (e: ApiException) {
+                // The ApiException status code indicates the detailed failure reason.
+                // Please refer to the GoogleSignInStatusCodes class reference for more information.
+                Log.w(
+                    SignInActivity::class.java.simpleName,
+                    "signInResult:failed code=" + e.statusCode
+                )
+            }
         }
     }
 

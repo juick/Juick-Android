@@ -39,57 +39,53 @@ import kotlinx.coroutines.withContext
  * @author ugnich
  */
 class PMFragment : Fragment(R.layout.fragment_pm) {
-    private var model: FragmentPmBinding? = null
-    private var adapter: MessagesListAdapter<Post>? = null
-    private var uname: String? = null
+    private var _model: FragmentPmBinding? = null
+    private val model get() = _model!!
+    private lateinit var adapter: MessagesListAdapter<Post>
+    private lateinit var uname: String
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        model = FragmentPmBinding.bind(view)
-        val arguments = arguments
-        if (arguments != null) {
-            uname = PMFragmentArgs.fromBundle(requireArguments()).uname
-            adapter = MessagesListAdapter(java.lang.String.valueOf(App.instance.me.value)
-            ) { imageView, url, _ ->
-                Glide.with(imageView.context)
-                    .load(url)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .into(imageView)
-            }
-            model!!.messagesList.setAdapter(adapter)
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    App.instance.api.pm(uname).let {
+        _model = FragmentPmBinding.bind(view)
+        uname = PMFragmentArgs.fromBundle(requireArguments()).uname
+        adapter = MessagesListAdapter(java.lang.String.valueOf(App.instance.me.value)
+        ) { imageView, url, _ ->
+            Glide.with(imageView.context)
+                .load(url)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(imageView)
+        }
+        model.messagesList.setAdapter(adapter)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                App.instance.api.pm(uname).let {
                         newPms ->
-                        withContext(Dispatchers.Main) {
-                            adapter?.addToEnd(newPms, false)
-                        }
-                    }
-                } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(App.instance, R.string.network_error, Toast.LENGTH_LONG)
-                            .show()
+                        adapter.addToEnd(newPms, false)
                     }
                 }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(App.instance, R.string.network_error, Toast.LENGTH_LONG)
+                        .show()
+                }
             }
-            model!!.input.setInputListener { input: CharSequence ->
-                postText(input.toString())
-                ViewUtil.hideKeyboard(activity)
-                true
-            }
-            App.instance.newMessage.observe(viewLifecycleOwner) { post -> onNewMessages(listOf(post)) }
         }
+        model.input.setInputListener { input: CharSequence ->
+            postText(input.toString())
+            ViewUtil.hideKeyboard(activity)
+            true
+        }
+        App.instance.newMessage.observe(viewLifecycleOwner) { post -> onNewMessages(listOf(post)) }
     }
 
     fun onNewMessages(posts: List<Post>) {
         Log.d("onNewMessages", posts.toString())
-        if (adapter != null) {
-            for (p in posts) {
-                adapter!!.addToStart(p, true)
-            }
+        for (p in posts) {
+            adapter.addToStart(p, true)
         }
     }
 
-    fun postText(body: String?) {
+    fun postText(body: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 App.instance.api.postPm(uname, body).let { post ->
@@ -107,7 +103,7 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
     }
 
     override fun onDestroyView() {
-        model = null
+        _model = null
         super.onDestroyView()
     }
 }

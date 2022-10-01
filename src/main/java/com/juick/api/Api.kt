@@ -40,15 +40,15 @@ interface Api {
     suspend fun getPosts(@Url url: String): List<Post>
 
     @GET("pm")
-    suspend fun pm(@Query("uname") uname: String?): List<Post>
+    suspend fun pm(@Query("uname") uname: String): List<Post>
 
     @FormUrlEncoded
     @POST("pm")
-    suspend fun postPm(@Query("uname") uname: String?, @Field("body") body: String?): Post
+    suspend fun postPm(@Query("uname") uname: String, @Field("body") body: String): Post
 
     @FormUrlEncoded
     @POST("post")
-    fun post(@Field("body") body: String?): Call<Void?>?
+    suspend fun post(@Field("body") body: String): Void
 
     @Multipart
     @POST("post")
@@ -71,12 +71,12 @@ interface Api {
 
     @FormUrlEncoded
     @POST("_google")
-    fun googleAuth(@Field("idToken") token: String?): Call<AuthResponse?>?
+    suspend fun googleAuth(@Field("idToken") token: String): AuthResponse
 
     @FormUrlEncoded
     @POST("signup")
-    fun signup(
+    suspend fun signup(
         @Field("username") username: String?, @Field("password") password: String?,
         @Field("verificationCode") verificationCode: String?
-    ): Call<Void?>?
+    ): Void
 }
