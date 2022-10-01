@@ -23,10 +23,12 @@ import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.juick.R
 import com.juick.android.Status
 import com.juick.databinding.FragmentTagsListBinding
 
@@ -73,7 +75,11 @@ class TagsFragment : BottomSheetDialogFragment() {
                         } ?: listOf()
                         adapter.addData(tags)
                     }
-                    Status.ERROR -> TODO()
+                    Status.ERROR -> {
+                        model.progressBar.visibility = View.GONE
+                        model.list.visibility = View.VISIBLE
+                        Toast.makeText(requireContext(), R.string.network_error, Toast.LENGTH_LONG).show()
+                    }
                     Status.LOADING -> {
                         model.list.visibility = View.GONE
                         model.progressBar.visibility = View.VISIBLE

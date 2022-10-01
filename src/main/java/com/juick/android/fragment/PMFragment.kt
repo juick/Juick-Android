@@ -48,7 +48,6 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
         super.onViewCreated(view, savedInstanceState)
         _model = FragmentPmBinding.bind(view)
         uname = PMFragmentArgs.fromBundle(requireArguments()).uname
-        model.messagesList.setAdapter(adapter)
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 App.instance.api.pm(uname).let {
@@ -77,6 +76,7 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .into(imageView)
             }
+            model.messagesList.setAdapter(adapter)
         }
     }
 

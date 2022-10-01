@@ -17,66 +17,14 @@
 package com.juick.android.screens.discover
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation.findNavController
-import com.juick.android.JuickMessagesAdapter
-import com.juick.android.Status
-import com.juick.databinding.FragmentPostsPageBinding
+import com.juick.android.screens.FeedFragment
 
-class DiscoverFragment : Fragment() {
-    private var _binding: FragmentPostsPageBinding? = null
-    private val binding get() = _binding!!
-    private lateinit var vm: DiscoverViewModel
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentPostsPageBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+class DiscoverFragment : FeedFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val adapter = JuickMessagesAdapter()
-        binding.list.adapter = adapter
-        adapter.setOnItemClickListener { _, pos ->
-            adapter.getItem(pos)?.let {
-                    post ->
-                val action = DiscoverFragmentDirections.actionDiscoverToThread()
-                action.mid = post.mid
-                findNavController(view).navigate(action)
-            }
-        }
         vm = ViewModelProvider(this)[DiscoverViewModel::class.java]
-        vm.feed.observe(viewLifecycleOwner) { response ->
-            when(response.status) {
-                Status.LOADING -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                    binding.list.visibility = View.GONE
-                }
-                Status.SUCCESS -> {
-                    stopRefreshing()
-                    adapter.newData(response.data ?: listOf())
-                }
-                Status.ERROR -> {
-                    TODO()
-                }
-            }
-        }
-    }
-
-    private fun stopRefreshing() {
-        binding.swipeContainer.isRefreshing = false
-        binding.list.visibility = View.VISIBLE
-        binding.progressBar.visibility = View.GONE
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        super.onViewCreated(view, savedInstanceState)
     }
 }
