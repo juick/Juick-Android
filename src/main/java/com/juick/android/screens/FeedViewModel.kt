@@ -14,24 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.android.screens
 
-package com.juick.android;
+import androidx.lifecycle.*
+import com.juick.App
+import com.juick.android.Resource
+import kotlinx.coroutines.Dispatchers
 
-import android.os.Bundle;
+open class FeedViewModel : ViewModel() {
+    var apiUrl: MutableLiveData<String> = MutableLiveData()
 
-import com.juick.android.fragment.PMFragment;
-import com.juick.android.fragment.PostsPageFragment;
-
-import static com.juick.android.fragment.PostsPageFragment.ARG_URL;
-
-public class FeedBuilder {
-    public static PostsPageFragment feedFor(UrlBuilder u) {
-        PostsPageFragment fragment = new PostsPageFragment();
-        Bundle args = new Bundle();
-
-        args.putParcelable(ARG_URL, u);
-
-        fragment.setArguments(args);
-        return fragment;
+    var feed = apiUrl.switchMap { url ->
+        liveData(Dispatchers.IO) {
+            emit(Resource.loading(null))
+            try {
+                emit(Resource.success(App.getInstance().api.getPosts(url)))
+            } catch (e: Exception) {
+                emit(Resource.error(data = null, message = e.message ?: "Error Occurred!"))
+            }
+        }
     }
 }

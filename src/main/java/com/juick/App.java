@@ -26,7 +26,6 @@ import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.multidex.MultiDexApplication;
 
@@ -42,7 +41,6 @@ import com.juick.android.Utils;
 import com.juick.api.Api;
 import com.juick.api.RequestBodyUtil;
 import com.juick.api.UpLoadProgressInterceptor;
-import com.juick.api.model.Chat;
 import com.juick.api.model.Post;
 import com.juick.api.model.PostResponse;
 import com.juick.api.model.SecureUser;

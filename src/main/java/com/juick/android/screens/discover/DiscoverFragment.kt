@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation.findNavController
 import com.juick.android.JuickMessagesAdapter
+import com.juick.android.Status
 import com.juick.databinding.FragmentPostsPageBinding
 
 class DiscoverFragment : Fragment() {
@@ -49,9 +50,20 @@ class DiscoverFragment : Fragment() {
             findNavController(view).navigate(action)
         }
         vm = ViewModelProvider(this)[DiscoverViewModel::class.java]
-        vm.feed.observe(viewLifecycleOwner) { posts ->
-            stopRefreshing()
-            adapter.newData(posts)
+        vm.feed.observe(viewLifecycleOwner) { response ->
+            when(response.status) {
+                Status.LOADING -> {
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.list.visibility = View.GONE
+                }
+                Status.SUCCESS -> {
+                    stopRefreshing()
+                    adapter.newData(response.data)
+                }
+                Status.ERROR -> {
+                    TODO()
+                }
+            }
         }
     }
 

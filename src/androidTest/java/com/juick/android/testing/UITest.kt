@@ -53,7 +53,7 @@ internal class UITest {
     fun isCorrectNotification_NotificationSender() {
         assumeTrue("UIAutomator tests require API18", android.os.Build.VERSION.SDK_INT >= 18)
         val notificationData = this.javaClass.getResourceAsStream("/test_notification.json")
-        val notificationJson = App.getInstance().getJsonMapper().readTree(notificationData)
+        val notificationJson = App.getInstance().jsonMapper.readTree(notificationData)
         App.getInstance().notificationSender.showNotification(notificationJson.toString())
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.openNotification()

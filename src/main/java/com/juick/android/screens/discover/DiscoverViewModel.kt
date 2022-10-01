@@ -21,6 +21,6 @@ import com.juick.android.UrlBuilder
 
 class DiscoverViewModel : FeedViewModel() {
     init {
-        setUrl(UrlBuilder.getLast().toString())
+        apiUrl.postValue(UrlBuilder.getLast().toString())
     }
 }

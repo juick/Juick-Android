@@ -29,6 +29,7 @@ import com.juick.R
 import com.juick.android.JuickMessageMenu
 import com.juick.android.JuickMessagesAdapter
 import com.juick.android.JuickMessagesAdapter.OnLoadMoreRequestListener
+import com.juick.android.Status
 import com.juick.android.UrlBuilder
 import com.juick.databinding.FragmentPostsPageBinding
 
@@ -58,29 +59,43 @@ class HomeFragment : Fragment() {
             action.mid = post.mid
             findNavController(view).navigate(action)
         }
+        var firstPage = true
+        var loading = false
         adapter.setOnLoadMoreRequestListener(
             object : OnLoadMoreRequestListener {
-                var loading = false
                 override fun onLoadMore() {
                     if (loading) return
                     loading = true
                     val lastItem = adapter.getItem(adapter.itemCount - 1)
                     val requestUrl = UrlBuilder.goHome().toString() + "&before_mid=" + lastItem.mid
-                    vm.setUrl(requestUrl)
-                    vm.loadFeed(true)
+                    firstPage = false
+                    vm.apiUrl.postValue(requestUrl)
                 }
             })
         vm = ViewModelProvider(this)[HomeViewModel::class.java]
-        vm.feed.observe(viewLifecycleOwner) { posts ->
-            stopRefreshing()
-            adapter.newData(posts)
-        }
-        if (adapter.itemCount == 0) {
-            binding.list.visibility = View.GONE
-            binding.progressBar.visibility = View.VISIBLE
-        } else {
-            binding.list.visibility = View.VISIBLE
-            binding.progressBar.visibility = View.GONE
+        vm.feed.observe(viewLifecycleOwner) { resource ->
+            when(resource.status) {
+                Status.LOADING -> {
+                    if (firstPage) {
+                        binding.progressBar.visibility = View.VISIBLE
+                        binding.list.visibility = View.GONE
+                    }
+                }
+                Status.SUCCESS -> {
+                    loading = false
+                    stopRefreshing()
+                    if (firstPage) {
+                        adapter.newData(resource.data)
+                    } else {
+                        adapter.addData(resource.data)
+                    }
+                }
+                Status.ERROR -> {
+                    loading = false
+                    stopRefreshing()
+                    TODO()
+                }
+            }
         }
         binding.swipeContainer.setColorSchemeColors(
             ContextCompat.getColor(
@@ -88,7 +103,10 @@ class HomeFragment : Fragment() {
                 R.color.colorAccent
             )
         )
-        binding.swipeContainer.setOnRefreshListener { vm.loadFeed(false) }
+        binding.swipeContainer.setOnRefreshListener {
+            firstPage = true
+            vm.apiUrl.postValue(UrlBuilder.goHome().toString())
+        }
     }
 
     private fun stopRefreshing() {

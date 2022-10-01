@@ -37,7 +37,7 @@ interface Api {
     fun me(): Call<SecureUser?>?
 
     @GET
-    fun getPosts(@Url url: String?): Call<List<Post?>?>?
+    suspend fun getPosts(@Url url: String): List<Post>
 
     @GET("pm")
     fun pm(@Query("uname") uname: String?): Call<List<Post?>?>?

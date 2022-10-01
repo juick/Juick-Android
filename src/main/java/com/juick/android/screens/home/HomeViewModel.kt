@@ -23,9 +23,9 @@ import com.juick.android.Utils
 class HomeViewModel : FeedViewModel() {
     init {
         if (Utils.hasAuth()) {
-            setUrl(UrlBuilder.goHome().toString())
+            apiUrl.postValue(UrlBuilder.goHome().toString())
         } else {
-            setUrl(UrlBuilder.getDiscussions().toString())
+            apiUrl.postValue(UrlBuilder.getDiscussions().toString())
         }
     }
 }
