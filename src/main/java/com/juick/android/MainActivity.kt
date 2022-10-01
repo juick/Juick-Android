@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    var appBarConfiguration: AppBarConfiguration? = null
+    private lateinit var appBarConfiguration: AppBarConfiguration
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _model = ActivityMainBinding.inflate(layoutInflater)
@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
             .build()
         val navHostFragment = model.navHost.getFragment<NavHostFragment>()
         val navController = navHostFragment.navController
-        setupActionBarWithNavController(this, navController, appBarConfiguration!!)
+        setupActionBarWithNavController(this, navController, appBarConfiguration)
         //NavigationUI.setupWithNavController(toolbar, navController);
         setupWithNavController(navView, navController)
         navController.addOnDestinationChangedListener {
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
             }
             JuickConfig.refresh()
         }
-        App.getInstance().setAuthorizationCallback {
+        App.instance.setAuthorizationCallback {
             val updatePasswordIntent = Intent(this, SignInActivity::class.java)
             updatePasswordIntent.putExtra(
                 SignInActivity.EXTRA_ACTION,
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
             }
-        App.getInstance().signInStatus.observe(this) { signInStatus: SignInStatus ->
+        App.instance.signInStatus.observe(this) { signInStatus: SignInStatus ->
             if (signInStatus == SignInStatus.SIGN_IN_PROGRESS) {
                 showLogin()
             }
@@ -175,15 +175,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (notificationManager != null) {
-            notificationManager!!.onResume()
-        }
+        notificationManager?.onResume()
         val intent = intent
         val action = StringUtils.defaultString(intent.action)
         if (action == BuildConfig.INTENT_NEW_EVENT_ACTION) {
             val msg = intent.getStringExtra(getString(R.string.notification_extra))
             try {
-                val jmsg = App.getInstance().jsonMapper.readValue(msg, Post::class.java)
+                val jmsg = App.instance.jsonMapper.readValue(msg, Post::class.java)
                 if (jmsg.user.uid == 0) {
                     setTitle(R.string.Discussions)
                     //replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
@@ -297,7 +295,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == ViewUtil.REQUEST_CODE_SYNC_CONTACTS) {
             // If request is cancelled, the result arrays are empty.
-            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
                 ContentResolver.setSyncAutomatically(
                     Utils.account,
                     ContactsContract.AUTHORITY,

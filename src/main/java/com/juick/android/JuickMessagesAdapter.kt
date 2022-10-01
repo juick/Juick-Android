@@ -1,0 +1,399 @@
+/*
+ * Copyright (C) 2008-2022, Juick
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.juick.android
+
+import android.content.Intent
+import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.URLSpan
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.TextView
+import androidx.core.text.HtmlCompat
+import androidx.recyclerview.widget.RecyclerView
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
+import com.juick.App
+import com.juick.BuildConfig
+import com.juick.R
+import com.juick.android.widget.util.BlurTransformation
+import com.juick.android.widget.util.ViewUtil
+import com.juick.api.model.Post
+import com.juick.util.MessageUtils
+import com.juick.util.StringUtils
+
+/**
+ *
+ * @author Ugnich Anton
+ */
+class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    var postList: MutableList<Post> = ArrayList()
+    var loadMoreRequestListener: OnLoadMoreRequestListener? = null
+    var itemClickListener: ((View?, Int) -> Unit)? = null
+    var itemMenuListener: OnItemClickListener? = null
+    var scrollListener: ((View?, Int, Int) -> Unit)? = null
+    private var hasMoreData = true
+
+    init {
+        setHasStableIds(true)
+    }
+
+    override fun getItemId(position: Int): Long {
+        val post = getItem(position)
+        // 123456/78 -> 1234560078
+        return if (post == null) 0 else post.mid.toLong() * 10000 + post.rid
+    }
+
+    fun newData(data: List<Post>) {
+        val oldCount = postList.size
+        postList.clear()
+        notifyItemRangeRemoved(0, oldCount)
+        postList.addAll(data)
+        notifyItemRangeInserted(0, data.size)
+    }
+
+    fun addData(data: List<Post>) {
+        hasMoreData = data.size > 0
+        val oldCount = postList.size
+        postList.addAll(data)
+        notifyItemRangeInserted(oldCount, postList.size)
+    }
+
+    fun addData(data: Post) {
+        val oldCount = postList.size
+        postList.add(data)
+        notifyItemRangeInserted(oldCount, postList.size)
+    }
+
+    fun addDisabledItem(txt: String?, position: Int) {
+        val post = Post()
+        post.body = txt
+        postList.add(position, post)
+        notifyItemRangeInserted(position, postList.size)
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        if (hasMoreData && loadMoreRequestListener != null && position == postList.size - 1) {
+            loadMoreRequestListener!!.onLoadMore()
+        }
+        return if (postList[position].rid == 0) TYPE_THREAD_POST else TYPE_ITEM
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == TYPE_THREAD_POST) {
+            val vh =
+                VH(LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false))
+            vh.setOnItemClickListener(itemClickListener)
+            vh.setOnMenuClickListener(itemMenuListener)
+            vh
+        } else {
+            val vh = VH(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_thread_message, parent, false)
+            )
+            vh.setOnItemClickListener(itemClickListener)
+            vh.setOnMenuClickListener(itemMenuListener)
+            vh.replyToTextView?.setOnClickListener { v: View ->
+                val p = v.tag as Post
+                if (scrollListener != null) scrollListener!!.invoke(v, p.replyto, p.rid)
+            }
+            vh
+        }
+    }
+
+    internal inner class IconTarget(private val holder: VH) : CustomTarget<Drawable?>(48, 48) {
+        override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable?>?) {
+            holder.replyToTextView?.setCompoundDrawablesWithIntrinsicBounds(
+                resource,
+                null,
+                null,
+                null
+            )
+        }
+
+        override fun onLoadCleared(placeholder: Drawable?) {
+            holder.replyToTextView?.setCompoundDrawablesWithIntrinsicBounds(
+                placeholder,
+                null,
+                null,
+                null
+            )
+        }
+    }
+
+    override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
+        val type = getItemViewType(position)
+        val holder = viewHolder as VH
+        val post = postList[position]
+        val isThread = type != TYPE_THREAD_POST
+        if (post.user != null) {
+            Glide.with(holder.itemView.context)
+                .load(post.user.avatar)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .fallback(R.drawable.av_96).into(holder.upicImageView)
+            holder.usernameTextView.text = post.user.uname
+            holder.timestampTextView.text = MessageUtils.formatMessageTimestamp(post)
+            holder.textTextView.text = StringUtils.EMPTY
+            holder.textTextView.text = formatMessageText(post)
+            holder.textTextView.movementMethod = LinkMovementMethod.getInstance()
+            if (post.photo != null && post.photo.small != null) {
+                holder.photoLayout.visibility = View.VISIBLE
+                holder.photoDescriptionView.visibility = View.GONE
+                val drawable = Glide.with(holder.itemView.context)
+                    .load(post.photo.small)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
+                    drawable.apply(RequestOptions.bitmapTransform(BlurTransformation()))
+                        .into(holder.photoImageView)
+                } else {
+                    drawable.into(holder.photoImageView)
+                }
+            } else if (App.instance.hasViewableContent(post.body)) {
+                holder.photoLayout.visibility = View.VISIBLE
+                // TODO: support multiple previewers
+                if (App.instance.previewers.size > 0) {
+                    App.instance.previewers.get(0).getPreviewUrl(post.body) { link ->
+                        if (link != null) {
+                            Glide.with(holder.itemView.context).load(link.getUrl())
+                                .transition(DrawableTransitionOptions.withCrossFade())
+                                .into(holder.photoImageView)
+                            holder.photoDescriptionView.visibility = View.VISIBLE
+                            holder.photoDescriptionView.text = link.description
+                        } else {
+                            holder.photoLayout.visibility = View.GONE
+                        }
+                    }
+                }
+            } else {
+                holder.photoLayout.visibility = View.GONE
+            }
+            if (!isThread) {
+                if (post.replies > 0) {
+                    holder.repliesTextView!!.visibility = View.VISIBLE
+                    holder.repliesTextView!!.text = Integer.toString(post.replies)
+                } else {
+                    holder.repliesTextView!!.visibility = View.GONE
+                }
+                if (post.likes > 0) {
+                    holder.likesTextView!!.visibility = View.VISIBLE
+                    holder.likesTextView!!.text = Integer.toString(post.likes)
+                } else {
+                    holder.likesTextView!!.visibility = View.GONE
+                }
+            } else {
+                if (post.nextRid == post.rid) {
+                    holder.backImageView?.visibility = View.VISIBLE
+                    holder.backImageView?.tag = post
+                    holder.backImageView?.setOnClickListener { v: View ->
+                        val p = v.tag as Post
+                        if (scrollListener != null) scrollListener!!.invoke(v, p.prevRid, 0)
+                        v.visibility = View.GONE
+                    }
+                } else {
+                    holder.backImageView?.visibility = View.GONE
+                }
+            }
+            if (post.rid > 0 && post.replyto > 0) {
+                Glide.with(holder.itemView.context)
+                    .load(post.to.avatar)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .fallback(R.drawable.av_96).into(IconTarget(holder))
+                holder.replyToTextView?.text = post.to.uname
+                holder.replyToTextView?.visibility = View.VISIBLE
+                holder.replyToTextView?.tag = post
+            }
+        }
+    }
+
+    fun getItem(position: Int): Post? {
+        return if (position >= postList.size) null else postList[position]
+    }
+
+    override fun getItemCount(): Int {
+        return if (postList.isEmpty()) 0 else postList.size
+    }
+
+    private fun formatMessageText(jmsg: Post): SpannableStringBuilder {
+        val ssb = SpannableStringBuilder()
+        var nextSpanStart = 0
+        for (tag in jmsg.tags) {
+            val text = String.format("#%s", tag)
+            ssb.append(text)
+            ssb.setSpan(object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    widget.tag = "clicked"
+                    val activity = widget.context as MainActivity
+                    activity.title = "#$tag"
+                    /*activity.replaceFragment(
+                            FeedBuilder.feedFor(
+                                    UrlBuilder.getPostsByTag(jmsg.getUser().getUid(), tag)));*/
+                }
+            }, nextSpanStart, nextSpanStart + text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            ssb.append(" ")
+            nextSpanStart += text.length + 1
+        }
+        val text = HtmlCompat.fromHtml(
+            MessageUtils.formatMessage(StringUtils.defaultString(jmsg.body)),
+            HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
+        ssb.append(text)
+        val urlSpans = ssb.getSpans(nextSpanStart, ssb.length, URLSpan::class.java)
+        // handle deep links
+        for (span in urlSpans) {
+            val start = ssb.getSpanStart(span)
+            val end = ssb.getSpanEnd(span)
+            val link = span.url
+            ssb.removeSpan(span)
+            ssb.setSpan(object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    widget.tag = "clicked"
+                    val data = Uri.parse(link)
+                    val activity = widget.context as MainActivity
+                    if (data.host == "juick.com") {
+                        activity.processUri(data)
+                    } else {
+                        val intent = Intent(Intent.ACTION_VIEW, data)
+                        widget.context.startActivity(intent)
+                    }
+                }
+            }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        return ssb
+    }
+
+    fun setOnLoadMoreRequestListener(loadMoreRequestListener: OnLoadMoreRequestListener?) {
+        this.loadMoreRequestListener = loadMoreRequestListener
+    }
+
+    val items: List<Post>
+        get() = postList
+
+    interface OnLoadMoreRequestListener {
+        fun onLoadMore()
+    }
+
+    internal class VH(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+        var container: ViewGroup
+        var upicImageView: ImageView
+        var usernameTextView: TextView
+        var timestampTextView: TextView
+        var photoImageView: ImageView
+        var photoLayout: RelativeLayout
+        var photoDescriptionView: TextView
+        var textTextView: TextView
+        var repliesTextView: TextView?
+        var likesTextView: TextView?
+        var replyToTextView: TextView?
+        var menuImageView: ImageView
+        var backImageView: ImageView?
+        var itemClickListener: ((View?, Int) -> Unit)? = null
+        var menuClickListener: OnItemClickListener? = null
+
+        init {
+            container = itemView.findViewById(R.id.container)
+            upicImageView = itemView.findViewById(R.id.user_picture)
+            usernameTextView = itemView.findViewById(R.id.username)
+            timestampTextView = itemView.findViewById(R.id.timestamp)
+            textTextView = itemView.findViewById(R.id.text)
+            photoLayout = itemView.findViewById(R.id.photoWrapper)
+            photoImageView = itemView.findViewById(R.id.photo)
+            photoDescriptionView = itemView.findViewById(R.id.photo_description)
+            likesTextView = itemView.findViewById(R.id.likes)
+            if (likesTextView != null) {
+                likesTextView!!.setCompoundDrawables(
+                    VectorDrawableCompat.create(
+                        itemView.context.resources,
+                        R.drawable.ic_ei_heart, null
+                    ), null, null, null
+                )
+            }
+            replyToTextView = itemView.findViewById(R.id.replyto)
+            ViewUtil.setDrawableTint(likesTextView)
+            repliesTextView = itemView.findViewById(R.id.replies)
+            if (repliesTextView != null) {
+                repliesTextView!!.setCompoundDrawables(
+                    VectorDrawableCompat.create(
+                        itemView.context.resources,
+                        R.drawable.ic_ei_comment, null
+                    ), null, null, null
+                )
+            }
+            ViewUtil.setDrawableTint(repliesTextView)
+            backImageView = itemView.findViewById(R.id.back_imageView)
+            menuImageView = itemView.findViewById(R.id.menu_dots)
+            menuImageView.setOnClickListener(this)
+            itemView.setOnClickListener(this)
+            textTextView.setOnClickListener(this)
+        }
+
+        override fun onClick(v: View) {
+            if (v.id == R.id.menu_dots) {
+                if (menuClickListener != null) {
+                    menuClickListener!!.onItemClick(v, bindingAdapterPosition)
+                }
+                return
+            }
+            if (itemClickListener != null) {
+                itemClickListener!!.invoke(v, bindingAdapterPosition)
+            }
+        }
+
+        fun setOnItemClickListener(listener: ((View?, Int) -> Unit)?) {
+            itemClickListener = listener
+        }
+
+        fun setOnMenuClickListener(listener: OnItemClickListener?) {
+            menuClickListener = listener
+        }
+    }
+
+    fun setOnItemClickListener(itemClickListener: (View?, Int) -> Unit) {
+        this.itemClickListener = itemClickListener
+    }
+
+    fun setOnMenuListener(listener: OnItemClickListener?) {
+        itemMenuListener = listener
+    }
+
+    fun setOnScrollListener(listener: (View?, Int, Int) -> Unit) {
+        scrollListener = listener
+    }
+
+    interface OnItemClickListener {
+        fun onItemClick(view: View?, pos: Int)
+    }
+
+    interface OnScrollListener {
+        fun onScrollToPost(v: View?, replyTo: Int, rid: Int)
+    }
+
+    companion object {
+        private const val TYPE_ITEM = 0
+        private const val TYPE_THREAD_POST = 2
+    }
+}

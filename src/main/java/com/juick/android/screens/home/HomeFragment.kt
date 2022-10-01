@@ -52,12 +52,14 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val adapter = JuickMessagesAdapter()
         binding.list.adapter = adapter
-        adapter.setOnMenuListener(JuickMessageMenu(adapter.items))
+        adapter.setOnMenuListener(JuickMessageMenu(viewLifecycleOwner, adapter.items))
         adapter.setOnItemClickListener { _, pos ->
-            val post = adapter.getItem(pos)
-            val action = HomeFragmentDirections.actionDiscoverFragmentToThreadFragment()
-            action.mid = post.mid
-            findNavController(view).navigate(action)
+            adapter.getItem(pos)?.let {
+                post ->
+                val action = HomeFragmentDirections.actionDiscoverFragmentToThreadFragment()
+                action.mid = post.mid
+                findNavController(view).navigate(action)
+            }
         }
         var firstPage = true
         var loading = false
@@ -66,10 +68,12 @@ class HomeFragment : Fragment() {
                 override fun onLoadMore() {
                     if (loading) return
                     loading = true
-                    val lastItem = adapter.getItem(adapter.itemCount - 1)
-                    val requestUrl = UrlBuilder.goHome().toString() + "&before_mid=" + lastItem.mid
-                    firstPage = false
-                    vm.apiUrl.postValue(requestUrl)
+                    adapter.getItem(adapter.itemCount - 1)?.let {
+                        lastItem ->
+                        val requestUrl = UrlBuilder.goHome().toString() + "&before_mid=" + lastItem.mid
+                        firstPage = false
+                        vm.apiUrl.postValue(requestUrl)
+                    }
                 }
             })
         vm = ViewModelProvider(this)[HomeViewModel::class.java]
@@ -85,9 +89,9 @@ class HomeFragment : Fragment() {
                     loading = false
                     stopRefreshing()
                     if (firstPage) {
-                        adapter.newData(resource.data)
+                        adapter.newData(resource.data ?: emptyList())
                     } else {
-                        adapter.addData(resource.data)
+                        adapter.addData(resource.data ?: emptyList())
                     }
                 }
                 Status.ERROR -> {
@@ -99,7 +103,7 @@ class HomeFragment : Fragment() {
         }
         binding.swipeContainer.setColorSchemeColors(
             ContextCompat.getColor(
-                App.getInstance(),
+                App.instance,
                 R.color.colorAccent
             )
         )

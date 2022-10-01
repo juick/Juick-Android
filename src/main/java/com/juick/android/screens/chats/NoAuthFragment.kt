@@ -40,7 +40,7 @@ class NoAuthFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.signInButton.setOnClickListener {
-            App.getInstance().signInStatus.postValue(
+            App.instance.signInStatus.postValue(
                 SignInActivity.SignInStatus.SIGN_IN_PROGRESS
             )
         }

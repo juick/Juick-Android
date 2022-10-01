@@ -31,6 +31,9 @@ import com.juick.App
 import com.juick.R
 import com.juick.api.model.SecureUser
 import com.juick.api.model.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -48,15 +51,14 @@ class ContactsSyncService : Service() {
             account: Account, extras: Bundle, authority: String,
             provider: ContentProviderClient, syncResult: SyncResult
         ) {
-            try {
-                val response: Response<SecureUser?> = App.getInstance().api.me()!!.execute()
-                if (response.isSuccessful) {
-                    val me = response.body()
-                    val friends = me!!.read
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val me = App.instance.me.value ?: SecureUser()
+                    val friends = me.read
                     friends?.let { updateContacts(account, it) }
+                } catch (e: Exception) {
+                    Log.d(ContactsSyncService::class.java.simpleName, "Sync error", e)
                 }
-            } catch (e: IOException) {
-                Log.d(ContactsSyncService::class.java.simpleName, "Sync error", e)
             }
         }
 

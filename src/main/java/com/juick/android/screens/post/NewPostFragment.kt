@@ -29,6 +29,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -40,6 +41,7 @@ import com.juick.android.screens.home.HomeFragmentDirections
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentNewPostBinding
 import com.juick.util.StringUtils
+import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
 import java.io.IOException
 
@@ -49,7 +51,7 @@ import java.io.IOException
 class NewPostFragment : Fragment() {
     private var attachmentUri: Uri? = null
     private var attachmentMime: String? = null
-    private var progressDialog: ProgressDialog? = null
+    private lateinit var progressDialog: ProgressDialog
     private val progressDialogCancel = BooleanReference(false)
 
     class BooleanReference(var bool: Boolean)
@@ -133,33 +135,32 @@ class NewPostFragment : Fragment() {
         if (attachmentUri != null) {
             progressDialog = ProgressDialog(activity)
             progressDialogCancel.bool = false
-            progressDialog!!.setOnCancelListener { arg0: DialogInterface? ->
+            progressDialog.setOnCancelListener {
                 progressDialogCancel.bool = true
             }
-            progressDialog!!.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
-            progressDialog!!.max = 0
-            progressDialog!!.show()
-            App.getInstance().setOnProgressListener { progressPercentage: Long ->
-                if (progressDialog != null) {
-                    if (progressDialog!!.max < progressPercentage) {
-                        progressDialog!!.max = progressPercentage.toInt()
-                    } else {
-                        progressDialog!!.progress = progressPercentage.toInt()
-                    }
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+            progressDialog.max = 0
+            progressDialog.show()
+            App.instance.setOnProgressListener { progressPercentage: Long ->
+                if (progressDialog.max < progressPercentage) {
+                    progressDialog.max = progressPercentage.toInt()
+                } else {
+                    progressDialog.progress = progressPercentage.toInt()
                 }
             }
         }
-        App.getInstance().sendMessage(msg, attachmentUri, attachmentMime) { newMessage: Post? ->
-            if (progressDialog != null) {
-                progressDialog!!.dismiss()
-            }
-            if (newMessage == null) {
-                Toast.makeText(activity, R.string.Error, Toast.LENGTH_LONG).show()
-            } else {
-                val mid = newMessage.mid
-                val discoverAction = HomeFragmentDirections.actionDiscoverFragmentToThreadFragment()
-                discoverAction.mid = mid
-                findNavController(requireView()).navigate(discoverAction)
+        lifecycleScope.launch {
+            App.instance.sendMessage(msg, attachmentUri, attachmentMime) { newMessage: Post? ->
+                progressDialog.dismiss()
+                if (newMessage == null) {
+                    Toast.makeText(activity, R.string.Error, Toast.LENGTH_LONG).show()
+                } else {
+                    val mid = newMessage.mid
+                    val discoverAction =
+                        HomeFragmentDirections.actionDiscoverFragmentToThreadFragment()
+                    discoverAction.mid = mid
+                    findNavController(requireView()).navigate(discoverAction)
+                }
             }
         }
     }

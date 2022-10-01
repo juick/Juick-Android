@@ -16,7 +16,10 @@
  */
 package com.juick.android.screens
 
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
+import androidx.lifecycle.switchMap
 import com.juick.App
 import com.juick.android.Resource
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +31,8 @@ open class FeedViewModel : ViewModel() {
         liveData(Dispatchers.IO) {
             emit(Resource.loading(null))
             try {
-                emit(Resource.success(App.getInstance().api.getPosts(url)))
+                val posts = App.instance.api?.getPosts(url) ?: listOf()
+                emit(Resource.success(posts))
             } catch (e: Exception) {
                 emit(Resource.error(data = null, message = e.message ?: "Error Occurred!"))
             }

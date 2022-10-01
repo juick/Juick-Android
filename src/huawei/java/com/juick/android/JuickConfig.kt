@@ -14,14 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.android
 
-package com.juick.android;
-
-import com.juick.App;
-
-public class JuickConfig {
-    public static void init() {
-        App.getInstance().setSignInProvider((context, button) -> null);
+object JuickConfig {
+    fun init() {
+        //App.instance.signInProvider = { context, button -> null }
     }
-    public static void refresh() {}
+
+    fun refresh() {}
 }

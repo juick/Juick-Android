@@ -34,17 +34,17 @@ import retrofit2.http.*
  */
 interface Api {
     @GET("me")
-    fun me(): Call<SecureUser?>?
+    suspend fun me(): SecureUser
 
     @GET
     suspend fun getPosts(@Url url: String): List<Post>
 
     @GET("pm")
-    fun pm(@Query("uname") uname: String?): Call<List<Post?>?>?
+    suspend fun pm(@Query("uname") uname: String?): List<Post>
 
     @FormUrlEncoded
     @POST("pm")
-    fun postPm(@Query("uname") uname: String?, @Field("body") body: String?): Call<Post?>?
+    suspend fun postPm(@Query("uname") uname: String?, @Field("body") body: String?): Post
 
     @FormUrlEncoded
     @POST("post")
@@ -52,16 +52,16 @@ interface Api {
 
     @Multipart
     @POST("post")
-    fun newPost(
+    suspend fun newPost(
         @Part("body") body: RequestBody?,
         @Part file: MultipartBody.Part?
-    ): Call<PostResponse?>?
+    ): PostResponse
 
     @GET("tags")
-    suspend fun tags(@Query("user_id") userId: Int): List<Tag>
+    suspend fun tags(): List<Tag>
 
     @GET("thread")
-    fun thread(@Query("mid") messageId: Int): Call<List<Post?>?>?
+    suspend fun thread(@Query("mid") messageId: Int): List<Post>
 
     @GET("android/register")
     suspend fun registerPush(@Query("regid") login: String)

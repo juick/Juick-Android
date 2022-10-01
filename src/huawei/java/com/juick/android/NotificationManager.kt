@@ -14,40 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.android
 
-package com.juick.android;
+import android.content.Context
+import com.juick.App
+import java.lang.Thread
+import com.huawei.agconnect.AGConnectOptionsBuilder
+import com.huawei.hms.aaid.HmsInstanceId
+import android.text.TextUtils
+import android.util.Log
+import java.lang.Exception
 
-import android.content.Context;
-import android.text.TextUtils;
-import android.util.Log;
-
-import com.huawei.agconnect.AGConnectOptionsBuilder;
-import com.huawei.hms.aaid.HmsInstanceId;
-import com.juick.App;
-
-public class NotificationManager {
-    public NotificationManager() {
-        Context context = App.getInstance();
+class NotificationManager {
+    init {
+        val context: Context = App.instance
         // get token
-        new Thread() {
-            @Override
-            public void run() {
+        object : Thread() {
+            override fun run() {
                 try {
                     // read from agconnect-services.json
-                    String appId = new AGConnectOptionsBuilder().build(context).getString("client/app_id");
-                    String pushtoken = HmsInstanceId.getInstance(context).getToken(appId, "HCM");
+                    val appId = AGConnectOptionsBuilder().build(context).getString("client/app_id")
+                    val pushtoken = HmsInstanceId.getInstance(context).getToken(appId, "HCM")
                     if (!TextUtils.isEmpty(pushtoken)) {
-                        Log.i("HMS", "get token:" + pushtoken);
-
+                        Log.i("HMS", "get token:$pushtoken")
                     }
-                } catch (Exception e) {
-                    Log.i("HMS", "getToken failed, " + e);
-
+                } catch (e: Exception) {
+                    Log.i("HMS", "getToken failed, $e")
                 }
             }
-        }.start();
+        }.start()
     }
-    public void onResume() {
 
-    }
+    fun onResume() {}
 }

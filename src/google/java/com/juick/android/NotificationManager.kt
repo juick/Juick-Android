@@ -27,7 +27,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 
 class NotificationManager {
     init {
-        val context: Context = App.getInstance()
+        val context: Context = App.instance
         if (!TextUtils.isEmpty(context.getString(R.string.gcm_defaultSenderId))) {
             if (GoogleApiAvailability.getInstance()
                     .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS

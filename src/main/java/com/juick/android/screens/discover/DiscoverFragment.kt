@@ -44,10 +44,12 @@ class DiscoverFragment : Fragment() {
         val adapter = JuickMessagesAdapter()
         binding.list.adapter = adapter
         adapter.setOnItemClickListener { _, pos ->
-            val post = adapter.getItem(pos)
-            val action = DiscoverFragmentDirections.actionDiscoverToThread()
-            action.mid = post.mid
-            findNavController(view).navigate(action)
+            adapter.getItem(pos)?.let {
+                    post ->
+                val action = DiscoverFragmentDirections.actionDiscoverToThread()
+                action.mid = post.mid
+                findNavController(view).navigate(action)
+            }
         }
         vm = ViewModelProvider(this)[DiscoverViewModel::class.java]
         vm.feed.observe(viewLifecycleOwner) { response ->
@@ -58,7 +60,7 @@ class DiscoverFragment : Fragment() {
                 }
                 Status.SUCCESS -> {
                     stopRefreshing()
-                    adapter.newData(response.data)
+                    adapter.newData(response.data ?: listOf())
                 }
                 Status.ERROR -> {
                     TODO()

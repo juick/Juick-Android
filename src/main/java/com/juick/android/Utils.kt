@@ -36,12 +36,10 @@ import okhttp3.OkHttpClient
  */
 object Utils {
     @JvmStatic
-    var myId = 0
-    @JvmStatic
     val account: Account?
         get() {
-            val am = AccountManager.get(App.getInstance())
-            val accounts = am.getAccountsByType(App.getInstance().getString(R.string.com_juick))
+            val am = AccountManager.get(App.instance)
+            val accounts = am.getAccountsByType(App.instance.getString(R.string.com_juick))
             return accounts.firstOrNull()
         }
 
@@ -58,7 +56,7 @@ object Utils {
     @JvmStatic
     val accountData: Bundle?
         get() {
-            val am = AccountManager.get(App.getInstance())
+            val am = AccountManager.get(App.instance)
             val account = account
             if (account != null) {
                 var b: Bundle? = null
@@ -100,7 +98,7 @@ object Utils {
             if (prefToken != null) {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        App.getInstance().api.registerPush(prefToken)
+                        App.instance.api.registerPush(prefToken)
                     } catch (e: Exception) {
                         Log.d(TAG, "Failed to register", e)
                     }

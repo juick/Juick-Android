@@ -31,12 +31,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.hasAuth
-import com.juick.api.model.SecureUser
 import com.juick.databinding.ActivityLoginBinding
 import com.juick.util.StringUtils
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  *
@@ -51,7 +51,7 @@ class SignInActivity : AppCompatActivity() {
     private var currentAction = 0
     private var _model: ActivityLoginBinding? = null
     private val model get() = _model!!
-    private val application = App.getInstance()
+    private val application = App.instance
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         authenticatorResponse =
@@ -72,11 +72,14 @@ class SignInActivity : AppCompatActivity() {
                 ).show()
                 return@setOnClickListener
             }
-            application.auth(nick, password, object : Callback<SecureUser?> {
-                override fun onResponse(call: Call<SecureUser?>, response: Response<SecureUser?>) {
-                    if (response.isSuccessful && response.code() == 200 && response.body() != null) {
-                        updateAccount(nick, response.body()!!.hash, currentAction)
-                    } else {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val me = application.auth(nick, password)
+                    withContext(Dispatchers.Main) {
+                        updateAccount(nick, me.hash, currentAction)
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
                         Toast.makeText(
                             this@SignInActivity,
                             R.string.Unknown_nick_or_wrong_password,
@@ -84,21 +87,11 @@ class SignInActivity : AppCompatActivity() {
                         ).show()
                     }
                 }
-
-                override fun onFailure(call: Call<SecureUser?>, t: Throwable) {
-                    val errorMessage = getText(R.string.network_error)
-                    Toast.makeText(
-                        this@SignInActivity, String.format(
-                            "%s: %s", errorMessage,
-                            StringUtils.defaultString(t.message)
-                        ), Toast.LENGTH_LONG
-                    ).show()
-                }
-            })
+            }
         }
         val signInButton = application.signInProvider
-            .prepareSignIn(this, model.signInButtonPlaceholder) as FrameLayout
-        signInButton.setOnClickListener { v: View? -> application.signInProvider.performSignIn() }
+            ?.prepareSignIn(this, model.signInButtonPlaceholder) as FrameLayout
+        signInButton.setOnClickListener { v: View? -> application.signInProvider?.performSignIn() }
         currentAction = intent.getIntExtra(EXTRA_ACTION, ACTION_ACCOUNT_CREATE)
         if (hasAuth() && currentAction != ACTION_PASSWORD_UPDATE) {
             val builder = AlertDialog.Builder(this)
@@ -114,7 +107,7 @@ class SignInActivity : AppCompatActivity() {
     @Deprecated("Deprecated in Java")
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        application.signInProvider.onSignInResult(
+        application.signInProvider?.onSignInResult(
             requestCode,
             resultCode,
             data,

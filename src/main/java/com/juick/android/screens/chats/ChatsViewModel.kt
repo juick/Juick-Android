@@ -29,7 +29,8 @@ class ChatsViewModel : ViewModel() {
     var chats = liveData(Dispatchers.IO) {
         emit(Resource.loading(null))
         try {
-            emit(Resource.success(data = App.getInstance().api.groupsPms(10).pms))
+            val pms = App.instance.api?.groupsPms(10)?.pms ?: listOf()
+            emit(Resource.success(data = pms))
         } catch (exception: Exception) {
             emit(Resource.error(data = null, message = exception.message ?: "Error Occurred!"))
         }

@@ -21,14 +21,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.juick.App
 import com.juick.android.Resource
-import com.juick.android.Utils
 import kotlinx.coroutines.Dispatchers
 
 class TagsViewModel: ViewModel() {
     var tags = liveData(Dispatchers.IO) {
         emit(Resource.loading(null))
         try {
-            emit(Resource.success(data = App.getInstance().api.tags(Utils.myId)))
+            val tags = App.instance.api.tags()
+            emit(Resource.success(data = tags))
         } catch (exception: Exception) {
             emit(Resource.error(data = null, message = exception.message ?: "Error Occurred!"))
         }
