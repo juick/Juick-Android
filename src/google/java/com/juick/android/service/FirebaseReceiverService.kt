@@ -40,7 +40,9 @@ class FirebaseReceiverService : FirebaseMessagingService() {
             Log.d(TAG, "Message received in foreground")
             try {
                 val reply: Post = App.instance.jsonMapper.readValue(msg, Post::class.java)
-                App.instance.newMessage.postValue(reply)
+                if (!reply.isService) {
+                    App.instance.newMessage.postValue(reply)
+                }
             } catch (e: IOException) {
                 Log.d(TAG, "JSON exception: " + e.message)
             }

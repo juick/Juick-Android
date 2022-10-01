@@ -16,16 +16,11 @@
  */
 package com.juick.api.model
 
-import com.juick.api.model.Chat
-import com.stfalcon.chatkit.commons.models.IDialog
-import com.juick.api.model.Post
-import com.stfalcon.chatkit.commons.models.IUser
-import com.juick.api.model.User
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.stfalcon.chatkit.commons.models.IMessage
 import com.fasterxml.jackson.annotation.JsonIgnore
-import java.lang.StringBuilder
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.juick.util.StringUtils
+import com.stfalcon.chatkit.commons.models.IMessage
 import java.util.*
 
 /**
@@ -45,6 +40,7 @@ class Post : IMessage {
     var replyQuote: String? = null
     var photo: Photo? = null
     var rid = 0
+    @JsonProperty("service")
     var isService = false
 
     @JsonIgnore
@@ -66,7 +62,7 @@ class Post : IMessage {
     }
 
     override fun getText(): String {
-        return body!!
+        return body ?: ""
     }
 
     override fun getUser(): User {

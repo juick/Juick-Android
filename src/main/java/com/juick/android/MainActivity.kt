@@ -187,18 +187,21 @@ class MainActivity : AppCompatActivity() {
                     //replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
                 } else {
                     if (jmsg.mid == 0) {
+                        val navHostFragment = model.navHost.getFragment<NavHostFragment>()
+                        val navController = navHostFragment.navController
+                        navController.popBackStack(R.id.chats, true)
+                        navController.navigate(R.id.chats)
                         val chatAction =
                             ChatsFragmentDirections.actionChatsToPMFragment(jmsg.user.uname ?: "")
                         chatAction.uid = jmsg.user.uid
-                        val navHostFragment = model.navHost.getFragment<NavHostFragment>()
-                        val navController = navHostFragment.navController
                         navController.navigate(chatAction)
                     } else {
+                        val navHostFragment = model.navHost.getFragment<NavHostFragment>()
+                        val navController = navHostFragment.navController
+                        navController.popBackStack(R.id.home, false)
                         val discoverAction =
                             HomeFragmentDirections.actionDiscoverFragmentToThreadFragment()
                         discoverAction.mid = jmsg.mid
-                        val navHostFragment = model.navHost.getFragment<NavHostFragment>()
-                        val navController = navHostFragment.navController
                         navController.navigate(discoverAction)
                     }
                 }

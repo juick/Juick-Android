@@ -70,7 +70,7 @@ class NotificationManager {
             override fun onRetryError(
                 sse: ServerSentEvent,
                 throwable: Throwable,
-                response: Response
+                response: Response?
             ): Boolean {
                 return true
             }
