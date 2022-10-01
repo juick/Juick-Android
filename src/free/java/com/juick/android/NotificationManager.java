@@ -39,7 +39,7 @@ public class NotificationManager {
 
     public void onResume() {
         if (es != null) return;
-        es = Utils.getSSEFactory()
+        es = Utils.getEventsFactory()
                 .readTimeout(0, TimeUnit.SECONDS).build();
         Request request = new Request.Builder()
                 .url(BuildConfig.EVENTS_ENDPOINT)

@@ -42,7 +42,7 @@ object Utils {
         get() {
             val am = AccountManager.get(App.getInstance())
             val accounts = am.getAccountsByType(App.getInstance().getString(R.string.com_juick))
-            return if (accounts.size > 0) accounts[0] else null
+            return accounts.firstOrNull()
         }
 
     @JvmStatic
@@ -71,14 +71,14 @@ object Utils {
             }
             return null
         }
-    private var WSFactoryInstance: OkHttpClient.Builder? = null
+    private var eventsFactoryInstance: OkHttpClient.Builder? = null
     @JvmStatic
-    val sSEFactory: OkHttpClient.Builder?
+    val eventsFactory: OkHttpClient.Builder?
         get() {
-            if (WSFactoryInstance == null) {
-                WSFactoryInstance = OkHttpClient.Builder()
+            if (eventsFactoryInstance == null) {
+                eventsFactoryInstance = OkHttpClient.Builder()
             }
-            return WSFactoryInstance
+            return eventsFactoryInstance
         }
 
     @JvmStatic
