@@ -52,9 +52,7 @@ class App : MultiDexApplication() {
             if (field == null) {
                 val client = OkHttpClient.Builder()
                     .addInterceptor(UpLoadProgressInterceptor { bytesWritten: Long, contentLength: Long ->
-                        if (callback != null) {
-                            callback!!.invoke(100 * bytesWritten / contentLength)
-                        }
+                        callback?.invoke(100 * bytesWritten / contentLength)
                     })
                     .addInterceptor { chain: Interceptor.Chain ->
                         val original = chain.request()
@@ -196,10 +194,6 @@ class App : MultiDexApplication() {
         private set
     var newMessage: MutableLiveData<Post> = MutableLiveData()
     val signInStatus = MutableLiveData(SignInStatus.SIGNED_OUT)
-    var me = liveData(Dispatchers.IO) {
-        val user = instance.api.me()
-        emit(user)
-    }
 
     companion object {
         init {

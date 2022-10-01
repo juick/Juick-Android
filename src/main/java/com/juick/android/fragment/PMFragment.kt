@@ -25,6 +25,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
 import com.juick.R
+import com.juick.android.Profile
 import com.juick.android.widget.util.ViewUtil
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentPmBinding
@@ -47,13 +48,6 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
         super.onViewCreated(view, savedInstanceState)
         _model = FragmentPmBinding.bind(view)
         uname = PMFragmentArgs.fromBundle(requireArguments()).uname
-        adapter = MessagesListAdapter(java.lang.String.valueOf(App.instance.me.value)
-        ) { imageView, url, _ ->
-            Glide.with(imageView.context)
-                .load(url)
-                .transition(DrawableTransitionOptions.withCrossFade())
-                .into(imageView)
-        }
         model.messagesList.setAdapter(adapter)
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -76,6 +70,14 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
             true
         }
         App.instance.newMessage.observe(viewLifecycleOwner) { post -> onNewMessages(listOf(post)) }
+        Profile.me.observe(viewLifecycleOwner) {
+            adapter = MessagesListAdapter(it.uname) { imageView, url, _ ->
+                Glide.with(imageView.context)
+                    .load(url)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .into(imageView)
+            }
+        }
     }
 
     fun onNewMessages(posts: List<Post>) {

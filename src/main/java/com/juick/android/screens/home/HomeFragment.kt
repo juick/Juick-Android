@@ -26,11 +26,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation.findNavController
 import com.juick.App
 import com.juick.R
-import com.juick.android.JuickMessageMenu
-import com.juick.android.JuickMessagesAdapter
+import com.juick.android.*
 import com.juick.android.JuickMessagesAdapter.OnLoadMoreRequestListener
-import com.juick.android.Status
-import com.juick.android.UrlBuilder
 import com.juick.databinding.FragmentPostsPageBinding
 
 /**
@@ -52,7 +49,6 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val adapter = JuickMessagesAdapter()
         binding.list.adapter = adapter
-        adapter.setOnMenuListener(JuickMessageMenu(viewLifecycleOwner, adapter.items))
         adapter.setOnItemClickListener { _, pos ->
             adapter.getItem(pos)?.let {
                 post ->
@@ -110,6 +106,9 @@ class HomeFragment : Fragment() {
         binding.swipeContainer.setOnRefreshListener {
             firstPage = true
             vm.apiUrl.postValue(UrlBuilder.goHome().toString())
+        }
+        Profile.me.observe(viewLifecycleOwner)  {
+            adapter.setOnMenuListener(JuickMessageMenuListener(it, adapter.items))
         }
     }
 

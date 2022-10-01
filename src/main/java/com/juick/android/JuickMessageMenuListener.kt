@@ -22,7 +22,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.LifecycleOwner
 import com.juick.App
 import com.juick.R
 import com.juick.api.model.Post
@@ -36,7 +35,7 @@ import kotlinx.coroutines.withContext
  *
  * @author Ugnich Anton
  */
-class JuickMessageMenu(private val context: LifecycleOwner, private val postList: List<Post>) : DialogInterface.OnClickListener,
+class JuickMessageMenuListener(private val me: SecureUser, private val postList: List<Post>) : DialogInterface.OnClickListener,
     JuickMessagesAdapter.OnItemClickListener {
     private var selectedPost: Post? = null
     private val currentActions = IntArray(MENU_ACTION_SOME_LAST_CMD)
@@ -67,11 +66,10 @@ class JuickMessageMenu(private val context: LifecycleOwner, private val postList
         selectedPost = postList[pos]
         val items: Array<CharSequence?>
         var menuLength: Int
-        val me = App.instance.me.value ?: SecureUser()
         if (me.uid == 0) {
             menuLength = 2
             items = listOf(
-                '@'.toString() + selectedPost!!.user.uname + " " + context.getString(R.string.blog),
+                "@${selectedPost!!.user.uname} ${context.getString(R.string.blog)}",
                 context.getString(R.string.Share)
             ).toTypedArray()
             currentActions[0] = MENU_ACTION_BLOG
@@ -96,7 +94,7 @@ class JuickMessageMenu(private val context: LifecycleOwner, private val postList
                 currentActions[i - 1] = MENU_ACTION_RECOMMEND
             }
             val UName = selectedPost!!.user.uname
-            items[i++] = '@'.toString() + UName + " " + view.context.getString(R.string.blog)
+            items[i++] = "@$UName ${view.context.getString(R.string.blog)}"
             currentActions[i - 1] = MENU_ACTION_BLOG
             items[i++] = context.resources.getString(R.string.Subscribe_to) + " @" + UName
             currentActions[i - 1] = MENU_ACTION_SUBSCRIBE

@@ -25,6 +25,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.Glide
 import com.juick.App
 import com.juick.R
+import com.juick.android.Profile
 import com.juick.databinding.ProfileMenuLayoutBinding
 
 class ProfileProvider(context: Context) : ActionProvider(context) {
@@ -32,7 +33,7 @@ class ProfileProvider(context: Context) : ActionProvider(context) {
 
     init {
         binding = ProfileMenuLayoutBinding.inflate(LayoutInflater.from(context))
-        App.instance.me.observe(context as LifecycleOwner) { user ->
+        Profile.me.observe(context as LifecycleOwner) { user ->
             if (user.uid > 0) {
                 val profileImage = binding.profileImage
                 val avatarUrl: String = user.avatar

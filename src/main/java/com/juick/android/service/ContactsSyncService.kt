@@ -17,7 +17,6 @@
 package com.juick.android.service
 
 import android.accounts.Account
-import android.app.Service
 import android.content.*
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -26,13 +25,13 @@ import android.provider.BaseColumns
 import android.provider.ContactsContract
 import android.provider.ContactsContract.RawContacts
 import android.util.Log
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.juick.App
 import com.juick.R
-import com.juick.api.model.SecureUser
 import com.juick.api.model.User
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutionException
@@ -40,20 +39,20 @@ import java.util.concurrent.ExecutionException
 /**
  * @author Ugnich Anton
  */
-class ContactsSyncService : Service() {
+class ContactsSyncService : LifecycleService() {
     private lateinit var contactsSyncAdapter: JuickSyncAdapter
 
-    private class JuickSyncAdapter constructor(private val appContext: Context) :
+    private class JuickSyncAdapter constructor(private val lifecycleScope: CoroutineScope,
+                                               appContext: Context) :
         AbstractThreadedSyncAdapter(appContext, true) {
         override fun onPerformSync(
             account: Account, extras: Bundle, authority: String,
             provider: ContentProviderClient, syncResult: SyncResult
         ) {
-            CoroutineScope(Dispatchers.IO).launch {
+            lifecycleScope.launch {
                 try {
-                    val me = App.instance.me.value ?: SecureUser()
-                    val friends = me.read
-                    friends?.let { updateContacts(account, it) }
+                    val me = App.instance.api.me()
+                    me.read?.let { updateContacts(account, it) }
                 } catch (e: Exception) {
                     Log.d(ContactsSyncService::class.java.simpleName, "Sync error", e)
                 }
@@ -183,10 +182,12 @@ class ContactsSyncService : Service() {
     }
 
     override fun onCreate() {
-        contactsSyncAdapter = JuickSyncAdapter(applicationContext)
+        super.onCreate()
+        contactsSyncAdapter = JuickSyncAdapter(lifecycleScope, applicationContext)
     }
 
     override fun onBind(intent: Intent): IBinder? {
+        super.onBind(intent)
         return contactsSyncAdapter.syncAdapterBinder
     }
 }

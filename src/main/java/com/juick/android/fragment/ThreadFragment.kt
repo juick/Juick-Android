@@ -35,8 +35,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.juick.App
 import com.juick.R
-import com.juick.android.JuickMessageMenu
+import com.juick.android.JuickMessageMenuListener
 import com.juick.android.JuickMessagesAdapter
+import com.juick.android.Profile
 import com.juick.android.SignInActivity
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.hasAuth
@@ -49,9 +50,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.FileNotFoundException
 
 /**
@@ -146,7 +144,6 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 onReply(post?.rid ?: 0, StringUtils.defaultString(post?.text))
             }
         }
-        adapter.setOnMenuListener(JuickMessageMenu(viewLifecycleOwner, adapter.items))
         adapter.setOnScrollListener { v: View?, replyTo: Int, rid: Int ->
             var pos = 0
             for (i in adapter.items.indices) {
@@ -182,6 +179,9 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
             }
         }
         load()
+        Profile.me.observe(viewLifecycleOwner)  {
+            adapter.setOnMenuListener(JuickMessageMenuListener(it, adapter.items))
+        }
     }
 
     private fun load() {
