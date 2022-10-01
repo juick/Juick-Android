@@ -89,9 +89,10 @@ class SignInActivity : AppCompatActivity() {
                 }
             }
         }
-        val signInButton = application.signInProvider
-            ?.prepareSignIn(this, model.signInButtonPlaceholder) as FrameLayout
-        signInButton.setOnClickListener { v: View? -> application.signInProvider?.performSignIn() }
+        application.signInProvider?.prepareSignIn(this, model.signInButtonPlaceholder)
+            ?.let { signInButton ->
+                signInButton.setOnClickListener { application.signInProvider?.performSignIn() }
+            }
         currentAction = intent.getIntExtra(EXTRA_ACTION, ACTION_ACCOUNT_CREATE)
         if (hasAuth() && currentAction != ACTION_PASSWORD_UPDATE) {
             val builder = AlertDialog.Builder(this)
