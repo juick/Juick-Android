@@ -202,6 +202,7 @@ class MainActivity : AppCompatActivity() {
                         val discoverAction =
                             HomeFragmentDirections.actionDiscoverFragmentToThreadFragment()
                         discoverAction.mid = jmsg.mid
+                        discoverAction.scrollToEnd = true
                         navController.navigate(discoverAction)
                     }
                 }

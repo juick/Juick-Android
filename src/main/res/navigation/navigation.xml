@@ -50,6 +50,10 @@
             android:id="@+id/action_thread_self"
             app:destination="@id/thread"
             app:popUpTo="@id/thread" />
+        <argument
+            android:name="scrollToEnd"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
     <fragment
         android:id="@+id/PMFragment"

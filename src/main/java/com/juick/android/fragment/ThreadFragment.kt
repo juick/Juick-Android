@@ -66,7 +66,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     private var attachmentMime: String? = null
     private var progressDialog: ProgressDialog? = null
     private var mid = 0
-    private var linearLayoutManager: LinearLayoutManager? = null
+    private var scrollToEnd = false
     private lateinit var adapter: JuickMessagesAdapter
     private var attachmentLauncher: ActivityResultLauncher<String>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,10 +90,9 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _model = FragmentThreadBinding.bind(view)
-        val args = arguments
-        if (args != null) {
-            mid = ThreadFragmentArgs.fromBundle(args).mid
-        }
+        val args = ThreadFragmentArgs.fromBundle(requireArguments())
+        mid = args.mid
+        scrollToEnd = args.scrollToEnd
         if (mid == 0) {
             return
         }
@@ -140,7 +139,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
             }
         }
         model.list.adapter = adapter
-        linearLayoutManager = model.list.layoutManager as LinearLayoutManager
+        val linearLayoutManager = model.list.layoutManager as LinearLayoutManager
         adapter.setOnItemClickListener { widget: View?, position: Int ->
             if (widget?.tag == null || widget.tag != "clicked") {
                 val post = adapter.getItem(position)
@@ -171,10 +170,14 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
             if (adapter.itemCount > 0) {
                 if (adapter.getItem(0)?.mid == reply.mid) {
                     adapter.addData(reply)
-                    linearLayoutManager!!.smoothScrollToPosition(
-                        model.list,
-                        RecyclerView.State(), reply.rid
-                    )
+                    val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
+                    val total = adapter.items.size - 1 - 1
+                    if (lastVisible == total) {
+                        linearLayoutManager.smoothScrollToPosition(
+                            model.list,
+                            RecyclerView.State(), reply.rid
+                        )
+                    }
                 }
             }
         }
@@ -192,6 +195,10 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                     model.list.visibility = View.VISIBLE
                     model.progressBar.visibility = View.GONE
                     adapter.newData(posts)
+                    if (scrollToEnd) {
+                        model.list.layoutManager?.smoothScrollToPosition(model.list,
+                            RecyclerView.State(), posts.size - 1)
+                    }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
