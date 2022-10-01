@@ -24,7 +24,7 @@ import kotlin.Throws
 
 class CountingRequestBody(private val delegate: RequestBody, private val listener: (Long, Long) -> Unit) :
     RequestBody() {
-    protected var countingSink: CountingSink? = null
+    protected lateinit var countingSink: CountingSink
     override fun contentType(): MediaType? {
         return delegate.contentType()
     }

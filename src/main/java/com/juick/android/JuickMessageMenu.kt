@@ -23,8 +23,6 @@ import android.content.Intent
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
 import com.juick.App
 import com.juick.R
 import com.juick.api.model.Post
@@ -33,9 +31,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 /**
  *
@@ -49,7 +44,7 @@ class JuickMessageMenu(private val context: LifecycleOwner, private val postList
         val builder = AlertDialog.Builder(context)
         builder.setIcon(android.R.drawable.ic_dialog_alert)
         builder.setMessage(App.instance.resources.getString(resId))
-        builder.setPositiveButton(R.string.Yes) { dialog: DialogInterface?, which: Int -> action.run() }
+        builder.setPositiveButton(R.string.Yes) { _, _ -> action.run() }
         builder.setNegativeButton(R.string.Cancel, null)
         builder.show()
     }
@@ -67,9 +62,9 @@ class JuickMessageMenu(private val context: LifecycleOwner, private val postList
         }
     }
 
-    override fun onItemClick(view: View?, position: Int) {
+    override fun onItemClick(view: View?, pos: Int) {
         val context = view?.context as Context
-        selectedPost = postList[position]
+        selectedPost = postList[pos]
         val items: Array<CharSequence?>
         var menuLength: Int
         val me = App.instance.me.value ?: SecureUser()

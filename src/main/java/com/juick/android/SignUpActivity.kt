@@ -40,7 +40,7 @@ class SignUpActivity : AppCompatActivity() {
         model = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(model.root)
         authCode = intent.getStringExtra("authCode")
-        model.buttonCreate.setOnClickListener { v: View? ->
+        model.buttonCreate.setOnClickListener {
             val nick = model.newNick.text.toString()
             val password = model.newPassword.text.toString()
             val confirm = model.confirmPassword.text.toString()

@@ -34,9 +34,7 @@ import com.juick.api.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import retrofit2.Response
 import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.util.concurrent.ExecutionException
 
 /**
@@ -125,7 +123,7 @@ class ContactsSyncService : Service() {
                     operationList.add(builder.build())
                 }
                 var photo: Bitmap? = null
-                if (user.avatar != null) {
+                if (user.avatar.isNotEmpty()) {
                     try {
                         photo = Glide.with(context).asBitmap().load(user.avatar)
                             .placeholder(R.drawable.av_96)

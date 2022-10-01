@@ -152,81 +152,79 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         val holder = viewHolder as VH
         val post = postList[position]
         val isThread = type != TYPE_THREAD_POST
-        if (post.user != null) {
-            Glide.with(holder.itemView.context)
-                .load(post.user.avatar)
+        Glide.with(holder.itemView.context)
+            .load(post.user.avatar)
+            .transition(DrawableTransitionOptions.withCrossFade())
+            .fallback(R.drawable.av_96).into(holder.upicImageView)
+        holder.usernameTextView.text = post.user.uname
+        holder.timestampTextView.text = MessageUtils.formatMessageTimestamp(post)
+        holder.textTextView.text = StringUtils.EMPTY
+        holder.textTextView.text = formatMessageText(post)
+        holder.textTextView.movementMethod = LinkMovementMethod.getInstance()
+        if (post.photo != null && post.photo?.small != null) {
+            holder.photoLayout.visibility = View.VISIBLE
+            holder.photoDescriptionView.visibility = View.GONE
+            val drawable = Glide.with(holder.itemView.context)
+                .load(post.photo!!.small)
                 .transition(DrawableTransitionOptions.withCrossFade())
-                .fallback(R.drawable.av_96).into(holder.upicImageView)
-            holder.usernameTextView.text = post.user.uname
-            holder.timestampTextView.text = MessageUtils.formatMessageTimestamp(post)
-            holder.textTextView.text = StringUtils.EMPTY
-            holder.textTextView.text = formatMessageText(post)
-            holder.textTextView.movementMethod = LinkMovementMethod.getInstance()
-            if (post.photo != null && post.photo?.small != null) {
-                holder.photoLayout.visibility = View.VISIBLE
-                holder.photoDescriptionView.visibility = View.GONE
-                val drawable = Glide.with(holder.itemView.context)
-                    .load(post.photo!!.small)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
-                    drawable.apply(RequestOptions.bitmapTransform(BlurTransformation()))
-                        .into(holder.photoImageView)
-                } else {
-                    drawable.into(holder.photoImageView)
-                }
-            } else if (App.instance.hasViewableContent(post.text)) {
-                holder.photoLayout.visibility = View.VISIBLE
-                // TODO: support multiple previewers
-                App.instance.previewers.firstOrNull()
-                    ?.getPreviewUrl(post.text) { link: LinkPreview? ->
-                        if (link != null) {
-                            Glide.with(holder.itemView.context).load(link.url)
-                                .transition(DrawableTransitionOptions.withCrossFade())
-                                .into(holder.photoImageView)
-                            holder.photoDescriptionView.visibility = View.VISIBLE
-                            holder.photoDescriptionView.text = link.description
-                        } else {
-                            holder.photoLayout.visibility = View.GONE
-                        }
-                    }
+            if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
+                drawable.apply(RequestOptions.bitmapTransform(BlurTransformation()))
+                    .into(holder.photoImageView)
             } else {
-                holder.photoLayout.visibility = View.GONE
+                drawable.into(holder.photoImageView)
             }
-            if (!isThread) {
-                if (post.replies > 0) {
-                    holder.repliesTextView!!.visibility = View.VISIBLE
-                    holder.repliesTextView!!.text = Integer.toString(post.replies)
-                } else {
-                    holder.repliesTextView!!.visibility = View.GONE
+        } else if (App.instance.hasViewableContent(post.text)) {
+            holder.photoLayout.visibility = View.VISIBLE
+            // TODO: support multiple previewers
+            App.instance.previewers.firstOrNull()
+                ?.getPreviewUrl(post.text) { link: LinkPreview? ->
+                    if (link != null) {
+                        Glide.with(holder.itemView.context).load(link.url)
+                            .transition(DrawableTransitionOptions.withCrossFade())
+                            .into(holder.photoImageView)
+                        holder.photoDescriptionView.visibility = View.VISIBLE
+                        holder.photoDescriptionView.text = link.description
+                    } else {
+                        holder.photoLayout.visibility = View.GONE
+                    }
                 }
-                if (post.likes > 0) {
-                    holder.likesTextView!!.visibility = View.VISIBLE
-                    holder.likesTextView!!.text = Integer.toString(post.likes)
-                } else {
-                    holder.likesTextView!!.visibility = View.GONE
+        } else {
+            holder.photoLayout.visibility = View.GONE
+        }
+        if (!isThread) {
+            if (post.replies > 0) {
+                holder.repliesTextView?.visibility = View.VISIBLE
+                holder.repliesTextView?.text = "${post.replies}"
+            } else {
+                holder.repliesTextView?.visibility = View.GONE
+            }
+            if (post.likes > 0) {
+                holder.likesTextView?.visibility = View.VISIBLE
+                holder.likesTextView?.text = "${post.likes}"
+            } else {
+                holder.likesTextView?.visibility = View.GONE
+            }
+        } else {
+            if (post.nextRid == post.rid) {
+                holder.backImageView?.visibility = View.VISIBLE
+                holder.backImageView?.tag = post
+                holder.backImageView?.setOnClickListener { v: View ->
+                    val p = v.tag as Post
+                    if (scrollListener != null) scrollListener!!.invoke(v, p.prevRid, 0)
+                    v.visibility = View.GONE
                 }
             } else {
-                if (post.nextRid == post.rid) {
-                    holder.backImageView?.visibility = View.VISIBLE
-                    holder.backImageView?.tag = post
-                    holder.backImageView?.setOnClickListener { v: View ->
-                        val p = v.tag as Post
-                        if (scrollListener != null) scrollListener!!.invoke(v, p.prevRid, 0)
-                        v.visibility = View.GONE
-                    }
-                } else {
-                    holder.backImageView?.visibility = View.GONE
-                }
+                holder.backImageView?.visibility = View.GONE
             }
-            if (post.rid > 0 && post.replyto > 0) {
-                Glide.with(holder.itemView.context)
-                    .load(post.to?.avatar)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .fallback(R.drawable.av_96).into(IconTarget(holder))
-                holder.replyToTextView?.text = post.to?.uname
-                holder.replyToTextView?.visibility = View.VISIBLE
-                holder.replyToTextView?.tag = post
-            }
+        }
+        if (post.rid > 0 && post.replyto > 0) {
+            Glide.with(holder.itemView.context)
+                .load(post.to?.avatar)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .fallback(R.drawable.av_96).into(IconTarget(holder))
+            holder.replyToTextView?.text = post.to?.uname
+            holder.replyToTextView?.visibility = View.VISIBLE
+            holder.replyToTextView?.tag = post
         }
     }
 
@@ -335,14 +333,12 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             replyToTextView = itemView.findViewById(R.id.replyto)
             ViewUtil.setDrawableTint(likesTextView)
             repliesTextView = itemView.findViewById(R.id.replies)
-            if (repliesTextView != null) {
-                repliesTextView!!.setCompoundDrawables(
-                    VectorDrawableCompat.create(
-                        itemView.context.resources,
-                        R.drawable.ic_ei_comment, null
-                    ), null, null, null
-                )
-            }
+            repliesTextView?.setCompoundDrawables(
+                VectorDrawableCompat.create(
+                    itemView.context.resources,
+                    R.drawable.ic_ei_comment, null
+                ), null, null, null
+            )
             ViewUtil.setDrawableTint(repliesTextView)
             backImageView = itemView.findViewById(R.id.back_imageView)
             menuImageView = itemView.findViewById(R.id.menu_dots)
@@ -353,14 +349,10 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         override fun onClick(v: View) {
             if (v.id == R.id.menu_dots) {
-                if (menuClickListener != null) {
-                    menuClickListener!!.onItemClick(v, bindingAdapterPosition)
-                }
+                menuClickListener?.onItemClick(v, bindingAdapterPosition)
                 return
             }
-            if (itemClickListener != null) {
-                itemClickListener!!.invoke(v, bindingAdapterPosition)
-            }
+            itemClickListener?.invoke(v, bindingAdapterPosition)
         }
 
         fun setOnItemClickListener(listener: ((View?, Int) -> Unit)?) {
@@ -386,10 +378,6 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     interface OnItemClickListener {
         fun onItemClick(view: View?, pos: Int)
-    }
-
-    interface OnScrollListener {
-        fun onScrollToPost(v: View?, replyTo: Int, rid: Int)
     }
 
     companion object {

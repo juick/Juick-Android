@@ -43,7 +43,7 @@ object RequestBodyUtil {
 
             @Throws(IOException::class)
             override fun writeTo(sink: BufferedSink) {
-                var source: Source? = null
+                lateinit var source: Source
                 try {
                     source = Okio.source(inputStream)
                     sink.writeAll(source)

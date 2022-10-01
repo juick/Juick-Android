@@ -92,7 +92,7 @@ class SignInActivity : AppCompatActivity() {
         currentAction = intent.getIntExtra(EXTRA_ACTION, ACTION_ACCOUNT_CREATE)
         if (hasAuth() && currentAction != ACTION_PASSWORD_UPDATE) {
             val builder = AlertDialog.Builder(this)
-            builder.setNeutralButton(android.R.string.ok) { arg0: DialogInterface?, arg1: Int ->
+            builder.setNeutralButton(android.R.string.ok) { _, _ ->
                 setResult(RESULT_CANCELED)
                 finish()
             }

@@ -36,15 +36,15 @@ object MessageUtils {
     }
 
     fun formatMessageTimestamp(jmsg: Post): String {
-        return outDateFormat.format(jmsg.getTimestamp())
+        return outDateFormat.format(jmsg.getTimestamp() ?: Date())
     }
 
     // TODO: taken from juick-core, need merge
     private val regexLinks2 =
         Pattern.compile("((?<=\\s)|(?<=\\A))([\\[\\{]|&lt;)((?:ht|f)tps?://(?:www\\.)?([^\\/\\s\\\"\\)\\!]+)/?(?:[^\\]\\}](?<!&gt;))*)([\\]\\}]|&gt;)")
 
-    fun formatMessage(msg: String): String {
-        var msg = msg
+    fun formatMessage(message: String): String {
+        var msg = message
         msg = msg.replace("&".toRegex(), "&amp;")
         msg = msg.replace("<".toRegex(), "&lt;")
         msg = msg.replace(">".toRegex(), "&gt;")
@@ -132,8 +132,11 @@ object MessageUtils {
         val m = regexLinks2.matcher(msg)
         val sb = StringBuffer()
         while (m.find()) {
-            val url = m.group(3).replace(" ", "%20").replace("\\s+".toRegex(), StringUtils.EMPTY)
-            m.appendReplacement(sb, "$1$2<a href=\"$url\" rel=\"nofollow\">$4</a>$5")
+            m.group(3)?.let { url ->
+                url.replace(" ", "%20")
+                    .replace("\\s+".toRegex(), StringUtils.EMPTY)
+                m.appendReplacement(sb, "$1$2<a href=\"$url\" rel=\"nofollow\">$4</a>$5")
+            }
         }
         m.appendTail(sb)
         msg = sb.toString()

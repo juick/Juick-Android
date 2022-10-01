@@ -121,7 +121,7 @@ class App : MultiDexApplication() {
 
     suspend fun auth(username: String, password: String): SecureUser {
         val client = OkHttpClient.Builder()
-            .authenticator { route: Route?, response: okhttp3.Response ->
+            .authenticator { _, response ->
                 if (response.request().header("Authorization") != null) {
                     return@authenticator null // Give up, we've already failed to authenticate.
                 }
