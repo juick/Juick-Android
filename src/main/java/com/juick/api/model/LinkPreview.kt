@@ -14,16 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.api.model
 
-package com.juick.api.ext;
-
-import com.juick.api.ext.youtube.VideoList;
-
-import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-
-public interface YouTube {
-    @GET("videos?part=snippet")
-    Call<VideoList> getDescription(@Query("id") String videoId, @Query("key") String apiKey);
-}
+class LinkPreview(val url: String, val description: String)

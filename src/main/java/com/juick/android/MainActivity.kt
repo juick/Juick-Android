@@ -188,7 +188,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     if (jmsg.mid == 0) {
                         val chatAction =
-                            ChatsFragmentDirections.actionChatsToPMFragment(jmsg.user.uname)
+                            ChatsFragmentDirections.actionChatsToPMFragment(jmsg.user.uname ?: "")
                         chatAction.uid = jmsg.user.uid
                         val navHostFragment = model.navHost.getFragment<NavHostFragment>()
                         val navController = navHostFragment.navController

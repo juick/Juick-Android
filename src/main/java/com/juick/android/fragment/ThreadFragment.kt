@@ -144,7 +144,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         adapter.setOnItemClickListener { widget: View?, position: Int ->
             if (widget?.tag == null || widget.tag != "clicked") {
                 val post = adapter.getItem(position)
-                onReply(post?.rid ?: 0, StringUtils.defaultString(post?.body))
+                onReply(post?.rid ?: 0, StringUtils.defaultString(post?.text))
             }
         }
         adapter.setOnMenuListener(JuickMessageMenu(viewLifecycleOwner, adapter.items))

@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.api.model
 
-package com.juick.api.model;
+/**
+ * Created by gerc on 11.03.2016.
+ */
+class Pms {
+    val pms: List<Chat>
 
-import androidx.annotation.NonNull;
-
-public class SecureUser extends User {
-    private String hash;
-
-    @NonNull
-    public String getHash() {
-        return hash;
+    init {
+        pms = emptyList()
     }
 }

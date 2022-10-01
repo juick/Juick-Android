@@ -14,18 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.api.ext.youtube
 
-package com.juick.api.ext.youtube;
-
-import androidx.annotation.NonNull;
-
-import java.util.List;
-
-public class VideoList {
-    private List<Video> items;
-
-    @NonNull
-    public List<Video> getItems() {
-        return items;
-    }
-}
+data class Thumbnail(
+    val url: String
+)

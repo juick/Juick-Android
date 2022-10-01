@@ -70,13 +70,13 @@ class NotificationSender(context: Context) {
                 if (jmsg.tags.isNotEmpty()) {
                     title = "$title: ${jmsg.tagsString}"
                 }
-                val body = if (TextUtils.isEmpty(jmsg.body)) {
+                val body = if (TextUtils.isEmpty(jmsg.text)) {
                     "sent an image"
                 } else {
-                    if (jmsg.body.length > 64) {
-                        jmsg.body.substring(0, 60) + "..."
+                    if (jmsg.text.length > 64) {
+                        jmsg.text.substring(0, 60) + "..."
                     } else {
-                        jmsg.body
+                        jmsg.text
                     }
                 }
                 val contentIntent = PendingIntent.getActivity(
@@ -93,7 +93,7 @@ class NotificationSender(context: Context) {
                     .setColor(ContextCompat.getColor(App.instance, R.color.colorAccent))
                     .setGroupSummary(true)
                 notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(jmsg.body))
+                notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(jmsg.text))
                 if (jmsg.user.uid > 0) {
                     notificationBuilder.addAction(
                         if (Build.VERSION.SDK_INT <= 19) R.drawable.ic_ab_reply2 else R.drawable.ic_ab_reply,

@@ -14,20 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.api.ext.youtube
 
-package com.juick.api.model;
-
-/**
- * Created by gerc on 15.02.2016.
- */
-public class Tag {
-    private String tag;
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-}
+data class Snippet(
+    val title: String,
+    val thumbnails: Map<String, Thumbnail>
+)

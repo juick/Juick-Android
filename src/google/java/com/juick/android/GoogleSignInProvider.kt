@@ -109,16 +109,20 @@ class GoogleSignInProvider : SignInProvider {
                         response: Response<AuthResponse?>
                     ) {
                         if (response.isSuccessful) {
-                            val data = response.body()
-                            if (data!!.user == null) {
-                                val authCode = data.authCode
-                                Log.i(SignInActivity::class.java.simpleName, authCode)
-                                val signupIntent = Intent(context, SignUpActivity::class.java)
-                                signupIntent.putExtra("email", data.account)
-                                signupIntent.putExtra("authCode", data.authCode)
-                                context!!.startActivityForResult(signupIntent, RC_SIGN_UP)
-                            } else {
-                                successCallback.response(data.user.name, data.user.hash)
+                            response.body()?.let {
+                                data ->
+                                if (data.user == null) {
+                                    data.authCode?.let { authCode ->
+                                        Log.i(SignInActivity::class.java.simpleName, authCode)
+                                        val signupIntent =
+                                            Intent(context, SignUpActivity::class.java)
+                                        signupIntent.putExtra("email", data.account)
+                                        signupIntent.putExtra("authCode", data.authCode)
+                                        context!!.startActivityForResult(signupIntent, RC_SIGN_UP)
+                                    }
+                                } else {
+                                    successCallback.response(data.user.name, data.user.hash)
+                                }
                             }
                         }
                     }

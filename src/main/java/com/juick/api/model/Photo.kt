@@ -14,21 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.api.model
 
-package com.juick.api.ext.youtube;
+import com.juick.api.model.Chat
+import com.stfalcon.chatkit.commons.models.IDialog
+import com.juick.api.model.Post
+import com.stfalcon.chatkit.commons.models.IUser
+import com.juick.api.model.User
+import com.fasterxml.jackson.annotation.JsonFormat
+import com.stfalcon.chatkit.commons.models.IMessage
+import java.util.ArrayList
+import com.fasterxml.jackson.annotation.JsonIgnore
+import java.lang.StringBuilder
+import com.juick.util.StringUtils
 
-import java.util.Map;
-
-public class Snippet {
-    private String title;
-
-    public String getTitle() {
-        return title;
-    }
-
-    private Map<String, Thumbnail> thumbnails;
-
-    public Map<String, Thumbnail> getThumbnails() {
-        return thumbnails;
-    }
+/**
+ * Created by gerc on 10.02.2016.
+ */
+class Photo {
+    var thumbnail: String? = null
+    var small: String? = null
+    var medium: String? = null
 }

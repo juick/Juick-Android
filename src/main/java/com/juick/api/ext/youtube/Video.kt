@@ -14,27 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.api.ext.youtube
 
-package com.juick.api.model;
-
-import androidx.annotation.NonNull;
-
-import java.util.Collections;
-import java.util.List;
-
-/**
- * Created by gerc on 11.03.2016.
- */
-public class Pms {
-
-    private List<Chat> pms;
-
-    public Pms() {
-        this.pms = Collections.emptyList();
-    }
-
-    @NonNull
-    public List<Chat> getPms() {
-        return pms;
-    }
-}
+data class Video(
+    val id: String,
+    val snippet: Snippet
+)

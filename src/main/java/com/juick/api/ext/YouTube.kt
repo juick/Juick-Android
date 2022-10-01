@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2008-2022, Juick
  *
@@ -15,39 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.api.ext
 
-package com.juick.api.model;
+import retrofit2.http.GET
+import com.juick.api.ext.youtube.VideoList
+import retrofit2.Call
+import retrofit2.http.Query
 
-/**
- * Created by gerc on 10.02.2016.
- */
-public class Photo {
-
-    private String thumbnail;
-    private String small;
-    private String medium;
-
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
-    }
-
-    public String getSmall() {
-        return small;
-    }
-
-    public void setSmall(String small) {
-        this.small = small;
-    }
-
-    public String getMedium() {
-        return medium;
-    }
-
-    public void setMedium(String medium) {
-        this.medium = medium;
-    }
+interface YouTube {
+    @GET("videos?part=snippet")
+    suspend fun getDescription(
+        @Query("id") videoId: String?,
+        @Query("key") apiKey: String?
+    ): VideoList
 }

@@ -76,7 +76,7 @@ class SignInActivity : AppCompatActivity() {
                 try {
                     val me = application.auth(nick, password)
                     withContext(Dispatchers.Main) {
-                        updateAccount(nick, me.hash, currentAction)
+                        updateAccount(nick, me.hash ?: "", currentAction)
                     }
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {

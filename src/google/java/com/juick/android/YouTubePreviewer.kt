@@ -22,12 +22,12 @@ import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.LinkPreviewer.UrlCallback
 import com.juick.api.ext.YouTube
-import com.juick.api.ext.youtube.VideoList
 import com.juick.api.model.LinkPreview
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import java.util.regex.Pattern
 
@@ -62,45 +62,33 @@ class YouTubePreviewer : LinkPreviewer {
                     videoId = sanitizer.getValue("v")
                 }
                 if (videoId != null) {
-                    youTube.getDescription(
-                        videoId,
-                        App.instance.getText(R.string.google_api_key).toString()
-                    ).enqueue(object : Callback<VideoList?> {
-                        override fun onResponse(
-                            call: Call<VideoList?>,
-                            response: Response<VideoList?>
-                        ) {
-                            if (response.isSuccessful) {
-                                val playlist = response.body()
-                                if (playlist != null && playlist.items.size > 0) {
-                                    val video = playlist.items[0]
-                                    if (video != null) {
-                                        val thumbnail = video.snippet.thumbnails["default"]
-                                        if (thumbnail != null) {
-                                            callback.response(
-                                                LinkPreview(
-                                                    thumbnail.url,
-                                                    video.snippet.title
-                                                )
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            val playlist = youTube.getDescription(
+                                videoId,
+                                App.instance.getText(R.string.google_api_key).toString()
+                            )
+                            withContext(Dispatchers.Main) {
+                                playlist.items.firstOrNull()?.let { video ->
+                                    val thumbnail = video.snippet.thumbnails["default"]
+                                    if (thumbnail != null) {
+                                        callback.response(
+                                            LinkPreview(
+                                                thumbnail.url,
+                                                video.snippet.title
                                             )
-                                        } else {
-                                            callback.response(null)
-                                        }
+                                        )
                                     } else {
                                         callback.response(null)
                                     }
-                                } else {
-                                    callback.response(null)
-                                }
-                            } else {
+                                } ?: callback.response(null)
+                            }
+                        } catch (e: Exception) {
+                            withContext(Dispatchers.Main) {
                                 callback.response(null)
                             }
                         }
-
-                        override fun onFailure(call: Call<VideoList?>, t: Throwable) {
-                            callback.response(null)
-                        }
-                    })
+                    }
                 }
             }
         }

@@ -14,23 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.api.model
 
-package com.juick.api.model;
-
-public class LinkPreview {
-    private String url;
-    private String description;
-
-    public LinkPreview(String url, String description) {
-        this.url = url;
-        this.description = description;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-}
+/**
+ * Created by gerc on 15.02.2016.
+ */
+data class Tag (
+    var tag: String
+)

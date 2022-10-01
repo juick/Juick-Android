@@ -14,24 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.api.model
 
-package com.juick.api.model;
-
-public class AuthResponse {
-    private String account;
-    private String authCode;
-    private SecureUser user;
-
-    public SecureUser getUser() {
-        return user;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public String getAuthCode() {
-        return authCode;
-    }
-
+class AuthResponse {
+    val account: String? = null
+    val authCode: String? = null
+    val user: SecureUser? = null
 }

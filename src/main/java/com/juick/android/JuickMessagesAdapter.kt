@@ -92,7 +92,7 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     fun addDisabledItem(txt: String?, position: Int) {
         val post = Post()
-        post.body = txt
+        post.setBody(txt)
         postList.add(position, post)
         notifyItemRangeInserted(position, postList.size)
     }
@@ -161,11 +161,11 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             holder.textTextView.text = StringUtils.EMPTY
             holder.textTextView.text = formatMessageText(post)
             holder.textTextView.movementMethod = LinkMovementMethod.getInstance()
-            if (post.photo != null && post.photo.small != null) {
+            if (post.photo != null && post.photo?.small != null) {
                 holder.photoLayout.visibility = View.VISIBLE
                 holder.photoDescriptionView.visibility = View.GONE
                 val drawable = Glide.with(holder.itemView.context)
-                    .load(post.photo.small)
+                    .load(post.photo!!.small)
                     .transition(DrawableTransitionOptions.withCrossFade())
                 if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
                     drawable.apply(RequestOptions.bitmapTransform(BlurTransformation()))
@@ -173,13 +173,13 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 } else {
                     drawable.into(holder.photoImageView)
                 }
-            } else if (App.instance.hasViewableContent(post.body)) {
+            } else if (App.instance.hasViewableContent(post.text)) {
                 holder.photoLayout.visibility = View.VISIBLE
                 // TODO: support multiple previewers
                 if (App.instance.previewers.size > 0) {
-                    App.instance.previewers.get(0).getPreviewUrl(post.body) { link ->
+                    App.instance.previewers.get(0).getPreviewUrl(post.text) { link ->
                         if (link != null) {
-                            Glide.with(holder.itemView.context).load(link.getUrl())
+                            Glide.with(holder.itemView.context).load(link.url)
                                 .transition(DrawableTransitionOptions.withCrossFade())
                                 .into(holder.photoImageView)
                             holder.photoDescriptionView.visibility = View.VISIBLE
@@ -220,10 +220,10 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
             if (post.rid > 0 && post.replyto > 0) {
                 Glide.with(holder.itemView.context)
-                    .load(post.to.avatar)
+                    .load(post.to?.avatar)
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .fallback(R.drawable.av_96).into(IconTarget(holder))
-                holder.replyToTextView?.text = post.to.uname
+                holder.replyToTextView?.text = post.to?.uname
                 holder.replyToTextView?.visibility = View.VISIBLE
                 holder.replyToTextView?.tag = post
             }
@@ -258,7 +258,7 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             nextSpanStart += text.length + 1
         }
         val text = HtmlCompat.fromHtml(
-            MessageUtils.formatMessage(StringUtils.defaultString(jmsg.body)),
+            MessageUtils.formatMessage(StringUtils.defaultString(jmsg.getBody())),
             HtmlCompat.FROM_HTML_MODE_LEGACY
         )
         ssb.append(text)

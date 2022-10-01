@@ -27,6 +27,7 @@ import androidx.lifecycle.liveData
 import androidx.multidex.MultiDexApplication
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.juick.android.*
 import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.Utils.accountData
@@ -89,7 +90,6 @@ class App : MultiDexApplication() {
             }
             return field
         }
-        private set
     val api get() = _api!!
     lateinit var jsonMapper: ObjectMapper
 
@@ -111,7 +111,7 @@ class App : MultiDexApplication() {
         if (!BuildConfig.DEBUG) {
             errorReporter = ErrorReporter(this, "support@juick.com", getString(R.string.appCrash))
         }
-        jsonMapper = ObjectMapper()
+        jsonMapper = jacksonObjectMapper()
         jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         jacksonConverterFactory = JacksonConverterFactory.create(jsonMapper)
         JuickConfig.init()
