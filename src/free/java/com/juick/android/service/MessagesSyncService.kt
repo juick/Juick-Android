@@ -42,8 +42,8 @@ class MessagesSyncService : Service() {
             if (me!!.unreadCount > 0) {
                 val user = User(0, "Juick")
                 val announcement = Post()
-                announcement.user = user
-                announcement.body = context.getString(R.string.unread_discussions)
+                announcement.setUser(user)
+                announcement.setBody(context.getString(R.string.unread_discussions))
                 try {
                     val messageData: String =
                         App.instance.jsonMapper.writeValueAsString(announcement)
