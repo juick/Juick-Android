@@ -55,7 +55,7 @@ public class UITest {
 
     @Test
     public void isDisplayed_MainActivity() {
-        onView(withId(R.id.app_bar_layout))
+        onView(withId(R.id.main_layout))
                 .check(matches(isDisplayed()));
     }
     @Test
