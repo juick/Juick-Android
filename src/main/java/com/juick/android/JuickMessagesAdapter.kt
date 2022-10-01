@@ -43,6 +43,7 @@ import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.widget.util.BlurTransformation
 import com.juick.android.widget.util.ViewUtil
+import com.juick.api.model.LinkPreview
 import com.juick.api.model.Post
 import com.juick.util.MessageUtils
 import com.juick.util.StringUtils
@@ -176,8 +177,8 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             } else if (App.instance.hasViewableContent(post.text)) {
                 holder.photoLayout.visibility = View.VISIBLE
                 // TODO: support multiple previewers
-                if (App.instance.previewers.size > 0) {
-                    App.instance.previewers.get(0).getPreviewUrl(post.text) { link ->
+                App.instance.previewers.firstOrNull()
+                    ?.getPreviewUrl(post.text) { link: LinkPreview? ->
                         if (link != null) {
                             Glide.with(holder.itemView.context).load(link.url)
                                 .transition(DrawableTransitionOptions.withCrossFade())
@@ -188,7 +189,6 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                             holder.photoLayout.visibility = View.GONE
                         }
                     }
-                }
             } else {
                 holder.photoLayout.visibility = View.GONE
             }

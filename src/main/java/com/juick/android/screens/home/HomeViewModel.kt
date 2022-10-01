@@ -25,7 +25,7 @@ class HomeViewModel : FeedViewModel() {
         if (Utils.hasAuth()) {
             apiUrl.postValue(UrlBuilder.goHome().toString())
         } else {
-            apiUrl.postValue(UrlBuilder.getDiscussions().toString())
+            apiUrl.postValue(UrlBuilder.discussions.toString())
         }
     }
 }

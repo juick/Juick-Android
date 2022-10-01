@@ -57,6 +57,6 @@ open class User : IUser {
     }
 
     override fun getAvatar(): String {
-        return avatar!!
+        return avatar ?: ""
     }
 }

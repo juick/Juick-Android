@@ -14,15 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.android
 
-package com.juick.android;
+import com.juick.api.model.LinkPreview
 
-import com.juick.api.model.LinkPreview;
+interface LinkPreviewer {
 
-public interface LinkPreviewer {
-    interface UrlCallback {
-        void response(LinkPreview url);
-    }
-    boolean hasViewableContent(String message);
-    void getPreviewUrl(String message, UrlCallback callback);
+    fun hasViewableContent(message: String): Boolean
+    fun getPreviewUrl(message: String, callback: UrlCallback)
 }
+
+typealias UrlCallback = (LinkPreview?) -> Unit

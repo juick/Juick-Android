@@ -149,20 +149,23 @@ class App : MultiDexApplication() {
         var body: MultipartBody.Part? = null
         if (attachmentUri != null) {
             Log.d("sendMessage", "$attachmentMime $attachmentUri")
-            val stream = contentResolver.openInputStream(attachmentUri)
-            val requestFile = RequestBodyUtil.create(MediaType.parse("multipart/form-data"), stream)
-            body = MultipartBody.Part.createFormData(
-                "attach",
-                String.format(
-                    "attach.%s",
-                    MimeTypeMap.getSingleton().getExtensionFromMimeType(attachmentMime)
-                ),
-                requestFile
-            )
+            contentResolver.openInputStream(attachmentUri)?.let {
+                stream ->
+                val requestFile =
+                    RequestBodyUtil.create(MediaType.parse("multipart/form-data"), stream)
+                body = MultipartBody.Part.createFormData(
+                    "attach",
+                    String.format(
+                        "attach.%s",
+                        MimeTypeMap.getSingleton().getExtensionFromMimeType(attachmentMime)
+                    ),
+                    requestFile
+                )
+            }
         }
         try {
             val message = instance.api.newPost(
-                RequestBody.create(MediaType.parse("text/plain"), txt),
+                RequestBody.create(MediaType.parse("text/plain"), txt ?: ""),
                 body
             )
             messageListener.invoke(message.newMessage)
@@ -173,7 +176,7 @@ class App : MultiDexApplication() {
 
     val previewers: ArrayList<LinkPreviewer> = arrayListOf()
 
-    fun hasViewableContent(message: String?): Boolean {
+    fun hasViewableContent(message: String): Boolean {
         for (previewer in previewers) {
             if (previewer.hasViewableContent(message)) {
                 return true

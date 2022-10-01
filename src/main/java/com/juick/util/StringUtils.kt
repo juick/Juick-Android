@@ -14,13 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.util
 
-package com.juick.util;
-
-public class StringUtils {
-    public static final String EMPTY = "";
-
-    public static String defaultString(final String str) {
-        return str == null ? EMPTY : str;
+object StringUtils {
+    const val EMPTY = ""
+    fun defaultString(str: String?): String {
+        return str ?: EMPTY
     }
 }

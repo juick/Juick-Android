@@ -14,23 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.android.service
 
-package com.juick.android;
+import android.util.Log
+import com.huawei.hms.push.HmsMessageService
+import com.huawei.hms.push.RemoteMessage
 
-import android.app.Activity;
-import android.content.Intent;
-import android.view.View;
-import android.widget.RelativeLayout;
-
-public interface SignInProvider {
-    interface SignInRequestCallback {
-        void request(String username, String password);
+class HmsReceiverService : HmsMessageService() {
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        Log.d("HMS", remoteMessage.data)
     }
-    interface SignInSuccessCallback {
-        void response(String username, String hash);
+
+    override fun onNewToken(s: String) {
+        Log.d("HMS", "Token: $s")
     }
-    View prepareSignIn(Activity context, RelativeLayout button);
-    default void performSignIn() {};
-    default void onSignInResult(int requestCode, int resultCode, Intent data,
-                        SignInRequestCallback requestCallback, SignInSuccessCallback successCallback) {};
 }

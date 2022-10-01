@@ -32,9 +32,6 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.juick.App
 import com.juick.R
-import com.juick.android.SignInActivity
-import com.juick.android.SignInProvider.SignInRequestCallback
-import com.juick.android.SignInProvider.SignInSuccessCallback
 import com.juick.api.model.AuthResponse
 import com.juick.util.StringUtils
 import retrofit2.Call
@@ -72,7 +69,7 @@ class GoogleSignInProvider : SignInProvider {
     override fun onSignInResult(
         requestCode: Int,
         resultCode: Int,
-        data: Intent,
+        data: Intent?,
         requestCallback: SignInRequestCallback,
         successCallback: SignInSuccessCallback
     ) {
@@ -84,9 +81,9 @@ class GoogleSignInProvider : SignInProvider {
             handleSignInResult(task, successCallback)
         }
         if (requestCode == RC_SIGN_UP) {
-            val nick = data.getStringExtra("nick")
-            val password = data.getStringExtra("password")
-            requestCallback.request(nick, password)
+            val nick = data?.getStringExtra("nick") ?: ""
+            val password = data?.getStringExtra("password") ?: ""
+            requestCallback.invoke(nick, password)
         }
     }
 
@@ -121,7 +118,7 @@ class GoogleSignInProvider : SignInProvider {
                                         context!!.startActivityForResult(signupIntent, RC_SIGN_UP)
                                     }
                                 } else {
-                                    successCallback.response(data.user.name, data.user.hash)
+                                    successCallback.invoke(data.user.name, data.user.hash!!)
                                 }
                             }
                         }

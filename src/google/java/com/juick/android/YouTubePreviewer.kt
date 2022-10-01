@@ -20,7 +20,6 @@ import android.net.UrlQuerySanitizer
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
-import com.juick.android.LinkPreviewer.UrlCallback
 import com.juick.api.ext.YouTube
 import com.juick.api.model.LinkPreview
 import kotlinx.coroutines.CoroutineScope
@@ -72,20 +71,20 @@ class YouTubePreviewer : LinkPreviewer {
                                 playlist.items.firstOrNull()?.let { video ->
                                     val thumbnail = video.snippet.thumbnails["default"]
                                     if (thumbnail != null) {
-                                        callback.response(
+                                        callback.invoke(
                                             LinkPreview(
                                                 thumbnail.url,
                                                 video.snippet.title
                                             )
                                         )
                                     } else {
-                                        callback.response(null)
+                                        callback.invoke(null)
                                     }
-                                } ?: callback.response(null)
+                                } ?: callback.invoke(null)
                             }
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
-                                callback.response(null)
+                                callback.invoke(null)
                             }
                         }
                     }

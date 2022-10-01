@@ -14,16 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.juick.api
 
-package com.juick.api;
-
-import com.bumptech.glide.annotation.GlideModule;
-import com.bumptech.glide.module.AppGlideModule;
+import com.bumptech.glide.annotation.GlideModule
+import com.bumptech.glide.module.AppGlideModule
 
 /**
  * Created by vt on 13/03/2018.
  */
 @GlideModule
-public class JuickGlideModule extends AppGlideModule {
-
-}
+class JuickGlideModule : AppGlideModule()
