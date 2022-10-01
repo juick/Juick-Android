@@ -47,6 +47,7 @@ import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.screens.chats.ChatsFragmentDirections
 import com.juick.android.screens.home.HomeFragmentDirections
 import com.juick.android.widget.util.ViewUtil
+import com.juick.android.widget.util.setAppBarElevation
 import com.juick.api.model.Post
 import com.juick.databinding.ActivityMainBinding
 import com.juick.util.StringUtils
@@ -74,6 +75,7 @@ class MainActivity : AppCompatActivity() {
         val toolbar = model.toolbar
         //toolbar.inflateMenu(R.menu.toolbar);
         setSupportActionBar(toolbar)
+        setAppBarElevation(model.appbarLayout)
         //CollapsingToolbarLayout layout = model.collapsingToolbarLayout;
         val navView = model.bottomNav
         val fab = model.fab

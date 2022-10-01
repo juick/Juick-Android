@@ -33,7 +33,7 @@
     </style>
     <style name="AppTheme.AppBarOverlay">
         <item name="android:textColorPrimary">@color/colorAccent</item>
-        <item name="backgroundColor">@color/white</item>
+        <item name="android:background">@color/white</item>
     </style>
     <style name="NavigationDrawerStyle">
         <item name="android:textColor">@color/colorText</item>

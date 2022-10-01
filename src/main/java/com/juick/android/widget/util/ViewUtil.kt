@@ -16,12 +16,19 @@
  */
 package com.juick.android.widget.util
 
-import android.widget.TextView
-import android.graphics.drawable.Drawable
-import androidx.core.graphics.drawable.DrawableCompat
 import android.app.Activity
-import android.view.inputmethod.InputMethodManager
 import android.content.Context
+import android.graphics.drawable.Drawable
+import android.os.Build
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.ViewCompat
+import com.google.android.material.appbar.AppBarLayout
+import com.juick.R
 
 /**
  * Created by gerc on 14.02.2016.
@@ -54,5 +61,23 @@ object ViewUtil {
             val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
         }
+    }
+}
+
+/**
+ * Toolbar elevation for API < 21
+ *
+ * @param appBarLayout AppBarLayout
+ */
+fun Activity.setAppBarElevation(appBarLayout: AppBarLayout) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        val toolbarHeight = resources.getDimension(R.dimen.toolbar_elevation)
+        val elevationView = View(this)
+        elevationView.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, toolbarHeight.toInt()
+        )
+        ViewCompat.setBackground(elevationView,
+            ContextCompat.getDrawable(this, R.drawable.elevation_pre_lollipop))
+        appBarLayout.addView(elevationView, 1)
     }
 }
