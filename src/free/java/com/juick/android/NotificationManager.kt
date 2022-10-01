@@ -46,7 +46,7 @@ class NotificationManager {
 
             override fun onMessage(
                 sse: ServerSentEvent,
-                id: String,
+                id: String?,
                 event: String,
                 message: String
             ) {

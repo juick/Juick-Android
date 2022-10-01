@@ -49,8 +49,8 @@ class AuthenticationService : Service() {
         override fun addAccount(
             response: AccountAuthenticatorResponse,
             accountType: String,
-            authTokenType: String,
-            requiredFeatures: Array<String>,
+            authTokenType: String?,
+            requiredFeatures: Array<String>?,
             options: Bundle
         ): Bundle {
             val i = Intent(context, SignInActivity::class.java)

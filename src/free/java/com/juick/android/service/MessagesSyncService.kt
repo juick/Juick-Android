@@ -39,7 +39,7 @@ class MessagesSyncService : Service() {
             syncResult: SyncResult
         ) {
             val me = App.instance.me.value
-            if (me!!.unreadCount > 0) {
+            if ((me?.unreadCount ?: 0) > 0) {
                 val user = User(0, "Juick")
                 val announcement = Post()
                 announcement.setUser(user)

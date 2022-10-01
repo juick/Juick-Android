@@ -23,8 +23,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
-import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -56,12 +54,10 @@ class SignInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         authenticatorResponse =
             intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
-        if (authenticatorResponse != null) {
-            authenticatorResponse!!.onRequestContinued()
-        }
+        authenticatorResponse?.onRequestContinued()
         _model = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(model.root)
-        model.buttonSave.setOnClickListener { v: View? ->
+        model.buttonSave.setOnClickListener {
             val nick = model.juickNick.text.toString()
             val password = model.juickPassword.text.toString()
             if (nick.isEmpty() || password.isEmpty()) {
@@ -141,9 +137,7 @@ class SignInActivity : AppCompatActivity() {
         result.putString(AccountManager.KEY_ACCOUNT_NAME, nick)
         result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick))
         result.putString(AccountManager.KEY_AUTHTOKEN, hash)
-        if (authenticatorResponse != null) {
-            authenticatorResponse!!.onResult(result)
-        }
+        authenticatorResponse?.onResult(result)
         setResult(RESULT_OK)
         finish()
     }
