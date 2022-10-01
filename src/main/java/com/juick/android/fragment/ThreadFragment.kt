@@ -59,14 +59,15 @@ import java.io.FileNotFoundException
  * @author Ugnich Anton
  */
 class ThreadFragment : Fragment(R.layout.fragment_thread) {
-    private var model: FragmentThreadBinding? = null
+    private var _model: FragmentThreadBinding? = null
+    private val model get () = _model!!
     private var rid = 0
     private var attachmentUri: Uri? = null
     private var attachmentMime: String? = null
     private var progressDialog: ProgressDialog? = null
     private var mid = 0
     private var linearLayoutManager: LinearLayoutManager? = null
-    private var adapter: JuickMessagesAdapter? = null
+    private lateinit var adapter: JuickMessagesAdapter
     private var attachmentLauncher: ActivityResultLauncher<String>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,7 +78,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 val mime = getMimeTypeFor(requireActivity(), uri)
                 if (isImageTypeAllowed(mime)) {
                     attachmentMime = mime
-                    model!!.buttonAttachment.isSelected = true
+                    model.buttonAttachment.isSelected = true
                 } else {
                     Toast.makeText(activity, R.string.wrong_image_format, Toast.LENGTH_SHORT)
                         .show()
@@ -88,7 +89,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        model = FragmentThreadBinding.bind(view)
+        _model = FragmentThreadBinding.bind(view)
         val args = arguments
         if (args != null) {
             mid = ThreadFragmentArgs.fromBundle(args).mid
@@ -96,12 +97,12 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         if (mid == 0) {
             return
         }
-        model!!.buttonSend.setOnClickListener { v: View? ->
+        model.buttonSend.setOnClickListener { v: View? ->
             if (!hasAuth()) {
                 startActivity(Intent(context, SignInActivity::class.java))
                 return@setOnClickListener
             }
-            val msg = model!!.editMessage.text.toString()
+            val msg = model.editMessage.text.toString()
             if (msg.length < 3 && attachmentUri == null) {
                 Toast.makeText(context, R.string.Enter_a_message, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -129,28 +130,28 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 }
             }
         }
-        model!!.buttonAttachment.setOnClickListener { v: View? ->
+        model.buttonAttachment.setOnClickListener { v: View? ->
             if (attachmentUri == null) {
                 attachmentLauncher!!.launch("image/*")
             } else {
                 attachmentUri = null
                 attachmentMime = null
-                model!!.buttonAttachment.isSelected = false
+                model.buttonAttachment.isSelected = false
             }
         }
-        model!!.list.adapter = adapter
-        linearLayoutManager = model!!.list.layoutManager as LinearLayoutManager?
-        adapter!!.setOnItemClickListener { widget: View?, position: Int ->
+        model.list.adapter = adapter
+        linearLayoutManager = model.list.layoutManager as LinearLayoutManager
+        adapter.setOnItemClickListener { widget: View?, position: Int ->
             if (widget?.tag == null || widget.tag != "clicked") {
-                val post = adapter!!.getItem(position)
+                val post = adapter.getItem(position)
                 onReply(post?.rid ?: 0, StringUtils.defaultString(post?.body))
             }
         }
-        adapter!!.setOnMenuListener(JuickMessageMenu(viewLifecycleOwner, adapter!!.items))
-        adapter!!.setOnScrollListener { v: View?, replyTo: Int, rid: Int ->
+        adapter.setOnMenuListener(JuickMessageMenu(viewLifecycleOwner, adapter.items))
+        adapter.setOnScrollListener { v: View?, replyTo: Int, rid: Int ->
             var pos = 0
-            for (i in adapter!!.items.indices) {
-                val p = adapter!!.items[i]
+            for (i in adapter.items.indices) {
+                val p = adapter.items[i]
                 if (p.rid == replyTo) {
                     p.nextRid = replyTo
                     if (p.prevRid == 0) p.prevRid = rid
@@ -159,20 +160,20 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 }
             }
             if (pos != 0) {
-                adapter!!.notifyItemChanged(pos)
-                model!!.list.scrollToPosition(pos)
+                adapter.notifyItemChanged(pos)
+                model.list.scrollToPosition(pos)
             }
         }
-        model!!.swipeContainer.isEnabled = false
-        model!!.list.visibility = View.GONE
-        model!!.progressBar.visibility = View.VISIBLE
-        App.instance.newMessage?.observe(viewLifecycleOwner) { reply ->
-            if (adapter!!.itemCount > 0) {
-                if (adapter?.getItem(0)?.mid == reply.getMid()) {
-                    adapter?.addData(reply)
+        model.swipeContainer.isEnabled = false
+        model.list.visibility = View.GONE
+        model.progressBar.visibility = View.VISIBLE
+        App.instance.newMessage.observe(viewLifecycleOwner) { reply ->
+            if (adapter.itemCount > 0) {
+                if (adapter.getItem(0)?.mid == reply.mid) {
+                    adapter.addData(reply)
                     linearLayoutManager!!.smoothScrollToPosition(
-                        model!!.list,
-                        RecyclerView.State(), reply.getRid()
+                        model.list,
+                        RecyclerView.State(), reply.rid
                     )
                 }
             }
@@ -183,14 +184,14 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     private fun load() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val posts = App.instance.api?.thread(mid) ?: listOf()
+                val posts = App.instance.api.thread(mid)
                 withContext(Dispatchers.Main) {
-                    if (adapter!!.itemCount > 0) {
+                    if (adapter.itemCount > 0) {
                         initAdapterStageTwo()
                     }
-                    model!!.list.visibility = View.VISIBLE
-                    model!!.progressBar.visibility = View.GONE
-                    adapter!!.newData(posts)
+                    model.list.visibility = View.VISIBLE
+                    model.progressBar.visibility = View.GONE
+                    adapter.newData(posts)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -208,23 +209,23 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         if (!isAdded) {
             return
         }
-        val replies = resources.getString(R.string.Replies) + " (" + (adapter!!.itemCount - 1) + ")"
-        adapter!!.addDisabledItem(replies, 1)
+        val replies = resources.getString(R.string.Replies) + " (" + (adapter.itemCount - 1) + ")"
+        adapter.addDisabledItem(replies, 1)
     }
 
     private fun resetForm() {
         rid = 0
-        model!!.textReplyTo.visibility = View.GONE
-        model!!.editMessage.setText(StringUtils.EMPTY)
+        model.textReplyTo.visibility = View.GONE
+        model.editMessage.setText(StringUtils.EMPTY)
         attachmentMime = null
         attachmentUri = null
-        model!!.buttonAttachment.isSelected = false
+        model.buttonAttachment.isSelected = false
         setFormEnabled(true)
     }
 
     private fun setFormEnabled(state: Boolean) {
-        model!!.editMessage.isEnabled = state
-        model!!.buttonSend.isEnabled = state
+        model.editMessage.isEnabled = state
+        model.buttonSend.isEnabled = state
     }
 
     private fun onReply(newrid: Int, txt: String) {
@@ -239,15 +240,15 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 inreplyto.length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            model!!.textReplyTo.text = ssb
-            model!!.textReplyTo.visibility = View.VISIBLE
+            model.textReplyTo.text = ssb
+            model.textReplyTo.visibility = View.VISIBLE
         } else {
-            model!!.textReplyTo.visibility = View.GONE
+            model.textReplyTo.visibility = View.GONE
         }
     }
 
     private fun postText(body: String) {
-        App.instance.api?.post(body)?.enqueue(object : Callback<Void?> {
+        App.instance.api.post(body)?.enqueue(object : Callback<Void?> {
             override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
                 if (response.isSuccessful && isAdded) {
                     Toast.makeText(App.instance, R.string.Message_posted, Toast.LENGTH_SHORT)
@@ -290,7 +291,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
             }
             setFormEnabled(true)
             if (newMessage != null) {
-                val mid: Int = newMessage.getMid()
+                val mid: Int = newMessage.mid
                 val action = ThreadFragmentDirections.actionThreadSelf()
                 action.mid = mid
                 findNavController(requireView()).navigate(action)
@@ -301,7 +302,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     }
 
     override fun onDestroyView() {
-        model = null
+        _model = null
         super.onDestroyView()
     }
 }

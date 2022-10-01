@@ -31,7 +31,7 @@ open class FeedViewModel : ViewModel() {
         liveData(Dispatchers.IO) {
             emit(Resource.loading(null))
             try {
-                val posts = App.instance.api?.getPosts(url) ?: listOf()
+                val posts = App.instance.api.getPosts(url)
                 emit(Resource.success(posts))
             } catch (e: Exception) {
                 emit(Resource.error(data = null, message = e.message ?: "Error Occurred!"))

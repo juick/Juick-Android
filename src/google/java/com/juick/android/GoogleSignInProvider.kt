@@ -83,7 +83,7 @@ class GoogleSignInProvider : SignInProvider {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             handleSignInResult(task, successCallback)
         }
-        if (requestCode == RC_SIGN_UP && data != null) {
+        if (requestCode == RC_SIGN_UP) {
             val nick = data.getStringExtra("nick")
             val password = data.getStringExtra("password")
             requestCallback.request(nick, password)
@@ -102,7 +102,7 @@ class GoogleSignInProvider : SignInProvider {
         try {
             val account = completedTask.getResult(ApiException::class.java)
             Log.i(SignInActivity::class.java.simpleName, "Success " + account.idToken)
-            App.instance.api?.googleAuth(account.idToken)
+            App.instance.api.googleAuth(account.idToken)
                 ?.enqueue(object : Callback<AuthResponse?> {
                     override fun onResponse(
                         call: Call<AuthResponse?>,

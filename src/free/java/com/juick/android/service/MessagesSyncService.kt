@@ -46,7 +46,7 @@ class MessagesSyncService : Service() {
                 announcement.body = context.getString(R.string.unread_discussions)
                 try {
                     val messageData: String =
-                        App.instance.getJsonMapper().writeValueAsString(announcement)
+                        App.instance.jsonMapper.writeValueAsString(announcement)
                     App.instance.notificationSender?.showNotification(messageData)
                 } catch (e: JsonProcessingException) {
                     Log.w(this.javaClass.simpleName, "JSON error", e)

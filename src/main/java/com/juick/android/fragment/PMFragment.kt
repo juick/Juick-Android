@@ -58,7 +58,7 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
             model!!.messagesList.setAdapter(adapter)
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    App.instance.api.pm(uname)?.let {
+                    App.instance.api.pm(uname).let {
                         newPms ->
                         withContext(Dispatchers.Main) {
                             adapter?.addToEnd(newPms, false)
