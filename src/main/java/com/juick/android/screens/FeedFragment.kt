@@ -95,7 +95,7 @@ open class FeedFragment: Fragment() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect {
-                    adapter.setOnMenuListener(JuickMessageMenuListener(it, adapter.items))
+                    adapter.setOnMenuListener(JuickMessageMenuListener(requireActivity(), it, adapter.items))
                 }
             }
         }

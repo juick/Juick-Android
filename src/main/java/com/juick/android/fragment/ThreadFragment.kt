@@ -166,7 +166,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect { me ->
-                    adapter.setOnMenuListener(JuickMessageMenuListener(me, adapter.items))
+                    adapter.setOnMenuListener(JuickMessageMenuListener(requireActivity(), me, adapter.items))
                 }
             }
         }

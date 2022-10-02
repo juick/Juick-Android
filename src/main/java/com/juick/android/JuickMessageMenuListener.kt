@@ -35,14 +35,14 @@ import kotlinx.coroutines.withContext
  *
  * @author Ugnich Anton
  */
-class JuickMessageMenuListener(private val me: SecureUser, private val postList: List<Post>) : DialogInterface.OnClickListener,
+class JuickMessageMenuListener(private val activity: Context, private val me: SecureUser, private val postList: List<Post>) : DialogInterface.OnClickListener,
     JuickMessagesAdapter.OnItemClickListener {
     private var selectedPost: Post? = null
     private val currentActions = IntArray(MENU_ACTION_SOME_LAST_CMD)
     private fun confirmAction(context: Context, resId: Int, action: Runnable) {
         val builder = AlertDialog.Builder(context)
         builder.setIcon(android.R.drawable.ic_dialog_alert)
-        builder.setMessage(App.instance.resources.getString(resId))
+        builder.setMessage(context.resources.getString(resId))
         builder.setPositiveButton(R.string.Yes) { _, _ -> action.run() }
         builder.setNegativeButton(R.string.Cancel, null)
         builder.show()
@@ -53,11 +53,11 @@ class JuickMessageMenuListener(private val me: SecureUser, private val postList:
             CoroutineScope(Dispatchers.IO).launch {
                 App.instance.api.post(body)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(App.instance, ok, Toast.LENGTH_LONG).show()
+                    Toast.makeText(activity, ok, Toast.LENGTH_LONG).show()
                 }
             }
         } catch (e: Exception) {
-            Toast.makeText(App.instance, R.string.network_error, Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, R.string.network_error, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -112,28 +112,28 @@ class JuickMessageMenuListener(private val me: SecureUser, private val postList:
         val action = currentActions[which]
         when (action) {
             MENU_ACTION_RECOMMEND -> confirmAction(
-                App.instance,
+                activity,
                 R.string.Are_you_sure_recommend
-            ) { postMessage("! #" + selectedPost!!.mid, App.instance.getString(R.string.Recommended)) }
+            ) { postMessage("! #" + selectedPost!!.mid, activity.getString(R.string.Recommended)) }
             MENU_ACTION_SUBSCRIBE -> confirmAction(
-                App.instance,
+                activity,
                 R.string.Are_you_sure_subscribe
             ) {
                 postMessage(
                     "S @" + selectedPost!!.user.uname,
-                    App.instance.getString(R.string.Subscribed)
+                    activity.getString(R.string.Subscribed)
                 )
             }
             MENU_ACTION_BLACKLIST -> confirmAction(
-                App.instance,
+                activity,
                 R.string.Are_you_sure_blacklist
             ) {
                 postMessage(
                     "BL @" + selectedPost!!.user.uname,
-                    App.instance.getString(R.string.Added_to_BL)
+                    activity.getString(R.string.Added_to_BL)
                 )
             }
-            MENU_ACTION_DELETE_POST -> confirmAction(App.instance, R.string.Are_you_sure_delete) {
+            MENU_ACTION_DELETE_POST -> confirmAction(activity, R.string.Are_you_sure_delete) {
                 postMessage(
                     "D #" +
                             if (selectedPost!!.rid == 0) selectedPost!!.mid.toString() else String.format(
@@ -141,14 +141,14 @@ class JuickMessageMenuListener(private val me: SecureUser, private val postList:
                                 selectedPost!!.mid,
                                 selectedPost!!.rid
                             ),
-                    App.instance.getString(R.string.Deleted), true
+                    activity.getString(R.string.Deleted), true
                 )
             }
             MENU_ACTION_SHARE -> {
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.type = "text/plain"
                 intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/" + selectedPost!!.mid)
-                App.instance.startActivity(intent)
+                activity.startActivity(intent)
             }
         }
     }
