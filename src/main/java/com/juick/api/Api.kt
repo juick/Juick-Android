@@ -41,7 +41,7 @@ interface Api {
 
     @FormUrlEncoded
     @POST("post")
-    suspend fun post(@Field("body") body: String): Void
+    suspend fun post(@Field("body") body: String)
 
     @Multipart
     @POST("post")
@@ -71,5 +71,5 @@ interface Api {
     suspend fun signup(
         @Field("username") username: String?, @Field("password") password: String?,
         @Field("verificationCode") verificationCode: String?
-    ): Void
+    )
 }
