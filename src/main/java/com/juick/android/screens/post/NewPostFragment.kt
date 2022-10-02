@@ -82,7 +82,7 @@ class NewPostFragment : Fragment() {
                 applyTag(tag)
             }
             val action = NewPostFragmentDirections.actionNewPostToTags()
-            findNavController(v!!).navigate(action)
+            findNavController(view).navigate(action)
         }
         model.buttonAttachment.setOnClickListener { v: View? ->
             if (attachmentUri == null) {

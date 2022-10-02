@@ -25,6 +25,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
@@ -52,6 +53,8 @@ class ChatsFragment : Fragment() {
                 .into(imageView)
         }
 
+    private lateinit var vm: ChatsViewModel
+
     init {
         chatsAdapter.setOnDialogClickListener { dialog: Chat ->
             val navController = findNavController(requireView())
@@ -75,6 +78,7 @@ class ChatsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         model.dialogsList.setAdapter(chatsAdapter)
+        vm = ViewModelProvider(this)[ChatsViewModel::class.java]
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect { me ->
@@ -83,7 +87,8 @@ class ChatsFragment : Fragment() {
                         val action = ChatsFragmentDirections.actionChatsToNoAuth()
                         navController.navigate(action)
                     } else {
-                        ChatsData.chats.collect { resource ->
+                        vm.loadChats()
+                        vm.chats.collect { resource ->
                             when (resource.status) {
                                 SUCCESS -> {
                                     model.dialogsList.visibility = View.VISIBLE

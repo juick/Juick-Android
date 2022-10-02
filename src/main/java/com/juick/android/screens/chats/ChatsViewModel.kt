@@ -16,6 +16,7 @@
  */
 package com.juick.android.screens.chats
 
+import androidx.lifecycle.ViewModel
 import com.juick.App
 import com.juick.android.Resource
 import com.juick.api.model.Chat
@@ -23,7 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 
-object ChatsData {
+class ChatsViewModel : ViewModel() {
     var chats = MutableStateFlow<Resource<List<Chat>>>(Resource.loading(null))
         private set
 

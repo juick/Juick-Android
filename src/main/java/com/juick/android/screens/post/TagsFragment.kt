@@ -61,7 +61,7 @@ class TagsFragment : BottomSheetDialogFragment() {
         adapter.setOnItemClickListener { _, position ->
             val tag = adapter.getItem(position)
             val navController = NavHostFragment.findNavController(this)
-            navController.previousBackStackEntry!!.savedStateHandle.set("tag", tag)
+            navController.previousBackStackEntry?.savedStateHandle?.set("tag", tag)
             dismiss()
         }
         /* adapter.setOnItemLongClickListener((view12, position) -> ((BaseActivity) getActivity())
@@ -173,14 +173,12 @@ class TagsFragment : BottomSheetDialogFragment() {
             }
 
             override fun onClick(v: View) {
-                if (itemClickListener != null) {
-                    itemClickListener!!.invoke(v, bindingAdapterPosition)
-                }
+                itemClickListener?.invoke(v, bindingAdapterPosition)
             }
 
             override fun onLongClick(v: View): Boolean {
                 if (itemLongClickListener != null) {
-                    itemLongClickListener!!.onItemLongClick(v, bindingAdapterPosition)
+                    itemLongClickListener?.onItemLongClick(v, bindingAdapterPosition)
                     return true
                 }
                 return false

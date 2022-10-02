@@ -48,7 +48,7 @@ import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.screens.chats.ChatsFragmentDirections
-import com.juick.android.screens.chats.ChatsData
+import com.juick.android.screens.chats.ChatsViewModel
 import com.juick.android.screens.home.HomeFragmentDirections
 import com.juick.android.widget.util.ViewUtil
 import com.juick.android.widget.util.setAppBarElevation
@@ -165,7 +165,6 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 ProfileData.refresh()
-                ChatsData.loadChats()
                 App.instance.signInStatus.collect { signInStatus: SignInStatus ->
                     if (signInStatus == SignInStatus.SIGN_IN_PROGRESS) {
                         showLogin()

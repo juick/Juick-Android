@@ -99,8 +99,8 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (hasMoreData && loadMoreRequestListener != null && position == postList.size - 1) {
-            loadMoreRequestListener!!.onLoadMore()
+        if (hasMoreData && position == postList.size - 1) {
+            loadMoreRequestListener?.onLoadMore()
         }
         return if (postList[position].rid == 0) TYPE_THREAD_POST else TYPE_ITEM
     }
@@ -121,7 +121,7 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             vh.setOnMenuClickListener(itemMenuListener)
             vh.replyToTextView?.setOnClickListener { v: View ->
                 val p = v.tag as Post
-                if (scrollListener != null) scrollListener!!.invoke(v, p.replyto, p.rid)
+                scrollListener?.invoke(v, p.replyto, p.rid)
             }
             vh
         }
@@ -210,7 +210,7 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 holder.backImageView?.tag = post
                 holder.backImageView?.setOnClickListener { v: View ->
                     val p = v.tag as Post
-                    if (scrollListener != null) scrollListener!!.invoke(v, p.prevRid, 0)
+                    scrollListener?.invoke(v, p.prevRid, 0)
                     v.visibility = View.GONE
                 }
             } else {
@@ -322,14 +322,12 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             photoImageView = itemView.findViewById(R.id.photo)
             photoDescriptionView = itemView.findViewById(R.id.photo_description)
             likesTextView = itemView.findViewById(R.id.likes)
-            if (likesTextView != null) {
-                likesTextView!!.setCompoundDrawables(
-                    VectorDrawableCompat.create(
-                        itemView.context.resources,
-                        R.drawable.ic_ei_heart, null
-                    ), null, null, null
-                )
-            }
+            likesTextView?.setCompoundDrawables(
+                VectorDrawableCompat.create(
+                    itemView.context.resources,
+                    R.drawable.ic_ei_heart, null
+                ), null, null, null
+            )
             replyToTextView = itemView.findViewById(R.id.replyto)
             ViewUtil.setDrawableTint(likesTextView)
             repliesTextView = itemView.findViewById(R.id.replies)

@@ -83,7 +83,7 @@ class NotificationSender(context: Context) {
                     App.instance,
                     getId(jmsg), createNewEventIntent(msgStr), PendingIntent.FLAG_UPDATE_CURRENT
                 )
-                val notificationBuilder = NotificationCompat.Builder(App.instance, channelId!!)
+                val notificationBuilder = NotificationCompat.Builder(App.instance, channelId)
                 notificationBuilder.setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle(title)
                     .setContentText(body)
@@ -148,6 +148,6 @@ class NotificationSender(context: Context) {
     }
 
     companion object {
-        private var channelId: String? = null
+        private lateinit var channelId: String
     }
 }
