@@ -19,19 +19,18 @@ package com.juick.android
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.hasAuth
 import com.juick.databinding.ActivityLoginBinding
 import com.juick.util.StringUtils
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,7 +67,7 @@ class SignInActivity : AppCompatActivity() {
                 ).show()
                 return@setOnClickListener
             }
-            CoroutineScope(Dispatchers.IO).launch {
+            lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     val me = application.auth(nick, password)
                     withContext(Dispatchers.Main) {

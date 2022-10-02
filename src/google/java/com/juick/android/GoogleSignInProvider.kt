@@ -22,6 +22,8 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -32,7 +34,6 @@ import com.google.android.gms.tasks.Task
 import com.juick.App
 import com.juick.R
 import com.juick.util.StringUtils
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -95,7 +96,8 @@ class GoogleSignInProvider : SignInProvider {
         completedTask: Task<GoogleSignInAccount>,
         successCallback: SignInSuccessCallback
     ) {
-        CoroutineScope(Dispatchers.IO).launch {
+        val scope = (context as LifecycleOwner).lifecycleScope
+        scope.launch(Dispatchers.IO) {
             try {
                 val account = completedTask.getResult(ApiException::class.java)
                 account.idToken?.let {

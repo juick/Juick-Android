@@ -34,7 +34,6 @@ import com.juick.android.widget.util.ViewUtil
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentPmBinding
 import com.stfalcon.chatkit.messages.MessagesListAdapter
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -54,7 +53,7 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
         super.onViewCreated(view, savedInstanceState)
         _model = FragmentPmBinding.bind(view)
         uname = PMFragmentArgs.fromBundle(requireArguments()).uname
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
                 App.instance.api.pm(uname).let { newPms ->
                     withContext(Dispatchers.Main) {
@@ -101,7 +100,7 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
     }
 
     fun postText(body: String) {
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
                 App.instance.api.postPm(uname, body).let { post ->
                     withContext(Dispatchers.Main) {

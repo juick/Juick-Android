@@ -22,11 +22,12 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.view.View
 import android.widget.Toast
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.juick.App
 import com.juick.R
 import com.juick.api.model.Post
 import com.juick.api.model.SecureUser
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -50,7 +51,7 @@ class JuickMessageMenuListener(private val activity: Context, private val me: Se
 
     private fun postMessage(body: String, ok: String, isReload: Boolean = false) {
         try {
-            CoroutineScope(Dispatchers.IO).launch {
+            (activity as LifecycleOwner).lifecycleScope.launch(Dispatchers.IO) {
                 App.instance.api.post(body)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(activity, ok, Toast.LENGTH_LONG).show()

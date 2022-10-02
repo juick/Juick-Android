@@ -21,18 +21,18 @@ import android.content.*
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.juick.App
 import com.juick.R
 import com.juick.api.model.Post
 import com.juick.api.model.User
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class MessagesSyncService : LifecycleService() {
-    private class MessagesSyncAdapter(private val lifecycleScope: CoroutineScope,
-                                      private val appContext: Context) :
+    private class MessagesSyncAdapter(private val lifecycleScope: LifecycleCoroutineScope,
+                                      appContext: Context) :
         AbstractThreadedSyncAdapter(appContext, true) {
         override fun onPerformSync(
             account: Account,

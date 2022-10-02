@@ -91,13 +91,6 @@ class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         notifyItemRangeInserted(oldCount, postList.size)
     }
 
-    fun addDisabledItem(txt: String?, position: Int) {
-        val post = Post()
-        post.setBody(txt)
-        postList.add(position, post)
-        notifyItemRangeInserted(position, postList.size)
-    }
-
     override fun getItemViewType(position: Int): Int {
         if (hasMoreData && position == postList.size - 1) {
             loadMoreRequestListener?.onLoadMore()

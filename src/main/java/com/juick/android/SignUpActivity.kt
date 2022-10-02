@@ -18,19 +18,14 @@ package com.juick.android
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.juick.App
-import com.juick.R
 import com.juick.databinding.ActivitySignupBinding
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class SignUpActivity : AppCompatActivity() {
     private var authCode: String? = null
@@ -48,7 +43,7 @@ class SignUpActivity : AppCompatActivity() {
                 Toast.makeText(this, "Passwords did not match", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
-            CoroutineScope(Dispatchers.IO).launch {
+            lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     App.instance.api.signup(nick, password, authCode)
                     withContext(Dispatchers.Main) {

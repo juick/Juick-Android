@@ -25,13 +25,13 @@ import android.provider.BaseColumns
 import android.provider.ContactsContract
 import android.provider.ContactsContract.RawContacts
 import android.util.Log
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.juick.App
 import com.juick.R
 import com.juick.api.model.User
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutionException
@@ -42,7 +42,7 @@ import java.util.concurrent.ExecutionException
 class ContactsSyncService : LifecycleService() {
     private lateinit var contactsSyncAdapter: JuickSyncAdapter
 
-    private class JuickSyncAdapter constructor(private val lifecycleScope: CoroutineScope,
+    private class JuickSyncAdapter constructor(private val lifecycleScope: LifecycleCoroutineScope,
                                                appContext: Context) :
         AbstractThreadedSyncAdapter(appContext, true) {
         override fun onPerformSync(

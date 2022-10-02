@@ -37,16 +37,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.juick.App
 import com.juick.R
-import com.juick.android.*
+import com.juick.android.JuickMessageMenuListener
+import com.juick.android.JuickMessagesAdapter
+import com.juick.android.ProfileData
+import com.juick.android.SignInActivity
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.hasAuth
 import com.juick.android.Utils.isImageTypeAllowed
-import com.juick.android.screens.post.NewPostFragment
 import com.juick.android.widget.util.ViewUtil
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentThreadBinding
 import com.juick.util.StringUtils
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -63,7 +64,6 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     private var attachmentUri: Uri? = null
     private var attachmentMime: String? = null
     private var progressDialog: ProgressDialog? = null
-    private val progressDialogCancel = NewPostFragment.BooleanReference(false)
     private var mid = 0
     private var scrollToEnd = false
     private lateinit var adapter: JuickMessagesAdapter
@@ -194,13 +194,10 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     }
 
     private fun load() {
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val posts = App.instance.api.thread(mid)
                 withContext(Dispatchers.Main) {
-                    if (adapter.itemCount > 0) {
-                        initAdapterStageTwo()
-                    }
                     model.list.visibility = View.VISIBLE
                     model.progressBar.visibility = View.GONE
                     adapter.newData(posts)
@@ -219,14 +216,6 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 }
             }
         }
-    }
-
-    private fun initAdapterStageTwo() {
-        if (!isAdded) {
-            return
-        }
-        val replies = resources.getString(R.string.Replies) + " (" + (adapter.itemCount - 1) + ")"
-        adapter.addDisabledItem(replies, 1)
     }
 
     private fun resetForm() {
@@ -264,7 +253,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     }
 
     private fun postText(body: String) {
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
                 App.instance.api.post(body)
                 withContext(Dispatchers.Main) {
@@ -285,8 +274,6 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     @Throws(FileNotFoundException::class)
     suspend fun postMedia(body: String?) {
         progressDialog = ProgressDialog(context)
-        progressDialogCancel.bool = false
-        progressDialog?.setOnCancelListener { _ -> progressDialogCancel.bool = true }
         progressDialog?.setProgressStyle(
             ProgressDialog.STYLE_HORIZONTAL
         )
