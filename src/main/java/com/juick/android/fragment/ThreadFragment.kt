@@ -169,6 +169,8 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                     adapter.setOnMenuListener(JuickMessageMenuListener(me, adapter.items))
                 }
             }
+        }
+        lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 App.instance.newMessage.collect { reply ->
                     if (adapter.itemCount > 0) {

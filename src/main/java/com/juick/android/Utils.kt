@@ -29,6 +29,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
+import java.net.URI
+import java.net.URISyntaxException
+
+
+
+
 
 /**
  *
@@ -105,5 +111,13 @@ object Utils {
                 }
             }
         }
+    }
+    @Throws(URISyntaxException::class)
+    fun buildUrl(url: String): Uri.Builder {
+        val uri = URI(url)
+        return Uri.Builder()
+            .scheme(uri.scheme)
+            .authority(uri.authority)
+            .path(uri.path)
     }
 }

@@ -46,7 +46,8 @@ class UrlBuilder : Parcelable {
     }
 
     companion object {
-        fun goHome(): UrlBuilder {
+        val home: UrlBuilder
+            get() {
             val url = UrlBuilder()
             url.url = "/home?1=1"
             return url

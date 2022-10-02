@@ -16,6 +16,7 @@
  */
 package com.juick.android.screens
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -50,6 +51,7 @@ open class FeedFragment: Fragment() {
         return binding.root
     }
 
+    @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val adapter = JuickMessagesAdapter()
@@ -71,36 +73,15 @@ open class FeedFragment: Fragment() {
                     loading = true
                     adapter.getItem(adapter.itemCount - 1)?.let {
                         lastItem ->
-                        val requestUrl = UrlBuilder.goHome().toString() + "&before_mid=" + lastItem.mid
+                        val requestUrl = Utils.buildUrl(vm.apiUrl.value)
+                            .appendQueryParameter("before_mid", lastItem.mid.toString())
+                            .build().toString()
                         firstPage = false
-                        vm.apiUrl.postValue(requestUrl)
+                        vm.apiUrl.value = requestUrl
                     }
                 }
             })
-        vm.feed.observe(viewLifecycleOwner) { resource ->
-            when(resource.status) {
-                Status.LOADING -> {
-                    if (firstPage) {
-                        binding.progressBar.visibility = View.VISIBLE
-                        binding.list.visibility = View.GONE
-                    }
-                }
-                Status.SUCCESS -> {
-                    loading = false
-                    stopRefreshing()
-                    if (firstPage) {
-                        adapter.newData(resource.data ?: emptyList())
-                    } else {
-                        adapter.addData(resource.data ?: emptyList())
-                    }
-                }
-                Status.ERROR -> {
-                    loading = false
-                    stopRefreshing()
-                    Toast.makeText(requireContext(), R.string.network_error, Toast.LENGTH_LONG).show()
-                }
-            }
-        }
+
         binding.swipeContainer.setColorSchemeColors(
             ContextCompat.getColor(
                 App.instance,
@@ -109,12 +90,40 @@ open class FeedFragment: Fragment() {
         )
         binding.swipeContainer.setOnRefreshListener {
             firstPage = true
-            vm.apiUrl.postValue(UrlBuilder.goHome().toString())
+            vm.apiUrl.value = Utils.buildUrl(vm.apiUrl.value).build().toString()
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect {
                     adapter.setOnMenuListener(JuickMessageMenuListener(it, adapter.items))
+                }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                vm.feed.collect { resource ->
+                    when(resource.status) {
+                        Status.LOADING -> {
+                            if (firstPage) {
+                                binding.progressBar.visibility = View.VISIBLE
+                                binding.list.visibility = View.GONE
+                            }
+                        }
+                        Status.SUCCESS -> {
+                            loading = false
+                            stopRefreshing()
+                            if (firstPage) {
+                                adapter.newData(resource.data ?: emptyList())
+                            } else {
+                                adapter.addData(resource.data ?: emptyList())
+                            }
+                        }
+                        Status.ERROR -> {
+                            loading = false
+                            stopRefreshing()
+                            Toast.makeText(requireContext(), resource.message, Toast.LENGTH_LONG).show()
+                        }
+                    }
                 }
             }
         }

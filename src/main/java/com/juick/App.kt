@@ -22,7 +22,6 @@ import android.text.TextUtils
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.MutableLiveData
 import androidx.multidex.MultiDexApplication
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -35,7 +34,6 @@ import com.juick.api.RequestBodyUtil
 import com.juick.api.UpLoadProgressInterceptor
 import com.juick.api.model.Post
 import com.juick.api.model.SecureUser
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor

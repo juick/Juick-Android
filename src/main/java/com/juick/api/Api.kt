@@ -16,17 +16,10 @@
  */
 package com.juick.api
 
-import com.juick.api.model.SecureUser
-import com.juick.api.model.Post
-import java.lang.Void
-import okhttp3.RequestBody
-import okhttp3.MultipartBody
-import com.juick.api.model.PostResponse
-import com.juick.api.model.Pms
-import com.juick.api.model.AuthResponse
+import com.juick.api.model.*
 import com.juick.api.model.Tag
-import retrofit2.Call
-import retrofit2.Response
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.*
 
 /**
@@ -35,9 +28,6 @@ import retrofit2.http.*
 interface Api {
     @GET("me")
     suspend fun me(): SecureUser
-
-    @GET("me")
-    fun getMe(): Call<SecureUser?>
 
     @GET
     suspend fun getPosts(@Url url: String): List<Post>

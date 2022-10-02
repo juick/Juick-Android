@@ -16,25 +16,42 @@
  */
 package com.juick.android.screens
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
-import androidx.lifecycle.switchMap
+import androidx.lifecycle.viewModelScope
 import com.juick.App
 import com.juick.android.Resource
+import com.juick.api.model.Post
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 open class FeedViewModel : ViewModel() {
-    var apiUrl: MutableLiveData<String> = MutableLiveData()
+    private val _apiUrl: MutableStateFlow<String> = MutableStateFlow("")
+    val apiUrl = _apiUrl
 
-    var feed = apiUrl.switchMap { url ->
-        liveData(Dispatchers.IO) {
-            emit(Resource.loading(null))
-            try {
-                val posts = App.instance.api.getPosts(url)
-                emit(Resource.success(posts))
-            } catch (e: Exception) {
-                emit(Resource.error(data = null, message = e.message ?: "Error Occurred!"))
+    private val _feed: MutableStateFlow<Resource<List<Post>>> = MutableStateFlow(Resource.loading(null))
+    val feed = _feed.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            apiUrl.collect {
+                if (it.isNotEmpty()) {
+                    try {
+                        val posts = withContext(Dispatchers.IO) {
+                            App.instance.api.getPosts(it)
+                        }
+                        _feed.update {
+                            Resource.success(posts)
+                        }
+                    } catch (e: Exception) {
+                        _feed.update {
+                            Resource.error(data = null, message = e.message ?: "Error Occurred!")
+                        }
+                    }
+                }
             }
         }
     }
