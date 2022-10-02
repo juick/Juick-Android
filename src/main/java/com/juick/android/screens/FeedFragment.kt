@@ -110,8 +110,8 @@ open class FeedFragment: Fragment() {
                             if (firstPage) {
                                 binding.progressBar.visibility = View.VISIBLE
                                 binding.list.visibility = View.GONE
+                                binding.errorText.visibility = View.GONE
                             }
-                            binding.errorText.visibility = View.GONE
                         }
                         Status.SUCCESS -> {
                             loading = false
@@ -128,7 +128,9 @@ open class FeedFragment: Fragment() {
                             loading = false
                             stopRefreshing()
                             Toast.makeText(requireContext(), resource.message, Toast.LENGTH_LONG).show()
-                            setError(resource.message ?: getString(R.string.Error))
+                            if (firstPage) {
+                                setError(resource.message ?: getString(R.string.Error))
+                            }
                         }
                     }
                 }
