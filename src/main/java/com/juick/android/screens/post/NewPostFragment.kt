@@ -51,9 +51,6 @@ class NewPostFragment : Fragment() {
     private var attachmentUri: Uri? = null
     private var attachmentMime: String? = null
     private var progressDialog: ProgressDialog? = null
-    private val progressDialogCancel = BooleanReference(false)
-
-    class BooleanReference(var bool: Boolean)
 
     private var _model: FragmentNewPostBinding? = null
     private val model get() = _model!!
@@ -133,10 +130,6 @@ class NewPostFragment : Fragment() {
         setFormEnabled(false)
         if (attachmentUri != null) {
             progressDialog = ProgressDialog(activity)
-            progressDialogCancel.bool = false
-            progressDialog?.setOnCancelListener {
-                progressDialogCancel.bool = true
-            }
             progressDialog?.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
             progressDialog?.max = 0
             progressDialog?.show()
@@ -154,11 +147,11 @@ class NewPostFragment : Fragment() {
                 if (newMessage == null) {
                     Toast.makeText(activity, R.string.Error, Toast.LENGTH_LONG).show()
                 } else {
-                    val mid = newMessage.mid
-                    val discoverAction =
-                        HomeFragmentDirections.actionDiscoverFragmentToThreadFragment()
-                    discoverAction.mid = mid
-                    findNavController(requireView()).navigate(discoverAction)
+                    val navController = findNavController(requireView())
+                    navController.popBackStack(R.id.new_post, true)
+                    val args = Bundle()
+                    args.putInt("mid", newMessage.mid)
+                    navController.navigate(R.id.thread, args)
                 }
             }
         }
