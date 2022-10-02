@@ -25,6 +25,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
@@ -47,12 +48,13 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
     private val model get() = _model!!
     private lateinit var adapter: MessagesListAdapter<Post>
     private lateinit var uname: String
+    private val args by navArgs<PMFragmentArgs>()
 
     @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _model = FragmentPmBinding.bind(view)
-        uname = PMFragmentArgs.fromBundle(requireArguments()).uname
+        uname = args.uname
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 App.instance.api.pm(uname).let { newPms ->

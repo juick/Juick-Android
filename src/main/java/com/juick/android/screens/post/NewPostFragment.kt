@@ -30,13 +30,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
-import com.juick.android.screens.home.HomeFragmentDirections
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentNewPostBinding
 import com.juick.util.StringUtils
@@ -55,6 +55,8 @@ class NewPostFragment : Fragment() {
     private var _model: FragmentNewPostBinding? = null
     private val model get() = _model!!
     private lateinit var attachmentLauncher: ActivityResultLauncher<String>
+    private val args by navArgs<NewPostFragmentArgs>()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -102,11 +104,10 @@ class NewPostFragment : Fragment() {
                 Toast.makeText(activity, "Attachment error: " + e.message, Toast.LENGTH_LONG).show()
             }
         }
-        val args = NewPostFragmentArgs.fromBundle(requireArguments())
-        if (!StringUtils.defaultString(args.text).isEmpty()) {
+        if (StringUtils.defaultString(args.text).isNotEmpty()) {
             applyTag(args.text)
         }
-        if (!StringUtils.defaultString(args.uri).isEmpty()) {
+        if (StringUtils.defaultString(args.uri).isNotEmpty()) {
             attachImage(Uri.parse(args.uri))
         }
         model.editMessage.requestFocus()

@@ -33,6 +33,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.juick.App
@@ -68,6 +69,8 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     private var scrollToEnd = false
     private lateinit var adapter: JuickMessagesAdapter
     private var attachmentLauncher: ActivityResultLauncher<String>? = null
+    private val args by navArgs<ThreadFragmentArgs>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adapter = JuickMessagesAdapter()
@@ -89,7 +92,6 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _model = FragmentThreadBinding.bind(view)
-        val args = ThreadFragmentArgs.fromBundle(requireArguments())
         mid = args.mid
         scrollToEnd = args.scrollToEnd
         if (mid == 0) {
