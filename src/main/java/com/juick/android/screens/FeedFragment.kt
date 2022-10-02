@@ -16,7 +16,6 @@
  */
 package com.juick.android.screens
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,7 +30,7 @@ import androidx.navigation.Navigation.findNavController
 import com.juick.App
 import com.juick.R
 import com.juick.android.*
-import com.juick.android.JuickMessagesAdapter.OnLoadMoreRequestListener
+import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
 import com.juick.databinding.FragmentPostsPageBinding
 import kotlinx.coroutines.launch
 
@@ -53,7 +52,7 @@ open class FeedFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val adapter = JuickMessagesAdapter()
+        val adapter = FeedAdapter()
         binding.list.adapter = adapter
         adapter.setOnItemClickListener { _, pos ->
             adapter.getItem(pos)?.let {
@@ -96,7 +95,10 @@ open class FeedFragment: Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect {
-                    adapter.setOnMenuListener(JuickMessageMenuListener(requireActivity(), it, adapter.items))
+                    adapter.setOnMenuListener(JuickMessageMenuListener(
+                        requireActivity(),
+                        requireView(), it, adapter.items
+                    ))
                 }
             }
         }

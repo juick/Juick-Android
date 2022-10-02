@@ -33,8 +33,11 @@ import com.juick.api.Api
 import com.juick.api.RequestBodyUtil
 import com.juick.api.UpLoadProgressInterceptor
 import com.juick.api.model.Post
+import com.juick.api.model.PostResponse
 import com.juick.api.model.SecureUser
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -136,12 +139,19 @@ class App : MultiDexApplication() {
         return retrofit.create(Api::class.java).me()
     }
 
+    suspend fun sendMessage(
+        txt: String?,
+        messageListener: (PostResponse) -> Unit
+    ) {
+        sendMessage(txt, null, null, messageListener)
+    }
+
     @Throws(FileNotFoundException::class)
     suspend fun sendMessage(
         txt: String?,
         attachmentUri: Uri?,
         attachmentMime: String?,
-        messageListener: (Post?) -> Unit
+        messageListener: (PostResponse) -> Unit
     ) {
         var body: MultipartBody.Part? = null
         if (attachmentUri != null) {
@@ -161,13 +171,15 @@ class App : MultiDexApplication() {
             }
         }
         try {
-            val message = instance.api.newPost(
-                RequestBody.create(MediaType.parse("text/plain"), txt ?: ""),
-                body
-            )
-            messageListener.invoke(message.newMessage)
+            val message = withContext(Dispatchers.IO) {
+                instance.api.newPost(
+                    RequestBody.create(MediaType.parse("text/plain"), txt ?: ""),
+                    body
+                )
+            }
+            messageListener.invoke(message)
         } catch (e: Exception) {
-            messageListener.invoke(null)
+            messageListener.invoke(PostResponse(null, e.message ?: "", ""))
         }
     }
 

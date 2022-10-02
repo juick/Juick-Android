@@ -39,10 +39,6 @@ interface Api {
     @POST("pm")
     suspend fun postPm(@Query("uname") uname: String, @Field("body") body: String): Post
 
-    @FormUrlEncoded
-    @POST("post")
-    suspend fun post(@Field("body") body: String)
-
     @Multipart
     @POST("post")
     suspend fun newPost(

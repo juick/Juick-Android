@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.juick.android
+package com.juick.android.screens
 
 import android.content.Intent
 import android.graphics.drawable.Drawable
@@ -41,6 +41,7 @@ import com.bumptech.glide.request.transition.Transition
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
+import com.juick.android.MainActivity
 import com.juick.android.widget.util.BlurTransformation
 import com.juick.android.widget.util.ViewUtil
 import com.juick.api.model.LinkPreview
@@ -52,7 +53,7 @@ import com.juick.util.StringUtils
  *
  * @author Ugnich Anton
  */
-class JuickMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var postList: MutableList<Post> = ArrayList()
     var loadMoreRequestListener: OnLoadMoreRequestListener? = null
     var itemClickListener: ((View?, Int) -> Unit)? = null

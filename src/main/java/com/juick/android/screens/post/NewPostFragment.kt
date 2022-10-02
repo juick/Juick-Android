@@ -143,15 +143,14 @@ class NewPostFragment : Fragment() {
             }
         }
         lifecycleScope.launch {
-            App.instance.sendMessage(msg, attachmentUri, attachmentMime) { newMessage: Post? ->
+            App.instance.sendMessage(msg, attachmentUri, attachmentMime) { response ->
                 progressDialog?.dismiss()
-                if (newMessage == null) {
-                    Toast.makeText(activity, R.string.Error, Toast.LENGTH_LONG).show()
-                } else {
+                Toast.makeText(activity, response.text, Toast.LENGTH_LONG).show()
+                response.newMessage?.let {
                     val navController = findNavController(requireView())
                     navController.popBackStack(R.id.new_post, true)
                     val args = Bundle()
-                    args.putInt("mid", newMessage.mid)
+                    args.putInt("mid", it.mid)
                     navController.navigate(R.id.thread, args)
                 }
             }

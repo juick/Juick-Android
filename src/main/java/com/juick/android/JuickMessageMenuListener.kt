@@ -24,20 +24,21 @@ import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.Navigation
 import com.juick.App
 import com.juick.R
+import com.juick.android.fragment.ThreadFragmentArgs
+import com.juick.android.screens.FeedAdapter
 import com.juick.api.model.Post
 import com.juick.api.model.SecureUser
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  *
  * @author Ugnich Anton
  */
-class JuickMessageMenuListener(private val activity: Context, private val me: SecureUser, private val postList: List<Post>) : DialogInterface.OnClickListener,
-    JuickMessagesAdapter.OnItemClickListener {
+class JuickMessageMenuListener(private val activity: Context, private val view: View, private val me: SecureUser, private val postList: List<Post>) : DialogInterface.OnClickListener,
+    FeedAdapter.OnItemClickListener {
     private var selectedPost: Post? = null
     private val currentActions = IntArray(MENU_ACTION_SOME_LAST_CMD)
     private fun confirmAction(context: Context, resId: Int, action: Runnable) {
@@ -47,19 +48,6 @@ class JuickMessageMenuListener(private val activity: Context, private val me: Se
         builder.setPositiveButton(R.string.Yes) { _, _ -> action.run() }
         builder.setNegativeButton(R.string.Cancel, null)
         builder.show()
-    }
-
-    private fun postMessage(body: String, ok: String, isReload: Boolean = false) {
-        try {
-            (activity as LifecycleOwner).lifecycleScope.launch(Dispatchers.IO) {
-                App.instance.api.post(body)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(activity, ok, Toast.LENGTH_LONG).show()
-                }
-            }
-        } catch (e: Exception) {
-            Toast.makeText(activity, R.string.network_error, Toast.LENGTH_LONG).show()
-        }
     }
 
     override fun onItemClick(view: View?, pos: Int) {
@@ -109,46 +97,57 @@ class JuickMessageMenuListener(private val activity: Context, private val me: Se
         builder.show()
     }
 
+    private fun processCommand(command: String) {
+        (activity as LifecycleOwner).lifecycleScope.launch {
+            App.instance.sendMessage(command) {
+                Toast.makeText(activity, it.text, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     override fun onClick(dialog: DialogInterface, which: Int) {
         val action = currentActions[which]
+        val mid = selectedPost!!.mid
+        val rid = selectedPost!!.rid
+        val uname = selectedPost!!.user.uname
         when (action) {
             MENU_ACTION_RECOMMEND -> confirmAction(
                 activity,
                 R.string.Are_you_sure_recommend
-            ) { postMessage("! #" + selectedPost!!.mid, activity.getString(R.string.Recommended)) }
+            ) {
+                processCommand("! #${mid}")
+            }
             MENU_ACTION_SUBSCRIBE -> confirmAction(
                 activity,
                 R.string.Are_you_sure_subscribe
             ) {
-                postMessage(
-                    "S @" + selectedPost!!.user.uname,
-                    activity.getString(R.string.Subscribed)
-                )
+                processCommand("S @${uname}")
             }
             MENU_ACTION_BLACKLIST -> confirmAction(
                 activity,
                 R.string.Are_you_sure_blacklist
             ) {
-                postMessage(
-                    "BL @" + selectedPost!!.user.uname,
-                    activity.getString(R.string.Added_to_BL)
-                )
+                processCommand("BL @${uname}")
             }
             MENU_ACTION_DELETE_POST -> confirmAction(activity, R.string.Are_you_sure_delete) {
-                postMessage(
-                    "D #" +
-                            if (selectedPost!!.rid == 0) selectedPost!!.mid.toString() else String.format(
-                                "%s/%s",
-                                selectedPost!!.mid,
-                                selectedPost!!.rid
-                            ),
-                    activity.getString(R.string.Deleted), true
-                )
+                processCommand("D #" +
+                        if (rid == 0) "$mid" else "$mid/$rid")
+                val navController = Navigation.findNavController(view)
+                navController.popBackStack(R.id.home, true)
+                if (rid > 0) {
+                    val args = ThreadFragmentArgs.Builder()
+                        .setMid(mid)
+                        .setScrollToEnd(true)
+                        .build()
+                    navController.navigate(R.id.thread, args.toBundle())
+                } else {
+                    navController.navigate(R.id.home)
+                }
             }
             MENU_ACTION_SHARE -> {
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.type = "text/plain"
-                intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/" + selectedPost!!.mid)
+                intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/$mid")
                 activity.startActivity(intent)
             }
         }

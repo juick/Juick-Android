@@ -16,6 +16,8 @@
  */
 package com.juick.api.model
 
-class PostResponse {
-    val newMessage: Post? = null
-}
+data class PostResponse (
+    val newMessage: Post?,
+    val text: String,
+    val markdown: String?
+)

@@ -39,14 +39,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
-import com.juick.android.JuickMessagesAdapter
+import com.juick.android.screens.FeedAdapter
 import com.juick.android.ProfileData
 import com.juick.android.SignInActivity
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.hasAuth
 import com.juick.android.Utils.isImageTypeAllowed
-import com.juick.android.widget.util.ViewUtil
-import com.juick.api.model.Post
 import com.juick.databinding.FragmentThreadBinding
 import com.juick.util.StringUtils
 import kotlinx.coroutines.Dispatchers
@@ -67,13 +65,13 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     private var progressDialog: ProgressDialog? = null
     private var mid = 0
     private var scrollToEnd = false
-    private lateinit var adapter: JuickMessagesAdapter
+    private lateinit var adapter: FeedAdapter
     private var attachmentLauncher: ActivityResultLauncher<String>? = null
     private val args by navArgs<ThreadFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = JuickMessagesAdapter()
+        adapter = FeedAdapter()
         attachmentLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
                 attachmentUri = uri
@@ -113,20 +111,16 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
             }
             val body = "$msgnum $msg"
             setFormEnabled(false)
-            if (attachmentUri == null) {
-                postText(body)
-            } else {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        postMedia(body)
-                    } catch (e: FileNotFoundException) {
-                        Toast.makeText(
-                            context,
-                            "Attachment error: " + e.message,
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                    }
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    postReply(body)
+                } catch (e: FileNotFoundException) {
+                    Toast.makeText(
+                        context,
+                        "Attachment error: " + e.message,
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
                 }
             }
         }
@@ -170,7 +164,10 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect { me ->
-                    adapter.setOnMenuListener(JuickMessageMenuListener(requireActivity(), me, adapter.items))
+                    adapter.setOnMenuListener(JuickMessageMenuListener(
+                        requireActivity(),
+                        requireView(), me, adapter.items
+                    ))
                 }
             }
         }
@@ -254,27 +251,8 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         }
     }
 
-    private fun postText(body: String) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                App.instance.api.post(body)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(App.instance, R.string.Message_posted, Toast.LENGTH_SHORT)
-                        .show()
-                    resetForm()
-                    ViewUtil.hideKeyboard(activity)
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(App.instance, R.string.Error, Toast.LENGTH_SHORT).show()
-                    setFormEnabled(true)
-                }
-            }
-        }
-    }
-
     @Throws(FileNotFoundException::class)
-    suspend fun postMedia(body: String?) {
+    suspend fun postReply(body: String?) {
         progressDialog = ProgressDialog(context)
         progressDialog?.setProgressStyle(
             ProgressDialog.STYLE_HORIZONTAL
@@ -282,24 +260,24 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         progressDialog?.max = 0
         progressDialog?.show()
         App.instance.setOnProgressListener { progress: Long ->
-            if (progressDialog!!.max < progress) {
-                progressDialog!!.max = progress.toInt()
+            if ((progressDialog?.max ?: 0) < progress) {
+                progressDialog?.max = progress.toInt()
             } else {
-                progressDialog!!.progress = progress.toInt()
+                progressDialog?.progress = progress.toInt()
             }
         }
-        App.instance.sendMessage(body, attachmentUri, attachmentMime) { newMessage: Post? ->
-            if (progressDialog != null) {
-                progressDialog!!.dismiss()
-            }
+        App.instance.sendMessage(body, attachmentUri, attachmentMime) { response ->
+            progressDialog?.dismiss()
             setFormEnabled(true)
-            if (newMessage != null) {
-                val mid: Int = newMessage.mid
-                val action = ThreadFragmentDirections.actionThreadSelf()
-                action.mid = mid
-                findNavController(requireView()).navigate(action)
-            } else {
-                Toast.makeText(context, R.string.Error, Toast.LENGTH_LONG).show()
+            Toast.makeText(context, response.text, Toast.LENGTH_LONG).show()
+            response.newMessage?.let {
+                val navController = findNavController(requireView())
+                navController.popBackStack(R.id.home, false)
+                val args = ThreadFragmentArgs.Builder()
+                    .setMid(it.mid)
+                    .setScrollToEnd(true)
+                    .build()
+                navController.navigate(R.id.thread, args.toBundle())
             }
         }
     }
