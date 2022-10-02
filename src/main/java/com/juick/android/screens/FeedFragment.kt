@@ -90,7 +90,9 @@ open class FeedFragment: Fragment() {
         )
         binding.swipeContainer.setOnRefreshListener {
             firstPage = true
-            vm.apiUrl.value = Utils.buildUrl(vm.apiUrl.value).build().toString()
+            vm.apiUrl.value = Utils.buildUrl(vm.apiUrl.value)
+                .appendQueryParameter("ts", "${System.currentTimeMillis()}")
+                .build().toString()
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
