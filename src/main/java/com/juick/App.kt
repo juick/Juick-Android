@@ -104,7 +104,7 @@ class App : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        val errorSubject = "[${getString(R.string.Juick)}] [${BuildConfig.VERSION_NAME}($${BuildConfig.VERSION_CODE})] ${getString(R.string.appCrash)}"
+        val errorSubject = "[${getString(R.string.Juick)}] [${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})] ${getString(R.string.appCrash)}"
         if (!BuildConfig.DEBUG) {
             errorReporter = ErrorReporter(this, "support@juick.com", errorSubject)
         }
