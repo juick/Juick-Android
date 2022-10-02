@@ -17,7 +17,6 @@
 package com.juick.android.screens.post
 
 import android.app.ProgressDialog
-import android.content.DialogInterface
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -51,7 +50,7 @@ import java.io.IOException
 class NewPostFragment : Fragment() {
     private var attachmentUri: Uri? = null
     private var attachmentMime: String? = null
-    private lateinit var progressDialog: ProgressDialog
+    private var progressDialog: ProgressDialog? = null
     private val progressDialogCancel = BooleanReference(false)
 
     class BooleanReference(var bool: Boolean)
@@ -135,23 +134,23 @@ class NewPostFragment : Fragment() {
         if (attachmentUri != null) {
             progressDialog = ProgressDialog(activity)
             progressDialogCancel.bool = false
-            progressDialog.setOnCancelListener {
+            progressDialog?.setOnCancelListener {
                 progressDialogCancel.bool = true
             }
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
-            progressDialog.max = 0
-            progressDialog.show()
+            progressDialog?.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+            progressDialog?.max = 0
+            progressDialog?.show()
             App.instance.setOnProgressListener { progressPercentage: Long ->
-                if (progressDialog.max < progressPercentage) {
-                    progressDialog.max = progressPercentage.toInt()
+                if ((progressDialog?.max ?: 0) < progressPercentage) {
+                    progressDialog?.max = progressPercentage.toInt()
                 } else {
-                    progressDialog.progress = progressPercentage.toInt()
+                    progressDialog?.progress = progressPercentage.toInt()
                 }
             }
         }
         lifecycleScope.launch {
             App.instance.sendMessage(msg, attachmentUri, attachmentMime) { newMessage: Post? ->
-                progressDialog.dismiss()
+                progressDialog?.dismiss()
                 if (newMessage == null) {
                     Toast.makeText(activity, R.string.Error, Toast.LENGTH_LONG).show()
                 } else {
