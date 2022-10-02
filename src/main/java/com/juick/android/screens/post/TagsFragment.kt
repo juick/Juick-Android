@@ -24,13 +24,17 @@ import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.juick.R
 import com.juick.android.Status
 import com.juick.databinding.FragmentTagsListBinding
+import kotlinx.coroutines.launch
 
 /**
  *
@@ -64,27 +68,34 @@ class TagsFragment : BottomSheetDialogFragment() {
                 .replaceFragment(FeedBuilder.feedFor(
                         UrlBuilder.getPostsByTag(uid, adapter.getItem(position)))));*/
         val vm = ViewModelProvider(this)[TagsViewModel::class.java]
-        vm.tags.observe(viewLifecycleOwner) {
-            resource ->
-                when(resource.status) {
-                    Status.SUCCESS -> {
-                        model.progressBar.visibility = View.GONE
-                        model.list.visibility = View.VISIBLE
-                        val tags = resource.data?.map {
-                            it.tag
-                        } ?: listOf()
-                        adapter.addData(tags)
-                    }
-                    Status.ERROR -> {
-                        model.progressBar.visibility = View.GONE
-                        model.list.visibility = View.VISIBLE
-                        Toast.makeText(requireContext(), R.string.network_error, Toast.LENGTH_LONG).show()
-                    }
-                    Status.LOADING -> {
-                        model.list.visibility = View.GONE
-                        model.progressBar.visibility = View.VISIBLE
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                vm.tags.collect { resource ->
+                    when (resource.status) {
+                        Status.SUCCESS -> {
+                            model.progressBar.visibility = View.GONE
+                            model.list.visibility = View.VISIBLE
+                            val tags = resource.data?.map {
+                                it.tag
+                            } ?: listOf()
+                            adapter.addData(tags)
+                        }
+                        Status.ERROR -> {
+                            model.progressBar.visibility = View.GONE
+                            model.list.visibility = View.VISIBLE
+                            Toast.makeText(
+                                requireContext(),
+                                R.string.network_error,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        Status.LOADING -> {
+                            model.list.visibility = View.GONE
+                            model.progressBar.visibility = View.VISIBLE
+                        }
                     }
                 }
+            }
         }
     }
 

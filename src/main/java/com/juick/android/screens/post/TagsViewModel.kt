@@ -18,19 +18,38 @@
 package com.juick.android.screens.post
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.juick.App
 import com.juick.android.Resource
+import com.juick.api.model.Tag
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class TagsViewModel: ViewModel() {
-    var tags = liveData(Dispatchers.IO) {
-        emit(Resource.loading(null))
-        try {
-            val tags = App.instance.api.tags()
-            emit(Resource.success(data = tags))
-        } catch (exception: Exception) {
-            emit(Resource.error(data = null, message = exception.message ?: "Error Occurred!"))
+class TagsViewModel : ViewModel() {
+    private val _tags = MutableStateFlow<Resource<List<Tag>>>(Resource.loading(emptyList()))
+    val tags = _tags.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            try {
+                val data = withContext(Dispatchers.IO) {
+                    App.instance.api.tags()
+                }
+                _tags.update {
+                    Resource.success(data = data)
+                }
+            } catch (exception: Exception) {
+                _tags.update {
+                    Resource.error(
+                        data = null,
+                        message = exception.message ?: "Error Occurred!"
+                    )
+                }
+            }
         }
     }
 }
