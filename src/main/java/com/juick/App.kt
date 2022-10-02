@@ -104,8 +104,9 @@ class App : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        val errorSubject = "[${getString(R.string.Juick)}] [${BuildConfig.VERSION_NAME}($${BuildConfig.VERSION_CODE})] ${getString(R.string.appCrash)}"
         if (!BuildConfig.DEBUG) {
-            errorReporter = ErrorReporter(this, "support@juick.com", getString(R.string.appCrash))
+            errorReporter = ErrorReporter(this, "support@juick.com", errorSubject)
         }
         jsonMapper = jacksonObjectMapper()
         jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
