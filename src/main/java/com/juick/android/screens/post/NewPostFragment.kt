@@ -115,7 +115,6 @@ class NewPostFragment : Fragment() {
         model.buttonTags.isEnabled = state
         model.buttonAttachment.isEnabled = state
         model.buttonSend.isEnabled = state
-        //setSupportProgressBarIndeterminateVisibility(state ? Boolean.FALSE : Boolean.TRUE);
     }
 
     @Throws(FileNotFoundException::class)
@@ -138,6 +137,7 @@ class NewPostFragment : Fragment() {
                     args.putInt("mid", it.mid)
                     navController.navigate(R.id.thread, args)
                 }
+                setFormEnabled(true)
             }
         }
     }

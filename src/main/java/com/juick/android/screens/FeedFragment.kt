@@ -111,6 +111,7 @@ open class FeedFragment: Fragment() {
                                 binding.progressBar.visibility = View.VISIBLE
                                 binding.list.visibility = View.GONE
                             }
+                            binding.errorText.visibility = View.GONE
                         }
                         Status.SUCCESS -> {
                             loading = false
@@ -127,6 +128,7 @@ open class FeedFragment: Fragment() {
                             loading = false
                             stopRefreshing()
                             Toast.makeText(requireContext(), resource.message, Toast.LENGTH_LONG).show()
+                            setError(resource.message ?: getString(R.string.Error))
                         }
                     }
                 }
@@ -137,6 +139,12 @@ open class FeedFragment: Fragment() {
         binding.swipeContainer.isRefreshing = false
         binding.list.visibility = View.VISIBLE
         binding.progressBar.visibility = View.GONE
+        binding.errorText.visibility = View.GONE
+    }
+    private fun setError(message: String) {
+        binding.list.visibility = View.GONE
+        binding.errorText.visibility = View.VISIBLE
+        binding.errorText.text = message
     }
     override fun onDestroyView() {
         super.onDestroyView()
