@@ -35,7 +35,7 @@ android {
     compileSdkVersion 33
     defaultConfig {
         targetSdkVersion 33
-        versionCode 151
+        versionCode 152
         versionName "3.1"
         applicationId "com.juick"
         vectorDrawables.useSupportLibrary true
@@ -120,7 +120,6 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 
     implementation 'com.google.android.material:material:1.6.1'
