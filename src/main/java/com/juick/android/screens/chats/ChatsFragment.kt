@@ -16,30 +16,34 @@
  */
 package com.juick.android.screens.chats
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.juick.R
+import com.juick.android.ProfileData
 import com.juick.android.Status.*
 import com.juick.api.model.Chat
 import com.juick.databinding.FragmentDialogListBinding
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter
+import kotlinx.coroutines.launch
 
 /**
  *
  * @author ugnich
  */
-class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
+class ChatsFragment : Fragment() {
     private var _model: FragmentDialogListBinding? = null
     private val model get() = _model!!
-    private lateinit var vm: ChatsViewModel
     private val chatsAdapter: DialogsListAdapter<Chat> =
         DialogsListAdapter { imageView: ImageView, url: String?, _: Any? ->
             Glide.with(imageView.context)
@@ -67,33 +71,40 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
         return model.root
     }
 
+    @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         model.dialogsList.setAdapter(chatsAdapter)
-        vm = ViewModelProvider(this)[ChatsViewModel::class.java]
-        vm.chats.observe(viewLifecycleOwner) { resource ->
-            when (resource.status) {
-                SUCCESS -> {
-                    model.dialogsList.visibility = View.VISIBLE
-                    model.progressBar.visibility = View.GONE
-                    resource.data?.let { chats ->
-                        chatsAdapter.setItems(chats)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                ProfileData.userProfile.collect { me ->
+                    val navController = findNavController(requireView())
+                    if (me.uid == 0) {
+                        val action = ChatsFragmentDirections.actionChatsToNoAuth()
+                        navController.navigate(action)
+                    } else {
+                        ChatsData.chats.collect { resource ->
+                            when (resource.status) {
+                                SUCCESS -> {
+                                    model.dialogsList.visibility = View.VISIBLE
+                                    model.progressBar.visibility = View.GONE
+                                    resource.data?.let { chats ->
+                                        chatsAdapter.setItems(chats)
+                                    }
+                                }
+                                ERROR -> Toast.makeText(
+                                    requireContext(),
+                                    resource.message,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                LOADING -> {
+                                    model.dialogsList.visibility = View.GONE
+                                    model.progressBar.visibility = View.VISIBLE
+                                }
+                            }
+                        }
                     }
                 }
-                ERROR -> TODO()
-                LOADING -> {
-                    model.dialogsList.visibility = View.GONE
-                    model.progressBar.visibility = View.VISIBLE
-                }
-            }
-        }
-        vm.isAuthenticated().observe(viewLifecycleOwner) { authenticated ->
-            val navController = findNavController(requireView())
-            if (!authenticated) {
-                val action = ChatsFragmentDirections.actionChatsToNoAuth()
-                navController.navigate(action)
-            } else {
-                navController.popBackStack(R.id.chats, false)
             }
         }
     }

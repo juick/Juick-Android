@@ -33,16 +33,15 @@ import com.juick.util.StringUtils
  */
 open class User : IUser {
     var uid = 0
-        private set
     var uname: String? = null
-        private set
     val fullname: String? = null
     val isBanned = false
     private val avatar: String? = null
     val unreadCount = 0
     val read: List<User>? = null
 
-    constructor() {}
+    constructor()
+
     constructor(uid: Int, uname: String?) {
         this.uid = uid
         this.uname = uname

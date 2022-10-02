@@ -55,7 +55,7 @@ class NotificationManager {
                     try {
                         val reply: Post =
                             App.instance.jsonMapper.readValue(message, Post::class.java)
-                        App.instance.newMessage.postValue(reply)
+                        App.instance.newMessage.value = reply
                     } catch (e: IOException) {
                         Log.d(TAG, "JSON exception: " + e.message)
                     }

@@ -16,28 +16,29 @@
  */
 package com.juick.android.screens.chats
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
 import com.juick.App
 import com.juick.android.Resource
-import com.juick.android.Utils
+import com.juick.api.model.Chat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 
-class ChatsViewModel : ViewModel() {
-    var chats = liveData(Dispatchers.IO) {
-        emit(Resource.loading(null))
+object ChatsData {
+    var chats = MutableStateFlow<Resource<List<Chat>>>(Resource.loading(null))
+        private set
+
+    suspend fun loadChats() {
         try {
-            val pms = App.instance.api.groupsPms(10).pms
-            emit(Resource.success(data = pms))
+            val pms = withContext(Dispatchers.IO) {
+                App.instance.api.groupsPms(10).pms
+            }
+            chats.value = Resource.success(data = pms)
         } catch (exception: Exception) {
-            emit(Resource.error(data = null, message = exception.message ?: "Error Occurred!"))
+            chats.value =
+                Resource.error(
+                    data = null,
+                    message = exception.message ?: "Error Occurred!"
+                )
         }
-    }
-
-    private val authenticated = MutableLiveData(Utils.hasAuth())
-    fun isAuthenticated(): LiveData<Boolean> {
-        return authenticated
     }
 }

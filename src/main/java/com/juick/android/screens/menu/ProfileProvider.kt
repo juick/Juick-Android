@@ -21,26 +21,32 @@ import android.view.ActionProvider
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.Glide
-import com.juick.App
 import com.juick.R
-import com.juick.android.Profile
+import com.juick.android.ProfileData
 import com.juick.databinding.ProfileMenuLayoutBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class ProfileProvider(context: Context) : ActionProvider(context) {
+class ProfileProvider(private val context: Context) : ActionProvider(context) {
     var binding: ProfileMenuLayoutBinding
 
     init {
         binding = ProfileMenuLayoutBinding.inflate(LayoutInflater.from(context))
-        Profile.me.observe(context as LifecycleOwner) { user ->
-            if (user.uid > 0) {
-                val profileImage = binding.profileImage
-                val avatarUrl: String = user.avatar
-                Glide.with(context)
-                    .load(avatarUrl)
-                    .placeholder(R.drawable.av_96)
-                    .into(profileImage)
+        CoroutineScope(Dispatchers.IO).launch {
+            ProfileData.userProfile.collect { user ->
+                if (user.uid > 0) {
+                    withContext(Dispatchers.Main) {
+                        val profileImage = binding.profileImage
+                        val avatarUrl: String = user.avatar
+                        Glide.with(context)
+                            .load(avatarUrl)
+                            .placeholder(R.drawable.av_96)
+                            .into(profileImage)
+                    }
+                }
             }
         }
     }

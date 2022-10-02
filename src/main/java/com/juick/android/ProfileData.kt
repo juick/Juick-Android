@@ -16,12 +16,30 @@
  */
 package com.juick.android
 
-import androidx.lifecycle.liveData
 import com.juick.App
+import com.juick.api.model.SecureUser
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 
-object Profile {
-    var me = liveData(Dispatchers.IO) {
-        emit(App.instance.api.me())
+object ProfileData {
+    val anonymous : SecureUser
+    get() {
+        val user = SecureUser()
+        user.uid = 0
+        user.uname = "Anonymous"
+        return user
+    }
+    var userProfile = MutableStateFlow(anonymous)
+        private set
+
+    suspend fun refresh() {
+        try {
+            userProfile.value = withContext(Dispatchers.IO) {
+                App.instance.api.me()
+            }
+        } catch (e: Exception) {
+            userProfile.value = anonymous
+        }
     }
 }

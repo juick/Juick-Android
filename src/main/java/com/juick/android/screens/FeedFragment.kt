@@ -23,12 +23,16 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import com.juick.App
 import com.juick.R
 import com.juick.android.*
 import com.juick.android.JuickMessagesAdapter.OnLoadMoreRequestListener
 import com.juick.databinding.FragmentPostsPageBinding
+import kotlinx.coroutines.launch
 
 /**
  * Created by gerc on 03.06.2016.
@@ -107,8 +111,12 @@ open class FeedFragment: Fragment() {
             firstPage = true
             vm.apiUrl.postValue(UrlBuilder.goHome().toString())
         }
-        Profile.me.observe(viewLifecycleOwner)  {
-            adapter.setOnMenuListener(JuickMessageMenuListener(it, adapter.items))
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                ProfileData.userProfile.collect {
+                    adapter.setOnMenuListener(JuickMessageMenuListener(it, adapter.items))
+                }
+            }
         }
     }
     private fun stopRefreshing() {

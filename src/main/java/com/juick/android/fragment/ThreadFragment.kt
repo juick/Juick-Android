@@ -29,16 +29,15 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.juick.App
 import com.juick.R
-import com.juick.android.JuickMessageMenuListener
-import com.juick.android.JuickMessagesAdapter
-import com.juick.android.Profile
-import com.juick.android.SignInActivity
+import com.juick.android.*
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.hasAuth
 import com.juick.android.Utils.isImageTypeAllowed
@@ -163,24 +162,30 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         model.swipeContainer.isEnabled = false
         model.list.visibility = View.GONE
         model.progressBar.visibility = View.VISIBLE
-        App.instance.newMessage.observe(viewLifecycleOwner) { reply ->
-            if (adapter.itemCount > 0) {
-                if (adapter.getItem(0)?.mid == reply.mid) {
-                    adapter.addData(reply)
-                    val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
-                    val total = adapter.items.size - 1 - 1
-                    if (lastVisible == total) {
-                        linearLayoutManager.smoothScrollToPosition(
-                            model.list,
-                            RecyclerView.State(), reply.rid
-                        )
+        load()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                ProfileData.userProfile.collect { me ->
+                    adapter.setOnMenuListener(JuickMessageMenuListener(me, adapter.items))
+                }
+            }
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                App.instance.newMessage.collect { reply ->
+                    if (adapter.itemCount > 0) {
+                        if (adapter.getItem(0)?.mid == reply.mid) {
+                            adapter.addData(reply)
+                            val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
+                            val total = adapter.items.size - 1 - 1
+                            if (lastVisible == total) {
+                                linearLayoutManager.smoothScrollToPosition(
+                                    model.list,
+                                    RecyclerView.State(), reply.rid
+                                )
+                            }
+                        }
                     }
                 }
             }
-        }
-        load()
-        Profile.me.observe(viewLifecycleOwner)  {
-            adapter.setOnMenuListener(JuickMessageMenuListener(it, adapter.items))
         }
     }
 

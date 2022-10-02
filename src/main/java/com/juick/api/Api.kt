@@ -36,6 +36,9 @@ interface Api {
     @GET("me")
     suspend fun me(): SecureUser
 
+    @GET("me")
+    fun getMe(): Call<SecureUser?>
+
     @GET
     suspend fun getPosts(@Url url: String): List<Post>
 

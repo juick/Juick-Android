@@ -41,7 +41,7 @@ class FirebaseReceiverService : FirebaseMessagingService() {
             try {
                 val reply: Post = App.instance.jsonMapper.readValue(msg, Post::class.java)
                 if (!reply.isService) {
-                    App.instance.newMessage.postValue(reply)
+                    App.instance.newMessage.value = reply
                 }
             } catch (e: IOException) {
                 Log.d(TAG, "JSON exception: " + e.message)

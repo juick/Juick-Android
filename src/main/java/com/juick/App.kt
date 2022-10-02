@@ -23,7 +23,6 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.liveData
 import androidx.multidex.MultiDexApplication
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -37,6 +36,7 @@ import com.juick.api.UpLoadProgressInterceptor
 import com.juick.api.model.Post
 import com.juick.api.model.SecureUser
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -192,8 +192,8 @@ class App : MultiDexApplication() {
             return field
         }
         private set
-    var newMessage: MutableLiveData<Post> = MutableLiveData()
-    val signInStatus = MutableLiveData(SignInStatus.SIGNED_OUT)
+    var newMessage = MutableStateFlow(Post.empty())
+    val signInStatus = MutableStateFlow(SignInStatus.SIGNED_OUT)
 
     companion object {
         init {

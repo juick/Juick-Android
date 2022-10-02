@@ -34,6 +34,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI.onNavDestinationSelected
@@ -45,12 +48,14 @@ import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.screens.chats.ChatsFragmentDirections
+import com.juick.android.screens.chats.ChatsData
 import com.juick.android.screens.home.HomeFragmentDirections
 import com.juick.android.widget.util.ViewUtil
 import com.juick.android.widget.util.setAppBarElevation
 import com.juick.api.model.Post
 import com.juick.databinding.ActivityMainBinding
 import com.juick.util.StringUtils
+import kotlinx.coroutines.launch
 import java.io.IOException
 
 /**
@@ -150,16 +155,22 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
             }
-        App.instance.signInStatus.observe(this) { signInStatus: SignInStatus ->
-            if (signInStatus == SignInStatus.SIGN_IN_PROGRESS) {
-                showLogin()
-            }
-        }
         model.fab.setOnClickListener {
             if (Utils.hasAuth()) {
                 navController.navigate(R.id.new_post)
             } else {
                 showLogin()
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                ProfileData.refresh()
+                ChatsData.loadChats()
+                App.instance.signInStatus.collect { signInStatus: SignInStatus ->
+                    if (signInStatus == SignInStatus.SIGN_IN_PROGRESS) {
+                        showLogin()
+                    }
+                }
             }
         }
     }
