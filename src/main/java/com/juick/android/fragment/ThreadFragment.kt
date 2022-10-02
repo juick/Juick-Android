@@ -41,6 +41,7 @@ import com.juick.android.*
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.hasAuth
 import com.juick.android.Utils.isImageTypeAllowed
+import com.juick.android.screens.post.NewPostFragment
 import com.juick.android.widget.util.ViewUtil
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentThreadBinding
@@ -62,6 +63,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     private var attachmentUri: Uri? = null
     private var attachmentMime: String? = null
     private var progressDialog: ProgressDialog? = null
+    private val progressDialogCancel = NewPostFragment.BooleanReference(false)
     private var mid = 0
     private var scrollToEnd = false
     private lateinit var adapter: JuickMessagesAdapter
@@ -283,13 +285,13 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     @Throws(FileNotFoundException::class)
     suspend fun postMedia(body: String?) {
         progressDialog = ProgressDialog(context)
-        /*progressDialogCancel.bool = false;
-        progressDialog.setOnCancelListener(arg0 -> progressDialogCancel.bool = true);*/
-        progressDialog!!.setProgressStyle(
+        progressDialogCancel.bool = false
+        progressDialog?.setOnCancelListener { _ -> progressDialogCancel.bool = true }
+        progressDialog?.setProgressStyle(
             ProgressDialog.STYLE_HORIZONTAL
         )
-        progressDialog!!.max = 0
-        progressDialog!!.show()
+        progressDialog?.max = 0
+        progressDialog?.show()
         App.instance.setOnProgressListener { progress: Long ->
             if (progressDialog!!.max < progress) {
                 progressDialog!!.max = progress.toInt()

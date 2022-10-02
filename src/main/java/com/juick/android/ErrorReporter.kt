@@ -17,12 +17,10 @@
 package com.juick.android
 
 import android.content.Context
-import java.lang.Thread.UncaughtExceptionHandler
-import java.lang.Thread
-import android.util.Log
 import android.content.Intent
 import android.net.Uri
-import android.content.ComponentName
+import android.util.Log
+import java.lang.Thread.UncaughtExceptionHandler
 
 class ErrorReporter(
     private val context: Context,
