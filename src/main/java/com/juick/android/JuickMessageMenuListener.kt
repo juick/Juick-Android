@@ -133,7 +133,7 @@ class JuickMessageMenuListener(private val activity: Context, private val view: 
                 processCommand("D #" +
                         if (rid == 0) "$mid" else "$mid/$rid")
                 val navController = Navigation.findNavController(view)
-                navController.popBackStack(R.id.home, true)
+                navController.popBackStack(R.id.home, false)
                 if (rid > 0) {
                     val args = ThreadFragmentArgs.Builder()
                         .setMid(mid)

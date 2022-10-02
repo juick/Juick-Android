@@ -23,7 +23,6 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".android.MainActivity">
-
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_container"
         android:layout_width="match_parent"
@@ -40,20 +39,10 @@
             android:clipToPadding="false"
             app:layoutManager="LinearLayoutManager" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
     <ProgressBar
         android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:padding="72dp" />
-    <TextView
-        android:id="@+id/errorMsg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:padding="72dp" />
-
+        style="?android:attr/progressBarStyleHorizontal"
+        android:indeterminateOnly="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </FrameLayout>

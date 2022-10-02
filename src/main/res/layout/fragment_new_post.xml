@@ -27,16 +27,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1">
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             >
-
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminateOnly="true"
+                android:visibility="gone" />
             <EditText
                 android:id="@+id/editMessage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_below="@id/progressBar"
                 android:background="#00000000"
                 android:gravity="top"
                 android:importantForAutofill="no"
@@ -51,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:scaleType="fitEnd"
-                tools:src="@drawable/nsfw" />
+                tools:src="@drawable/elevation_pre_lollipop" />
         </RelativeLayout>
     </ScrollView>
 

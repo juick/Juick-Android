@@ -16,7 +16,6 @@
  */
 package com.juick.android.fragment
 
-import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
@@ -39,12 +38,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
-import com.juick.android.screens.FeedAdapter
 import com.juick.android.ProfileData
 import com.juick.android.SignInActivity
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.hasAuth
 import com.juick.android.Utils.isImageTypeAllowed
+import com.juick.android.screens.FeedAdapter
 import com.juick.databinding.FragmentThreadBinding
 import com.juick.util.StringUtils
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +61,6 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
     private var rid = 0
     private var attachmentUri: Uri? = null
     private var attachmentMime: String? = null
-    private var progressDialog: ProgressDialog? = null
     private var mid = 0
     private var scrollToEnd = false
     private lateinit var adapter: FeedAdapter
@@ -95,7 +93,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         if (mid == 0) {
             return
         }
-        model.buttonSend.setOnClickListener { v: View? ->
+        model.buttonSend.setOnClickListener {
             if (!hasAuth()) {
                 startActivity(Intent(context, SignInActivity::class.java))
                 return@setOnClickListener
@@ -124,7 +122,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 }
             }
         }
-        model.buttonAttachment.setOnClickListener { v: View? ->
+        model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
                 attachmentLauncher!!.launch("image/*")
             } else {
@@ -141,7 +139,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 onReply(post?.rid ?: 0, StringUtils.defaultString(post?.text))
             }
         }
-        adapter.setOnScrollListener { v: View?, replyTo: Int, rid: Int ->
+        adapter.setOnScrollListener { _, replyTo, rid ->
             var pos = 0
             for (i in adapter.items.indices) {
                 val p = adapter.items[i]
@@ -180,10 +178,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                             val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
                             val total = adapter.items.size - 1 - 1
                             if (lastVisible == total) {
-                                linearLayoutManager.smoothScrollToPosition(
-                                    model.list,
-                                    RecyclerView.State(), reply.rid
-                                )
+                                model.list.scrollToPosition(reply.rid)
                             }
                         }
                     }
@@ -217,16 +212,6 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         }
     }
 
-    private fun resetForm() {
-        rid = 0
-        model.textReplyTo.visibility = View.GONE
-        model.editMessage.setText(StringUtils.EMPTY)
-        attachmentMime = null
-        attachmentUri = null
-        model.buttonAttachment.isSelected = false
-        setFormEnabled(true)
-    }
-
     private fun setFormEnabled(state: Boolean) {
         model.editMessage.isEnabled = state
         model.buttonSend.isEnabled = state
@@ -253,21 +238,9 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
 
     @Throws(FileNotFoundException::class)
     suspend fun postReply(body: String?) {
-        progressDialog = ProgressDialog(context)
-        progressDialog?.setProgressStyle(
-            ProgressDialog.STYLE_HORIZONTAL
-        )
-        progressDialog?.max = 0
-        progressDialog?.show()
-        App.instance.setOnProgressListener { progress: Long ->
-            if ((progressDialog?.max ?: 0) < progress) {
-                progressDialog?.max = progress.toInt()
-            } else {
-                progressDialog?.progress = progress.toInt()
-            }
-        }
+        model.progressBar.visibility = View.VISIBLE
         App.instance.sendMessage(body, attachmentUri, attachmentMime) { response ->
-            progressDialog?.dismiss()
+            model.progressBar.visibility = View.GONE
             setFormEnabled(true)
             Toast.makeText(context, response.text, Toast.LENGTH_LONG).show()
             response.newMessage?.let {

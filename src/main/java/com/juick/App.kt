@@ -31,7 +31,6 @@ import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.Utils.accountData
 import com.juick.api.Api
 import com.juick.api.RequestBodyUtil
-import com.juick.api.UpLoadProgressInterceptor
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.SecureUser
@@ -52,9 +51,6 @@ class App : MultiDexApplication() {
         get() {
             if (field == null) {
                 val client = OkHttpClient.Builder()
-                    .addInterceptor(UpLoadProgressInterceptor { bytesWritten: Long, contentLength: Long ->
-                        callback?.invoke(100 * bytesWritten / contentLength)
-                    })
                     .addInterceptor { chain: Interceptor.Chain ->
                         val original = chain.request()
                         val requestBuilder = original.newBuilder()
@@ -91,11 +87,6 @@ class App : MultiDexApplication() {
         }
     val api get() = _api!!
     lateinit var jsonMapper: ObjectMapper
-
-    private var callback: ((Long) -> Unit)? = null
-    fun setOnProgressListener(callback: (Long) -> Unit) {
-        this.callback = callback
-    }
 
     private var authorizationCallback: (() -> Unit)? = null
     fun setAuthorizationCallback(authorizationCallback: () -> Unit) {

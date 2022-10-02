@@ -16,7 +16,6 @@
  */
 package com.juick.android.screens.post
 
-import android.app.ProgressDialog
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -37,7 +36,6 @@ import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
-import com.juick.api.model.Post
 import com.juick.databinding.FragmentNewPostBinding
 import com.juick.util.StringUtils
 import kotlinx.coroutines.launch
@@ -50,7 +48,6 @@ import java.io.IOException
 class NewPostFragment : Fragment() {
     private var attachmentUri: Uri? = null
     private var attachmentMime: String? = null
-    private var progressDialog: ProgressDialog? = null
 
     private var _model: FragmentNewPostBinding? = null
     private val model get() = _model!!
@@ -70,7 +67,7 @@ class NewPostFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         attachmentLauncher =
             registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? -> attachImage(uri) }
-        model.buttonTags.setOnClickListener { v: View? ->
+        model.buttonTags.setOnClickListener {
             val navController = findNavController(requireView())
             val tagState = navController.currentBackStackEntry
                 ?.savedStateHandle as SavedStateHandle
@@ -82,7 +79,7 @@ class NewPostFragment : Fragment() {
             val action = NewPostFragmentDirections.actionNewPostToTags()
             findNavController(view).navigate(action)
         }
-        model.buttonAttachment.setOnClickListener { v: View? ->
+        model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
                 try {
                     attachmentLauncher.launch("image/*")
@@ -97,7 +94,7 @@ class NewPostFragment : Fragment() {
                     .clear(model.imagePreview)
             }
         }
-        model.buttonSend.setOnClickListener { v: View? ->
+        model.buttonSend.setOnClickListener {
             try {
                 sendMessage()
             } catch (e: FileNotFoundException) {
@@ -129,22 +126,10 @@ class NewPostFragment : Fragment() {
             return
         }
         setFormEnabled(false)
-        if (attachmentUri != null) {
-            progressDialog = ProgressDialog(activity)
-            progressDialog?.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
-            progressDialog?.max = 0
-            progressDialog?.show()
-            App.instance.setOnProgressListener { progressPercentage: Long ->
-                if ((progressDialog?.max ?: 0) < progressPercentage) {
-                    progressDialog?.max = progressPercentage.toInt()
-                } else {
-                    progressDialog?.progress = progressPercentage.toInt()
-                }
-            }
-        }
+        model.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch {
             App.instance.sendMessage(msg, attachmentUri, attachmentMime) { response ->
-                progressDialog?.dismiss()
+                model.progressBar.visibility = View.GONE
                 Toast.makeText(activity, response.text, Toast.LENGTH_LONG).show()
                 response.newMessage?.let {
                     val navController = findNavController(requireView())
