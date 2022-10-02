@@ -74,13 +74,12 @@ class ChatsFragment : Fragment() {
         return model.root
     }
 
-    @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         model.dialogsList.setAdapter(chatsAdapter)
         vm = ViewModelProvider(this)[ChatsViewModel::class.java]
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect { me ->
                     val navController = findNavController(requireView())
                     if (me.uid == 0) {

@@ -51,7 +51,6 @@ open class FeedFragment: Fragment() {
         return binding.root
     }
 
-    @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val adapter = JuickMessagesAdapter()
@@ -95,7 +94,7 @@ open class FeedFragment: Fragment() {
                 .build().toString()
         }
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect {
                     adapter.setOnMenuListener(JuickMessageMenuListener(requireActivity(), it, adapter.items))
                 }
@@ -114,10 +113,12 @@ open class FeedFragment: Fragment() {
                         Status.SUCCESS -> {
                             loading = false
                             stopRefreshing()
-                            if (firstPage) {
-                                adapter.newData(resource.data ?: emptyList())
-                            } else {
-                                adapter.addData(resource.data ?: emptyList())
+                            resource.data?.let {
+                                if (firstPage) {
+                                    adapter.newData(it)
+                                } else {
+                                    adapter.addData(it)
+                                }
                             }
                         }
                         Status.ERROR -> {

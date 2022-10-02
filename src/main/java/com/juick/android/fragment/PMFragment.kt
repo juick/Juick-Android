@@ -50,7 +50,6 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
     private lateinit var uname: String
     private val args by navArgs<PMFragmentArgs>()
 
-    @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _model = FragmentPmBinding.bind(view)
@@ -75,7 +74,7 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
             true
         }
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect {
                     adapter = MessagesListAdapter(it.uname) { imageView, url, _ ->
                         Glide.with(imageView.context)
