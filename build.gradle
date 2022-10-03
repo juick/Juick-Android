@@ -140,7 +140,7 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     //noinspection GradleDependency
     implementation "com.squareup.retrofit2:converter-jackson:$retrofit_version"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.1"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4"
 
     implementation "com.github.bumptech.glide:glide:$glide_version"
     kapt "com.github.bumptech.glide:compiler:$glide_version"
