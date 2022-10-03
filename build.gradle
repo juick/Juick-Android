@@ -114,6 +114,7 @@ tasks.withType(JavaCompile) {
 
 dependencies {
     kapt 'androidx.annotation:annotation:1.5.0'
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.drawerlayout:drawerlayout:1.1.1'
@@ -133,7 +134,7 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     //noinspection GradleDependency
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
-    implementation 'com.github.heremaps:oksse:0.9.0'
+    freeImplementation 'com.github.heremaps:oksse:0.9.0'
 
     // retrofit 2.7.x require API21
     //noinspection GradleDependency
