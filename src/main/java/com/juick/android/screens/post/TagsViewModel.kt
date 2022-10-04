@@ -46,7 +46,7 @@ class TagsViewModel : ViewModel() {
                 _tags.update {
                     Resource.error(
                         data = null,
-                        message = exception.message ?: "Error Occurred!"
+                        message = exception.message
                     )
                 }
             }

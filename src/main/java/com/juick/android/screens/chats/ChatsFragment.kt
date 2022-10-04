@@ -22,6 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
@@ -30,9 +31,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.juick.App
 import com.juick.R
 import com.juick.android.ProfileData
 import com.juick.android.Status.*
+import com.juick.android.Utils
 import com.juick.api.model.Chat
 import com.juick.databinding.FragmentDialogListBinding
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter
@@ -77,7 +80,19 @@ class ChatsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         model.dialogsList.setAdapter(chatsAdapter)
+        model.swipeContainer.setColorSchemeColors(
+            ContextCompat.getColor(
+                App.instance,
+                R.color.colorAccent
+            )
+        )
+        model.swipeContainer.setOnRefreshListener {
+            lifecycleScope.launch {
+                vm.loadChats()
+            }
+        }
         vm = ViewModelProvider(this)[ChatsViewModel::class.java]
+
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect { me ->
@@ -106,6 +121,7 @@ class ChatsFragment : Fragment() {
                                         resource.message,
                                         Toast.LENGTH_LONG
                                     ).show()
+                                    setError(resource.message ?: getString(R.string.Error))
                                 }
                                 LOADING -> {
                                     startLoading()
@@ -122,6 +138,7 @@ class ChatsFragment : Fragment() {
         model.dialogsList.visibility = View.VISIBLE
         model.progressBar.visibility = View.GONE
         model.errorText.visibility = View.GONE
+        model.swipeContainer.isRefreshing = false
     }
     private fun startLoading() {
         model.dialogsList.visibility = View.GONE

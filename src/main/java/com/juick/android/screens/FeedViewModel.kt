@@ -48,7 +48,7 @@ open class FeedViewModel : ViewModel() {
                         }
                     } catch (e: Exception) {
                         _feed.update {
-                            Resource.error(data = null, message = e.message ?: "Error Occurred!")
+                            Resource.error(data = null, message = e.message)
                         }
                     }
                 }

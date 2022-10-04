@@ -29,6 +29,7 @@ class ChatsViewModel : ViewModel() {
         private set
 
     suspend fun loadChats() {
+        chats.value = Resource.loading(null)
         try {
             val pms = withContext(Dispatchers.IO) {
                 App.instance.api.groupsPms(10).pms
@@ -38,7 +39,7 @@ class ChatsViewModel : ViewModel() {
             chats.value =
                 Resource.error(
                     data = null,
-                    message = exception.message ?: "Error Occurred!"
+                    message = exception.message
                 )
         }
     }
