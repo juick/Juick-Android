@@ -47,6 +47,7 @@ import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
+import com.juick.android.fragment.ThreadFragmentArgs
 import com.juick.android.screens.chats.ChatsFragmentDirections
 import com.juick.android.screens.chats.ChatsViewModel
 import com.juick.android.screens.home.HomeFragmentDirections
@@ -281,9 +282,11 @@ class MainActivity : AppCompatActivity() {
             2 -> {
                 // thread
                 val threadId = pathSegments[1]
-                val action = HomeFragmentDirections.actionDiscoverFragmentToThreadFragment()
-                action.mid = threadId.toInt()
-                navController.navigate(action)
+                val args = ThreadFragmentArgs.Builder()
+                    .setMid(threadId.toInt())
+                    .build()
+                navController.popBackStack(R.id.home, false)
+                navController.navigate(R.id.thread, args.toBundle())
             }
             else ->                 // discover
                 navController.navigate(R.id.home)
