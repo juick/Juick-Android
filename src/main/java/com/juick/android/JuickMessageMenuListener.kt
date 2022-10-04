@@ -30,14 +30,17 @@ import com.juick.R
 import com.juick.android.fragment.ThreadFragmentArgs
 import com.juick.android.screens.FeedAdapter
 import com.juick.api.model.Post
-import com.juick.api.model.SecureUser
+import com.juick.api.model.User
 import kotlinx.coroutines.launch
 
 /**
  *
  * @author Ugnich Anton
  */
-class JuickMessageMenuListener(private val activity: Context, private val view: View, private val me: SecureUser, private val postList: List<Post>) : DialogInterface.OnClickListener,
+class JuickMessageMenuListener(
+    private val activity: Context, private val view: View,
+    private val me: User, private val postList: List<Post>
+) : DialogInterface.OnClickListener,
     FeedAdapter.OnItemClickListener {
     private var selectedPost: Post? = null
     private val currentActions = IntArray(MENU_ACTION_SOME_LAST_CMD)

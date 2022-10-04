@@ -20,5 +20,5 @@ package com.juick.api.model
  * Created by gerc on 15.02.2016.
  */
 data class Tag (
-    var tag: String
+    val tag: String
 )

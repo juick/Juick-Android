@@ -33,7 +33,7 @@ import com.juick.api.Api
 import com.juick.api.RequestBodyUtil
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
-import com.juick.api.model.SecureUser
+import com.juick.api.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
@@ -110,7 +110,7 @@ class App : MultiDexApplication() {
 
     lateinit var jacksonConverterFactory: JacksonConverterFactory
 
-    suspend fun auth(username: String, password: String): SecureUser {
+    suspend fun auth(username: String, password: String): User {
         val client = OkHttpClient.Builder()
             .authenticator { _, response ->
                 if (response.request().header("Authorization") != null) {

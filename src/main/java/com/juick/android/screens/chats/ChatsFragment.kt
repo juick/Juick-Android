@@ -89,20 +89,21 @@ class ChatsFragment : Fragment() {
                         vm.chats.collect { resource ->
                             when (resource.status) {
                                 SUCCESS -> {
-                                    model.dialogsList.visibility = View.VISIBLE
-                                    model.progressBar.visibility = View.GONE
+                                    stopLoading()
                                     resource.data?.let { chats ->
                                         chatsAdapter.setItems(chats)
                                     }
                                 }
-                                ERROR -> Toast.makeText(
-                                    requireContext(),
-                                    resource.message,
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                ERROR -> {
+                                    stopLoading()
+                                    Toast.makeText(
+                                        requireContext(),
+                                        resource.message,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
                                 LOADING -> {
-                                    model.dialogsList.visibility = View.GONE
-                                    model.progressBar.visibility = View.VISIBLE
+                                    startLoading()
                                 }
                             }
                         }
@@ -110,6 +111,15 @@ class ChatsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun stopLoading() {
+        model.dialogsList.visibility = View.VISIBLE
+        model.progressBar.visibility = View.GONE
+    }
+    private fun startLoading() {
+        model.dialogsList.visibility = View.GONE
+        model.progressBar.visibility = View.VISIBLE
     }
 
     override fun onDestroyView() {

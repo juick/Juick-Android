@@ -24,8 +24,7 @@ import java.util.*
 /**
  * Created by gerc on 11.03.2016.
  */
-class Chat : IDialog<Post> {
-    var uname: String? = null
+data class Chat(val uname: String) : IDialog<Post> {
     var uid = 0
     var avatar: String? = null
     var messagesCount = 0
@@ -47,7 +46,7 @@ class Chat : IDialog<Post> {
     }
 
     override fun getDialogName(): String {
-        return uname!!
+        return uname
     }
 
     override fun getUsers(): List<IUser> {

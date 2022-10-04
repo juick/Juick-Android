@@ -16,8 +16,4 @@
  */
 package com.juick.api.model
 
-class AuthResponse {
-    val account: String? = null
-    val authCode: String? = null
-    val user: SecureUser? = null
-}
+data class AuthResponse(val account: String?, val authCode: String?, val user: User?)

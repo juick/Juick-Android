@@ -16,43 +16,25 @@
  */
 package com.juick.api.model
 
-import com.juick.api.model.Chat
-import com.stfalcon.chatkit.commons.models.IDialog
-import com.juick.api.model.Post
 import com.stfalcon.chatkit.commons.models.IUser
-import com.juick.api.model.User
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.stfalcon.chatkit.commons.models.IMessage
-import java.util.ArrayList
-import com.fasterxml.jackson.annotation.JsonIgnore
-import java.lang.StringBuilder
-import com.juick.util.StringUtils
 
 /**
  * Created by gerc on 10.02.2016.
  */
-open class User : IUser {
-    var uid = 0
-    var uname: String? = null
-    val fullname: String? = null
-    val isBanned = false
-    private val avatar: String? = null
-    val unreadCount = 0
-    val read: List<User>? = null
-
-    constructor()
-
-    constructor(uid: Int, uname: String?) {
-        this.uid = uid
-        this.uname = uname
-    }
+data class User(val uid: Int, val uname: String) : IUser {
+    var hash: String? = null
+    var fullname: String? = null
+    var isBanned = false
+    private var avatar: String? = null
+    var unreadCount = 0
+    var read: List<User>? = null
 
     override fun getId(): String {
         return uid.toString()
     }
 
     override fun getName(): String {
-        return uname!!
+        return uname
     }
 
     override fun getAvatar(): String {

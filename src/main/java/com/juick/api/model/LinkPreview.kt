@@ -16,4 +16,4 @@
  */
 package com.juick.api.model
 
-class LinkPreview(val url: String, val description: String)
+data class LinkPreview(val url: String, val description: String)

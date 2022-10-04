@@ -27,7 +27,7 @@ import retrofit2.http.*
  */
 interface Api {
     @GET("me")
-    suspend fun me(): SecureUser
+    suspend fun me(): User
 
     @GET
     suspend fun getPosts(@Url url: String): List<Post>

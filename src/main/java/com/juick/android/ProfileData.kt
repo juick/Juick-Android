@@ -17,19 +17,13 @@
 package com.juick.android
 
 import com.juick.App
-import com.juick.api.model.SecureUser
+import com.juick.api.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 
 object ProfileData {
-    val anonymous : SecureUser
-    get() {
-        val user = SecureUser()
-        user.uid = 0
-        user.uname = "Anonymous"
-        return user
-    }
+    val anonymous = User(uid = 0, uname = "Anonymous")
     var userProfile = MutableStateFlow(anonymous)
         private set
 

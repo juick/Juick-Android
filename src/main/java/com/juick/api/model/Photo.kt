@@ -16,23 +16,11 @@
  */
 package com.juick.api.model
 
-import com.juick.api.model.Chat
-import com.stfalcon.chatkit.commons.models.IDialog
-import com.juick.api.model.Post
-import com.stfalcon.chatkit.commons.models.IUser
-import com.juick.api.model.User
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.stfalcon.chatkit.commons.models.IMessage
-import java.util.ArrayList
-import com.fasterxml.jackson.annotation.JsonIgnore
-import java.lang.StringBuilder
-import com.juick.util.StringUtils
-
 /**
  * Created by gerc on 10.02.2016.
  */
-class Photo {
-    var thumbnail: String? = null
-    var small: String? = null
-    var medium: String? = null
-}
+data class Photo (
+    val thumbnail: String,
+    val small: String,
+    val medium: String
+)

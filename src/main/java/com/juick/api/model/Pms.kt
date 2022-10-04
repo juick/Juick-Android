@@ -19,10 +19,6 @@ package com.juick.api.model
 /**
  * Created by gerc on 11.03.2016.
  */
-class Pms {
+data class Pms (
     val pms: List<Chat>
-
-    init {
-        pms = emptyList()
-    }
-}
+)
