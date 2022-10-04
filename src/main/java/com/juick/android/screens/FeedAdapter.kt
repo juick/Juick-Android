@@ -28,6 +28,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
@@ -43,7 +44,8 @@ import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.MainActivity
 import com.juick.android.widget.util.BlurTransformation
-import com.juick.android.widget.util.ViewUtil
+import com.juick.android.widget.util.setCompatElevation
+import com.juick.android.widget.util.setDrawableTint
 import com.juick.api.model.LinkPreview
 import com.juick.api.model.Post
 import com.juick.util.MessageUtils
@@ -186,18 +188,13 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             holder.photoLayout.visibility = View.GONE
         }
         if (!isThread) {
-            if (post.replies > 0) {
-                holder.repliesTextView?.visibility = View.VISIBLE
-                holder.repliesTextView?.text = "${post.replies}"
-            } else {
-                holder.repliesTextView?.visibility = View.GONE
-            }
-            if (post.likes > 0) {
-                holder.likesTextView?.visibility = View.VISIBLE
-                holder.likesTextView?.text = "${post.likes}"
-            } else {
-                holder.likesTextView?.visibility = View.GONE
-            }
+            val replies = if (post.replies > 0) post.replies else holder.itemView.context.getString(R.string.reply)
+            val likes = if (post.likes > 0) post.likes else holder.itemView.context.getString(R.string.recommend)
+            holder.repliesTextView?.visibility = View.VISIBLE
+            holder.repliesTextView?.text = "$replies"
+            holder.likesTextView?.visibility = View.VISIBLE
+            holder.likesTextView?.text = "$likes"
+            holder.bottomBarLayout?.setCompatElevation(holder.bottomBarDividerView)
         } else {
             if (post.nextRid == post.rid) {
                 holder.backImageView?.visibility = View.VISIBLE
@@ -300,11 +297,13 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         var textTextView: TextView
         var repliesTextView: TextView?
         var likesTextView: TextView?
+        var bottomBarLayout: LinearLayout?
         var replyToTextView: TextView?
         var menuImageView: ImageView
         var backImageView: ImageView?
         var itemClickListener: ((View?, Int) -> Unit)? = null
         var menuClickListener: OnItemClickListener? = null
+        var bottomBarDividerView: View?
 
         init {
             container = itemView.findViewById(R.id.container)
@@ -312,7 +311,7 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             usernameTextView = itemView.findViewById(R.id.username)
             timestampTextView = itemView.findViewById(R.id.timestamp)
             textTextView = itemView.findViewById(R.id.text)
-            photoLayout = itemView.findViewById(R.id.photoWrapper)
+            photoLayout = itemView.findViewById(R.id.photo_wrapper)
             photoImageView = itemView.findViewById(R.id.photo)
             photoDescriptionView = itemView.findViewById(R.id.photo_description)
             likesTextView = itemView.findViewById(R.id.likes)
@@ -323,7 +322,9 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 ), null, null, null
             )
             replyToTextView = itemView.findViewById(R.id.replyto)
-            ViewUtil.setDrawableTint(likesTextView)
+            bottomBarLayout = itemView.findViewById(R.id.bottom_bar_layout)
+            bottomBarDividerView = itemView.findViewById(R.id.bottom_bar_elevation_pre_lollipop)
+            likesTextView?.setDrawableTint()
             repliesTextView = itemView.findViewById(R.id.replies)
             repliesTextView?.setCompoundDrawables(
                 VectorDrawableCompat.create(
@@ -331,7 +332,7 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     R.drawable.ic_ei_comment, null
                 ), null, null, null
             )
-            ViewUtil.setDrawableTint(repliesTextView)
+            repliesTextView?.setDrawableTint()
             backImageView = itemView.findViewById(R.id.back_imageView)
             menuImageView = itemView.findViewById(R.id.menu_dots)
             menuImageView.setOnClickListener(this)

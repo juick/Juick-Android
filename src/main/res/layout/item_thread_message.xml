@@ -65,11 +65,11 @@
         android:linksClickable="true"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         android:textColor="@color/colorText"
-        tools:text="This is reply markup"
+        tools:text="This is a reply markup"
         android:layout_marginEnd="@dimen/activity_horizontal_margin" />
 
     <RelativeLayout
-        android:id="@+id/photoWrapper"
+        android:id="@+id/photo_wrapper"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -106,14 +106,14 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         android:contentDescription="@string/context_menu"
         android:src="@drawable/ic_more_vert_black_24dp"
-        app:tint="@color/colorText"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        app:tint="@android:color/darker_gray" />
 
     <TextView
         android:id="@+id/timestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/photoWrapper"
+        android:layout_below="@+id/photo_wrapper"
         android:layout_marginTop="16dp"
         android:layout_toEndOf="@+id/user_picture"
         android:layout_toRightOf="@+id/user_picture"

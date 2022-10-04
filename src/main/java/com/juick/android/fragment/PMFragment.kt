@@ -31,7 +31,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
 import com.juick.R
 import com.juick.android.ProfileData
-import com.juick.android.widget.util.ViewUtil
+import com.juick.android.widget.util.hideKeyboard
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentPmBinding
 import com.stfalcon.chatkit.messages.MessagesListAdapter
@@ -70,7 +70,7 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
         }
         model.input.setInputListener { input: CharSequence ->
             postText(input.toString())
-            ViewUtil.hideKeyboard(activity)
+            hideKeyboard(activity)
             true
         }
         lifecycleScope.launch {

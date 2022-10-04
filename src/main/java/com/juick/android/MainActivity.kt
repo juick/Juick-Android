@@ -51,7 +51,7 @@ import com.juick.android.fragment.ThreadFragmentArgs
 import com.juick.android.screens.chats.ChatsFragmentDirections
 import com.juick.android.screens.chats.ChatsViewModel
 import com.juick.android.screens.home.HomeFragmentDirections
-import com.juick.android.widget.util.ViewUtil
+import com.juick.android.widget.util.REQUEST_CODE_SYNC_CONTACTS
 import com.juick.android.widget.util.setAppBarElevation
 import com.juick.api.model.Post
 import com.juick.databinding.ActivityMainBinding
@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
                     arrayOf(
                         Manifest.permission.READ_CONTACTS,
                         Manifest.permission.WRITE_CONTACTS
-                    ), ViewUtil.REQUEST_CODE_SYNC_CONTACTS
+                    ), REQUEST_CODE_SYNC_CONTACTS
                 )
             } else {
                 ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1)
@@ -312,7 +312,7 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == ViewUtil.REQUEST_CODE_SYNC_CONTACTS) {
+        if (requestCode == REQUEST_CODE_SYNC_CONTACTS) {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
                 ContentResolver.setSyncAutomatically(

@@ -22,45 +22,46 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
 import android.view.inputmethod.InputMethodManager
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.marginBottom
 import com.google.android.material.appbar.AppBarLayout
 import com.juick.R
+import com.juick.android.screens.FeedAdapter
 
 /**
  * Created by gerc on 14.02.2016.
  */
-object ViewUtil {
-    const val REQUEST_CODE_SYNC_CONTACTS = 5
 
-    /**
-     * android:drawableTint for API < 21
-     * @param v TextView
-     */
-    fun setDrawableTint(v: TextView?) {
-        if (v == null) return
-        val ds = v.compoundDrawables
-        val cs = arrayOfNulls<Drawable>(ds.size)
-        val c = v.currentTextColor
-        for (i in ds.indices) {
-            if (ds[i] == null) {
-                cs[i] = null
-            } else {
-                cs[i] = DrawableCompat.wrap(ds[i]!!)
-                DrawableCompat.setTint(cs[i]!!, c)
-            }
+const val REQUEST_CODE_SYNC_CONTACTS = 5
+
+/**
+ * android:drawableTint for API < 21
+ */
+fun TextView.setDrawableTint() {
+    val ds = compoundDrawables
+    val cs = arrayOfNulls<Drawable>(ds.size)
+    val c = currentTextColor
+    for (i in ds.indices) {
+        if (ds[i] == null) {
+            cs[i] = null
+        } else {
+            cs[i] = DrawableCompat.wrap(ds[i]!!)
+            DrawableCompat.setTint(cs[i]!!, c)
         }
-        v.setCompoundDrawablesWithIntrinsicBounds(cs[0], cs[1], cs[2], cs[3])
     }
+    setCompoundDrawablesWithIntrinsicBounds(cs[0], cs[1], cs[2], cs[3])
+}
 
-    fun hideKeyboard(activity: Activity?) {
-        if (activity != null) {
-            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
-        }
+fun hideKeyboard(activity: Activity?) {
+    if (activity != null) {
+        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
     }
 }
 
@@ -79,5 +80,22 @@ fun Activity.setAppBarElevation(appBarLayout: AppBarLayout) {
         ViewCompat.setBackground(elevationView,
             ContextCompat.getDrawable(this, R.drawable.elevation_pre_lollipop))
         appBarLayout.addView(elevationView, 1)
+    }
+}
+
+fun LinearLayout.setCompatElevation(view: View?) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        val params = layoutParams as MarginLayoutParams
+        params.bottomMargin = 0
+        layoutParams = params
+        val toolbarHeight = resources.getDimension(R.dimen.bottom_bar_elevation)
+        view?.let { elevationView ->
+            elevationView.visibility = View.VISIBLE
+            val elevationParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, toolbarHeight.toInt()
+            )
+            elevationParams.bottomMargin = resources.getDimension(R.dimen.toolbar_elevation).toInt()
+            elevationView.layoutParams = elevationParams
+        }
     }
 }

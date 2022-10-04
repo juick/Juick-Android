@@ -23,4 +23,6 @@
     <color name="colorText">#222222</color>
     <color name="colorFunny">#ff339a</color>
     <color name="colorDimmed">#88859d</color>
+    <color name="colorTextBackground">#ffffff</color>
+    <color name="colorBorder">#eeeeee</color>
 </resources>
