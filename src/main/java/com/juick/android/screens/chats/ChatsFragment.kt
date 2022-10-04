@@ -30,6 +30,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.juick.R
 import com.juick.android.ProfileData
 import com.juick.android.Status.*
 import com.juick.api.model.Chat
@@ -91,7 +92,11 @@ class ChatsFragment : Fragment() {
                                 SUCCESS -> {
                                     stopLoading()
                                     resource.data?.let { chats ->
-                                        chatsAdapter.setItems(chats)
+                                        if (chats.isNotEmpty()) {
+                                            chatsAdapter.setItems(chats)
+                                        } else {
+                                            setError(getString(R.string.you_have_no_direct_messages))
+                                        }
                                     }
                                 }
                                 ERROR -> {
@@ -116,10 +121,16 @@ class ChatsFragment : Fragment() {
     private fun stopLoading() {
         model.dialogsList.visibility = View.VISIBLE
         model.progressBar.visibility = View.GONE
+        model.errorText.visibility = View.GONE
     }
     private fun startLoading() {
         model.dialogsList.visibility = View.GONE
         model.progressBar.visibility = View.VISIBLE
+        model.errorText.visibility = View.GONE
+    }
+    private fun setError(message: String) {
+        model.errorText.visibility = View.VISIBLE
+        model.errorText.text = message
     }
 
     override fun onDestroyView() {

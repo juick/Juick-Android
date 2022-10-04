@@ -81,7 +81,7 @@
     <string name="LoadPhotos">Load photos automatically</string>
     <string name="FontSize">Font size</string>
 
-    <!-- ThreadActivity -->
+    <!-- Thread -->
     <string name="In_reply_to_">in reply to</string>
     <string name="post_not_found">Post not found</string>
     <string name="no_auth_message">Not authorized</string>
@@ -90,6 +90,9 @@
     <string name="DeletePost">Delete post</string>
     <string name="Are_you_sure_delete">Are you sure delete message ?</string>
     <string name="Deleted">Deleted</string>
+
+    <!-- Chats -->
+    <string name="you_have_no_direct_messages">You have no direct messages</string>
 
     <string name="appCrash">Juick application crash</string>
     <string name="user_photo">User photo</string>
