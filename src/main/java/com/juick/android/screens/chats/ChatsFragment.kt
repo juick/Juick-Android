@@ -33,7 +33,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
 import com.juick.R
-import com.juick.android.ProfileData
 import com.juick.android.Status.*
 import com.juick.android.Utils
 import com.juick.api.model.Chat
@@ -95,40 +94,38 @@ class ChatsFragment : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                ProfileData.userProfile.collect { me ->
-                    val navController = findNavController(requireView())
-                    if (me.uid == 0) {
-                        val action = ChatsFragmentDirections.actionChatsToNoAuth()
-                        navController.navigate(action)
-                    } else {
-                        vm.loadChats()
-                        vm.chats.collect { resource ->
-                            when (resource.status) {
-                                SUCCESS -> {
-                                    stopLoading()
-                                    resource.data?.let { chats ->
-                                        if (chats.isNotEmpty()) {
-                                            chatsAdapter.setItems(chats)
-                                        } else {
-                                            setError(getString(R.string.you_have_no_direct_messages))
-                                        }
+                if (Utils.hasAuth()) {
+                    vm.loadChats()
+                    vm.chats.collect { resource ->
+                        when (resource.status) {
+                            SUCCESS -> {
+                                stopLoading()
+                                resource.data?.let { chats ->
+                                    if (chats.isNotEmpty()) {
+                                        chatsAdapter.setItems(chats)
+                                    } else {
+                                        setError(getString(R.string.you_have_no_direct_messages))
                                     }
                                 }
-                                ERROR -> {
-                                    stopLoading()
-                                    Toast.makeText(
-                                        requireContext(),
-                                        resource.message,
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                    setError(resource.message ?: getString(R.string.Error))
-                                }
-                                LOADING -> {
-                                    startLoading()
-                                }
+                            }
+                            ERROR -> {
+                                stopLoading()
+                                Toast.makeText(
+                                    requireContext(),
+                                    resource.message,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                setError(resource.message ?: getString(R.string.Error))
+                            }
+                            LOADING -> {
+                                startLoading()
                             }
                         }
                     }
+                } else {
+                    val navController = findNavController(requireView())
+                    val action = ChatsFragmentDirections.actionChatsToNoAuth()
+                    navController.navigate(action)
                 }
             }
         }
@@ -140,11 +137,13 @@ class ChatsFragment : Fragment() {
         model.errorText.visibility = View.GONE
         model.swipeContainer.isRefreshing = false
     }
+
     private fun startLoading() {
         model.dialogsList.visibility = View.GONE
         model.progressBar.visibility = View.VISIBLE
         model.errorText.visibility = View.GONE
     }
+
     private fun setError(message: String) {
         model.errorText.visibility = View.VISIBLE
         model.errorText.text = message
