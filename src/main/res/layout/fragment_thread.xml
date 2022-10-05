@@ -55,7 +55,7 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/colorPrimary"
         android:layout_weight="0">
         <TextView
             android:id="@+id/textReplyTo"
@@ -64,7 +64,7 @@
             android:singleLine="true"
             android:visibility="gone"
             android:paddingBottom="2dip"
-            android:textColor="#000"/>
+            android:textColor="@color/colorText"/>
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -75,6 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/Attach"
+                android:tint="@color/colorText"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_button_attachment"
                 android:layout_centerVertical="true"
@@ -111,6 +112,7 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_send_black_24dp"
+                android:tint="@color/colorText"
                 android:contentDescription="@string/Send"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"

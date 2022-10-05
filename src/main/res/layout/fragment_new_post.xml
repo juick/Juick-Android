@@ -78,6 +78,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/tags_button"
             android:padding="10dp"
+            app:tint="@color/colorAccent"
             android:src="@drawable/ic_code_tags_black_24dp" />
 
         <ImageView
@@ -88,6 +89,7 @@
             android:layout_toRightOf="@id/buttonTags"
             android:contentDescription="@string/attach_photo"
             android:padding="10dp"
+            app:tint="@color/colorAccent"
             android:src="@drawable/ic_button_attachment" />
 
         <ImageView
