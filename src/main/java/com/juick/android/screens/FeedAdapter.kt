@@ -116,8 +116,10 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             vh.setOnItemClickListener(itemClickListener)
             vh.setOnMenuClickListener(itemMenuListener)
             vh.replyToTextView?.setOnClickListener { v: View ->
-                val p = v.tag as Post
-                scrollListener?.invoke(v, p.replyto, p.rid)
+                val p = v.tag as Post?
+                p?.let {
+                    scrollListener?.invoke(v, p.replyto, p.rid)
+                }
             }
             vh
         }
@@ -216,6 +218,8 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             holder.replyToTextView?.text = post.to?.uname
             holder.replyToTextView?.visibility = View.VISIBLE
             holder.replyToTextView?.tag = post
+        } else {
+            holder.replyToTextView?.visibility = View.INVISIBLE
         }
     }
 
