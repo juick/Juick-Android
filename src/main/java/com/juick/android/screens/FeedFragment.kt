@@ -24,6 +24,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
@@ -32,6 +33,8 @@ import com.juick.R
 import com.juick.android.*
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
 import com.juick.databinding.FragmentPostsPageBinding
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -92,50 +95,42 @@ open class FeedFragment: Fragment() {
                 .appendQueryParameter("ts", "${System.currentTimeMillis()}")
                 .build().toString()
         }
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                ProfileData.userProfile.collect {
-                    adapter.setOnMenuListener(JuickMessageMenuListener(
-                        requireActivity(),
-                        requireView(), it, adapter.items
-                    ))
+        ProfileData.userProfile.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach {
+            adapter.setOnMenuListener(JuickMessageMenuListener(
+                requireActivity(),
+                requireView(), it, adapter.items
+            ))
+        }.launchIn(lifecycleScope)
+        vm.feed.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach { resource ->
+            when(resource.status) {
+                Status.LOADING -> {
+                    if (firstPage) {
+                        binding.progressBar.visibility = View.VISIBLE
+                        binding.list.visibility = View.GONE
+                        binding.errorText.visibility = View.GONE
+                    }
                 }
-            }
-        }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                vm.feed.collect { resource ->
-                    when(resource.status) {
-                        Status.LOADING -> {
-                            if (firstPage) {
-                                binding.progressBar.visibility = View.VISIBLE
-                                binding.list.visibility = View.GONE
-                                binding.errorText.visibility = View.GONE
-                            }
-                        }
-                        Status.SUCCESS -> {
-                            loading = false
-                            stopRefreshing()
-                            resource.data?.let {
-                                if (firstPage) {
-                                    adapter.newData(it)
-                                } else {
-                                    adapter.addData(it)
-                                }
-                            }
-                        }
-                        Status.ERROR -> {
-                            loading = false
-                            stopRefreshing()
-                            Toast.makeText(requireContext(), resource.message, Toast.LENGTH_LONG).show()
-                            if (firstPage) {
-                                setError(resource.message ?: getString(R.string.Error))
-                            }
+                Status.SUCCESS -> {
+                    loading = false
+                    stopRefreshing()
+                    resource.data?.let {
+                        if (firstPage) {
+                            adapter.newData(it)
+                        } else {
+                            adapter.addData(it)
                         }
                     }
                 }
+                Status.ERROR -> {
+                    loading = false
+                    stopRefreshing()
+                    Toast.makeText(requireContext(), resource.message, Toast.LENGTH_LONG).show()
+                    if (firstPage) {
+                        setError(resource.message ?: getString(R.string.Error))
+                    }
+                }
             }
-        }
+        }.launchIn(lifecycleScope)
     }
     private fun stopRefreshing() {
         binding.swipeContainer.isRefreshing = false
