@@ -22,17 +22,14 @@ import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.account
 
-object JuickConfig {
-    fun init() {
-        //App.instance.signInProvider = { context, button -> null }
-    }
+fun App.init() {
+    //App.instance.signInProvider = { context, button -> null }
+}
 
-    fun refresh() {
-        val messagesProviderAuthority: String =
-            App.instance.getString(R.string.messages_provider_authority)
-        val account = account
-        ContentResolver.setIsSyncable(account, messagesProviderAuthority, 1)
-        ContentResolver.setSyncAutomatically(account, messagesProviderAuthority, true)
-        ContentResolver.addPeriodicSync(account, messagesProviderAuthority, Bundle.EMPTY, 300L)
-    }
+fun MainActivity.refresh() {
+    val messagesProviderAuthority = getString(R.string.messages_provider_authority)
+    val account = account
+    ContentResolver.setIsSyncable(account, messagesProviderAuthority, 1)
+    ContentResolver.setSyncAutomatically(account, messagesProviderAuthority, true)
+    ContentResolver.addPeriodicSync(account, messagesProviderAuthority, Bundle.EMPTY, 300L)
 }

@@ -138,9 +138,9 @@ class MainActivity : AppCompatActivity() {
                     86400L
                 )
             }
-            JuickConfig.refresh()
+            refresh()
         }
-        App.instance.setAuthorizationCallback {
+        App.instance.authorizationCallback = {
             val updatePasswordIntent = Intent(this, SignInActivity::class.java)
             updatePasswordIntent.putExtra(
                 SignInActivity.EXTRA_ACTION,
@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
                         navController.popBackStack(R.id.chats, true)
                         navController.navigate(R.id.chats)
                         val chatAction =
-                            ChatsFragmentDirections.actionChatsToPMFragment(jmsg.user.uname ?: "")
+                            ChatsFragmentDirections.actionChatsToPMFragment(jmsg.user.uname)
                         chatAction.uid = jmsg.user.uid
                         navController.navigate(chatAction)
                     } else {

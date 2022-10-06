@@ -47,68 +47,65 @@ import java.io.FileNotFoundException
  * Created by gerc on 14.02.2016.
  */
 class App : MultiDexApplication() {
-    private var _api: Api? = null
-        get() {
-            if (field == null) {
-                val client = OkHttpClient.Builder()
-                    .addInterceptor { chain: Interceptor.Chain ->
-                        val original = chain.request()
-                        val requestBuilder = original.newBuilder()
-                            .header("Accept", "application/json")
-                            .method(original.method(), original.body())
-                        val accountData = accountData
-                        if (accountData != null) {
-                            val hash = accountData.getString(AccountManager.KEY_AUTHTOKEN)
-                            if (!TextUtils.isEmpty(hash)) {
-                                requestBuilder.addHeader("Authorization", "Juick $hash")
-                            }
-                        }
-                        val request = requestBuilder.build()
-                        val response = chain.proceed(request)
-                        if (!response.isSuccessful) {
-                            if (response.code() == 401) {
-                                if (accountData != null) {
-                                    authorizationCallback?.invoke()
-                                }
-                            }
-                        }
-                        response
+    val api: Api by lazy {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain: Interceptor.Chain ->
+                val original = chain.request()
+                val requestBuilder = original.newBuilder()
+                    .header("Accept", "application/json")
+                    .method(original.method(), original.body())
+                val accountData = accountData
+                if (accountData != null) {
+                    val hash = accountData.getString(AccountManager.KEY_AUTHTOKEN)
+                    if (!TextUtils.isEmpty(hash)) {
+                        requestBuilder.addHeader("Authorization", "Juick $hash")
                     }
-                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS))
-                    .build()
-                val retrofit = Retrofit.Builder()
-                    .baseUrl(BuildConfig.API_ENDPOINT)
-                    .client(client)
-                    .addConverterFactory(jacksonConverterFactory)
-                    .build()
-                field = retrofit.create(Api::class.java)
+                }
+                val request = requestBuilder.build()
+                val response = chain.proceed(request)
+                if (!response.isSuccessful) {
+                    if (response.code() == 401) {
+                        if (accountData != null) {
+                            authorizationCallback?.invoke()
+                        }
+                    }
+                }
+                response
             }
-            return field
-        }
-    val api get() = _api!!
-    lateinit var jsonMapper: ObjectMapper
-
-    private var authorizationCallback: (() -> Unit)? = null
-    fun setAuthorizationCallback(authorizationCallback: () -> Unit) {
-        this.authorizationCallback = authorizationCallback
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS))
+            .build()
+        val retrofit = Retrofit.Builder()
+            .baseUrl(BuildConfig.API_ENDPOINT)
+            .client(client)
+            .addConverterFactory(jacksonConverterFactory)
+            .build()
+        retrofit.create(Api::class.java)
     }
+    val jsonMapper: ObjectMapper by lazy {
+        val mapper = jacksonObjectMapper()
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        mapper
+    }
+
+    var authorizationCallback: (() -> Unit)? = null
 
     private var errorReporter: ErrorReporter? = null
 
     override fun onCreate() {
         super.onCreate()
         instance = this
-        val errorSubject = "[${getString(R.string.Juick)}] [${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})] ${getString(R.string.appCrash)}"
+        val errorSubject =
+            "[${getString(R.string.Juick)}] [${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})] ${
+                getString(R.string.appCrash)
+            }"
         if (!BuildConfig.DEBUG) {
             errorReporter = ErrorReporter(this, "support@juick.com", errorSubject)
         }
-        jsonMapper = jacksonObjectMapper()
-        jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        jacksonConverterFactory = JacksonConverterFactory.create(jsonMapper)
-        JuickConfig.init()
+
+        init()
     }
 
-    lateinit var jacksonConverterFactory: JacksonConverterFactory
+    internal val jacksonConverterFactory = JacksonConverterFactory.create(jsonMapper)
 
     suspend fun auth(username: String, password: String): User {
         val client = OkHttpClient.Builder()
@@ -147,8 +144,7 @@ class App : MultiDexApplication() {
         var body: MultipartBody.Part? = null
         if (attachmentUri != null) {
             Log.d("sendMessage", "$attachmentMime $attachmentUri")
-            contentResolver.openInputStream(attachmentUri)?.let {
-                stream ->
+            contentResolver.openInputStream(attachmentUri)?.let { stream ->
                 val requestFile =
                     RequestBodyUtil.create(MediaType.parse("multipart/form-data"), stream)
                 body = MultipartBody.Part.createFormData(
@@ -186,15 +182,10 @@ class App : MultiDexApplication() {
     }
 
     var signInProvider: SignInProvider? = null
-    var notificationSender: NotificationSender? = null
-        get() {
-            if (field == null) {
-                field = NotificationSender(this)
-            }
-            return field
-        }
-        private set
-    var messages = MutableStateFlow<List<Post>>(listOf())
+    val notificationSender : NotificationSender by lazy {
+        NotificationSender(instance)
+    }
+    val messages = MutableStateFlow<List<Post>>(listOf())
     val signInStatus = MutableStateFlow(SignInStatus.SIGNED_OUT)
 
     companion object {

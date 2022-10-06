@@ -18,11 +18,9 @@ package com.juick.android
 
 import com.juick.App
 
-object JuickConfig {
-    fun init() {
-        App.instance.previewers.add(YouTubePreviewer())
-        App.instance.signInProvider = GoogleSignInProvider()
-    }
-
-    fun refresh() {}
+fun App.init() {
+    previewers.add(YouTubePreviewer())
+    signInProvider = GoogleSignInProvider()
 }
+
+fun MainActivity.refresh() {}

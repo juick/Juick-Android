@@ -48,7 +48,7 @@ class MessagesSyncService : LifecycleService() {
                         val announcement = Post(user = User(0, "Juick"))
                         announcement.setBody(context.getString(R.string.unread_discussions))
                         val messageData = App.instance.jsonMapper.writeValueAsString(announcement)
-                        App.instance.notificationSender?.showNotification(messageData)
+                        App.instance.notificationSender.showNotification(messageData)
                     }
                 } catch (e: Exception) {
                     Log.w(this.javaClass.simpleName, "Sync error", e)

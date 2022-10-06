@@ -16,10 +16,8 @@
  */
 package com.juick.android
 
-object JuickConfig {
-    fun init() {
-        //App.instance.signInProvider = { context, button -> null }
-    }
-
-    fun refresh() {}
+fun App.init() {
+    //App.instance.signInProvider = { context, button -> null }
 }
+
+fun MainActivity.refresh() {}
