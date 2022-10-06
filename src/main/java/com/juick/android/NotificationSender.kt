@@ -30,15 +30,16 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.api.model.Post
 import java.util.concurrent.ExecutionException
 
-class NotificationSender(context: Context) {
+class NotificationSender(private val context: Context, private val jsonMapper: ObjectMapper) {
     private val notificationManager =
-        App.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val handler = Handler(Looper.getMainLooper())
 
     init {
@@ -62,7 +63,7 @@ class NotificationSender(context: Context) {
 
     fun showNotification(msgStr: String?) {
         try {
-            val jmsg = App.instance.jsonMapper.readValue(msgStr, Post::class.java)
+            val jmsg = jsonMapper.readValue(msgStr, Post::class.java)
             if (jmsg.isService) {
                 handler.post { notificationManager.cancel(getId(jmsg).toString(), 0) }
             } else {
@@ -80,31 +81,31 @@ class NotificationSender(context: Context) {
                     }
                 }
                 val contentIntent = PendingIntent.getActivity(
-                    App.instance,
+                    context,
                     getId(jmsg), createNewEventIntent(msgStr), PendingIntent.FLAG_UPDATE_CURRENT
                 )
-                val notificationBuilder = NotificationCompat.Builder(App.instance, channelId)
+                val notificationBuilder = NotificationCompat.Builder(context, channelId)
                 notificationBuilder.setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle(title)
                     .setContentText(body)
                     .setAutoCancel(true).setWhen(0)
                     .setContentIntent(contentIntent)
                     .setGroup("messages")
-                    .setColor(ContextCompat.getColor(App.instance, R.color.colorAccent))
+                    .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                     .setGroupSummary(true)
                 notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(jmsg.text))
                 if (jmsg.user.uid > 0) {
                     notificationBuilder.addAction(
                         if (Build.VERSION.SDK_INT <= 19) R.drawable.ic_ab_reply2 else R.drawable.ic_ab_reply,
-                        App.instance.getString(R.string.reply), PendingIntent.getActivity(
-                            App.instance,
+                        context.getString(R.string.reply), PendingIntent.getActivity(
+                            context,
                             getId(jmsg), createNewEventIntent(msgStr),
                             PendingIntent.FLAG_UPDATE_CURRENT
                         )
                     )
                 }
-                val avatarBitmap = Glide.with(App.instance).asBitmap()
+                val avatarBitmap = Glide.with(context).asBitmap()
                     .load(jmsg.user.avatar)
                     .fallback(R.drawable.av_96)
                     .placeholder(R.drawable.av_96)
@@ -139,11 +140,11 @@ class NotificationSender(context: Context) {
     }
 
     private fun createNewEventIntent(jmsg: String?): Intent {
-        val intent = Intent(App.instance, MainActivity::class.java)
+        val intent = Intent(context, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         intent.action = BuildConfig.INTENT_NEW_EVENT_ACTION
-        intent.putExtra(App.instance.getString(R.string.notification_extra), jmsg)
+        intent.putExtra(context.getString(R.string.notification_extra), jmsg)
         return intent
     }
 

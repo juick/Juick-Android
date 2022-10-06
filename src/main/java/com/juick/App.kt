@@ -183,7 +183,7 @@ class App : MultiDexApplication() {
 
     var signInProvider: SignInProvider? = null
     val notificationSender : NotificationSender by lazy {
-        NotificationSender(instance)
+        NotificationSender(instance, jsonMapper)
     }
     val messages = MutableStateFlow<List<Post>>(listOf())
     val signInStatus = MutableStateFlow(SignInStatus.SIGNED_OUT)
