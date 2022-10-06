@@ -37,9 +37,10 @@ class NotificationManager {
         if (es != null) return
         es = eventsFactory!!
             .readTimeout(0, TimeUnit.SECONDS).build()
-        var uri = Utils.buildUrl(BuildConfig.EVENTS_ENDPOINT)
-        Utils.accountData?.let {
-            uri.appendQueryParameter("hash", it.getString(AccountManager.KEY_AUTHTOKEN))
+        val uri = Utils.buildUrl(BuildConfig.EVENTS_ENDPOINT)
+        val hash = Utils.accountData?.getString(AccountManager.KEY_AUTHTOKEN) ?: ""
+        if (hash.isNotEmpty()) {
+            uri.appendQueryParameter("hash", hash)
         }
         val request = Request.Builder()
             .url(uri.build().toString())
