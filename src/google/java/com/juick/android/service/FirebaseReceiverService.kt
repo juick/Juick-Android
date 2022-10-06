@@ -16,13 +16,12 @@
  */
 package com.juick.android.service
 
-import com.juick.android.Utils.updateFCMToken
+import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
-import com.juick.android.service.FirebaseReceiverService
 import com.google.firebase.messaging.RemoteMessage
 import com.juick.App
 import com.juick.R
-import android.util.Log
+import com.juick.android.Utils.updateFCMToken
 import com.juick.api.model.Post
 import java.io.IOException
 
@@ -47,7 +46,7 @@ class FirebaseReceiverService : FirebaseMessagingService() {
                 Log.d(TAG, "JSON exception: " + e.message)
             }
         } else {
-            App.instance.notificationSender?.showNotification(msg)
+            App.instance.notificationSender.showNotification(msg)
         }
     }
 

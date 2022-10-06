@@ -16,6 +16,8 @@
  */
 package com.juick.android
 
+import com.juick.App
+
 fun App.init() {
     //App.instance.signInProvider = { context, button -> null }
 }
