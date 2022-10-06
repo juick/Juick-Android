@@ -194,7 +194,7 @@ class App : MultiDexApplication() {
             return field
         }
         private set
-    var newMessage = MutableStateFlow(Post.empty())
+    var messages = MutableStateFlow<List<Post>>(listOf())
     val signInStatus = MutableStateFlow(SignInStatus.SIGNED_OUT)
 
     companion object {

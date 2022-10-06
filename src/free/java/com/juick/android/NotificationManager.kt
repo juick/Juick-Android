@@ -16,14 +16,16 @@
  */
 package com.juick.android
 
-import com.juick.android.Utils.eventsFactory
-import okhttp3.OkHttpClient
+import android.accounts.AccountManager
+import android.util.Log
 import com.here.oksse.OkSse
 import com.here.oksse.ServerSentEvent
-import android.util.Log
-import com.juick.api.model.Post
 import com.juick.App
 import com.juick.BuildConfig
+import com.juick.android.Utils.eventsFactory
+import com.juick.api.model.Post
+import kotlinx.coroutines.flow.update
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
@@ -35,8 +37,12 @@ class NotificationManager {
         if (es != null) return
         es = eventsFactory!!
             .readTimeout(0, TimeUnit.SECONDS).build()
+        var uri = Utils.buildUrl(BuildConfig.EVENTS_ENDPOINT)
+        Utils.accountData?.let {
+            uri.appendQueryParameter("hash", it.getString(AccountManager.KEY_AUTHTOKEN))
+        }
         val request = Request.Builder()
-            .url(BuildConfig.EVENTS_ENDPOINT)
+            .url(uri.build().toString())
             .build()
         val sse = OkSse(es)
         sse.newServerSentEvent(request, object : ServerSentEvent.Listener {
@@ -55,7 +61,7 @@ class NotificationManager {
                     try {
                         val reply: Post =
                             App.instance.jsonMapper.readValue(message, Post::class.java)
-                        App.instance.newMessage.value = reply
+                        App.instance.messages.update { listOf(reply) }
                     } catch (e: IOException) {
                         Log.d(TAG, "JSON exception: " + e.message)
                     }

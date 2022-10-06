@@ -14,28 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.juick.android.fragment
+package com.juick.android.screens.pm
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.*
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
 import com.juick.R
 import com.juick.android.ProfileData
+import com.juick.android.Status
 import com.juick.android.widget.util.hideKeyboard
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentPmBinding
 import com.stfalcon.chatkit.messages.MessagesListAdapter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -46,6 +47,7 @@ import kotlinx.coroutines.withContext
 class PMFragment : Fragment(R.layout.fragment_pm) {
     private var _model: FragmentPmBinding? = null
     private val model get() = _model!!
+    private lateinit var vm: PMViewModel
     private lateinit var adapter: MessagesListAdapter<Post>
     private lateinit var uname: String
     private val args by navArgs<PMFragmentArgs>()
@@ -54,53 +56,52 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
         super.onViewCreated(view, savedInstanceState)
         _model = FragmentPmBinding.bind(view)
         uname = args.uname
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                App.instance.api.pm(uname).let { newPms ->
-                    withContext(Dispatchers.Main) {
-                        adapter.addToEnd(newPms, false)
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(App.instance, R.string.network_error, Toast.LENGTH_LONG)
-                        .show()
-                }
-            }
-        }
+        vm = ViewModelProvider(this, PMViewModelFactory(uname))[PMViewModel::class.java]
         model.input.setInputListener { input: CharSequence ->
             postText(input.toString())
             hideKeyboard(activity)
             true
         }
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                ProfileData.userProfile.collect {
-                    adapter = MessagesListAdapter(it.uname) { imageView, url, _ ->
-                        Glide.with(imageView.context)
-                            .load(url)
-                            .transition(DrawableTransitionOptions.withCrossFade())
-                            .into(imageView)
+        ProfileData.userProfile.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach {
+            adapter = MessagesListAdapter(it.uname) { imageView, url, _ ->
+                Glide.with(imageView.context)
+                    .load(url)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .into(imageView)
+            }
+            model.messagesList.setAdapter(adapter)
+        }.launchIn(lifecycleScope)
+        App.instance.messages.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach { posts ->
+            onNewMessages(posts.filter {
+                it.isOurs(uname)
+            })
+        }.launchIn(lifecycleScope)
+        vm.messages.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach {
+            when (it.status) {
+                Status.LOADING -> {}
+                Status.ERROR -> Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                Status.SUCCESS -> {
+                    it.data?.let { posts ->
+                        adapter.addToEnd(posts, false)
                     }
-                    model.messagesList.setAdapter(adapter)
                 }
             }
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                App.instance.newMessage.collect { post ->
-                    onNewMessages(listOf(post))
-                }
-            }
-        }
+        }.launchIn(lifecycleScope)
+        vm.loadMessages()
     }
 
-    fun onNewMessages(posts: List<Post>) {
+    private fun Post.isOurs(authorName: String) : Boolean {
+        return mid == 0 && uname == authorName || uname == to?.uname
+    }
+
+    private fun onNewMessages(posts: List<Post>) {
         Log.d("onNewMessages", posts.toString())
-        for (p in posts) {
-            adapter.addToStart(p, true)
+        posts.forEach {
+            adapter.addToStart(it, shouldScrollToBottom)
         }
     }
 
-    fun postText(body: String) {
+    private fun postText(body: String) {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 App.instance.api.postPm(uname, body).let { post ->
@@ -116,6 +117,14 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
             }
         }
     }
+
+    private val shouldScrollToBottom : Boolean
+        get() {
+            val lastVisible =
+                (model.messagesList.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+            val total = adapter.itemCount - 1
+            return lastVisible == total
+        }
 
     override fun onDestroyView() {
         _model = null

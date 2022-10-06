@@ -58,7 +58,7 @@
     <fragment
         android:id="@+id/PMFragment"
         tools:layout="@layout/fragment_pm"
-        android:name="com.juick.android.fragment.PMFragment"
+        android:name="com.juick.android.screens.pm.PMFragment"
         android:label="{uname}" >
         <argument
             android:name="uname"

@@ -171,14 +171,16 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                App.instance.newMessage.collect { reply ->
-                    if (adapter.itemCount > 0) {
-                        if (adapter.getItem(0)?.mid == reply.mid) {
-                            adapter.addData(reply)
-                            val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
-                            val total = adapter.items.size - 1 - 1
-                            if (lastVisible == total) {
-                                model.list.scrollToPosition(reply.rid)
+                App.instance.messages.collect { replies ->
+                    replies.forEach { reply ->
+                        if (adapter.itemCount > 0) {
+                            if (adapter.getItem(0)?.mid == reply.mid) {
+                                adapter.addData(reply)
+                                val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
+                                val total = adapter.items.size - 1 - 1
+                                if (lastVisible == total) {
+                                    model.list.scrollToPosition(reply.rid)
+                                }
                             }
                         }
                     }

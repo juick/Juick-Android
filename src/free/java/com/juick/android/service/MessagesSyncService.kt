@@ -45,9 +45,7 @@ class MessagesSyncService : LifecycleService() {
                 try {
                     val me = App.instance.api.me()
                     if (me.unreadCount > 0) {
-                        val user = User(0, "Juick")
-                        val announcement = Post()
-                        announcement.setUser(user)
+                        val announcement = Post(user = User(0, "Juick"))
                         announcement.setBody(context.getString(R.string.unread_discussions))
                         val messageData = App.instance.jsonMapper.writeValueAsString(announcement)
                         App.instance.notificationSender?.showNotification(messageData)

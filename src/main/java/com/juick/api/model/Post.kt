@@ -26,11 +26,10 @@ import java.util.*
 /**
  * Created by gerc on 10.02.2016.
  */
-class Post : IMessage {
+data class Post(private var user: User) : IMessage {
     var mid = 0
     var replyto = 0
     var to: User? = null
-    private var user: User? = null
     private var body: String? = null
     private var timestamp: Date? = null
     var tags: List<String> = ArrayList()
@@ -66,7 +65,7 @@ class Post : IMessage {
     }
 
     override fun getUser(): User {
-        return user!!
+        return user
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
@@ -74,7 +73,7 @@ class Post : IMessage {
         return timestamp ?: Date()
     }
 
-    fun setUser(user: User?) {
+    fun setUser(user: User) {
         this.user = user
     }
 
@@ -97,7 +96,7 @@ class Post : IMessage {
 
     companion object {
         fun empty(): Post {
-            val post = Post()
+            val post = Post(user = User(0, "Juick"))
             post.timestamp = Date()
             post.body = StringUtils.EMPTY
             return post

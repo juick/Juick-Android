@@ -25,12 +25,12 @@ data class User(val uid: Int, val uname: String) : IUser {
     var hash: String? = null
     var fullname: String? = null
     var isBanned = false
-    private var avatar: String? = null
+    private var avatar = ""
     var unreadCount = 0
     var read: List<User>? = null
 
     override fun getId(): String {
-        return uid.toString()
+        return uname
     }
 
     override fun getName(): String {
@@ -38,6 +38,6 @@ data class User(val uid: Int, val uname: String) : IUser {
     }
 
     override fun getAvatar(): String {
-        return avatar ?: ""
+        return avatar
     }
 }
