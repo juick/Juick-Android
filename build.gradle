@@ -3,7 +3,7 @@ buildscript {
     ext.navigation_version = "2.5.2"
     ext.okhttp_version = "3.12.13"
     ext.retrofit_version = "2.6.4"
-    ext.glide_version = "4.14.1"
+    ext.glide_version = "4.14.2"
 
     repositories {
         mavenCentral()
