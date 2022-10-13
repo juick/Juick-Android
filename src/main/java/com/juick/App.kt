@@ -105,7 +105,9 @@ class App : MultiDexApplication() {
         init()
     }
 
-    internal val jacksonConverterFactory = JacksonConverterFactory.create(jsonMapper)
+    internal val jacksonConverterFactory: JacksonConverterFactory by lazy {
+        JacksonConverterFactory.create(jsonMapper)
+    }
 
     suspend fun auth(username: String, password: String): User {
         val client = OkHttpClient.Builder()
@@ -182,7 +184,7 @@ class App : MultiDexApplication() {
     }
 
     var signInProvider: SignInProvider? = null
-    val notificationSender : NotificationSender by lazy {
+    val notificationSender: NotificationSender by lazy {
         NotificationSender(instance, jsonMapper)
     }
     val messages = MutableStateFlow<List<Post>>(listOf())
