@@ -17,32 +17,32 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent"
-                android:layout_height="match_parent"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:fitsSystemWindows="true"
-                android:background="?attr/colorPrimary"
-                android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
     <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_logo"
-            android:layout_above="@+id/linearLayout"
-            android:layout_centerHorizontal="true"
-        android:contentDescription="@string/logo" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/linearLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="@string/logo"
+        android:src="@drawable/ic_logo" />
 
     <LinearLayout
-            android:orientation="vertical"
-            android:layout_gravity="center"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:id="@+id/linearLayout"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp">
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:orientation="vertical">
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -51,7 +51,7 @@
             android:layout_marginBottom="8dp"
             android:labelFor="@id/juickNick">
 
-        <com.google.android.material.textfield.TextInputEditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/juickNick"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -63,11 +63,11 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-                android:labelFor="@id/juickPassword"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:labelFor="@id/juickPassword">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/juickPassword"
@@ -80,22 +80,21 @@
                 tools:targetApi="o" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/buttonSave"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="24dp"
-                android:padding="12dp"
-                android:background="@color/colorFunny"
-                android:textColor="@color/white"
-                android:text="@string/login"/>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonSave"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:padding="12dp"
+            android:text="@string/login"
+            app:cornerRadius="0dp" />
 
         <RelativeLayout
-                android:id="@+id/sign_in_button_placeholder"
-                android:layout_width="fill_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
+            android:id="@+id/sign_in_button_placeholder"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
         </RelativeLayout>
     </LinearLayout>

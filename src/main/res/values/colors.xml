@@ -17,12 +17,12 @@
   -->
 
 <resources>
-    <color name="colorPrimary">#f8f8f8</color>
-    <color name="colorAccent">#3c77aa</color>
-    <color name="colorSecondary">#fdfdff</color>
+    <color name="colorPrimary">#3c77aa</color>
+    <color name="colorAccent">#ff339a</color>
+    <color name="colorSecondary">#006600</color>
     <color name="colorText">#222222</color>
-    <color name="colorFunny">#ff339a</color>
     <color name="colorDimmed">#88859d</color>
+    <color name="colorMainBackground">#f8f8f8</color>
     <color name="colorTextBackground">#ffffff</color>
     <color name="colorBorder">#eeeeee</color>
 </resources>

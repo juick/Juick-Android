@@ -20,6 +20,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
     <ProgressBar
         android:id="@+id/progressBar"
@@ -40,6 +41,8 @@
                 android:id="@+id/list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@color/colorMainBackground"
+                tools:listitem="@layout/item_thread_message"
                 android:scrollbars="vertical"
                 android:clipToPadding="false"
                 app:layoutManager="LinearLayoutManager"/>
@@ -55,7 +58,7 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:background="@color/colorMainBackground"
         android:layout_weight="0">
         <TextView
             android:id="@+id/textReplyTo"

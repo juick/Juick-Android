@@ -57,15 +57,15 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
-            android:backgroundTint="@color/colorFunny"
-            app:backgroundTint="@color/colorFunny"
+            android:backgroundTint="@color/colorAccent"
+            app:backgroundTint="@color/colorAccent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
             app:srcCompat="@drawable/ic_ei_pencil"
             android:tint="@color/white"
-            app:tint="@color/colorPrimary"
+            app:tint="@color/colorMainBackground"
             app:borderWidth="0dp"
             tools:targetApi="lollipop"
             android:contentDescription="@string/Create" />
@@ -80,7 +80,7 @@
 
         android:layout_alignParentBottom="true"
         app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
-        app:itemBackground="@color/colorPrimary"
+        app:itemBackground="@color/colorMainBackground"
         app:itemIconTint="@color/bottom_nav_color"
         app:labelVisibilityMode="unlabeled"
         app:menu="@menu/bottom_navigation" />
