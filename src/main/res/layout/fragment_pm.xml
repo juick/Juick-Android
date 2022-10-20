@@ -29,8 +29,9 @@
         android:layout_above="@+id/input"
         app:incomingTextSize="14sp"
         app:outcomingTextSize="14sp"
-        app:incomingDefaultBubbleColor="@color/colorSecondary"
-        app:outcomingDefaultBubbleColor="@color/colorFunny"/>
+        app:incomingTextColor="@color/colorText"
+        app:incomingDefaultBubbleColor="@color/colorTextBackground"
+        app:outcomingDefaultBubbleColor="@color/colorAccent"/>
     <com.stfalcon.chatkit.messages.MessageInput
         android:id="@+id/input"
         android:layout_width="match_parent"

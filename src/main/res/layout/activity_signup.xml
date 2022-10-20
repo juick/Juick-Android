@@ -20,7 +20,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorPrimary"
+    android:background="@color/colorMainBackground"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
@@ -96,7 +96,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="@color/colorFunny"
+                android:background="@color/colorAccent"
                 android:text="@string/Create"
                 android:textColor="@color/white" />
         </LinearLayout>

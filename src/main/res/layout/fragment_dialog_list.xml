@@ -31,6 +31,7 @@
         app:dialogTitleTextSize="14sp"
         app:dialogMessageTextSize="14sp"
         app:dialogDateSize="14sp"
+        app:dialogTitleTextColor="@color/colorText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

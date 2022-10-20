@@ -72,6 +72,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/textReplyTo"
+            android:padding="8dp"
             android:orientation="horizontal">
             <ImageButton
                 android:id="@id/buttonAttachment"
@@ -90,18 +91,20 @@
                 android:layout_height="0dp"
                 android:layout_toEndOf="@id/buttonAttachment"
                 android:layout_toRightOf="@id/buttonAttachment"/>
-
-            <EditText
-                android:id="@id/editMessage"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toEndOf="@id/attachmentButtonSpace"
                 android:layout_toLeftOf="@id/sendButtonSpace"
                 android:layout_toRightOf="@id/attachmentButtonSpace"
-                android:layout_toStartOf="@id/sendButtonSpace"
+                android:layout_toStartOf="@id/sendButtonSpace">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@id/editMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:inputType="textAutoCorrect|textAutoComplete|textMultiLine|textCapSentences"/>
-
+            </com.google.android.material.textfield.TextInputLayout>
             <Space
                 android:id="@id/sendButtonSpace"
                 android:layout_width="0dp"

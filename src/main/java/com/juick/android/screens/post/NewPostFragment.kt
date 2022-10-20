@@ -168,7 +168,7 @@ class NewPostFragment : Fragment() {
 
     private fun applyTag(tag: String?) {
         model.editMessage.setText("*$tag ${model.editMessage.text}")
-        val textLength = model.editMessage.text.length
+        val textLength = model.editMessage.text?.length ?: 0
         model.editMessage.setSelection(textLength, textLength)
         model.editMessage.requestFocus()
     }

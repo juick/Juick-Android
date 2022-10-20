@@ -46,7 +46,7 @@
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_toLeftOf="@+id/menu_dots"
         android:layout_toRightOf="@id/user_picture"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         android:textColor="@color/colorPrimary"
         android:textIsSelectable="false"
         tools:text="ugnich"
@@ -63,9 +63,10 @@
         android:layout_toEndOf="@+id/user_picture"
         android:layout_toRightOf="@+id/user_picture"
         android:linksClickable="true"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
         android:textColor="@color/colorText"
-        tools:text="This is a reply markup"
+        android:textColorLink="@color/colorDimmed"
+        tools:text="@string/lorem"
         android:layout_marginEnd="@dimen/activity_horizontal_margin" />
 
     <RelativeLayout
@@ -132,6 +133,7 @@
         android:background="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         tools:text="freefd"
+        android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
         android:textColor="@color/colorPrimary"
         android:textSize="14sp" />
     <View

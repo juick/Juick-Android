@@ -16,12 +16,12 @@
   -->
 
 <resources>
-    <color name="colorPrimary">#333</color>
-    <color name="colorAccent">#c38855</color>
+    <color name="colorPrimary">#c38855</color>
+    <color name="colorAccent">#ff339a</color>
     <color name="colorSecondary">#222</color>
     <color name="colorText">#ccc</color>
-    <color name="colorFunny">#ff339a</color>
     <color name="colorDimmed">#88859d</color>
+    <color name="colorMainBackground">#333</color>
     <color name="colorTextBackground">#383838</color>
     <color name="colorBorder">#4c4c4c</color>
 </resources>

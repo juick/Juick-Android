@@ -38,19 +38,22 @@
                 android:layout_height="wrap_content"
                 android:indeterminateOnly="true"
                 android:visibility="gone" />
-            <EditText
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:layout_below="@id/progressBar">
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editMessage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/progressBar"
-                android:background="#00000000"
-                android:gravity="top"
                 android:importantForAutofill="no"
+                android:minLines="7"
+                android:gravity="top"
                 android:inputType="textCapSentences|textMultiLine"
-                android:padding="8dip"
                 tools:targetApi="o"
                 tools:text="*weather the weather is cold!" />
-
+            </com.google.android.material.textfield.TextInputLayout>
             <ImageView
                 android:id="@+id/imagePreview"
                 android:layout_width="wrap_content"
@@ -65,7 +68,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
-        android:padding="8dip">
+        android:background="@color/colorMainBackground"
+        android:padding="8dp">
 
         <ImageView
             android:id="@+id/buttonTags"
@@ -75,10 +79,9 @@
             android:layout_alignParentLeft="true"
             android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/tags_button"
+            app:tint="@color/colorText"
             android:padding="10dp"
-            app:tint="@color/colorAccent"
             android:src="@drawable/ic_code_tags_black_24dp" />
 
         <ImageView
@@ -88,8 +91,8 @@
             android:layout_toEndOf="@id/buttonTags"
             android:layout_toRightOf="@id/buttonTags"
             android:contentDescription="@string/attach_photo"
+            app:tint="@color/colorText"
             android:padding="10dp"
-            app:tint="@color/colorAccent"
             android:src="@drawable/ic_button_attachment" />
 
         <ImageView
@@ -98,12 +101,11 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/send_button"
+            app:tint="@color/colorText"
             android:padding="10dp"
             android:src="@drawable/ic_send_black_24dp"
-            android:text="@string/Send"
-            app:tint="@color/colorAccent" />
+            android:text="@string/Send" />
     </RelativeLayout>
 
 </LinearLayout>
