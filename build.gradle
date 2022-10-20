@@ -150,6 +150,9 @@ dependencies {
 
     implementation 'androidx.multidex:multidex:2.0.1'
 
+    // Fragment testing
+    debugImplementation "androidx.fragment:fragment-testing:1.5.3"
+
     // Core library
     androidTestImplementation 'androidx.test:core:1.4.0'
 

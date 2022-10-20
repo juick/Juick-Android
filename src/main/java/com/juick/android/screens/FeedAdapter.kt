@@ -16,6 +16,7 @@
  */
 package com.juick.android.screens
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -23,6 +24,7 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.text.style.QuoteSpan
 import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
@@ -31,7 +33,9 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
+import androidx.core.text.getSpans
 import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.bumptech.glide.Glide
@@ -157,7 +161,7 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         holder.usernameTextView.text = post.user.uname
         holder.timestampTextView.text = MessageUtils.formatMessageTimestamp(post)
         holder.textTextView.text = StringUtils.EMPTY
-        holder.textTextView.text = formatMessageText(post)
+        holder.textTextView.text = formatMessageText(holder.itemView.context, post)
         holder.textTextView.movementMethod = LinkMovementMethod.getInstance()
         if (post.photo != null && post.photo?.small != null) {
             holder.photoLayout.visibility = View.VISIBLE
@@ -229,54 +233,6 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemCount(): Int {
         return if (postList.isEmpty()) 0 else postList.size
-    }
-
-    private fun formatMessageText(jmsg: Post): SpannableStringBuilder {
-        val ssb = SpannableStringBuilder()
-        var nextSpanStart = 0
-        for (tag in jmsg.tags) {
-            val text = String.format("#%s", tag)
-            ssb.append(text)
-            ssb.setSpan(object : ClickableSpan() {
-                override fun onClick(widget: View) {
-                    widget.tag = "clicked"
-                    val activity = widget.context as MainActivity
-                    activity.title = "#$tag"
-                    /*activity.replaceFragment(
-                            FeedBuilder.feedFor(
-                                    UrlBuilder.getPostsByTag(jmsg.getUser().getUid(), tag)));*/
-                }
-            }, nextSpanStart, nextSpanStart + text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            ssb.append(" ")
-            nextSpanStart += text.length + 1
-        }
-        val text = HtmlCompat.fromHtml(
-            MessageUtils.formatMessage(StringUtils.defaultString(jmsg.getBody())),
-            HtmlCompat.FROM_HTML_MODE_LEGACY
-        )
-        ssb.append(text)
-        val urlSpans = ssb.getSpans(nextSpanStart, ssb.length, URLSpan::class.java)
-        // handle deep links
-        for (span in urlSpans) {
-            val start = ssb.getSpanStart(span)
-            val end = ssb.getSpanEnd(span)
-            val link = span.url
-            ssb.removeSpan(span)
-            ssb.setSpan(object : ClickableSpan() {
-                override fun onClick(widget: View) {
-                    widget.tag = "clicked"
-                    val data = Uri.parse(link)
-                    val activity = widget.context as MainActivity
-                    if (data.host == "juick.com") {
-                        activity.processUri(data)
-                    } else {
-                        val intent = Intent(Intent.ACTION_VIEW, data)
-                        widget.context.startActivity(intent)
-                    }
-                }
-            }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
-        return ssb
     }
 
     fun setOnLoadMoreRequestListener(loadMoreRequestListener: OnLoadMoreRequestListener?) {
@@ -378,6 +334,69 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     companion object {
+        fun formatMessageText(context: Context, jmsg: Post): SpannableStringBuilder {
+            val tagLine = SpannableStringBuilder()
+            var nextSpanStart = 0
+            for (tag in jmsg.tags) {
+                val text = "#$tag"
+                tagLine.append(text)
+                tagLine.setSpan(object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        widget.tag = "clicked"
+                        val activity = widget.context as MainActivity
+                        activity.title = "#$tag"
+                        /*activity.replaceFragment(
+                                FeedBuilder.feedFor(
+                                        UrlBuilder.getPostsByTag(jmsg.getUser().getUid(), tag)));*/
+                    }
+                }, nextSpanStart, nextSpanStart + text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                tagLine.append(" ")
+                nextSpanStart += text.length + 1
+            }
+            val formattedMessage = MessageUtils.formatMessage(StringUtils.defaultString(jmsg.getBody()))
+            val text = HtmlCompat.fromHtml(
+                formattedMessage,
+                HtmlCompat.FROM_HTML_MODE_COMPACT
+            )
+            val textContent = SpannableStringBuilder()
+            textContent.append(text)
+            val quotes = textContent.getSpans<QuoteSpan>()
+            for (quote in quotes) {
+                val start = textContent.getSpanStart(quote)
+                val end = textContent.getSpanEnd(quote)
+                textContent.removeSpan(quote)
+                textContent.setSpan(
+                    QuoteSpan(ContextCompat.getColor(context, R.color.colorDimmed)),
+                    start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+            val urlSpans = textContent.getSpans<URLSpan>()
+            // handle deep links
+            for (span in urlSpans) {
+                val start = textContent.getSpanStart(span)
+                val end = textContent.getSpanEnd(span)
+                val link = span.url
+                textContent.removeSpan(span)
+                textContent.setSpan(object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        widget.tag = "clicked"
+                        val data = Uri.parse(link)
+                        val activity = widget.context as MainActivity
+                        if (data.host == "juick.com") {
+                            activity.processUri(data)
+                        } else {
+                            val intent = Intent(Intent.ACTION_VIEW, data)
+                            widget.context.startActivity(intent)
+                        }
+                    }
+                }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+
+            return SpannableStringBuilder()
+                .append(tagLine)
+                .append(textContent)
+        }
+
         private const val TYPE_ITEM = 0
         private const val TYPE_THREAD_POST = 2
     }

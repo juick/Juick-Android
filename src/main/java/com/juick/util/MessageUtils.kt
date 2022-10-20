@@ -142,8 +142,8 @@ object MessageUtils {
         msg = sb.toString()
 
         // > citate
-        msg = msg.replace("(?:(?<=\\n)|(?<=\\A))&gt; *(.*)?(\\n|(?=\\Z))".toRegex(), "<q>$1</q>")
-        msg = msg.replace("</q><q>".toRegex(), "\n")
+        msg = msg.replace("(?:(?<=\\n)|(?<=\\A))&gt; *(.*)?(\\n|(?=\\Z))".toRegex(), "\n<blockquote>$1</blockquote>")
+        msg = msg.replace("</blockquote>\n<blockquote>".toRegex(), "\n")
         msg = msg.replace("\n".toRegex(), "<br/>\n")
         return msg
     }

@@ -17,10 +17,13 @@
 
 package com.juick.android.testing
 
+import android.text.style.ClickableSpan
+import android.text.style.QuoteSpan
+import androidx.core.text.getSpans
+import androidx.core.text.toSpanned
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -31,6 +34,9 @@ import androidx.test.uiautomator.Until
 import com.juick.App
 import com.juick.R
 import com.juick.android.MainActivity
+import com.juick.android.screens.FeedAdapter
+import com.juick.api.model.Post
+import junit.framework.Assert.assertEquals
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
@@ -54,10 +60,24 @@ internal class UITest {
         assumeTrue("UIAutomator tests require API18", android.os.Build.VERSION.SDK_INT >= 18)
         val notificationData = this.javaClass.getResourceAsStream("/test_notification.json")
         val notificationJson = App.instance.jsonMapper.readTree(notificationData)
-        App.instance.notificationSender?.showNotification(notificationJson.toString())
+        App.instance.notificationSender.showNotification(notificationJson.toString())
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.openNotification()
         device.wait(Until.hasObject(By.textStartsWith("Hello, world!")), 5000)
         device.pressHome()
+    }
+
+    @Test
+    fun formatMessage_spans() {
+        val msg = "> quote\n> quote 2\n" +
+                "text [link](http://ya.ru)"
+        val post = Post.empty()
+        post.tags = arrayListOf("tag")
+        post.setBody(msg)
+        activityRule.scenario.onActivity {
+            val formatted = FeedAdapter.formatMessageText(it, post).toSpanned()
+            assertEquals(1, formatted.getSpans<QuoteSpan>().size)
+            assertEquals(2, formatted.getSpans<ClickableSpan>().size)
+        }
     }
 }
