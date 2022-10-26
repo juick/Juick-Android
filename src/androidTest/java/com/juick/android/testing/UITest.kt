@@ -21,24 +21,24 @@ import android.text.style.ClickableSpan
 import android.text.style.QuoteSpan
 import androidx.core.text.getSpans
 import androidx.core.text.toSpanned
+import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.google.common.truth.Truth.assertThat
 import com.juick.App
 import com.juick.R
 import com.juick.android.MainActivity
 import com.juick.android.screens.FeedAdapter
 import com.juick.api.model.Post
-import junit.framework.Assert.assertEquals
 import org.junit.Assume.assumeTrue
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -46,14 +46,12 @@ import org.junit.runner.RunWith
 @LargeTest
 internal class UITest {
 
-    @get:Rule
-    val activityRule
-            = ActivityScenarioRule(MainActivity::class.java)
-
     @Test
     fun isDisplayed_MainActivity() {
-        onView(withId(R.id.main_layout))
-            .check(matches(isDisplayed()))
+        launchActivity<MainActivity>().use {
+            onView(withId(R.id.main_layout))
+                .check(matches(isDisplayed()))
+        }
     }
     @Test
     fun isCorrectNotification_NotificationSender() {
@@ -74,10 +72,9 @@ internal class UITest {
         val post = Post.empty()
         post.tags = arrayListOf("tag")
         post.setBody(msg)
-        activityRule.scenario.onActivity {
-            val formatted = FeedAdapter.formatMessageText(it, post).toSpanned()
-            assertEquals(1, formatted.getSpans<QuoteSpan>().size)
-            assertEquals(2, formatted.getSpans<ClickableSpan>().size)
-        }
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        val formatted = FeedAdapter.formatMessageText(appContext, post).toSpanned()
+        assertThat(formatted.getSpans<QuoteSpan>().size).isEqualTo(1)
+        assertThat(formatted.getSpans<ClickableSpan>().size).isEqualTo(2)
     }
 }
