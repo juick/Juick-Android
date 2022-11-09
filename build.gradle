@@ -163,7 +163,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:truth:1.4.0'
 
     // Espresso dependencies
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
     // UI Automator
     androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.3'
 }
