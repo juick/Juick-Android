@@ -4,7 +4,7 @@ buildscript {
     ext.okhttp_version = "3.12.13"
     ext.retrofit_version = "2.6.4"
     ext.glide_version = "4.14.2"
-    ext.androidx_test_version = "1.4.0"
+    ext.androidx_test_version = "1.5.0"
 
     repositories {
         mavenCentral()
@@ -157,7 +157,6 @@ dependencies {
     debugImplementation "androidx.fragment:fragment-testing:1.5.4"
 
     // Core library
-    androidTestImplementation "androidx.test:core:$androidx_test_version"
     androidTestImplementation "androidx.test:core-ktx:$androidx_test_version"
 
     // Assertions
