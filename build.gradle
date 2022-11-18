@@ -15,7 +15,7 @@ buildscript {
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigation_version"
         classpath 'com.android.tools.build:gradle:7.3.1'
         classpath 'com.google.gms:google-services:4.3.14'
-        classpath 'com.huawei.agconnect:agcp:1.7.3.301'
+        classpath 'com.huawei.agconnect:agcp:1.7.3.302'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
