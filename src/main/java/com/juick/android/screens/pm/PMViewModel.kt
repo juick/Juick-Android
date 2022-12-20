@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class PMViewModel(private val userName: String): ViewModel() {
-    val messages = MutableStateFlow<Resource<List<Post>>>(Resource.loading(null))
+    val messages = MutableStateFlow<Resource<List<Post>>>(Resource.loading())
 
     fun loadMessages() {
         viewModelScope.launch {

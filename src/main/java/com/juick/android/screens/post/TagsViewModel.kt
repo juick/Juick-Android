@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TagsViewModel : ViewModel() {
-    private val _tags = MutableStateFlow<Resource<List<Tag>>>(Resource.loading(emptyList()))
+    private val _tags = MutableStateFlow<Resource<List<Tag>>>(Resource.loading())
     val tags = _tags.asStateFlow()
 
     init {

@@ -32,7 +32,7 @@ open class FeedViewModel : ViewModel() {
     private val _apiUrl: MutableStateFlow<String> = MutableStateFlow("")
     val apiUrl = _apiUrl
 
-    private val _feed: MutableStateFlow<Resource<List<Post>>> = MutableStateFlow(Resource.loading(null))
+    private val _feed: MutableStateFlow<Resource<List<Post>>> = MutableStateFlow(Resource.loading())
     val feed = _feed.asStateFlow()
 
     init {
@@ -40,6 +40,9 @@ open class FeedViewModel : ViewModel() {
             apiUrl.collect {
                 if (it.isNotEmpty()) {
                     try {
+                        _feed.update {
+                            Resource.loading()
+                        }
                         val posts = withContext(Dispatchers.IO) {
                             App.instance.api.getPosts(it)
                         }

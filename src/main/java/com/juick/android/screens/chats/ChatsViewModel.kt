@@ -25,11 +25,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 
 class ChatsViewModel : ViewModel() {
-    var chats = MutableStateFlow<Resource<List<Chat>>>(Resource.loading(null))
+    var chats = MutableStateFlow<Resource<List<Chat>>>(Resource.loading())
         private set
 
     suspend fun loadChats() {
-        chats.value = Resource.loading(null)
+        chats.value = Resource.loading()
         try {
             val pms = withContext(Dispatchers.IO) {
                 App.instance.api.groupsPms(10).pms
