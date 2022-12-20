@@ -22,18 +22,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.juick.R
 import com.juick.android.Status
 import com.juick.databinding.FragmentTagsListBinding
+import com.juick.databinding.ItemTagBinding
 import kotlinx.coroutines.launch
 
 /**
@@ -59,7 +62,7 @@ class TagsFragment : BottomSheetDialogFragment() {
         val adapter = TagsAdapter()
         model.list.adapter = adapter
         adapter.setOnItemClickListener { _, position ->
-            val tag = adapter.getItem(position)
+            val tag = adapter.currentList[position]
             val navController = NavHostFragment.findNavController(this)
             navController.previousBackStackEntry?.savedStateHandle?.set("tag", tag)
             dismiss()
@@ -75,10 +78,11 @@ class TagsFragment : BottomSheetDialogFragment() {
                         Status.SUCCESS -> {
                             model.progressBar.visibility = View.GONE
                             model.list.visibility = View.VISIBLE
-                            val tags = resource.data?.map {
-                                it.tag
-                            } ?: listOf()
-                            adapter.addData(tags)
+                            resource.data?.let { tags ->
+                                adapter.submitList(tags.map {
+                                    it.tag
+                                })
+                            }
                         }
                         Status.ERROR -> {
                             model.progressBar.visibility = View.GONE
@@ -99,41 +103,22 @@ class TagsFragment : BottomSheetDialogFragment() {
         }
     }
 
-    internal class TagsAdapter : RecyclerView.Adapter<TagsAdapter.VH>() {
-        var items: MutableList<String> = ArrayList()
+    internal class TagsAdapter : ListAdapter<String, TagsAdapter.TagsViewHolder>(DIFF_CALLBACK) {
         var itemClickListener: ((View?, Int) -> Unit)? = null
         var itemLongClickListener: OnItemLongClickListener? = null
-        fun addData(newItems: List<String>) {
-            items.clear()
-            items.addAll(newItems)
-            notifyDataSetChanged()
-        }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-            val vh = VH(
-                LayoutInflater.from(parent.context)
-                    .inflate(android.R.layout.simple_list_item_1, parent, false)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TagsViewHolder {
+            val viewHolder = TagsViewHolder(
+                ItemTagBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             )
-            vh.setOnItemClickListener(itemClickListener)
-            vh.setOnItemLongClickListener(itemLongClickListener)
-            Log.d("TagsAdapter", "onCreateViewHolder")
-            return vh
+            viewHolder.setOnItemClickListener(itemClickListener)
+            viewHolder.setOnItemLongClickListener(itemLongClickListener)
+            return viewHolder
         }
 
-        override fun onBindViewHolder(holder: VH, position: Int) {
-            val tag = items[position]
-            Log.d("TagsAdapter", "onBindViewHolder: $position $tag")
-            holder.textView.text = tag
-        }
-
-        override fun getItemCount(): Int {
-            Log.d("TagsAdapter", "getItemCount: " + items.size)
-            return items.size
-        }
-
-        fun getItem(position: Int): String {
-            Log.d("TagsAdapter", "getItem: $position")
-            return items[position]
+        override fun onBindViewHolder(holder: TagsViewHolder, position: Int) {
+            val tag = getItem(position)
+            holder.binding.text.text = tag
         }
 
         fun setOnItemClickListener(itemClickListener: (View?, Int) -> Unit) {
@@ -152,14 +137,14 @@ class TagsFragment : BottomSheetDialogFragment() {
             fun onItemLongClick(view: View?, pos: Int)
         }
 
-        internal class VH(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener,
+        internal class TagsViewHolder(val binding: ItemTagBinding) :
+            RecyclerView.ViewHolder(binding.root),
+            View.OnClickListener,
             OnLongClickListener {
-            var textView: TextView
             var itemClickListener: ((View?, Int) -> Unit)? = null
             var itemLongClickListener: OnItemLongClickListener? = null
 
             init {
-                textView = itemView.findViewById(android.R.id.text1)
                 itemView.setOnClickListener(this)
                 itemView.setOnLongClickListener(this)
             }
@@ -182,6 +167,17 @@ class TagsFragment : BottomSheetDialogFragment() {
                     return true
                 }
                 return false
+            }
+        }
+        companion object {
+            val DIFF_CALLBACK = object: DiffUtil.ItemCallback<String>() {
+                override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
+                    return oldItem == newItem
+                }
+
+                override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+                    return oldItem == newItem
+                }
             }
         }
     }

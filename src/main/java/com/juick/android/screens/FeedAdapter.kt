@@ -38,6 +38,7 @@ import androidx.core.text.HtmlCompat
 import androidx.core.text.getSpans
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.bumptech.glide.Glide
@@ -61,8 +62,7 @@ import com.juick.util.StringUtils
  *
  * @author Ugnich Anton
  */
-class FeedAdapter : RecyclerView.Adapter<FeedAdapter.PostViewHolder>() {
-    var differ = AsyncListDiffer(this, DIFF_CALLBACK)
+class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK) {
     private var loadMoreRequestListener: OnLoadMoreRequestListener? = null
     private var itemClickListener: ((View?, Int) -> Unit)? = null
     var itemMenuListener: OnItemClickListener? = null
@@ -79,15 +79,11 @@ class FeedAdapter : RecyclerView.Adapter<FeedAdapter.PostViewHolder>() {
         return if (post == null) 0 else post.mid.toLong() * 10000 + post.rid
     }
 
-    fun submitList(data: List<Post>) {
-        differ.submitList(data)
-    }
-
     override fun getItemViewType(position: Int): Int {
-        if (hasMoreData && position == differ.currentList.size - 1) {
+        if (hasMoreData && position == currentList.size - 1) {
             loadMoreRequestListener?.onLoadMore()
         }
-        return if (differ.currentList[position].rid == 0) TYPE_THREAD_POST else TYPE_ITEM
+        return if (currentList[position].rid == 0) TYPE_THREAD_POST else TYPE_ITEM
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -139,7 +135,7 @@ class FeedAdapter : RecyclerView.Adapter<FeedAdapter.PostViewHolder>() {
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val type = getItemViewType(position)
-        val post = differ.currentList[position]
+        val post = currentList[position]
         val isThread = type != TYPE_THREAD_POST
         Glide.with(holder.itemView.context)
             .load(post.user.avatar)
@@ -216,20 +212,9 @@ class FeedAdapter : RecyclerView.Adapter<FeedAdapter.PostViewHolder>() {
         }
     }
 
-    fun getItem(position: Int): Post? {
-        return differ.currentList[position]
-    }
-
-    override fun getItemCount(): Int {
-        return differ.currentList.size
-    }
-
     fun setOnLoadMoreRequestListener(loadMoreRequestListener: OnLoadMoreRequestListener?) {
         this.loadMoreRequestListener = loadMoreRequestListener
     }
-
-    val items: List<Post>
-        get() = differ.currentList
 
     interface OnLoadMoreRequestListener {
         fun onLoadMore()

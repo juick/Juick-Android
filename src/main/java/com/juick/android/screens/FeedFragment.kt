@@ -26,16 +26,17 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import com.juick.App
 import com.juick.R
-import com.juick.android.*
+import com.juick.android.JuickMessageMenuListener
+import com.juick.android.ProfileData
+import com.juick.android.Status
+import com.juick.android.Utils
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
 import com.juick.databinding.FragmentPostsPageBinding
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 /**
  * Created by gerc on 03.06.2016.
@@ -58,7 +59,7 @@ open class FeedFragment: Fragment() {
         val adapter = FeedAdapter()
         binding.list.adapter = adapter
         adapter.setOnItemClickListener { _, pos ->
-            adapter.getItem(pos)?.let {
+            adapter.currentList[pos]?.let {
                 post ->
                 val threadArgs = Bundle()
                 threadArgs.putInt("mid", post.mid)
@@ -72,7 +73,7 @@ open class FeedFragment: Fragment() {
                 override fun onLoadMore() {
                     if (loading) return
                     loading = true
-                    adapter.getItem(adapter.itemCount - 1)?.let {
+                    adapter.currentList[adapter.itemCount - 1]?.let {
                         lastItem ->
                         val requestUrl = Utils.buildUrl(vm.apiUrl.value)
                             .appendQueryParameter("before_mid", lastItem.mid.toString())
@@ -98,7 +99,7 @@ open class FeedFragment: Fragment() {
         ProfileData.userProfile.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach {
             adapter.setOnMenuListener(JuickMessageMenuListener(
                 requireActivity(),
-                requireView(), it, adapter.items
+                requireView(), it, adapter.currentList
             ))
         }.launchIn(lifecycleScope)
         vm.feed.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach { resource ->
@@ -117,7 +118,7 @@ open class FeedFragment: Fragment() {
                         if (firstPage) {
                             adapter.submitList(it)
                         } else {
-                            adapter.submitList(adapter.items + it)
+                            adapter.submitList(adapter.currentList + it)
                         }
                     }
                 }

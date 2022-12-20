@@ -135,14 +135,14 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
         val linearLayoutManager = model.list.layoutManager as LinearLayoutManager
         adapter.setOnItemClickListener { widget: View?, position: Int ->
             if (widget?.tag == null || widget.tag != "clicked") {
-                val post = adapter.getItem(position)
+                val post = adapter.currentList[position]
                 onReply(post?.rid ?: 0, StringUtils.defaultString(post?.text))
             }
         }
         adapter.setOnScrollListener { _, replyTo, rid ->
             var pos = 0
-            for (i in adapter.items.indices) {
-                val p = adapter.items[i]
+            for (i in adapter.currentList.indices) {
+                val p = adapter.currentList[i]
                 if (p.rid == replyTo) {
                     p.nextRid = replyTo
                     if (p.prevRid == 0) p.prevRid = rid
@@ -164,7 +164,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 ProfileData.userProfile.collect { me ->
                     adapter.setOnMenuListener(JuickMessageMenuListener(
                         requireActivity(),
-                        requireView(), me, adapter.items
+                        requireView(), me, adapter.currentList
                     ))
                 }
             }
@@ -174,10 +174,10 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 App.instance.messages.collect { replies ->
                     replies.forEach { reply ->
                         if (adapter.itemCount > 0) {
-                            if (adapter.getItem(0)?.mid == reply.mid) {
-                                adapter.submitList(adapter.items + reply)
+                            if (adapter.currentList[0]?.mid == reply.mid) {
+                                adapter.submitList(adapter.currentList + reply)
                                 val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
-                                val total = adapter.items.size - 1 - 1
+                                val total = adapter.currentList.size - 1 - 1
                                 if (lastVisible == total) {
                                     model.list.scrollToPosition(reply.rid)
                                 }
