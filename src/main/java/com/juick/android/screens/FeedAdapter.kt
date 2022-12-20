@@ -36,6 +36,8 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.text.getSpans
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.bumptech.glide.Glide
@@ -59,12 +61,12 @@ import com.juick.util.StringUtils
  *
  * @author Ugnich Anton
  */
-class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var postList: MutableList<Post> = ArrayList()
-    var loadMoreRequestListener: OnLoadMoreRequestListener? = null
-    var itemClickListener: ((View?, Int) -> Unit)? = null
+class FeedAdapter : RecyclerView.Adapter<FeedAdapter.PostViewHolder>() {
+    var differ = AsyncListDiffer(this, DIFF_CALLBACK)
+    private var loadMoreRequestListener: OnLoadMoreRequestListener? = null
+    private var itemClickListener: ((View?, Int) -> Unit)? = null
     var itemMenuListener: OnItemClickListener? = null
-    var scrollListener: ((View?, Int, Int) -> Unit)? = null
+    private var scrollListener: ((View?, Int, Int) -> Unit)? = null
     private var hasMoreData = true
 
     init {
@@ -77,43 +79,28 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return if (post == null) 0 else post.mid.toLong() * 10000 + post.rid
     }
 
-    fun newData(data: List<Post>) {
-        val oldCount = postList.size
-        postList.clear()
-        notifyItemRangeRemoved(0, oldCount)
-        postList.addAll(data)
-        notifyItemRangeInserted(0, data.size)
-    }
-
-    fun addData(data: List<Post>) {
-        hasMoreData = data.size > 0
-        val oldCount = postList.size
-        postList.addAll(data)
-        notifyItemRangeInserted(oldCount, postList.size)
-    }
-
-    fun addData(data: Post) {
-        val oldCount = postList.size
-        postList.add(data)
-        notifyItemRangeInserted(oldCount, postList.size)
+    fun submitList(data: List<Post>) {
+        differ.submitList(data)
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (hasMoreData && position == postList.size - 1) {
+        if (hasMoreData && position == differ.currentList.size - 1) {
             loadMoreRequestListener?.onLoadMore()
         }
-        return if (postList[position].rid == 0) TYPE_THREAD_POST else TYPE_ITEM
+        return if (differ.currentList[position].rid == 0) TYPE_THREAD_POST else TYPE_ITEM
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         return if (viewType == TYPE_THREAD_POST) {
             val vh =
-                VH(LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false))
+                PostViewHolder(
+                    LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false)
+                )
             vh.setOnItemClickListener(itemClickListener)
             vh.setOnMenuClickListener(itemMenuListener)
             vh
         } else {
-            val vh = VH(
+            val vh = PostViewHolder(
                 LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_thread_message, parent, false)
             )
@@ -129,7 +116,8 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    internal inner class IconTarget(private val holder: VH) : CustomTarget<Drawable?>(48, 48) {
+    internal inner class IconTarget(private val holder: PostViewHolder) :
+        CustomTarget<Drawable?>(48, 48) {
         override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable?>?) {
             holder.replyToTextView?.setCompoundDrawablesWithIntrinsicBounds(
                 resource,
@@ -149,10 +137,9 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val type = getItemViewType(position)
-        val holder = viewHolder as VH
-        val post = postList[position]
+        val post = differ.currentList[position]
         val isThread = type != TYPE_THREAD_POST
         Glide.with(holder.itemView.context)
             .load(post.user.avatar)
@@ -194,8 +181,10 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             holder.photoLayout.visibility = View.GONE
         }
         if (!isThread) {
-            val replies = if (post.replies > 0) post.replies else holder.itemView.context.getString(R.string.reply)
-            val likes = if (post.likes > 0) post.likes else holder.itemView.context.getString(R.string.recommend)
+            val replies =
+                if (post.replies > 0) post.replies else holder.itemView.context.getString(R.string.reply)
+            val likes =
+                if (post.likes > 0) post.likes else holder.itemView.context.getString(R.string.recommend)
             holder.repliesTextView?.visibility = View.VISIBLE
             holder.repliesTextView?.text = "$replies"
             holder.likesTextView?.visibility = View.VISIBLE
@@ -228,11 +217,11 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     fun getItem(position: Int): Post? {
-        return if (position >= postList.size) null else postList[position]
+        return differ.currentList[position]
     }
 
     override fun getItemCount(): Int {
-        return if (postList.isEmpty()) 0 else postList.size
+        return differ.currentList.size
     }
 
     fun setOnLoadMoreRequestListener(loadMoreRequestListener: OnLoadMoreRequestListener?) {
@@ -240,13 +229,13 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     val items: List<Post>
-        get() = postList
+        get() = differ.currentList
 
     interface OnLoadMoreRequestListener {
         fun onLoadMore()
     }
 
-    internal class VH(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
         var container: ViewGroup
         var upicImageView: ImageView
         var usernameTextView: TextView
@@ -353,7 +342,8 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 tagLine.append(" ")
                 nextSpanStart += text.length + 1
             }
-            val formattedMessage = MessageUtils.formatMessage(StringUtils.defaultString(jmsg.getBody()))
+            val formattedMessage =
+                MessageUtils.formatMessage(StringUtils.defaultString(jmsg.getBody()))
             val text = HtmlCompat.fromHtml(
                 formattedMessage,
                 HtmlCompat.FROM_HTML_MODE_COMPACT
@@ -399,5 +389,15 @@ class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         private const val TYPE_ITEM = 0
         private const val TYPE_THREAD_POST = 2
+
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Post>() {
+            override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
+                return oldItem.id == newItem.id
+            }
+
+            override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
+                return oldItem.likes == newItem.likes && oldItem.getBody() == newItem.getBody()
+            }
+        }
     }
 }

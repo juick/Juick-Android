@@ -115,9 +115,9 @@ open class FeedFragment: Fragment() {
                     stopRefreshing()
                     resource.data?.let {
                         if (firstPage) {
-                            adapter.newData(it)
+                            adapter.submitList(it)
                         } else {
-                            adapter.addData(it)
+                            adapter.submitList(adapter.items + it)
                         }
                     }
                 }
@@ -130,7 +130,7 @@ open class FeedFragment: Fragment() {
                     }
                 }
             }
-        }.launchIn(lifecycleScope)
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
     private fun stopRefreshing() {
         binding.swipeContainer.isRefreshing = false

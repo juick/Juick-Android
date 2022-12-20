@@ -175,7 +175,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                     replies.forEach { reply ->
                         if (adapter.itemCount > 0) {
                             if (adapter.getItem(0)?.mid == reply.mid) {
-                                adapter.addData(reply)
+                                adapter.submitList(adapter.items + reply)
                                 val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
                                 val total = adapter.items.size - 1 - 1
                                 if (lastVisible == total) {
@@ -196,7 +196,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 withContext(Dispatchers.Main) {
                     model.list.visibility = View.VISIBLE
                     model.progressBar.visibility = View.GONE
-                    adapter.newData(posts)
+                    adapter.submitList(posts)
                     if (scrollToEnd) {
                         model.list.layoutManager?.smoothScrollToPosition(model.list,
                             RecyclerView.State(), posts.size - 1)
