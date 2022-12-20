@@ -17,9 +17,7 @@
 package com.juick.android.screens.chats
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -38,15 +36,15 @@ import com.juick.android.Utils
 import com.juick.api.model.Chat
 import com.juick.databinding.FragmentDialogListBinding
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter
+import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.launch
 
 /**
  *
  * @author ugnich
  */
-class ChatsFragment : Fragment() {
-    private var _model: FragmentDialogListBinding? = null
-    private val model get() = _model!!
+class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
+    private val model by viewBinding(FragmentDialogListBinding::bind)
     private val chatsAdapter: DialogsListAdapter<Chat> =
         DialogsListAdapter { imageView: ImageView, url: String?, _: Any? ->
             Glide.with(imageView.context)
@@ -65,15 +63,6 @@ class ChatsFragment : Fragment() {
             action.uname = dialog.dialogName
             navController.navigate(action)
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _model = FragmentDialogListBinding.inflate(inflater, container, false)
-        return model.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -147,10 +136,5 @@ class ChatsFragment : Fragment() {
     private fun setError(message: String) {
         model.errorText.visibility = View.VISIBLE
         model.errorText.text = message
-    }
-
-    override fun onDestroyView() {
-        _model = null
-        super.onDestroyView()
     }
 }

@@ -46,6 +46,7 @@ import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.android.screens.FeedAdapter
 import com.juick.databinding.FragmentThreadBinding
 import com.juick.util.StringUtils
+import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -56,8 +57,7 @@ import java.io.FileNotFoundException
  * @author Ugnich Anton
  */
 class ThreadFragment : Fragment(R.layout.fragment_thread) {
-    private var _model: FragmentThreadBinding? = null
-    private val model get () = _model!!
+    private val model by viewBinding(FragmentThreadBinding::bind)
     private var rid = 0
     private var attachmentUri: Uri? = null
     private var attachmentMime: String? = null
@@ -87,7 +87,6 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _model = FragmentThreadBinding.bind(view)
         mid = args.mid
         scrollToEnd = args.scrollToEnd
         if (mid == 0) {
@@ -255,10 +254,5 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 navController.navigate(R.id.thread, args.toBundle())
             }
         }
-    }
-
-    override fun onDestroyView() {
-        _model = null
-        super.onDestroyView()
     }
 }

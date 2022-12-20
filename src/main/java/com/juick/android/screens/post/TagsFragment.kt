@@ -17,7 +17,6 @@
 package com.juick.android.screens.post
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -28,7 +27,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -37,23 +35,15 @@ import com.juick.R
 import com.juick.android.Status
 import com.juick.databinding.FragmentTagsListBinding
 import com.juick.databinding.ItemTagBinding
+import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.launch
 
 /**
  *
  * @author Ugnich Anton
  */
-class TagsFragment : BottomSheetDialogFragment() {
-    private var _model: FragmentTagsListBinding? = null
-    private val model get() = _model!!
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _model = FragmentTagsListBinding.inflate(inflater, container, false)
-        return model.root
-    }
+class TagsFragment : BottomSheetDialogFragment(R.layout.fragment_tags_list) {
+    private val model by viewBinding(FragmentTagsListBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -180,10 +170,5 @@ class TagsFragment : BottomSheetDialogFragment() {
                 }
             }
         }
-    }
-
-    override fun onDestroyView() {
-        _model = null
-        super.onDestroyView()
     }
 }

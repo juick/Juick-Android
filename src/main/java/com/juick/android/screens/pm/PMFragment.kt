@@ -34,6 +34,7 @@ import com.juick.android.widget.util.hideKeyboard
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentPmBinding
 import com.stfalcon.chatkit.messages.MessagesListAdapter
+import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -45,8 +46,7 @@ import kotlinx.coroutines.withContext
  * @author ugnich
  */
 class PMFragment : Fragment(R.layout.fragment_pm) {
-    private var _model: FragmentPmBinding? = null
-    private val model get() = _model!!
+    private val model by viewBinding(FragmentPmBinding::bind)
     private lateinit var vm: PMViewModel
     private lateinit var adapter: MessagesListAdapter<Post>
     private lateinit var uname: String
@@ -54,7 +54,6 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _model = FragmentPmBinding.bind(view)
         uname = args.uname
         vm = ViewModelProvider(this, PMViewModelFactory(uname))[PMViewModel::class.java]
         model.input.setInputListener { input: CharSequence ->
@@ -125,9 +124,4 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
             val total = adapter.itemCount - 1
             return lastVisible == total
         }
-
-    override fun onDestroyView() {
-        _model = null
-        super.onDestroyView()
-    }
 }

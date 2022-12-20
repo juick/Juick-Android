@@ -17,9 +17,7 @@
 package com.juick.android.screens
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -35,24 +33,17 @@ import com.juick.android.Status
 import com.juick.android.Utils
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
 import com.juick.databinding.FragmentPostsPageBinding
+import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 /**
  * Created by gerc on 03.06.2016.
  */
-open class FeedFragment: Fragment() {
+open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
     internal lateinit var vm: FeedViewModel
 
-    private var _binding: FragmentPostsPageBinding? = null
-    private val binding get() = _binding!!
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentPostsPageBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+    private val binding by viewBinding(FragmentPostsPageBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -143,9 +134,5 @@ open class FeedFragment: Fragment() {
         binding.list.visibility = View.GONE
         binding.errorText.visibility = View.VISIBLE
         binding.errorText.text = message
-    }
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

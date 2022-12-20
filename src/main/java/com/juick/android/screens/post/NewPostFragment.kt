@@ -38,6 +38,7 @@ import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.databinding.FragmentNewPostBinding
 import com.juick.util.StringUtils
+import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -45,23 +46,13 @@ import java.io.IOException
 /**
  * Created by alx on 02.01.17.
  */
-class NewPostFragment : Fragment() {
+class NewPostFragment : Fragment(R.layout.fragment_new_post) {
     private var attachmentUri: Uri? = null
     private var attachmentMime: String? = null
 
-    private var _model: FragmentNewPostBinding? = null
-    private val model get() = _model!!
+    private val model by viewBinding(FragmentNewPostBinding::bind)
     private lateinit var attachmentLauncher: ActivityResultLauncher<String>
     private val args by navArgs<NewPostFragmentArgs>()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _model = FragmentNewPostBinding.inflate(inflater, container, false)
-        return model.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -171,10 +162,5 @@ class NewPostFragment : Fragment() {
         val textLength = model.editMessage.text?.length ?: 0
         model.editMessage.setSelection(textLength, textLength)
         model.editMessage.requestFocus()
-    }
-
-    override fun onDestroyView() {
-        _model = null
-        super.onDestroyView()
     }
 }

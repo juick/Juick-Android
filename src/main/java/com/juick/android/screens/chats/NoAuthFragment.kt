@@ -16,26 +16,17 @@
  */
 package com.juick.android.screens.chats
 
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.juick.App
+import com.juick.R
 import com.juick.android.SignInActivity
 import com.juick.databinding.FragmentNoAuthBinding
+import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 
-class NoAuthFragment : Fragment() {
-    private var _binding: FragmentNoAuthBinding? = null
-    private val binding get() = _binding!!
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentNoAuthBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+class NoAuthFragment : Fragment(R.layout.fragment_no_auth) {
+    private val binding by viewBinding(FragmentNoAuthBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -43,10 +34,5 @@ class NoAuthFragment : Fragment() {
             App.instance.signInStatus.value =
                 SignInActivity.SignInStatus.SIGN_IN_PROGRESS
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

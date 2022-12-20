@@ -23,23 +23,10 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.juick.databinding.FragmentMeBinding
+import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 
 /**
  * Created by alx on 13.12.16.
  */
 class MeFragment : Fragment(R.layout.fragment_me) {
-    private var model: FragmentMeBinding? = null
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        model = FragmentMeBinding.inflate(inflater, container, false)
-        return model!!.root
-    }
-
-    override fun onDestroyView() {
-        model = null
-        super.onDestroyView()
-    }
 }

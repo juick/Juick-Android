@@ -151,6 +151,8 @@ dependencies {
     implementation 'com.github.vitalyster:ChatKit:5e99a8bf3c'
     huaweiImplementation 'com.huawei.hms:push:6.7.0.300'
 
+    implementation 'com.github.Zhuinden:fragmentviewbindingdelegate-kt:1.0.2'
+
     implementation 'androidx.multidex:multidex:2.0.1'
 
     // Fragment testing
