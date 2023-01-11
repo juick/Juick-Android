@@ -331,6 +331,15 @@ class MainActivity : AppCompatActivity() {
         if (profileItem != null && avatar != null) {
             profileItem.actionView?.findViewById<ImageView>(R.id.profile_image)
                 ?.setImageBitmap(avatar)
+            profileItem.actionView?.setOnClickListener {
+                onOptionsItemSelected(profileItem)
+            }
+        }
+        val discussionsItem = menu.findItem(R.id.discussions)
+        if (discussionsItem != null) {
+            discussionsItem.actionView?.setOnClickListener {
+                onOptionsItemSelected(discussionsItem)
+            }
         }
         return super.onCreateOptionsMenu(menu)
     }

@@ -26,11 +26,11 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
     <item android:id="@+id/discussions"
         android:title="Discussions"
-        android:icon="@drawable/ic_ei_bell"
+        app:actionLayout="@layout/menu_layout_discussions"
         app:showAsAction="always"/>
     <item android:id="@+id/action_profile"
         android:title="Profile"
         android:icon="@drawable/av_96"
-        app:actionLayout="@layout/profile_menu_layout"
+        app:actionLayout="@layout/menu_layout_profile"
         app:showAsAction="always"/>
 </menu>
