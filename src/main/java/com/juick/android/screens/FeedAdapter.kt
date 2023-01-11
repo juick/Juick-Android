@@ -209,6 +209,14 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
         holder.menuImageView.setOnClickListener {
             itemMenuListener?.onItemClick(it, post)
         }
+        holder.itemView.setOnLongClickListener {
+            itemMenuListener?.onItemClick(it, post)
+            true
+        }
+        holder.textTextView.setOnLongClickListener {
+            itemMenuListener?.onItemClick(it, post)
+            true
+        }
         holder.itemView.setOnClickListener {
             itemClickListener?.invoke(it, position)
         }
