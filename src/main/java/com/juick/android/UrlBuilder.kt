@@ -93,6 +93,12 @@ class UrlBuilder : Parcelable {
             return url
         }
 
+        fun search(search: String) : UrlBuilder {
+            val url = UrlBuilder()
+            url.url = "messages?search=$search"
+            return url
+        }
+
         val discussions: UrlBuilder
             get() {
                 val builder = UrlBuilder()

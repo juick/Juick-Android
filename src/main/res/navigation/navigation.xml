@@ -130,4 +130,12 @@
             android:name="uname"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/search"
+        android:name="com.juick.android.screens.search.SearchFragment"
+        android:label="{search}" >
+        <argument
+            android:name="search"
+            app:argType="string" />
+    </fragment>
 </navigation>

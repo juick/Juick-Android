@@ -33,6 +33,8 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -50,6 +52,7 @@ import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.fragment.ThreadFragmentArgs
 import com.juick.android.screens.chats.ChatsFragmentDirections
 import com.juick.android.screens.home.HomeFragmentDirections
+import com.juick.android.screens.search.SearchFragmentArgs
 import com.juick.android.updater.Updater
 import com.juick.android.widget.util.REQUEST_CODE_SYNC_CONTACTS
 import com.juick.android.widget.util.setAppBarElevation
@@ -272,6 +275,22 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.toolbar, menu)
+        val searchView = menu.findItem(R.id.action_search).actionView as SearchView
+        searchView.setOnQueryTextListener(object : OnQueryTextListener {
+            override fun onQueryTextSubmit(s: String): Boolean {
+                searchView.clearFocus()
+                val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
+                val navController = navHostFragment.navController
+                val args = SearchFragmentArgs.Builder(s)
+                    .build()
+                navController.navigate(R.id.search, args.toBundle())
+                return true
+            }
+
+            override fun onQueryTextChange(s: String): Boolean {
+                return true
+            }
+        })
         return super.onCreateOptionsMenu(menu)
     }
 
