@@ -49,8 +49,8 @@ import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.fragment.ThreadFragmentArgs
 import com.juick.android.screens.chats.ChatsFragmentDirections
-import com.juick.android.screens.chats.ChatsViewModel
 import com.juick.android.screens.home.HomeFragmentDirections
+import com.juick.android.updater.Updater
 import com.juick.android.widget.util.REQUEST_CODE_SYNC_CONTACTS
 import com.juick.android.widget.util.setAppBarElevation
 import com.juick.api.model.Post
@@ -164,6 +164,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         lifecycleScope.launch {
+            Updater(this@MainActivity)
+                .checkUpdate()
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 ProfileData.refresh()
                 App.instance.signInStatus.collect { signInStatus: SignInStatus ->

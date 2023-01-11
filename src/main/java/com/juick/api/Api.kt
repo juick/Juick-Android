@@ -16,11 +16,14 @@
  */
 package com.juick.api
 
+import com.juick.android.updater.Release
 import com.juick.api.model.*
 import com.juick.api.model.Tag
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.http.*
+import java.io.File
 
 /**
  * Created by gerc on 14.02.2016.
@@ -68,4 +71,9 @@ interface Api {
         @Field("username") username: String?, @Field("password") password: String?,
         @Field("verificationCode") verificationCode: String?
     )
+    @GET("apps/android/releases")
+    suspend fun releases(): List<Release>
+
+    @GET
+    suspend fun download(@Url url: String): ResponseBody
 }
