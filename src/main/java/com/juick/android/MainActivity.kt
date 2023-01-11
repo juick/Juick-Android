@@ -276,13 +276,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.toolbar, menu)
         val searchView = menu.findItem(R.id.action_search).actionView as SearchView
+        searchView.isSubmitButtonEnabled = true
         searchView.setOnQueryTextListener(object : OnQueryTextListener {
             override fun onQueryTextSubmit(s: String): Boolean {
-                searchView.clearFocus()
+                model.toolbar.collapseActionView()
                 val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
                 val navController = navHostFragment.navController
-                val args = SearchFragmentArgs.Builder(s)
-                    .build()
+                val args = SearchFragmentArgs.Builder(s).build()
                 navController.navigate(R.id.search, args.toBundle())
                 return true
             }
