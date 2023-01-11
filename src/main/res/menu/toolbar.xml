@@ -24,11 +24,9 @@
         android:icon="@drawable/ic_ei_search"
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
-    <!-- item
-        android:title="@string/Juick_profile"
-        android:id="@+id/profile"
-        app:showAsAction="always"
+    <item android:id="@+id/action_profile"
+        android:title="Profile"
+        android:icon="@drawable/av_96"
         app:actionLayout="@layout/profile_menu_layout"
-        app:actionProviderClass="com.juick.android.screens.menu.ProfileProvider"
-        / -->
+        app:showAsAction="always"/>
 </menu>

@@ -20,6 +20,8 @@ import android.Manifest
 import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -29,6 +31,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,6 +47,9 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI.onNavDestinationSelected
 import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
 import androidx.navigation.ui.NavigationUI.setupWithNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.material.appbar.AppBarLayout
 import com.juick.App
 import com.juick.BuildConfig
@@ -59,7 +65,9 @@ import com.juick.android.widget.util.setAppBarElevation
 import com.juick.api.model.Post
 import com.juick.databinding.ActivityMainBinding
 import com.juick.util.StringUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 /**
@@ -75,6 +83,7 @@ class MainActivity : AppCompatActivity() {
             loginLauncher.launch(Intent(this, SignInActivity::class.java))
         }
     }
+    private var avatar: Bitmap? = null
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,6 +93,7 @@ class MainActivity : AppCompatActivity() {
         val toolbar = model.toolbar
         //toolbar.inflateMenu(R.menu.toolbar);
         setSupportActionBar(toolbar)
+
         setAppBarElevation(model.appbarLayout)
         //CollapsingToolbarLayout layout = model.collapsingToolbarLayout;
         val navView = model.bottomNav
@@ -174,6 +184,32 @@ class MainActivity : AppCompatActivity() {
                 App.instance.signInStatus.collect { signInStatus: SignInStatus ->
                     if (signInStatus == SignInStatus.SIGN_IN_PROGRESS) {
                         showLogin()
+                    }
+                }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                ProfileData.userProfile.collect {
+                    withContext(Dispatchers.Main) {
+                        val avatarUrl: String = it.avatar
+                        Glide.with(this@MainActivity)
+                            .asBitmap()
+                            .load(avatarUrl)
+                            .placeholder(R.drawable.av_96)
+                            .into(object: CustomTarget<Bitmap>() {
+                                override fun onResourceReady(
+                                    resource: Bitmap,
+                                    transition: Transition<in Bitmap>?
+                                ) {
+                                    avatar = resource
+                                    invalidateOptionsMenu()
+                                }
+
+                                override fun onLoadCleared(placeholder: Drawable?) {
+                                    avatar = null
+                                }
+                            })
                     }
                 }
             }
@@ -291,6 +327,11 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
+        val profileItem = menu.findItem(R.id.action_profile)
+        if (profileItem != null && avatar != null) {
+            profileItem.actionView?.findViewById<ImageView>(R.id.profile_image)
+                ?.setImageBitmap(avatar)
+        }
         return super.onCreateOptionsMenu(menu)
     }
 
