@@ -138,4 +138,8 @@
             android:name="search"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@id/discussions"
+        android:name="com.juick.android.screens.discussions.DiscussionsFragment"
+        android:label="Discussions" />
 </navigation>

@@ -24,6 +24,10 @@
         android:icon="@drawable/ic_ei_search"
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
+    <item android:id="@+id/discussions"
+        android:title="Discussions"
+        android:icon="@drawable/ic_ei_bell"
+        app:showAsAction="always"/>
     <item android:id="@+id/action_profile"
         android:title="Profile"
         android:icon="@drawable/av_96"
