@@ -103,7 +103,7 @@ android {
     }
     applicationVariants.all { variant ->
         variant.outputs.all {
-            outputFileName = "Juick-${variant.flavorName}-v${variant.versionName}.${variant.versionCode}.apk"
+            outputFileName = "Juick-${variant.flavorName}-v${variant.versionName}.apk"
         }
     }
 }
