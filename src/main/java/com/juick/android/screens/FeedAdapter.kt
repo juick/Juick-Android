@@ -36,7 +36,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.text.getSpans
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -49,6 +48,7 @@ import com.bumptech.glide.request.transition.Transition
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
+import com.juick.android.JuickMessageMenuListener
 import com.juick.android.MainActivity
 import com.juick.android.widget.util.BlurTransformation
 import com.juick.android.widget.util.setCompatElevation
@@ -65,7 +65,7 @@ import com.juick.util.StringUtils
 class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK) {
     private var loadMoreRequestListener: OnLoadMoreRequestListener? = null
     private var itemClickListener: ((View?, Int) -> Unit)? = null
-    var itemMenuListener: OnItemClickListener? = null
+    private var itemMenuListener: OnItemClickListener? = null
     private var scrollListener: ((View?, Int, Int) -> Unit)? = null
     private var hasMoreData = true
 
@@ -92,16 +92,12 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
                 PostViewHolder(
                     LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false)
                 )
-            vh.setOnItemClickListener(itemClickListener)
-            vh.setOnMenuClickListener(itemMenuListener)
             vh
         } else {
             val vh = PostViewHolder(
                 LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_thread_message, parent, false)
             )
-            vh.setOnItemClickListener(itemClickListener)
-            vh.setOnMenuClickListener(itemMenuListener)
             vh.replyToTextView?.setOnClickListener { v: View ->
                 val p = v.tag as Post?
                 p?.let {
@@ -210,6 +206,15 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
         } else {
             holder.replyToTextView?.visibility = View.INVISIBLE
         }
+        holder.menuImageView.setOnClickListener {
+            itemMenuListener?.onItemClick(it, post)
+        }
+        holder.itemView.setOnClickListener {
+            itemClickListener?.invoke(it, position)
+        }
+        holder.textTextView.setOnClickListener {
+            itemClickListener?.invoke(it, position)
+        }
     }
 
     fun setOnLoadMoreRequestListener(loadMoreRequestListener: OnLoadMoreRequestListener?) {
@@ -220,7 +225,7 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
         fun onLoadMore()
     }
 
-    class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var container: ViewGroup
         var upicImageView: ImageView
         var usernameTextView: TextView
@@ -235,8 +240,6 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
         var replyToTextView: TextView?
         var menuImageView: ImageView
         var backImageView: ImageView?
-        var itemClickListener: ((View?, Int) -> Unit)? = null
-        var menuClickListener: OnItemClickListener? = null
         var bottomBarDividerView: View?
 
         init {
@@ -269,25 +272,6 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
             repliesTextView?.setDrawableTint()
             backImageView = itemView.findViewById(R.id.back_imageView)
             menuImageView = itemView.findViewById(R.id.menu_dots)
-            menuImageView.setOnClickListener(this)
-            itemView.setOnClickListener(this)
-            textTextView.setOnClickListener(this)
-        }
-
-        override fun onClick(v: View) {
-            if (v.id == R.id.menu_dots) {
-                menuClickListener?.onItemClick(v, bindingAdapterPosition)
-                return
-            }
-            itemClickListener?.invoke(v, bindingAdapterPosition)
-        }
-
-        fun setOnItemClickListener(listener: ((View?, Int) -> Unit)?) {
-            itemClickListener = listener
-        }
-
-        fun setOnMenuClickListener(listener: OnItemClickListener?) {
-            menuClickListener = listener
         }
     }
 
@@ -295,7 +279,7 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
         this.itemClickListener = itemClickListener
     }
 
-    fun setOnMenuListener(listener: OnItemClickListener?) {
+    fun setOnMenuListener(listener: JuickMessageMenuListener) {
         itemMenuListener = listener
     }
 
@@ -304,7 +288,7 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
     }
 
     interface OnItemClickListener {
-        fun onItemClick(view: View?, pos: Int)
+        fun onItemClick(view: View?, post: Post)
     }
 
     companion object {

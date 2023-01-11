@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -18,10 +18,11 @@ package com.juick.android
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
+import android.view.Menu
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
@@ -38,120 +39,122 @@ import kotlinx.coroutines.launch
  * @author Ugnich Anton
  */
 class JuickMessageMenuListener(
-    private val activity: Context, private val view: View,
-    private val me: User, private val postList: List<Post>
-) : DialogInterface.OnClickListener,
-    FeedAdapter.OnItemClickListener {
-    private var selectedPost: Post? = null
-    private val currentActions = IntArray(MENU_ACTION_SOME_LAST_CMD)
-    private fun confirmAction(context: Context, resId: Int, action: Runnable) {
+    private val activity: Context, private val me: User) : FeedAdapter.OnItemClickListener {
+    private fun confirmAction(context: Context, resId: Int, action: Runnable) : Boolean {
         val builder = AlertDialog.Builder(context)
+        var result = false
         builder.setIcon(android.R.drawable.ic_dialog_alert)
         builder.setMessage(context.resources.getString(resId))
-        builder.setPositiveButton(R.string.Yes) { _, _ -> action.run() }
+        builder.setPositiveButton(R.string.Yes) { _, _ -> action.run(); result = true }
         builder.setNegativeButton(R.string.Cancel, null)
         builder.show()
+        return result
     }
 
-    override fun onItemClick(view: View?, pos: Int) {
+    override fun onItemClick(view: View?, post: Post) {
         val context = view?.context as Context
-        selectedPost = postList[pos]
-        val items: Array<CharSequence?>
-        var menuLength: Int
+        val popupMenu = PopupMenu(context, view)
         if (me.uid == 0) {
-            menuLength = 2
-            items = listOf(
-                "@${selectedPost!!.user.uname} ${context.getString(R.string.blog)}",
+            popupMenu.menu.add(
+                Menu.NONE, MENU_ACTION_BLOG, Menu.NONE,
+                "@${post.user.uname} ${context.getString(R.string.blog)}"
+            )
+            popupMenu.menu.add(
+                Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
                 context.getString(R.string.Share)
-            ).toTypedArray()
-            currentActions[0] = MENU_ACTION_BLOG
-            currentActions[1] = MENU_ACTION_SHARE
-        } else if (selectedPost!!.user.uid == me.uid) {
-            menuLength = 1
-            items = arrayOfNulls(menuLength)
-            items[0] =
-                if (selectedPost!!.rid == 0)
-                    context.getString(R.string.DeletePost) else
-                    context.getString(R.string.DeleteComment)
-            currentActions[0] = MENU_ACTION_DELETE_POST
+            )
+        } else if (post.user.uid == me.uid) {
+            val itemText = if (post.rid == 0)
+                context.getString(R.string.DeletePost) else
+                context.getString(R.string.DeleteComment)
+            popupMenu.menu.add(
+                Menu.NONE, MENU_ACTION_DELETE_POST, Menu.NONE,
+                itemText
+            )
         } else {
-            menuLength = 4
-            if (selectedPost!!.rid == 0) {
-                menuLength++
+            if (post.rid == 0) {
+                popupMenu.menu.add(
+                    Menu.NONE, MENU_ACTION_RECOMMEND, Menu.NONE,
+                    context.getString(R.string.Recommend_message)
+                )
             }
-            items = arrayOfNulls(menuLength)
-            var i = 0
-            if (selectedPost!!.rid == 0) {
-                items[i++] = context.getString(R.string.Recommend_message)
-                currentActions[i - 1] = MENU_ACTION_RECOMMEND
-            }
-            val UName = selectedPost!!.user.uname
-            items[i++] = "@$UName ${view.context.getString(R.string.blog)}"
-            currentActions[i - 1] = MENU_ACTION_BLOG
-            items[i++] = context.resources.getString(R.string.Subscribe_to) + " @" + UName
-            currentActions[i - 1] = MENU_ACTION_SUBSCRIBE
-            items[i++] = context.resources.getString(R.string.Blacklist) + " @" + UName
-            currentActions[i - 1] = MENU_ACTION_BLACKLIST
-            items[i++] = context.resources.getString(R.string.Share)
-            currentActions[i - 1] = MENU_ACTION_SHARE
+            val UName = post.user.uname
+            popupMenu.menu.add(
+                Menu.NONE, MENU_ACTION_BLOG, Menu.NONE,
+                "@$UName ${view.context.getString(R.string.blog)}"
+            )
+            popupMenu.menu.add(
+                Menu.NONE, MENU_ACTION_SUBSCRIBE, Menu.NONE,
+                context.resources.getString(R.string.Subscribe_to) + " @" + UName
+            )
+            popupMenu.menu.add(
+                Menu.NONE, MENU_ACTION_BLACKLIST, Menu.NONE,
+                context.resources.getString(R.string.Blacklist) + " @" + UName
+            )
+            popupMenu.menu.add(
+                Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
+                context.resources.getString(R.string.Share)
+            )
         }
-        val builder = AlertDialog.Builder(context)
-        builder.setItems(items, this)
-        builder.show()
+        popupMenu.setOnMenuItemClickListener {
+            val action = it.itemId
+            val mid = post.mid
+            val rid = post.rid
+            val uname = post.user.uname
+            when (action) {
+                MENU_ACTION_BLOG -> {
+                    true
+                }
+                MENU_ACTION_RECOMMEND -> confirmAction(
+                    activity,
+                    R.string.Are_you_sure_recommend
+                ) {
+                    processCommand("! #${mid}")
+                }
+                MENU_ACTION_SUBSCRIBE -> confirmAction(
+                    activity,
+                    R.string.Are_you_sure_subscribe
+                ) {
+                    processCommand("S @${uname}")
+                }
+                MENU_ACTION_BLACKLIST -> confirmAction(
+                    activity,
+                    R.string.Are_you_sure_blacklist
+                ) {
+                    processCommand("BL @${uname}")
+                }
+                MENU_ACTION_DELETE_POST -> confirmAction(activity, R.string.Are_you_sure_delete) {
+                    processCommand("D #" +
+                            if (rid == 0) "$mid" else "$mid/$rid")
+                    val navController = Navigation.findNavController(view)
+                    navController.popBackStack(R.id.home, false)
+                    if (rid > 0) {
+                        val args = ThreadFragmentArgs.Builder()
+                            .setMid(mid)
+                            .setScrollToEnd(true)
+                            .build()
+                        navController.navigate(R.id.thread, args.toBundle())
+                    } else {
+                        navController.navigate(R.id.home)
+                    }
+                }
+                MENU_ACTION_SHARE -> {
+                    val intent = Intent(Intent.ACTION_SEND)
+                    intent.type = "text/plain"
+                    intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/$mid")
+                    activity.startActivity(intent)
+                    true
+                }
+                else -> { false }
+            }
+        }
+        popupMenu.show()
     }
 
     private fun processCommand(command: String) {
         (activity as LifecycleOwner).lifecycleScope.launch {
             App.instance.sendMessage(command) {
                 Toast.makeText(activity, it.text, Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
-    override fun onClick(dialog: DialogInterface, which: Int) {
-        val action = currentActions[which]
-        val mid = selectedPost!!.mid
-        val rid = selectedPost!!.rid
-        val uname = selectedPost!!.user.uname
-        when (action) {
-            MENU_ACTION_RECOMMEND -> confirmAction(
-                activity,
-                R.string.Are_you_sure_recommend
-            ) {
-                processCommand("! #${mid}")
-            }
-            MENU_ACTION_SUBSCRIBE -> confirmAction(
-                activity,
-                R.string.Are_you_sure_subscribe
-            ) {
-                processCommand("S @${uname}")
-            }
-            MENU_ACTION_BLACKLIST -> confirmAction(
-                activity,
-                R.string.Are_you_sure_blacklist
-            ) {
-                processCommand("BL @${uname}")
-            }
-            MENU_ACTION_DELETE_POST -> confirmAction(activity, R.string.Are_you_sure_delete) {
-                processCommand("D #" +
-                        if (rid == 0) "$mid" else "$mid/$rid")
-                val navController = Navigation.findNavController(view)
-                navController.popBackStack(R.id.home, false)
-                if (rid > 0) {
-                    val args = ThreadFragmentArgs.Builder()
-                        .setMid(mid)
-                        .setScrollToEnd(true)
-                        .build()
-                    navController.navigate(R.id.thread, args.toBundle())
-                } else {
-                    navController.navigate(R.id.home)
-                }
-            }
-            MENU_ACTION_SHARE -> {
-                val intent = Intent(Intent.ACTION_SEND)
-                intent.type = "text/plain"
-                intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/$mid")
-                activity.startActivity(intent)
             }
         }
     }
@@ -163,6 +166,5 @@ class JuickMessageMenuListener(
         private const val MENU_ACTION_BLACKLIST = 4
         private const val MENU_ACTION_SHARE = 5
         private const val MENU_ACTION_DELETE_POST = 6
-        private const val MENU_ACTION_SOME_LAST_CMD = 7
     }
 }

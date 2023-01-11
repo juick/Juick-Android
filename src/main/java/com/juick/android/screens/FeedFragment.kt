@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import com.juick.App
 import com.juick.R
@@ -34,8 +35,10 @@ import com.juick.android.Utils
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
 import com.juick.databinding.FragmentPostsPageBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 /**
  * Created by gerc on 03.06.2016.
@@ -87,12 +90,16 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
                 .appendQueryParameter("ts", "${System.currentTimeMillis()}")
                 .build().toString()
         }
-        ProfileData.userProfile.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach {
-            adapter.setOnMenuListener(JuickMessageMenuListener(
-                requireActivity(),
-                requireView(), it, adapter.currentList
-            ))
-        }.launchIn(lifecycleScope)
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                ProfileData.userProfile.collect {
+                    adapter.setOnMenuListener(JuickMessageMenuListener(
+                        requireActivity(), it
+                    ))
+                }
+            }
+        }
+
         vm.feed.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach { resource ->
             when(resource.status) {
                 Status.LOADING -> {
