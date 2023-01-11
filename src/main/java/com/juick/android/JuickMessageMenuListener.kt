@@ -30,6 +30,7 @@ import com.juick.App
 import com.juick.R
 import com.juick.android.fragment.ThreadFragmentArgs
 import com.juick.android.screens.FeedAdapter
+import com.juick.android.screens.blog.BlogFragmentArgs
 import com.juick.api.model.Post
 import com.juick.api.model.User
 import kotlinx.coroutines.launch
@@ -103,6 +104,10 @@ class JuickMessageMenuListener(
             val uname = post.user.uname
             when (action) {
                 MENU_ACTION_BLOG -> {
+                    val navController = Navigation.findNavController(view)
+                    val args = BlogFragmentArgs.Builder(uname)
+                        .build()
+                    navController.navigate(R.id.blog, args.toBundle())
                     true
                 }
                 MENU_ACTION_RECOMMEND -> confirmAction(

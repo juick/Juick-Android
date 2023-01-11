@@ -122,4 +122,12 @@
         tools:layout="@layout/fragment_tags_list"
         android:name="com.juick.android.screens.post.TagsFragment"
         android:label="@string/tags" />
+    <fragment
+        android:id="@+id/blog"
+        android:name="com.juick.android.screens.blog.BlogFragment"
+        android:label="{uname}" >
+        <argument
+            android:name="uname"
+            app:argType="string" />
+    </fragment>
 </navigation>
