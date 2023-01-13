@@ -52,6 +52,15 @@ class JuickMessageMenuListener(
         return result
     }
 
+    private fun likeMessage(post: Post) : Boolean {
+        return confirmAction(
+            activity,
+            R.string.Are_you_sure_recommend
+        ) {
+            processCommand("! #${post.mid}")
+        }
+    }
+
     override fun onItemClick(view: View?, post: Post) {
         val context = view?.context as Context
         val popupMenu = PopupMenu(context, view)
@@ -110,12 +119,7 @@ class JuickMessageMenuListener(
                     navController.navigate(R.id.blog, args.toBundle())
                     true
                 }
-                MENU_ACTION_RECOMMEND -> confirmAction(
-                    activity,
-                    R.string.Are_you_sure_recommend
-                ) {
-                    processCommand("! #${mid}")
-                }
+                MENU_ACTION_RECOMMEND -> likeMessage(post)
                 MENU_ACTION_SUBSCRIBE -> confirmAction(
                     activity,
                     R.string.Are_you_sure_subscribe
@@ -154,6 +158,10 @@ class JuickMessageMenuListener(
             }
         }
         popupMenu.show()
+    }
+
+    override fun onLikeClick(view: View?, post: Post) {
+        likeMessage(post)
     }
 
     private fun processCommand(command: String) {

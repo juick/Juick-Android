@@ -195,6 +195,9 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
                 holder.backImageView?.visibility = View.GONE
             }
         }
+        holder.likesTextView?.setOnClickListener {
+            itemMenuListener?.onLikeClick(holder.likesTextView, post)
+        }
         if (post.rid > 0 && post.replyto > 0) {
             Glide.with(holder.itemView.context)
                 .load(post.to?.avatar)
@@ -297,6 +300,7 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
 
     interface OnItemClickListener {
         fun onItemClick(view: View?, post: Post)
+        fun onLikeClick(view: View?, post: Post)
     }
 
     companion object {
