@@ -20,16 +20,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/action_search"
-        android:title="Search"
+        android:title="@string/search"
         android:icon="@drawable/ic_ei_search"
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
     <item android:id="@+id/discussions"
-        android:title="Discussions"
+        android:title="@string/Discussions"
         app:actionLayout="@layout/menu_layout_discussions"
         app:showAsAction="always"/>
     <item android:id="@+id/action_profile"
-        android:title="Profile"
+        android:title="@string/Me"
         android:icon="@drawable/av_96"
         app:actionLayout="@layout/menu_layout_profile"
         app:showAsAction="always"/>

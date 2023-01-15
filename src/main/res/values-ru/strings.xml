@@ -92,6 +92,8 @@
 
     <!-- Chats -->
     <string name="you_have_no_direct_messages">У вас нет личных сообщений</string>
+
     <string name="downloading_update">Скачивание обновления…</string>
+    <string name="search">Поиск</string>
 
 </resources>
