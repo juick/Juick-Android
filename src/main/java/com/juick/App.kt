@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -18,6 +18,7 @@ package com.juick
 
 import android.accounts.AccountManager
 import android.net.Uri
+import android.os.Build
 import android.text.TextUtils
 import android.util.Log
 import android.webkit.MimeTypeMap
@@ -38,6 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import okhttp3.*
+import okhttp3.internal.Version
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
@@ -53,6 +55,8 @@ class App : MultiDexApplication() {
                 val original = chain.request()
                 val requestBuilder = original.newBuilder()
                     .header("Accept", "application/json")
+                    .header("User-Agent", "${getString(R.string.Juick)}/${BuildConfig.VERSION_CODE} " +
+                            "${Version.userAgent()} Android/${Build.VERSION.SDK_INT}")
                     .method(original.method(), original.body())
                 val accountData = accountData
                 if (accountData != null) {
