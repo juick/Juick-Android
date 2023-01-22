@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -62,8 +62,9 @@ import com.juick.util.StringUtils
  *
  * @author Ugnich Anton
  */
-class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK) {
+class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK) {
     private var loadMoreRequestListener: OnLoadMoreRequestListener? = null
+    var postUpdatedListener: OnPostUpdatedListener? = null
     private var itemClickListener: ((View?, Int) -> Unit)? = null
     private var itemMenuListener: OnItemClickListener? = null
     private var scrollListener: ((View?, Int, Int) -> Unit)? = null
@@ -83,11 +84,11 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
         if (hasMoreData && position == currentList.size - 1) {
             loadMoreRequestListener?.onLoadMore()
         }
-        return if (currentList[position].rid == 0) TYPE_THREAD_POST else TYPE_ITEM
+        return if (currentList[position].rid == 0) TYPE_MESSAGE else TYPE_THREAD_REPLY
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        return if (viewType == TYPE_THREAD_POST) {
+        return if (viewType == TYPE_MESSAGE) {
             val vh =
                 PostViewHolder(
                     LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false)
@@ -96,7 +97,7 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
         } else {
             val vh = PostViewHolder(
                 LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_thread_message, parent, false)
+                    .inflate(R.layout.item_thread_reply, parent, false)
             )
             vh.replyToTextView?.setOnClickListener { v: View ->
                 val p = v.tag as Post?
@@ -132,7 +133,7 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val type = getItemViewType(position)
         val post = currentList[position]
-        val isThread = type != TYPE_THREAD_POST
+        val isReply = type != TYPE_MESSAGE
         Glide.with(holder.itemView.context)
             .load(post.user.avatar)
             .transition(DrawableTransitionOptions.withCrossFade())
@@ -172,16 +173,41 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
         } else {
             holder.photoLayout.visibility = View.GONE
         }
-        if (!isThread) {
-            val replies =
-                if (post.replies > 0) post.replies else holder.itemView.context.getString(R.string.reply)
-            val likes =
-                if (post.likes > 0) post.likes else holder.itemView.context.getString(R.string.recommend)
-            holder.repliesTextView?.visibility = View.VISIBLE
-            holder.repliesTextView?.text = "$replies"
-            holder.likesTextView?.visibility = View.VISIBLE
-            holder.likesTextView?.text = "$likes"
-            holder.bottomBarLayout?.setCompatElevation(holder.bottomBarDividerView)
+        if (!isReply) {
+            if (showSubscriptions) {
+                holder.repliesTextView?.setOnClickListener {
+                    itemMenuListener?.onSubscribeToggleClick(holder.repliesTextView, post)
+                }
+                if (post.subscribed) {
+                    holder.repliesTextView?.setCompoundDrawables(
+                        VectorDrawableCompat.create(
+                            holder.itemView.context.resources,
+                            R.drawable.ic_ei_check, null
+                        ), null, null, null
+                    )
+                    holder.repliesTextView?.setDrawableTint()
+                    holder.repliesTextView?.text = holder.itemView.context.getString(R.string.subscribed)
+                } else {
+                    holder.repliesTextView?.setCompoundDrawables(
+                        VectorDrawableCompat.create(
+                            holder.itemView.context.resources,
+                            R.drawable.ic_ei_eye, null
+                        ), null, null, null
+                    )
+                    holder.repliesTextView?.setDrawableTint()
+                    holder.repliesTextView?.text = holder.itemView.context.getString(R.string.subscribe)
+                }
+            } else {
+                val replies =
+                    if (post.replies > 0) post.replies else holder.itemView.context.getString(R.string.reply)
+                val likes =
+                    if (post.likes > 0) post.likes else holder.itemView.context.getString(R.string.recommend)
+                holder.repliesTextView?.visibility = View.VISIBLE
+                holder.repliesTextView?.text = "$replies"
+                holder.likesTextView?.visibility = View.VISIBLE
+                holder.likesTextView?.text = "$likes"
+                holder.bottomBarLayout?.setCompatElevation(holder.bottomBarDividerView)
+            }
         } else {
             if (post.nextRid == post.rid) {
                 holder.backImageView?.visibility = View.VISIBLE
@@ -234,6 +260,11 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
 
     interface OnLoadMoreRequestListener {
         fun onLoadMore()
+    }
+
+    interface OnPostUpdatedListener {
+        fun postLikeChanged(post: Post, isLiked: Boolean)
+        fun postSubscriptionChanged(post: Post, isSubscribed: Boolean)
     }
 
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -301,6 +332,7 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
     interface OnItemClickListener {
         fun onItemClick(view: View?, post: Post)
         fun onLikeClick(view: View?, post: Post)
+        fun onSubscribeToggleClick(view: View?, post: Post)
     }
 
     companion object {
@@ -368,8 +400,8 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
                 .append(textContent)
         }
 
-        private const val TYPE_ITEM = 0
-        private const val TYPE_THREAD_POST = 2
+        private const val TYPE_THREAD_REPLY = 0
+        private const val TYPE_MESSAGE = 2
 
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Post>() {
             override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
@@ -378,6 +410,7 @@ class FeedAdapter : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK)
 
             override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
                 return oldItem.likes == newItem.likes && oldItem.getBody() == newItem.getBody()
+                        && oldItem.subscribed == newItem.subscribed
             }
         }
     }

@@ -44,6 +44,7 @@ import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.hasAuth
 import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.android.screens.FeedAdapter
+import com.juick.api.model.Post
 import com.juick.databinding.FragmentThreadBinding
 import com.juick.util.StringUtils
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
@@ -56,7 +57,7 @@ import java.io.FileNotFoundException
  *
  * @author Ugnich Anton
  */
-class ThreadFragment : Fragment(R.layout.fragment_thread) {
+class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpdatedListener {
     private val model by viewBinding(FragmentThreadBinding::bind)
     private var rid = 0
     private var attachmentUri: Uri? = null
@@ -69,7 +70,8 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = FeedAdapter()
+        adapter = FeedAdapter(showSubscriptions = true)
+        adapter.postUpdatedListener = this
         attachmentLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
                 attachmentUri = uri
@@ -162,7 +164,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect { me ->
                     adapter.setOnMenuListener(JuickMessageMenuListener(
-                        requireActivity(), me
+                        requireActivity(), adapter, me
                     ))
                 }
             }
@@ -253,5 +255,13 @@ class ThreadFragment : Fragment(R.layout.fragment_thread) {
                 navController.navigate(R.id.thread, args.toBundle())
             }
         }
+    }
+
+    override fun postLikeChanged(post: Post, isLiked: Boolean) {
+
+    }
+
+    override fun postSubscriptionChanged(post: Post, isSubscribed: Boolean) {
+        load()
     }
 }

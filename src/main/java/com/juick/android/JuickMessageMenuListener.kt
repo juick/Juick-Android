@@ -32,6 +32,7 @@ import com.juick.android.fragment.ThreadFragmentArgs
 import com.juick.android.screens.FeedAdapter
 import com.juick.android.screens.blog.BlogFragmentArgs
 import com.juick.api.model.Post
+import com.juick.api.model.PostResponse
 import com.juick.api.model.User
 import kotlinx.coroutines.launch
 
@@ -40,7 +41,7 @@ import kotlinx.coroutines.launch
  * @author Ugnich Anton
  */
 class JuickMessageMenuListener(
-    private val activity: Context, private val me: User) : FeedAdapter.OnItemClickListener {
+    private val activity: Context, private val adapter: FeedAdapter, private val me: User) : FeedAdapter.OnItemClickListener {
     private fun confirmAction(context: Context, resId: Int, action: Runnable) : Boolean {
         val builder = AlertDialog.Builder(context)
         var result = false
@@ -57,7 +58,32 @@ class JuickMessageMenuListener(
             activity,
             R.string.Are_you_sure_recommend
         ) {
-            processCommand("! #${post.mid}")
+            processCommand("! #${post.mid}") {
+                adapter.postUpdatedListener?.postLikeChanged(post, true)
+            }
+        }
+    }
+
+    private fun subscribeMessageToggle(post: Post): Boolean {
+        return if (post.subscribed) {
+            confirmAction(
+                activity,
+                R.string.unsubscribe_from_comments
+            ) {
+                processCommand("U #${post.mid}") {
+                    adapter.postUpdatedListener?.postSubscriptionChanged(post, false)
+                }
+
+            }
+        } else {
+            confirmAction(
+                activity,
+                R.string.subscribe_to_comments
+            ) {
+                processCommand("S #${post.mid}") {
+                    adapter.postUpdatedListener?.postSubscriptionChanged(post, true)
+                }
+            }
         }
     }
 
@@ -88,18 +114,18 @@ class JuickMessageMenuListener(
                     context.getString(R.string.Recommend_message)
                 )
             }
-            val UName = post.user.uname
+            val userName = post.user.uname
             popupMenu.menu.add(
                 Menu.NONE, MENU_ACTION_BLOG, Menu.NONE,
-                "@$UName ${view.context.getString(R.string.blog)}"
+                "@$userName ${view.context.getString(R.string.blog)}"
             )
             popupMenu.menu.add(
                 Menu.NONE, MENU_ACTION_SUBSCRIBE, Menu.NONE,
-                context.resources.getString(R.string.Subscribe_to) + " @" + UName
+                context.resources.getString(R.string.Subscribe_to) + " @" + userName
             )
             popupMenu.menu.add(
                 Menu.NONE, MENU_ACTION_BLACKLIST, Menu.NONE,
-                context.resources.getString(R.string.Blacklist) + " @" + UName
+                context.resources.getString(R.string.Blacklist) + " @" + userName
             )
             popupMenu.menu.add(
                 Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
@@ -164,10 +190,15 @@ class JuickMessageMenuListener(
         likeMessage(post)
     }
 
-    private fun processCommand(command: String) {
+    override fun onSubscribeToggleClick(view: View?, post: Post) {
+        subscribeMessageToggle(post)
+    }
+
+    private fun processCommand(command: String, callback: ((PostResponse) -> Unit)? = null) {
         (activity as LifecycleOwner).lifecycleScope.launch {
             App.instance.sendMessage(command) {
                 Toast.makeText(activity, it.text, Toast.LENGTH_LONG).show()
+                callback?.invoke(it)
             }
         }
     }

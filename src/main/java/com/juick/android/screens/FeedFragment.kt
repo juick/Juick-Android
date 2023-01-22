@@ -33,6 +33,7 @@ import com.juick.android.ProfileData
 import com.juick.android.Status
 import com.juick.android.Utils
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
+import com.juick.api.model.Post
 import com.juick.databinding.FragmentPostsPageBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.flow.collect
@@ -43,7 +44,7 @@ import kotlinx.coroutines.launch
 /**
  * Created by gerc on 03.06.2016.
  */
-open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
+open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnPostUpdatedListener {
     internal lateinit var vm: FeedViewModel
 
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
@@ -51,6 +52,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val adapter = FeedAdapter()
+        adapter.postUpdatedListener = this
         binding.list.adapter = adapter
         adapter.setOnItemClickListener { _, pos ->
             adapter.currentList[pos]?.let {
@@ -94,7 +96,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect {
                     adapter.setOnMenuListener(JuickMessageMenuListener(
-                        requireActivity(), it
+                        requireActivity(), adapter, it
                     ))
                 }
             }
@@ -141,5 +143,13 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
         binding.list.visibility = View.GONE
         binding.errorText.visibility = View.VISIBLE
         binding.errorText.text = message
+    }
+
+    override fun postLikeChanged(post: Post, isLiked: Boolean) {
+
+    }
+
+    override fun postSubscriptionChanged(post: Post, isSubscribed: Boolean) {
+
     }
 }

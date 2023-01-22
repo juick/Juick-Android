@@ -26,8 +26,12 @@ import java.util.*
 /**
  * Created by gerc on 10.02.2016.
  */
-data class Post(private var user: User) : IMessage {
-    var mid = 0
+data class Post(
+    private var user: User,
+    var mid: Int = 0,
+    var rid: Int = 0,
+    var subscribed: Boolean = false
+) : IMessage {
     var replyto = 0
     var to: User? = null
     private var body: String? = null
@@ -38,7 +42,6 @@ data class Post(private var user: User) : IMessage {
     var repliesby: String? = null
     var replyQuote: String? = null
     var photo: Photo? = null
-    var rid = 0
     @JsonProperty("service")
     var isService = false
 

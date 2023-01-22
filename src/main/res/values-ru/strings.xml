@@ -95,5 +95,9 @@
 
     <string name="downloading_update">Скачивание обновления…</string>
     <string name="search">Поиск</string>
+    <string name="subscribed">Подписан</string>
+    <string name="subscribe">Подписаться</string>
+    <string name="subscribe_to_comments">Подписаться на комментарии?</string>
+    <string name="unsubscribe_from_comments">Отписаться от комментариев?</string>
 
 </resources>
