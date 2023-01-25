@@ -122,7 +122,7 @@ dependencies {
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 
-    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'com.google.android.material:material:1.8.0'
     googleImplementation 'com.google.android.gms:play-services-auth:20.4.1'
     // Firebase platform
     googleImplementation platform('com.google.firebase:firebase-bom:31.2.0')
