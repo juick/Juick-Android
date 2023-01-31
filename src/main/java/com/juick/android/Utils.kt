@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -41,7 +41,6 @@ import java.net.URISyntaxException
  * @author Ugnich Anton
  */
 object Utils {
-    @JvmStatic
     val account: Account?
         get() {
             val am = AccountManager.get(App.instance)
@@ -49,7 +48,6 @@ object Utils {
             return accounts.firstOrNull()
         }
 
-    @JvmStatic
     fun hasAuth(): Boolean {
         return account != null
     }
@@ -59,7 +57,6 @@ object Utils {
             val account = account
             return account?.name
         }
-    @JvmStatic
     val accountData: Bundle?
         get() {
             val am = AccountManager.get(App.instance)
@@ -76,7 +73,6 @@ object Utils {
             return null
         }
     private var eventsFactoryInstance: OkHttpClient.Builder? = null
-    @JvmStatic
     val eventsFactory: OkHttpClient.Builder?
         get() {
             if (eventsFactoryInstance == null) {
@@ -85,29 +81,24 @@ object Utils {
             return eventsFactoryInstance
         }
 
-    @JvmStatic
-    fun isImageTypeAllowed(mime: String?): Boolean {
-        return mime != null && (mime == "image/jpeg" || mime == "image/png")
+    fun isImageTypeAllowed(mime: String): Boolean {
+        return mime == "image/jpeg" || mime == "image/png"
     }
 
-    @JvmStatic
-    fun getMimeTypeFor(context: Context, url: Uri?): String? {
+    fun getMimeTypeFor(context: Context, url: Uri): String? {
         val resolver = context.contentResolver
-        return resolver.getType(url!!)
+        return resolver.getType(url)
     }
 
-    @JvmStatic
-    fun updateFCMToken(prefToken: String?) {
+    fun updateFCMToken(prefToken: String) {
         val TAG = "updateFCMToken"
         Log.d(TAG, "currentToken $prefToken")
         if (hasAuth()) {
-            if (prefToken != null) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        App.instance.api.registerPush(prefToken)
-                    } catch (e: Exception) {
-                        Log.d(TAG, "Failed to register", e)
-                    }
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    App.instance.api.registerPush(prefToken)
+                } catch (e: Exception) {
+                    Log.d(TAG, "Failed to register", e)
                 }
             }
         }

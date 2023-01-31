@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -19,9 +19,7 @@ package com.juick.android.screens.post
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -135,24 +133,25 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
 
     private fun attachImage(uri: Uri?) {
         if (uri != null) {
-            val mime = getMimeTypeFor(requireContext(), uri)
-            if (isImageTypeAllowed(mime)) {
-                attachmentUri = uri
-                attachmentMime = mime
-                model.buttonAttachment.isSelected = true
-                try {
-                    requireContext().contentResolver.openInputStream(uri).use { bitmapStream ->
-                        val image = BitmapFactory.decodeStream(bitmapStream)
-                        Glide.with(requireContext())
-                            .load(image)
-                            .transition(DrawableTransitionOptions.withCrossFade())
-                            .into(model.imagePreview)
+            getMimeTypeFor(requireContext(), uri)?.let { mime ->
+                if (isImageTypeAllowed(mime)) {
+                    attachmentUri = uri
+                    attachmentMime = mime
+                    model.buttonAttachment.isSelected = true
+                    try {
+                        requireContext().contentResolver.openInputStream(uri).use { bitmapStream ->
+                            val image = BitmapFactory.decodeStream(bitmapStream)
+                            Glide.with(requireContext())
+                                .load(image)
+                                .transition(DrawableTransitionOptions.withCrossFade())
+                                .into(model.imagePreview)
+                        }
+                    } catch (e: IOException) {
+                        Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
                     }
-                } catch (e: IOException) {
-                    Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(activity, R.string.wrong_image_format, Toast.LENGTH_LONG).show()
                 }
-            } else {
-                Toast.makeText(activity, R.string.wrong_image_format, Toast.LENGTH_LONG).show()
             }
         }
     }

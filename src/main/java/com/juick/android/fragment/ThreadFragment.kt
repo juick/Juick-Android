@@ -72,19 +72,25 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         super.onCreate(savedInstanceState)
         adapter = FeedAdapter(showSubscriptions = true)
         adapter.postUpdatedListener = this
-        attachmentLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            if (uri != null) {
-                attachmentUri = uri
-                val mime = getMimeTypeFor(requireActivity(), uri)
-                if (isImageTypeAllowed(mime)) {
-                    attachmentMime = mime
-                    model.buttonAttachment.isSelected = true
-                } else {
-                    Toast.makeText(activity, R.string.wrong_image_format, Toast.LENGTH_SHORT)
-                        .show()
+        attachmentLauncher =
+            registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+                if (uri != null) {
+                    attachmentUri = uri
+                    getMimeTypeFor(requireActivity(), uri)?.let { mime ->
+                        if (isImageTypeAllowed(mime)) {
+                            attachmentMime = mime
+                            model.buttonAttachment.isSelected = true
+                        } else {
+                            Toast.makeText(
+                                activity,
+                                R.string.wrong_image_format,
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                        }
+                    }
                 }
             }
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -163,9 +169,11 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect { me ->
-                    adapter.setOnMenuListener(JuickMessageMenuListener(
-                        requireActivity(), adapter, me
-                    ))
+                    adapter.setOnMenuListener(
+                        JuickMessageMenuListener(
+                            requireActivity(), adapter, me
+                        )
+                    )
                 }
             }
         }
@@ -198,8 +206,10 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
                     model.progressBar.visibility = View.GONE
                     adapter.submitList(posts)
                     if (scrollToEnd) {
-                        model.list.layoutManager?.smoothScrollToPosition(model.list,
-                            RecyclerView.State(), posts.size - 1)
+                        model.list.layoutManager?.smoothScrollToPosition(
+                            model.list,
+                            RecyclerView.State(), posts.size - 1
+                        )
                     }
                 }
             } catch (e: Exception) {
