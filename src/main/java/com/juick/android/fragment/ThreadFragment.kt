@@ -206,10 +206,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
                     model.progressBar.visibility = View.GONE
                     adapter.submitList(posts)
                     if (scrollToEnd) {
-                        model.list.layoutManager?.smoothScrollToPosition(
-                            model.list,
-                            RecyclerView.State(), posts.size - 1
-                        )
+                        model.list.scrollToPosition(posts.size - 1)
                     }
                 }
             } catch (e: Exception) {
