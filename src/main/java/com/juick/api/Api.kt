@@ -23,7 +23,6 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.http.*
-import java.io.File
 
 /**
  * Created by gerc on 14.02.2016.
@@ -55,8 +54,8 @@ interface Api {
     @GET("thread")
     suspend fun thread(@Query("mid") messageId: Int): List<Post>
 
-    @GET("android/register")
-    suspend fun registerPush(@Query("regid") login: String)
+    @PUT("notifications")
+    suspend fun registerPush(@Body tokens: List<ExternalToken>)
 
     @GET("groups_pms")
     suspend fun groupsPms(@Query("cnt") cnt: Int): Pms

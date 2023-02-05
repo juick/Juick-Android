@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.util.Log
 import com.juick.App
 import com.juick.R
+import com.juick.api.model.ExternalToken
 import com.juick.util.StringUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,10 +32,6 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.net.URI
 import java.net.URISyntaxException
-
-
-
-
 
 /**
  *
@@ -90,13 +87,13 @@ object Utils {
         return resolver.getType(url)
     }
 
-    fun updateFCMToken(prefToken: String) {
+    fun updateToken(tokenType: String, prefToken: String) {
         val TAG = "updateFCMToken"
-        Log.d(TAG, "currentToken $prefToken")
+        Log.d(TAG, "currentToken $tokenType $prefToken")
         if (hasAuth()) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    App.instance.api.registerPush(prefToken)
+                    App.instance.api.registerPush(listOf(ExternalToken(type = tokenType, token = prefToken)))
                 } catch (e: Exception) {
                     Log.d(TAG, "Failed to register", e)
                 }

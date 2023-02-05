@@ -14,20 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.juick.android.service
 
-import android.util.Log
-import com.huawei.hms.push.HmsMessageService
-import com.huawei.hms.push.RemoteMessage
-import com.juick.android.Utils.updateToken
+package com.juick.api.model
 
-class HmsReceiverService : HmsMessageService() {
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Log.d("HMS", remoteMessage.data)
-    }
-
-    override fun onNewToken(s: String) {
-        Log.d("HMS", "Token: $s")
-        updateToken("hcm", s)
-    }
-}
+data class ExternalToken(
+    val type: String,
+    val token: String,
+    val name: String? = null,
+    val secret: String? = null
+)

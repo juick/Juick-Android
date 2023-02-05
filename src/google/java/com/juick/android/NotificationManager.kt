@@ -16,7 +16,6 @@
  */
 package com.juick.android
 
-import com.juick.android.Utils.updateFCMToken
 import android.content.Context
 import com.juick.App
 import android.text.TextUtils
@@ -24,6 +23,7 @@ import com.juick.R
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.ConnectionResult
 import com.google.firebase.messaging.FirebaseMessaging
+import com.juick.android.Utils.updateToken
 
 class NotificationManager {
     init {
@@ -33,7 +33,7 @@ class NotificationManager {
                     .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
             ) {
                 FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
-                    updateFCMToken(token)
+                    updateToken("fcm", token)
                 }
             }
         }

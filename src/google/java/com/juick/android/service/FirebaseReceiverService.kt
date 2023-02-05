@@ -21,7 +21,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.juick.App
 import com.juick.R
-import com.juick.android.Utils.updateFCMToken
+import com.juick.android.Utils.updateToken
 import com.juick.api.model.Post
 import java.io.IOException
 
@@ -52,6 +52,6 @@ class FirebaseReceiverService : FirebaseMessagingService() {
 
     override fun onNewToken(refreshedToken: String) {
         Log.d(TAG, "Refreshed token: $refreshedToken")
-        updateFCMToken(refreshedToken)
+        updateToken("fcm", refreshedToken)
     }
 }

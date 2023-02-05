@@ -37,6 +37,7 @@ class NotificationManager {
                     val pushtoken = HmsInstanceId.getInstance(context).getToken(appId, "HCM")
                     if (!TextUtils.isEmpty(pushtoken)) {
                         Log.i("HMS", "get token:$pushtoken")
+                        Utils.updateToken("hcm", pushtoken)
                     }
                 } catch (e: Exception) {
                     Log.i("HMS", "getToken failed, $e")
