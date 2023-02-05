@@ -34,7 +34,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
