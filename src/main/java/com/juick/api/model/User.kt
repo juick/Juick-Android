@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -21,12 +21,11 @@ import com.stfalcon.chatkit.commons.models.IUser
 /**
  * Created by gerc on 10.02.2016.
  */
-data class User(val uid: Int, val uname: String) : IUser {
+data class User(val uid: Int, val uname: String, var unreadCount: Int = 0) : IUser {
     var hash: String? = null
     var fullname: String? = null
     var isBanned = false
     private var avatar = ""
-    var unreadCount = 0
     var read: List<User>? = null
 
     override fun getId(): String {

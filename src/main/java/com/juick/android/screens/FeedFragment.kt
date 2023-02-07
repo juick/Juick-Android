@@ -102,6 +102,9 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             vm.apiUrl.value = Utils.buildUrl(vm.apiUrl.value)
                 .appendQueryParameter("ts", "${System.currentTimeMillis()}")
                 .build().toString()
+            viewLifecycleOwner.lifecycleScope.launch {
+                ProfileData.refresh()
+            }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

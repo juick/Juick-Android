@@ -26,7 +26,7 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
     <item android:id="@+id/discussions"
         android:title="@string/Discussions"
-        app:actionLayout="@layout/menu_layout_discussions"
+        android:icon="@drawable/ic_ei_bell"
         app:showAsAction="always"/>
     <item android:id="@+id/action_profile"
         android:title="@string/Me"

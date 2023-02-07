@@ -38,6 +38,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -51,6 +52,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.badge.BadgeUtils
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
@@ -83,9 +87,12 @@ class MainActivity : AppCompatActivity() {
             loginLauncher.launch(Intent(this, SignInActivity::class.java))
         }
     }
-    private var avatar: Bitmap? = null
 
+    private var avatar: Bitmap? = null
+    private lateinit var badge: BadgeDrawable
     private lateinit var appBarConfiguration: AppBarConfiguration
+
+    @ExperimentalBadgeUtils
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _model = ActivityMainBinding.inflate(layoutInflater)
@@ -191,29 +198,38 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 ProfileData.userProfile.collect {
-                    withContext(Dispatchers.Main) {
-                        val avatarUrl: String = it.avatar
-                        Glide.with(this@MainActivity)
-                            .asBitmap()
-                            .load(avatarUrl)
-                            .placeholder(R.drawable.av_96)
-                            .into(object: CustomTarget<Bitmap>() {
-                                override fun onResourceReady(
-                                    resource: Bitmap,
-                                    transition: Transition<in Bitmap>?
-                                ) {
-                                    avatar = resource
-                                    invalidateOptionsMenu()
-                                }
+                    val avatarUrl: String = it.avatar
+                    Glide.with(this@MainActivity)
+                        .asBitmap()
+                        .load(avatarUrl)
+                        .placeholder(R.drawable.av_96)
+                        .into(object : CustomTarget<Bitmap>() {
+                            override fun onResourceReady(
+                                resource: Bitmap,
+                                transition: Transition<in Bitmap>?
+                            ) {
+                                avatar = resource
+                                invalidateOptionsMenu()
+                            }
 
-                                override fun onLoadCleared(placeholder: Drawable?) {
-                                    avatar = null
-                                }
-                            })
+                            override fun onLoadCleared(placeholder: Drawable?) {
+                                avatar = null
+                            }
+                        })
+                    withContext(Dispatchers.Main) {
+                        if (it.unreadCount > 0) {
+                            badge.number = it.unreadCount
+                            BadgeUtils.attachBadgeDrawable(badge, model.toolbar, R.id.discussions)
+                        } else {
+                            BadgeUtils.detachBadgeDrawable(badge, model.toolbar, R.id.discussions)
+                        }
                     }
                 }
-            }
         }
+        }
+        badge = BadgeDrawable.create(this)
+        badge.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
+        badge.badgeTextColor = ContextCompat.getColor(this, R.color.colorMainBackground)
     }
 
     private fun shouldHideNavView(view: Int): Boolean {
