@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -195,6 +195,16 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        badge = BadgeDrawable.create(this)
+        badge.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
+        badge.badgeTextColor = ContextCompat.getColor(this, R.color.colorMainBackground)
+        model.toolbar.viewTreeObserver.addOnGlobalLayoutListener {
+            BadgeUtils.attachBadgeDrawable(
+                badge,
+                model.toolbar,
+                R.id.discussions
+            )
+        }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 ProfileData.userProfile.collect {
@@ -218,18 +228,15 @@ class MainActivity : AppCompatActivity() {
                         })
                     withContext(Dispatchers.Main) {
                         if (it.unreadCount > 0) {
+                            badge.isVisible = true
                             badge.number = it.unreadCount
-                            BadgeUtils.attachBadgeDrawable(badge, model.toolbar, R.id.discussions)
                         } else {
-                            BadgeUtils.detachBadgeDrawable(badge, model.toolbar, R.id.discussions)
+                            badge.isVisible = false
                         }
                     }
                 }
+            }
         }
-        }
-        badge = BadgeDrawable.create(this)
-        badge.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
-        badge.badgeTextColor = ContextCompat.getColor(this, R.color.colorMainBackground)
     }
 
     private fun shouldHideNavView(view: Int): Boolean {
