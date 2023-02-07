@@ -62,7 +62,7 @@ class TagsFragment : BottomSheetDialogFragment(R.layout.fragment_tags_list) {
                         UrlBuilder.getPostsByTag(uid, adapter.getItem(position)))));*/
         val vm = ViewModelProvider(this)[TagsViewModel::class.java]
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 vm.tags.collect { resource ->
                     when (resource.status) {
                         Status.SUCCESS -> {

@@ -166,7 +166,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         model.progressBar.visibility = View.VISIBLE
         load()
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 ProfileData.userProfile.collect { me ->
                     adapter.setOnMenuListener(
                         JuickMessageMenuListener(
@@ -177,7 +177,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
             }
         }
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 App.instance.messages.collect { replies ->
                     replies.forEach { reply ->
                         if (adapter.itemCount > 0) {

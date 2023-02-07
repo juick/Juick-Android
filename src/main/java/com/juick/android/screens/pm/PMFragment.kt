@@ -61,7 +61,7 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
             hideKeyboard(activity)
             true
         }
-        ProfileData.userProfile.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach {
+        ProfileData.userProfile.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach {
             adapter = MessagesListAdapter(it.uname) { imageView, url, _ ->
                 Glide.with(imageView.context)
                     .load(url)
@@ -70,12 +70,12 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
             }
             model.messagesList.setAdapter(adapter)
         }.launchIn(lifecycleScope)
-        App.instance.messages.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach { posts ->
+        App.instance.messages.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach { posts ->
             onNewMessages(posts.filter {
                 it.isOurs(uname)
             })
         }.launchIn(lifecycleScope)
-        vm.messages.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach {
+        vm.messages.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach {
             when (it.status) {
                 Status.LOADING -> {}
                 Status.ERROR -> Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()

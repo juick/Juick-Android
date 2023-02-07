@@ -82,7 +82,7 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
         vm = ViewModelProvider(this)[ChatsViewModel::class.java]
 
         lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 if (Utils.hasAuth()) {
                     vm.loadChats()
                     vm.chats.collect { resource ->

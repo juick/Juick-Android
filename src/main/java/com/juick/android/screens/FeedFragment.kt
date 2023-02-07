@@ -107,7 +107,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 ProfileData.userProfile.collect {
                     adapter.setOnMenuListener(JuickMessageMenuListener(
                         requireActivity(), adapter, it
@@ -116,7 +116,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             }
         }
 
-        vm.feed.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).onEach { resource ->
+        vm.feed.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach { resource ->
             when(resource.status) {
                 Status.LOADING -> {
                     if (firstPage) {
