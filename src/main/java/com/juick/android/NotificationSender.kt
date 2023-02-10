@@ -31,7 +31,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.api.model.Post

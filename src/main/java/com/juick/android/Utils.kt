@@ -18,9 +18,11 @@ package com.juick.android
 
 import android.accounts.Account
 import android.accounts.AccountManager
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import com.juick.App
 import com.juick.R
@@ -107,5 +109,16 @@ object Utils {
             .scheme(uri.scheme)
             .authority(uri.authority)
             .path(uri.path)
+    }
+
+    fun configureSync() {
+        ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1)
+        ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true)
+        ContentResolver.addPeriodicSync(
+            account,
+            ContactsContract.AUTHORITY,
+            Bundle.EMPTY,
+            86400L
+        )
     }
 }

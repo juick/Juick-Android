@@ -17,9 +17,7 @@
 package com.juick.android
 
 import android.Manifest
-import android.content.ContentResolver
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -64,7 +62,6 @@ import com.juick.android.screens.chats.ChatsFragmentDirections
 import com.juick.android.screens.home.HomeFragmentDirections
 import com.juick.android.screens.search.SearchFragmentArgs
 import com.juick.android.updater.Updater
-import com.juick.android.widget.util.REQUEST_CODE_SYNC_CONTACTS
 import com.juick.android.widget.util.setAppBarElevation
 import com.juick.api.model.Post
 import com.juick.databinding.ActivityMainBinding
@@ -91,6 +88,11 @@ class MainActivity : AppCompatActivity() {
     private var avatar: Bitmap? = null
     private lateinit var badge: BadgeDrawable
     private lateinit var appBarConfiguration: AppBarConfiguration
+
+    private var requestContactsPermission = RequestPermission(
+        this, Manifest.permission.WRITE_CONTACTS, Build.VERSION_CODES.M)
+    private var requestNotificationsPermission = RequestPermission(
+        this, Manifest.permission.POST_NOTIFICATIONS, Build.VERSION_CODES.TIRAMISU)
 
     @ExperimentalBadgeUtils
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -136,30 +138,7 @@ class MainActivity : AppCompatActivity() {
             val fabVisibility = if (shouldViewFab(id)) View.VISIBLE else View.GONE
             fab.visibility = fabVisibility
         }
-        if (Utils.hasAuth()) {
-            notificationManager = NotificationManager()
-            val account = Utils.account
-            if (Build.VERSION.SDK_INT >= 23
-                && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissions(
-                    arrayOf(
-                        Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.WRITE_CONTACTS
-                    ), REQUEST_CODE_SYNC_CONTACTS
-                )
-            } else {
-                ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1)
-                ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true)
-                ContentResolver.addPeriodicSync(
-                    account,
-                    ContactsContract.AUTHORITY,
-                    Bundle.EMPTY,
-                    86400L
-                )
-            }
-            refresh()
-        }
+
         App.instance.authorizationCallback = {
             val updatePasswordIntent = Intent(this, SignInActivity::class.java)
             updatePasswordIntent.putExtra(
@@ -184,6 +163,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
         lifecycleScope.launch {
+            if (Utils.hasAuth()) {
+                notificationManager = NotificationManager()
+
+                if (requestContactsPermission()) {
+                    Utils.configureSync()
+                }
+                requestNotificationsPermission()
+                refresh()
+            }
             Updater(this@MainActivity)
                 .checkUpdate()
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -398,30 +386,5 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         return (onNavDestinationSelected(item, navController)
                 || super.onOptionsItemSelected(item))
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_SYNC_CONTACTS) {
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
-                ContentResolver.setSyncAutomatically(
-                    Utils.account,
-                    ContactsContract.AUTHORITY,
-                    true
-                )
-                ContentResolver.addPeriodicSync(
-                    Utils.account,
-                    ContactsContract.AUTHORITY,
-                    Bundle.EMPTY,
-                    86400L
-                )
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }

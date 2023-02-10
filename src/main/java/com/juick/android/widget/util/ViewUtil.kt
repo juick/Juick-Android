@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -29,16 +29,12 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.marginBottom
 import com.google.android.material.appbar.AppBarLayout
 import com.juick.R
-import com.juick.android.screens.FeedAdapter
 
 /**
  * Created by gerc on 14.02.2016.
  */
-
-const val REQUEST_CODE_SYNC_CONTACTS = 5
 
 /**
  * android:drawableTint for API < 21
