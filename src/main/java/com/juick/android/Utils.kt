@@ -110,15 +110,4 @@ object Utils {
             .authority(uri.authority)
             .path(uri.path)
     }
-
-    fun configureSync() {
-        ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1)
-        ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true)
-        ContentResolver.addPeriodicSync(
-            account,
-            ContactsContract.AUTHORITY,
-            Bundle.EMPTY,
-            86400L
-        )
-    }
 }

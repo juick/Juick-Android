@@ -89,8 +89,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var badge: BadgeDrawable
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    private var requestContactsPermission = RequestPermission(
-        this, Manifest.permission.WRITE_CONTACTS, Build.VERSION_CODES.M)
     private var requestNotificationsPermission = RequestPermission(
         this, Manifest.permission.POST_NOTIFICATIONS, Build.VERSION_CODES.TIRAMISU)
 
@@ -164,12 +162,9 @@ class MainActivity : AppCompatActivity() {
         }
         lifecycleScope.launch {
             if (Utils.hasAuth()) {
-                notificationManager = NotificationManager()
-
-                if (requestContactsPermission()) {
-                    Utils.configureSync()
+                if (requestNotificationsPermission() == true) {
+                    notificationManager = NotificationManager()
                 }
-                requestNotificationsPermission()
                 refresh()
             }
             Updater(this@MainActivity)
@@ -276,29 +271,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         if (action == Intent.ACTION_VIEW) {
-            val mimeType = StringUtils.defaultString(intent.type)
-            if (mimeType == "vnd.android.cursor.item/vnd.com.juick.profile") {
-                val contactUri = intent.data
-                if (contactUri != null) {
-                    val contentResolver = contentResolver
-                    val queryResult = contentResolver.query(contactUri, null, null, null, null)
-                    if (queryResult != null) {
-                        queryResult.moveToFirst()
-                        val nameIndex = queryResult.getColumnIndex(ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY)
-                        if (nameIndex >= 0) {
-                            val name = queryResult.getString(nameIndex)
-                            queryResult.close()
-                            if (!TextUtils.isEmpty(name)) {
-                                title = name
-                                //replaceFragment(FeedBuilder.feedFor(UrlBuilder.getUserPostsByName(name)));
-                            }
-                        }
-                    }
-                }
-            } else {
-                val data = intent.data
-                data?.let { processUri(it) }
-            }
+            val data = intent.data
+            data?.let { processUri(it) }
         }
         if (action == Intent.ACTION_SEND) {
             val mime = intent.type
