@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -46,15 +46,14 @@ class SignInActivity : AppCompatActivity() {
 
     private var authenticatorResponse: AccountAuthenticatorResponse? = null
     private var currentAction = 0
-    private var _model: ActivityLoginBinding? = null
-    private val model get() = _model!!
+    private lateinit var model: ActivityLoginBinding
     private val application = App.instance
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         authenticatorResponse =
             intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
         authenticatorResponse?.onRequestContinued()
-        _model = ActivityLoginBinding.inflate(layoutInflater)
+        model = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(model.root)
         model.buttonSave.setOnClickListener {
             val nick = model.juickNick.text.toString()

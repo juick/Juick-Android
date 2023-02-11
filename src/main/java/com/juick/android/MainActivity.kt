@@ -23,8 +23,6 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.ContactsContract
-import android.text.TextUtils
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -75,8 +73,7 @@ import java.io.IOException
  * @author Ugnich Anton
  */
 class MainActivity : AppCompatActivity() {
-    private var _model: ActivityMainBinding? = null
-    private val model get() = _model!!
+    private lateinit var model: ActivityMainBinding
     private var notificationManager: NotificationManager? = null
     private lateinit var loginLauncher: ActivityResultLauncher<Intent>
     private fun showLogin() {
@@ -95,7 +92,7 @@ class MainActivity : AppCompatActivity() {
     @ExperimentalBadgeUtils
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        _model = ActivityMainBinding.inflate(layoutInflater)
+        model = ActivityMainBinding.inflate(layoutInflater)
         setContentView(model.root)
         val toolbar = model.toolbar
         //toolbar.inflateMenu(R.menu.toolbar);
