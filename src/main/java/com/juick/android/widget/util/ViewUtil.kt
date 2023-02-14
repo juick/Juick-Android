@@ -18,6 +18,7 @@ package com.juick.android.widget.util
 
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.View
@@ -29,6 +30,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.appbar.AppBarLayout
 import com.juick.R
 
@@ -93,5 +95,18 @@ fun LinearLayout.setCompatElevation(view: View?) {
             elevationParams.bottomMargin = resources.getDimension(R.dimen.toolbar_elevation).toInt()
             elevationView.layoutParams = elevationParams
         }
+    }
+}
+
+fun Context.getLifecycleOwner(): LifecycleOwner? {
+    var curContext = this
+    var maxDepth = 20
+    while (maxDepth-- > 0 && curContext !is LifecycleOwner) {
+        curContext = (curContext as ContextWrapper).baseContext
+    }
+    return if (curContext is LifecycleOwner) {
+        curContext as LifecycleOwner
+    } else {
+        null
     }
 }

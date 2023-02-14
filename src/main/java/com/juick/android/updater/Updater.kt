@@ -26,11 +26,12 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
+import androidx.lifecycle.lifecycleScope
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
-import kotlinx.coroutines.CoroutineScope
+import com.juick.android.widget.util.getLifecycleOwner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.*
@@ -92,7 +93,7 @@ class Updater(private val activity: Activity) {
             it.contentType == CONTENT_TYPE_APK
                     && it.name.contains(BuildConfig.FLAVOR)
         }.map { it.browserDownloadUrl }.firstOrNull() ?: return
-        CoroutineScope(Dispatchers.Main).launch {
+        activity.getLifecycleOwner()?.lifecycleScope?.launch {
             AlertDialog.Builder(activity)
                 .setTitle(release.name)
                 .setMessage(release.body)
@@ -116,17 +117,18 @@ class Updater(private val activity: Activity) {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private fun downloadUpdate(url: String) {
         Toast.makeText(activity, activity.getString(R.string.downloading_update), Toast.LENGTH_LONG).show()
-        CoroutineScope(Dispatchers.IO).launch {
+        val scope = activity.getLifecycleOwner()?.lifecycleScope
+        scope?.launch(Dispatchers.IO) {
             try {
                 val apkFile = download(url, FILENAME_APK)
                 if (apkFile != null) {
-                    CoroutineScope(Dispatchers.Main).launch {
+                    scope.launch {
                         installAPK(apkFile)
                     }
                 }
             } catch (e: Exception) {
                 Log.e("Updater", "Update error: $e.message", e)
-                CoroutineScope(Dispatchers.Main).launch {
+                scope.launch {
                     Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
                 }
             }
@@ -147,5 +149,4 @@ class Updater(private val activity: Activity) {
             Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
         }
     }
-
 }
