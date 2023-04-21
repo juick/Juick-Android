@@ -153,6 +153,8 @@ dependencies {
 
     implementation 'com.github.Zhuinden:fragmentviewbindingdelegate-kt:1.0.2'
 
+    implementation 'com.github.dhaval2404:imagepicker:2.1'
+
     implementation 'androidx.multidex:multidex:2.0.1'
 
     // Fragment testing

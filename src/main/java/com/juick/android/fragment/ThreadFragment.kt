@@ -16,6 +16,7 @@
  */
 package com.juick.android.fragment
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
@@ -35,6 +36,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.github.dhaval2404.imagepicker.ImagePicker
 import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
@@ -66,7 +68,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
     private var scrollToEnd = false
     private lateinit var adapter: FeedAdapter
     private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
-    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<PickVisualMediaRequest?>
+    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<Intent>
     private val args by navArgs<ThreadFragmentArgs>()
 
     private fun handleSelectedUri(uri: Uri?) {
@@ -92,10 +94,20 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         super.onCreate(savedInstanceState)
         adapter = FeedAdapter(showSubscriptions = true)
         adapter.postUpdatedListener = this
-        attachmentMediaLauncher =
-            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-                handleSelectedUri(uri)
+        attachmentMediaLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            result ->
+            val resultCode = result.resultCode
+            val data = result.data
+
+            if (resultCode == Activity.RESULT_OK) {
+                //Image Uri will not be null for RESULT_OK
+                val fileUri = data?.data!!
+
+                handleSelectedUri(fileUri)
+            } else if (resultCode == ImagePicker.RESULT_ERROR) {
+                Toast.makeText(activity, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
             }
+        }
         attachmentLegacyLauncher =
             registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
                 handleSelectedUri(uri)
@@ -141,7 +153,11 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
                 if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable()) {
-                    attachmentMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    ImagePicker.with(this)
+                        .crop()
+                        .createIntent { intent ->
+                            attachmentMediaLauncher.launch(intent)
+                        }
                 } else {
                     attachmentLegacyLauncher.launch("image/*")
                 }
