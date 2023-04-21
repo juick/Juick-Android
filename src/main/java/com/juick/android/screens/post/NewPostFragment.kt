@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.SavedStateHandle
@@ -49,13 +50,16 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
     private var attachmentMime: String? = null
 
     private val model by viewBinding(FragmentNewPostBinding::bind)
-    private lateinit var attachmentLauncher: ActivityResultLauncher<String>
+    private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
+    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<PickVisualMediaRequest>
     private val args by navArgs<NewPostFragmentArgs>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        attachmentLauncher =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? -> attachImage(uri) }
+        attachmentLegacyLauncher =
+            registerForActivityResult(ActivityResultContracts.GetContent()) { uri -> attachImage(uri) }
+        attachmentMediaLauncher =
+            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> attachImage(uri) }
         model.buttonTags.setOnClickListener {
             val navController = findNavController(requireView())
             val tagState = navController.currentBackStackEntry
@@ -71,7 +75,11 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
                 try {
-                    attachmentLauncher.launch("image/*")
+                    if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable()) {
+                        attachmentMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    } else {
+                        attachmentLegacyLauncher.launch("image/*")
+                    }
                 } catch (e: Exception) {
                     Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
                 }

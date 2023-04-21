@@ -26,6 +26,7 @@ import android.text.style.StyleSpan
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -64,31 +65,40 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
     private var mid = 0
     private var scrollToEnd = false
     private lateinit var adapter: FeedAdapter
-    private var attachmentLauncher: ActivityResultLauncher<String>? = null
+    private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
+    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<PickVisualMediaRequest?>
     private val args by navArgs<ThreadFragmentArgs>()
+
+    private fun handleSelectedUri(uri: Uri?) {
+        if (uri != null) {
+            attachmentUri = uri
+            getMimeTypeFor(requireActivity(), uri)?.let { mime ->
+                if (isImageTypeAllowed(mime)) {
+                    attachmentMime = mime
+                    model.buttonAttachment.isSelected = true
+                } else {
+                    Toast.makeText(
+                        activity,
+                        R.string.wrong_image_format,
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adapter = FeedAdapter(showSubscriptions = true)
         adapter.postUpdatedListener = this
-        attachmentLauncher =
+        attachmentMediaLauncher =
+            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                handleSelectedUri(uri)
+            }
+        attachmentLegacyLauncher =
             registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-                if (uri != null) {
-                    attachmentUri = uri
-                    getMimeTypeFor(requireActivity(), uri)?.let { mime ->
-                        if (isImageTypeAllowed(mime)) {
-                            attachmentMime = mime
-                            model.buttonAttachment.isSelected = true
-                        } else {
-                            Toast.makeText(
-                                activity,
-                                R.string.wrong_image_format,
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
-                        }
-                    }
-                }
+                handleSelectedUri(uri)
             }
     }
 
@@ -130,7 +140,11 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         }
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
-                attachmentLauncher!!.launch("image/*")
+                if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable()) {
+                    attachmentMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                } else {
+                    attachmentLegacyLauncher.launch("image/*")
+                }
             } else {
                 attachmentUri = null
                 attachmentMime = null
