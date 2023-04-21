@@ -16,6 +16,8 @@
  */
 package com.juick.android.screens.post
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -31,6 +33,7 @@ import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.github.dhaval2404.imagepicker.ImagePicker
 import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.getMimeTypeFor
@@ -51,7 +54,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
 
     private val model by viewBinding(FragmentNewPostBinding::bind)
     private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
-    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<PickVisualMediaRequest>
+    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<Intent>
     private val args by navArgs<NewPostFragmentArgs>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -59,7 +62,19 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         attachmentLegacyLauncher =
             registerForActivityResult(ActivityResultContracts.GetContent()) { uri -> attachImage(uri) }
         attachmentMediaLauncher =
-            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> attachImage(uri) }
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                val resultCode = result.resultCode
+                val data = result.data
+
+                if (resultCode == Activity.RESULT_OK) {
+                    //Image Uri will not be null for RESULT_OK
+                    val fileUri = data?.data!!
+
+                    attachImage(fileUri)
+                } else if (resultCode == ImagePicker.RESULT_ERROR) {
+                    Toast.makeText(activity, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
+                }
+            }
         model.buttonTags.setOnClickListener {
             val navController = findNavController(requireView())
             val tagState = navController.currentBackStackEntry
@@ -76,7 +91,11 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
             if (attachmentUri == null) {
                 try {
                     if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable()) {
-                        attachmentMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        ImagePicker.with(this)
+                            .crop()
+                            .createIntent { intent ->
+                                attachmentMediaLauncher.launch(intent)
+                            }
                     } else {
                         attachmentLegacyLauncher.launch("image/*")
                     }
