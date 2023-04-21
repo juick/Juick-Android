@@ -236,6 +236,7 @@ class MainActivity : AppCompatActivity() {
         val intent = intent
         val action = StringUtils.defaultString(intent.action)
         if (action == BuildConfig.INTENT_NEW_EVENT_ACTION) {
+            intent.action = ""
             val msg = intent.getStringExtra(getString(R.string.notification_extra))
             try {
                 val jmsg = App.instance.jsonMapper.readValue(msg, Post::class.java)
@@ -270,6 +271,7 @@ class MainActivity : AppCompatActivity() {
         if (action == Intent.ACTION_VIEW) {
             val data = intent.data
             data?.let { processUri(it) }
+            intent.action = ""
         }
         if (action == Intent.ACTION_SEND) {
             val mime = intent.type
@@ -283,6 +285,7 @@ class MainActivity : AppCompatActivity() {
             val navHostFragment = model.navHost.getFragment<NavHostFragment>()
             val navController = navHostFragment.navController
             navController.navigate(R.id.new_post, postArgs)
+            intent.action = ""
         }
     }
 
