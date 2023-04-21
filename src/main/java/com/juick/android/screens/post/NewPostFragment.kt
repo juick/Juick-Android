@@ -26,6 +26,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
@@ -33,7 +34,9 @@ import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.github.dhaval2404.imagepicker.ImagePicker
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
 import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.getMimeTypeFor
@@ -54,27 +57,29 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
 
     private val model by viewBinding(FragmentNewPostBinding::bind)
     private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
-    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<Intent>
+    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
     private val args by navArgs<NewPostFragmentArgs>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         attachmentLegacyLauncher =
             registerForActivityResult(ActivityResultContracts.GetContent()) { uri -> attachImage(uri) }
-        attachmentMediaLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                val resultCode = result.resultCode
-                val data = result.data
-
-                if (resultCode == Activity.RESULT_OK) {
-                    //Image Uri will not be null for RESULT_OK
-                    val fileUri = data?.data!!
-
-                    attachImage(fileUri)
-                } else if (resultCode == ImagePicker.RESULT_ERROR) {
-                    Toast.makeText(activity, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
-                }
+        attachmentMediaLauncher = registerForActivityResult(CropImageContract()) {
+                result ->
+            if (result.isSuccessful) {
+                // Use the returned uri.
+                val uriContent = result.uriContent
+                attachImage(uriContent)
+            } else {
+                // An error occurred.
+                val exception = result.error
+                Toast.makeText(
+                    activity,
+                    exception?.message ?: getText(R.string.Error),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+        }
         model.buttonTags.setOnClickListener {
             val navController = findNavController(requireView())
             val tagState = navController.currentBackStackEntry
@@ -91,11 +96,15 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
             if (attachmentUri == null) {
                 try {
                     if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable()) {
-                        ImagePicker.with(this)
-                            .crop()
-                            .createIntent { intent ->
-                                attachmentMediaLauncher.launch(intent)
-                            }
+                        attachmentMediaLauncher.launch(
+                            CropImageContractOptions(
+                                uri = null,
+                                cropImageOptions = CropImageOptions(
+                                    imageSourceIncludeCamera = true,
+                                    imageSourceIncludeGallery = true
+                                ),
+                            ),
+                        )
                     } else {
                         attachmentLegacyLauncher.launch("image/*")
                     }

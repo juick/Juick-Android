@@ -16,7 +16,6 @@
  */
 package com.juick.android.fragment
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
@@ -27,7 +26,6 @@ import android.text.style.StyleSpan
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -36,7 +34,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.github.dhaval2404.imagepicker.ImagePicker
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
 import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
@@ -68,7 +68,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
     private var scrollToEnd = false
     private lateinit var adapter: FeedAdapter
     private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
-    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<Intent>
+    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
     private val args by navArgs<ThreadFragmentArgs>()
 
     private fun handleSelectedUri(uri: Uri?) {
@@ -94,18 +94,20 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         super.onCreate(savedInstanceState)
         adapter = FeedAdapter(showSubscriptions = true)
         adapter.postUpdatedListener = this
-        attachmentMediaLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        attachmentMediaLauncher = registerForActivityResult(CropImageContract()) {
             result ->
-            val resultCode = result.resultCode
-            val data = result.data
-
-            if (resultCode == Activity.RESULT_OK) {
-                //Image Uri will not be null for RESULT_OK
-                val fileUri = data?.data!!
-
-                handleSelectedUri(fileUri)
-            } else if (resultCode == ImagePicker.RESULT_ERROR) {
-                Toast.makeText(activity, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
+            if (result.isSuccessful) {
+                // Use the returned uri.
+                val uriContent = result.uriContent
+                handleSelectedUri(uriContent)
+            } else {
+                // An error occurred.
+                val exception = result.error
+                Toast.makeText(
+                    activity,
+                    exception?.message ?: getText(R.string.Error),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
         attachmentLegacyLauncher =
@@ -153,11 +155,15 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
                 if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable()) {
-                    ImagePicker.with(this)
-                        .crop()
-                        .createIntent { intent ->
-                            attachmentMediaLauncher.launch(intent)
-                        }
+                    attachmentMediaLauncher.launch(
+                        CropImageContractOptions(
+                            uri = null,
+                            cropImageOptions = CropImageOptions(
+                                imageSourceIncludeCamera = true,
+                                imageSourceIncludeGallery = true,
+                            ),
+                        ),
+                    )
                 } else {
                     attachmentLegacyLauncher.launch("image/*")
                 }
