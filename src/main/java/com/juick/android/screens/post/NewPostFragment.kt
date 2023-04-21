@@ -20,6 +20,7 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -95,7 +96,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
                 try {
-                    if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable()) {
+                    if (Build.VERSION.SDK_INT >= 21) {
                         attachmentMediaLauncher.launch(
                             CropImageContractOptions(
                                 uri = null,

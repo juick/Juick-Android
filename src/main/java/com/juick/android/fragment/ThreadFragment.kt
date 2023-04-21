@@ -19,6 +19,7 @@ package com.juick.android.fragment
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -154,7 +155,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         }
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
-                if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable()) {
+                if (Build.VERSION.SDK_INT >= 21) {
                     attachmentMediaLauncher.launch(
                         CropImageContractOptions(
                             uri = null,
