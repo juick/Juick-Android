@@ -100,6 +100,10 @@ class JuickMessageMenuListener(
                 context.getString(R.string.Share)
             )
         } else if (post.user.uid == me.uid) {
+            popupMenu.menu.add(
+                Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
+                context.resources.getString(R.string.Share)
+            )
             val itemText = if (post.rid == 0)
                 context.getString(R.string.DeletePost) else
                 context.getString(R.string.DeleteComment)
@@ -176,7 +180,7 @@ class JuickMessageMenuListener(
                 MENU_ACTION_SHARE -> {
                     val intent = Intent(Intent.ACTION_SEND)
                     intent.type = "text/plain"
-                    intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/$mid")
+                    intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/m/$mid")
                     activity.startActivity(intent)
                     true
                 }
