@@ -105,5 +105,9 @@
     <string name="subscribe_to_comments">Подписаться на комментарии?</string>
     <string name="unsubscribe_from_comments">Отписаться от комментариев?</string>
     <string name="premium_badge">"Премиум"-значок</string>
+    <string name="make_public">Для всех</string>
+    <string name="make_private">Для друзей</string>
+    <string name="confirm_make_public">Сделать публичным?</string>
+    <string name="confirm_make_private">Скрыть пост?</string>
 
 </resources>

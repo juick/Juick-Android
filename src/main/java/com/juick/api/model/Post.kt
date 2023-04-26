@@ -42,7 +42,7 @@ data class Post(
     var repliesby: String? = null
     var replyQuote: String? = null
     var photo: Photo? = null
-    var friendsOnly = false
+    var friendsOnly: Boolean = false
     @JsonProperty("service")
     var isService = false
 

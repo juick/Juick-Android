@@ -23,6 +23,7 @@ import android.view.Menu
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
@@ -76,6 +77,16 @@ class JuickMessageMenuListener(
             }
         }
     }
+    private fun privacyToggle(post: Post, completion: ((Boolean) -> Unit)? = null) {
+        val scope = (activity as LifecycleOwner).lifecycleScope
+        scope.launch {
+            val result = withContext(Dispatchers.IO) { App.instance.api.togglePrivacy(post.mid) }
+            completion?.invoke(result.isSuccessful)
+            scope.launch {
+                ProfileData.refresh()
+            }
+        }
+    }
 
     private fun subscribeMessageToggle(post: Post): Boolean {
         return if (post.subscribed) {
@@ -103,6 +114,7 @@ class JuickMessageMenuListener(
     override fun onItemClick(view: View?, post: Post) {
         val context = view?.context as Context
         val popupMenu = PopupMenu(context, view)
+        popupMenu.setForceShowIcon(true)
         if (me.uid == 0) {
             popupMenu.menu.add(
                 Menu.NONE, MENU_ACTION_BLOG, Menu.NONE,
@@ -117,6 +129,17 @@ class JuickMessageMenuListener(
                 Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
                 context.resources.getString(R.string.Share)
             )
+            if (post.rid == 0) {
+                val action = if (post.friendsOnly) MENU_ACTION_MAKE_PUBLIC else MENU_ACTION_MAKE_PRIVATE
+                val title = if (post.friendsOnly) context.getString(R.string.make_public) else context.getString(
+                                    R.string.make_private)
+                val item = popupMenu.menu.add(
+                    Menu.NONE, action, Menu.NONE,
+                    title
+                )
+                val icon = if (post.friendsOnly) R.drawable.ic_ei_unlock else R.drawable.ic_ei_lock
+                item.icon = ContextCompat.getDrawable(context, icon)
+            }
             val itemText = if (post.rid == 0)
                 context.getString(R.string.DeletePost) else
                 context.getString(R.string.DeleteComment)
@@ -231,6 +254,16 @@ class JuickMessageMenuListener(
                     activity.startActivity(intent)
                     true
                 }
+                MENU_ACTION_MAKE_PUBLIC -> {
+                    confirmAction(activity, R.string.confirm_make_public) {
+                        privacyToggle(post)
+                    }
+                }
+                MENU_ACTION_MAKE_PRIVATE -> {
+                    confirmAction(activity, R.string.confirm_make_private) {
+                        privacyToggle(post)
+                    }
+                }
                 else -> { false }
             }
         }
@@ -268,5 +301,7 @@ class JuickMessageMenuListener(
         private const val MENU_ACTION_REMOVE_FROM_VIP = 8
         private const val MENU_ACTION_ADD_TO_IGNORELIST = 9
         private const val MENU_ACTION_REMOVE_FROM_IGNORELIST = 10
+        private const val MENU_ACTION_MAKE_PRIVATE = 11
+        private const val MENU_ACTION_MAKE_PUBLIC = 12
     }
 }

@@ -122,4 +122,8 @@
     <string name="subscribe_to_comments">Subscribe to comments?</string>
     <string name="unsubscribe_from_comments">Unsubcribe from comments?</string>
     <string name="premium_badge">Premium badge</string>
+    <string name="make_public">Make public</string>
+    <string name="make_private">Make private</string>
+    <string name="confirm_make_public">Make public?</string>
+    <string name="confirm_make_private">Make private?</string>
 </resources>

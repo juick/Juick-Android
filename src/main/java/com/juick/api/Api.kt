@@ -33,6 +33,8 @@ interface Api {
     suspend fun me(): User
     @POST("users/wl")
     suspend fun toggleVIP(@Query("name") userName: String): Response<Void>
+    @POST("messages/set_privacy")
+    suspend fun togglePrivacy(@Query("mid") mid: Int): Response<Void>
     @GET
     suspend fun getPosts(@Url url: String): List<Post>
 
