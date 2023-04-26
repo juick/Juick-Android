@@ -30,6 +30,7 @@
         app:showAsAction="always"/>
     <item android:id="@+id/profile"
         android:title="@string/Me"
+        android:visible="false"
         android:icon="@drawable/av_96"
         app:actionLayout="@layout/menu_layout_profile"
         app:showAsAction="always"/>

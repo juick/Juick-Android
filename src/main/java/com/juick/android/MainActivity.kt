@@ -88,6 +88,7 @@ class MainActivity : AppCompatActivity() {
     private var avatar: Bitmap? = null
     private lateinit var badge: BadgeDrawable
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var profileItem: MenuItem
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private var requestNotificationsPermission = RequestPermission(
@@ -210,6 +211,7 @@ class MainActivity : AppCompatActivity() {
 
                                     override fun onLoadCleared(placeholder: Drawable?) {
                                         avatar = null
+                                        invalidateOptionsMenu()
                                     }
                                 })
                             withContext(Dispatchers.Main) {
@@ -222,7 +224,9 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
-                        else -> { avatar = ResourcesCompat.getDrawable(resources, R.drawable.av_96, null)!!.toBitmap() }
+                        else -> {
+                            avatar = ResourcesCompat.getDrawable(resources, R.drawable.av_96, null)!!.toBitmap()
+                        }
                     }
 
                 }
@@ -323,8 +327,11 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
-        val profileItem = menu.findItem(R.id.profile)
-        if (profileItem != null && avatar != null) {
+        profileItem = menu.findItem(R.id.profile)
+        ProfileData.userProfile.value.data?.let {
+            profileItem.isVisible = it.uid > 0
+        }
+        if (avatar != null) {
             profileItem.actionView?.findViewById<ImageView>(R.id.profile_image)
                 ?.setImageBitmap(avatar)
             profileItem.actionView?.setOnClickListener {

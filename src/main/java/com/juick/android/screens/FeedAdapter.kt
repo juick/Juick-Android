@@ -141,6 +141,9 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         holder.usernameTextView.text = post.user.uname
         holder.premiumBadge.visibility = if (post.user.premium) View.VISIBLE else View.GONE
         holder.timestampTextView.text = MessageUtils.formatMessageTimestamp(post)
+        if (post.friendsOnly) {
+            holder.messagePrivacyView!!.visibility = View.VISIBLE
+        }
         holder.textTextView.text = StringUtils.EMPTY
         holder.textTextView.text = formatMessageText(holder.itemView.context, post)
         holder.textTextView.movementMethod = LinkMovementMethod.getInstance()
@@ -274,6 +277,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         var usernameTextView: TextView
         var premiumBadge: ImageView
         var timestampTextView: TextView
+        var messagePrivacyView: ImageView?
         var photoImageView: ImageView
         var photoLayout: RelativeLayout
         var photoDescriptionView: TextView
@@ -292,6 +296,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             usernameTextView = itemView.findViewById(R.id.username)
             premiumBadge = itemView.findViewById(R.id.premium_image_view)
             timestampTextView = itemView.findViewById(R.id.timestamp)
+            messagePrivacyView = itemView.findViewById(R.id.message_privacy_status)
             textTextView = itemView.findViewById(R.id.text)
             photoLayout = itemView.findViewById(R.id.photo_wrapper)
             photoImageView = itemView.findViewById(R.id.photo)
