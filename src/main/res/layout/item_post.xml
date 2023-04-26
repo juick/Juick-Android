@@ -59,6 +59,17 @@
             app:layout_constraintStart_toEndOf="@id/user_picture"
             app:layout_constraintTop_toTopOf="@id/user_picture"
             tools:text="ugnich" />
+        <ImageView
+            android:id="@+id/premium_image_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_ei_star"
+            app:layout_constraintStart_toEndOf="@id/username"
+            app:layout_constraintTop_toTopOf="@id/username"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:tint="@android:color/holo_green_dark"
+            android:contentDescription="@string/premium_badge" />
 
         <TextView
             android:id="@+id/timestamp"

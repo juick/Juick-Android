@@ -99,5 +99,6 @@
     <string name="subscribe">Подписаться</string>
     <string name="subscribe_to_comments">Подписаться на комментарии?</string>
     <string name="unsubscribe_from_comments">Отписаться от комментариев?</string>
+    <string name="premium_badge">"Премиум"-значок</string>
 
 </resources>

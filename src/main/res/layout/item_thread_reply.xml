@@ -39,20 +39,28 @@
 
     <TextView
         android:id="@+id/username"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:layout_toLeftOf="@+id/menu_dots"
         android:layout_toRightOf="@id/user_picture"
         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         android:textColor="@color/colorPrimary"
         android:textIsSelectable="false"
         tools:text="ugnich"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_toStartOf="@+id/menu_dots"
         android:layout_toEndOf="@id/user_picture" />
+    <ImageView
+        android:id="@+id/premium_image_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_ei_star"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_toRightOf="@id/username"
+        android:layout_toEndOf="@id/username"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:tint="@android:color/holo_green_dark"
+        android:contentDescription="@string/premium_badge" />
 
     <TextView
         android:id="@+id/text"

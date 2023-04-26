@@ -21,7 +21,7 @@ import com.stfalcon.chatkit.commons.models.IUser
 /**
  * Created by gerc on 10.02.2016.
  */
-data class User(val uid: Int, val uname: String, var unreadCount: Int = 0) : IUser {
+data class User(val uid: Int, val uname: String, var unreadCount: Int = 0, val premium: Boolean = false) : IUser {
     var hash: String? = null
     var fullname: String? = null
     var isBanned = false

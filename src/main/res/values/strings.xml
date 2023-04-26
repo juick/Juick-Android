@@ -116,4 +116,5 @@
     <string name="subscribe">Subscribe</string>
     <string name="subscribe_to_comments">Subscribe to comments?</string>
     <string name="unsubscribe_from_comments">Unsubcribe from comments?</string>
+    <string name="premium_badge">Premium badge</string>
 </resources>

@@ -139,6 +139,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             .transition(DrawableTransitionOptions.withCrossFade())
             .fallback(R.drawable.av_96).into(holder.upicImageView)
         holder.usernameTextView.text = post.user.uname
+        holder.premiumBadge.visibility = if (post.user.premium) View.VISIBLE else View.GONE
         holder.timestampTextView.text = MessageUtils.formatMessageTimestamp(post)
         holder.textTextView.text = StringUtils.EMPTY
         holder.textTextView.text = formatMessageText(holder.itemView.context, post)
@@ -271,6 +272,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         var container: ViewGroup
         var upicImageView: ImageView
         var usernameTextView: TextView
+        var premiumBadge: ImageView
         var timestampTextView: TextView
         var photoImageView: ImageView
         var photoLayout: RelativeLayout
@@ -288,6 +290,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             container = itemView.findViewById(R.id.container)
             upicImageView = itemView.findViewById(R.id.user_picture)
             usernameTextView = itemView.findViewById(R.id.username)
+            premiumBadge = itemView.findViewById(R.id.premium_image_view)
             timestampTextView = itemView.findViewById(R.id.timestamp)
             textTextView = itemView.findViewById(R.id.text)
             photoLayout = itemView.findViewById(R.id.photo_wrapper)
