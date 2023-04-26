@@ -53,10 +53,15 @@
     <!-- JuickMessageMenu -->
     <string name="Recommend_message">Рекомендовать сообщение</string>
     <string name="Subscribe_to">Подписаться на</string>
-    <string name="Blacklist">Добавить в черный список</string>
+    <string name="add_to_ignore_list">Игнорировать</string>
+    <string name="remove_from_ignore_list">Убрать из игнорируемых</string>
+    <string name="add_to_vip">Добавить автора в VIP список</string>
+    <string name="remove_from_vip">Убрать автора из VIP</string>
+    <string name="confirm_add_to_vip">Добавить в VIP?</string>
+    <string name="confirm_remove_from_vip">Убрать из VIP?</string>
     <string name="Recommended">Рекомендовано</string>
     <string name="Subscribed">Подписано</string>
-    <string name="Added_to_BL">Добавлено в черный список</string>
+    <string name="added_to_ignore_list">Добавлено в игнорируемые</string>
     <string name="Are_you_sure_recommend">Вы уверены, что хотите рекомендовать?</string>
     <string name="Are_you_sure_subscribe">Вы уверены, что хотите подписаться?</string>
     <string name="Are_you_sure_blacklist">Вы уверены, что хотите добавить в черный список?</string>

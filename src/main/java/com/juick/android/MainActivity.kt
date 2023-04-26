@@ -35,6 +35,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -188,32 +190,40 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 ProfileData.userProfile.collect {
-                    val avatarUrl: String = it.avatar
-                    Glide.with(this@MainActivity)
-                        .asBitmap()
-                        .load(avatarUrl)
-                        .placeholder(R.drawable.av_96)
-                        .into(object : CustomTarget<Bitmap>() {
-                            override fun onResourceReady(
-                                resource: Bitmap,
-                                transition: Transition<in Bitmap>?
-                            ) {
-                                avatar = resource
-                                invalidateOptionsMenu()
-                            }
+                    when (it.status) {
+                        Status.SUCCESS -> {
+                            val user = it.data!!
+                            val avatarUrl: String = user.avatar
+                            Glide.with(this@MainActivity)
+                                .asBitmap()
+                                .load(avatarUrl)
+                                .placeholder(R.drawable.av_96)
+                                .into(object : CustomTarget<Bitmap>() {
+                                    override fun onResourceReady(
+                                        resource: Bitmap,
+                                        transition: Transition<in Bitmap>?
+                                    ) {
+                                        avatar = resource
+                                        invalidateOptionsMenu()
+                                    }
 
-                            override fun onLoadCleared(placeholder: Drawable?) {
-                                avatar = null
+                                    override fun onLoadCleared(placeholder: Drawable?) {
+                                        avatar = null
+                                    }
+                                })
+                            withContext(Dispatchers.Main) {
+                                if (user.unreadCount > 0) {
+                                    badge.isVisible = true
+                                    badge.number = user.unreadCount
+                                } else {
+                                    badge.isVisible = false
+                                }
                             }
-                        })
-                    withContext(Dispatchers.Main) {
-                        if (it.unreadCount > 0) {
-                            badge.isVisible = true
-                            badge.number = it.unreadCount
-                        } else {
-                            badge.isVisible = false
                         }
+
+                        else -> { avatar = ResourcesCompat.getDrawable(resources, R.drawable.av_96, null)!!.toBitmap() }
                     }
+
                 }
             }
         }

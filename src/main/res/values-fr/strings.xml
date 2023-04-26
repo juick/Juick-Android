@@ -40,10 +40,10 @@
     <!-- JuickMessageMenu -->
     <string name="Recommend_message">Recommendez le message</string>
     <string name="Subscribe_to">S\'abonner à</string>
-    <string name="Blacklist">Liste noire</string>
+    <string name="add_to_ignore_list">Liste noire</string>
     <string name="Recommended">Recommandés</string>
     <string name="Subscribed">Souscrits</string>
-    <string name="Added_to_BL">Ajoutés à la LN</string>
+    <string name="added_to_ignore_list">Ajoutés à la LN</string>
 
     <!-- NewMessageActivity -->
     <string name="New_message">Nouveaux message</string>

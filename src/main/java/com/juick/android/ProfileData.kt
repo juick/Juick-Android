@@ -20,20 +20,24 @@ import com.juick.App
 import com.juick.api.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
 object ProfileData {
     val anonymous = User(uid = 0, uname = "Anonymous")
-    var userProfile = MutableStateFlow(anonymous)
+    var userProfile: MutableStateFlow<Resource<User>> = MutableStateFlow(Resource.loading())
         private set
 
     suspend fun refresh() {
+        userProfile.update {
+            Resource.loading()
+        }
         try {
             userProfile.value = withContext(Dispatchers.IO) {
-                App.instance.api.me()
+                Resource.success(App.instance.api.me())
             }
         } catch (e: Exception) {
-            userProfile.value = anonymous
+            userProfile.value = Resource.success(anonymous)
         }
     }
 }

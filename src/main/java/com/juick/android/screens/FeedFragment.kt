@@ -106,12 +106,16 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                 ProfileData.refresh()
             }
         }
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 ProfileData.userProfile.collect {
-                    adapter.setOnMenuListener(JuickMessageMenuListener(
-                        requireActivity(), adapter, it
-                    ))
+                    if (it.status == Status.SUCCESS) {
+                        adapter.setOnMenuListener(
+                            JuickMessageMenuListener(
+                                requireActivity(), adapter, it.data!!
+                            )
+                        )
+                    }
                 }
             }
         }

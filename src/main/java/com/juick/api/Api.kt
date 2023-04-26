@@ -22,6 +22,7 @@ import com.juick.api.model.Tag
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.*
 
 /**
@@ -30,7 +31,8 @@ import retrofit2.http.*
 interface Api {
     @GET("me")
     suspend fun me(): User
-
+    @POST("users/wl")
+    suspend fun toggleVIP(@Query("name") userName: String): Response<Void>
     @GET
     suspend fun getPosts(@Url url: String): List<Post>
 

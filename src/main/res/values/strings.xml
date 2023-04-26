@@ -55,10 +55,15 @@
     <!-- JuickMessageMenu -->
     <string name="Recommend_message">Recommend message</string>
     <string name="Subscribe_to">Subscribe to</string>
-    <string name="Blacklist">Blacklist</string>
+    <string name="add_to_ignore_list">Ignore</string>
+    <string name="remove_from_ignore_list">Remove from ignore list</string>
+    <string name="add_to_vip">Add user to VIP list</string>
+    <string name="remove_from_vip">Remove user from VIP list</string>
+    <string name="confirm_add_to_vip">Add to VIP?</string>
+    <string name="confirm_remove_from_vip">Remove from VIP?</string>
     <string name="Recommended">Recommended</string>
     <string name="Subscribed">Subscribed</string>
-    <string name="Added_to_BL">Added to BL</string>
+    <string name="added_to_ignore_list">Added to ignore list</string>
     <string name="Are_you_sure_recommend">Are you sure you want to recommend?</string>
     <string name="Are_you_sure_subscribe">Are you sure you want to subscribe?</string>
     <string name="Are_you_sure_blacklist">Are you sure you want to blacklist?</string>

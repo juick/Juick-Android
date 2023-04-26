@@ -34,7 +34,9 @@ import com.juick.android.screens.blog.BlogFragmentArgs
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.User
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  *
@@ -60,6 +62,17 @@ class JuickMessageMenuListener(
         ) {
             processCommand("! #${post.mid}") {
                 adapter.postUpdatedListener?.postLikeChanged(post, true)
+            }
+        }
+    }
+
+    private fun vipToggle(user: User, completion: ((Boolean) -> Unit)? = null) {
+        val scope = (activity as LifecycleOwner).lifecycleScope
+        scope.launch {
+            val result = withContext(Dispatchers.IO) { App.instance.api.toggleVIP(user.name) }
+            completion?.invoke(result.isSuccessful)
+            scope.launch {
+                ProfileData.refresh()
             }
         }
     }
@@ -127,10 +140,28 @@ class JuickMessageMenuListener(
                 Menu.NONE, MENU_ACTION_SUBSCRIBE, Menu.NONE,
                 context.resources.getString(R.string.Subscribe_to) + " @" + userName
             )
-            popupMenu.menu.add(
-                Menu.NONE, MENU_ACTION_BLACKLIST, Menu.NONE,
-                context.resources.getString(R.string.Blacklist) + " @" + userName
-            )
+            if (me.vip.contains(post.user)) {
+                popupMenu.menu.add(
+                    Menu.NONE, MENU_ACTION_REMOVE_FROM_VIP, Menu.NONE,
+                    context.resources.getString(R.string.remove_from_vip)
+                )
+            } else {
+                popupMenu.menu.add(
+                    Menu.NONE, MENU_ACTION_ADD_TO_VIP, Menu.NONE,
+                    context.resources.getString(R.string.add_to_vip)
+                )
+            }
+            if (me.ignored.contains(post.user)) {
+                popupMenu.menu.add(
+                    Menu.NONE, MENU_ACTION_REMOVE_FROM_IGNORELIST, Menu.NONE,
+                    context.resources.getString(R.string.remove_from_ignore_list) + " @" + userName
+                )
+            } else {
+                popupMenu.menu.add(
+                    Menu.NONE, MENU_ACTION_ADD_TO_IGNORELIST, Menu.NONE,
+                    context.resources.getString(R.string.add_to_ignore_list) + " @" + userName
+                )
+            }
             popupMenu.menu.add(
                 Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
                 context.resources.getString(R.string.Share)
@@ -156,11 +187,27 @@ class JuickMessageMenuListener(
                 ) {
                     processCommand("S @${uname}")
                 }
-                MENU_ACTION_BLACKLIST -> confirmAction(
+                MENU_ACTION_ADD_TO_IGNORELIST -> confirmAction(
                     activity,
                     R.string.Are_you_sure_blacklist
                 ) {
                     processCommand("BL @${uname}")
+                }
+                MENU_ACTION_REMOVE_FROM_IGNORELIST -> {
+                    processCommand("BL @${uname}")
+                    true
+                }
+                MENU_ACTION_ADD_TO_VIP -> confirmAction(
+                    activity,
+                    R.string.confirm_add_to_vip
+                ) {
+                    vipToggle(post.user)
+                }
+                MENU_ACTION_REMOVE_FROM_VIP -> confirmAction(
+                    activity,
+                    R.string.confirm_remove_from_vip
+                ) {
+                    vipToggle(post.user)
                 }
                 MENU_ACTION_DELETE_POST -> confirmAction(activity, R.string.Are_you_sure_delete) {
                     processCommand("D #" +
@@ -199,10 +246,14 @@ class JuickMessageMenuListener(
     }
 
     private fun processCommand(command: String, callback: ((PostResponse) -> Unit)? = null) {
-        (activity as LifecycleOwner).lifecycleScope.launch {
+        val scope = (activity as LifecycleOwner).lifecycleScope
+        scope.launch {
             App.instance.sendMessage(command) {
                 Toast.makeText(activity, it.text, Toast.LENGTH_LONG).show()
                 callback?.invoke(it)
+                scope.launch {
+                    ProfileData.refresh()
+                }
             }
         }
     }
@@ -211,8 +262,11 @@ class JuickMessageMenuListener(
         private const val MENU_ACTION_RECOMMEND = 1
         private const val MENU_ACTION_BLOG = 2
         private const val MENU_ACTION_SUBSCRIBE = 3
-        private const val MENU_ACTION_BLACKLIST = 4
         private const val MENU_ACTION_SHARE = 5
         private const val MENU_ACTION_DELETE_POST = 6
+        private const val MENU_ACTION_ADD_TO_VIP = 7
+        private const val MENU_ACTION_REMOVE_FROM_VIP = 8
+        private const val MENU_ACTION_ADD_TO_IGNORELIST = 9
+        private const val MENU_ACTION_REMOVE_FROM_IGNORELIST = 10
     }
 }

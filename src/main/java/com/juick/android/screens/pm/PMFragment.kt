@@ -62,13 +62,15 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
             true
         }
         ProfileData.userProfile.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach {
-            adapter = MessagesListAdapter(it.uname) { imageView, url, _ ->
-                Glide.with(imageView.context)
-                    .load(url)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .into(imageView)
+            if (it.status == Status.SUCCESS) {
+                adapter = MessagesListAdapter(it.data!!.uname) { imageView, url, _ ->
+                    Glide.with(imageView.context)
+                        .load(url)
+                        .transition(DrawableTransitionOptions.withCrossFade())
+                        .into(imageView)
+                }
+                model.messagesList.setAdapter(adapter)
             }
-            model.messagesList.setAdapter(adapter)
         }.launchIn(lifecycleScope)
         App.instance.messages.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach { posts ->
             onNewMessages(posts.filter {
