@@ -31,6 +31,7 @@ import android.widget.ImageView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
@@ -88,6 +89,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var badge: BadgeDrawable
     private lateinit var appBarConfiguration: AppBarConfiguration
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private var requestNotificationsPermission = RequestPermission(
         this, Manifest.permission.POST_NOTIFICATIONS, Build.VERSION_CODES.TIRAMISU)
 
@@ -161,7 +163,7 @@ class MainActivity : AppCompatActivity() {
         }
         lifecycleScope.launch {
             if (Utils.hasAuth()) {
-                if (requestNotificationsPermission() == true) {
+                if (requestNotificationsPermission()) {
                     notificationManager = NotificationManager()
                 }
                 refresh()
