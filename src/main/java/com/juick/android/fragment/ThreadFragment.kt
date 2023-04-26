@@ -303,6 +303,9 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         }
     }
 
+    override fun postUpdated(post: Post) {
+        load()
+    }
     override fun postLikeChanged(post: Post, isLiked: Boolean) {
 
     }

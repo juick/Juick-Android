@@ -267,6 +267,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
     }
 
     interface OnPostUpdatedListener {
+        fun postUpdated(post: Post)
         fun postLikeChanged(post: Post, isLiked: Boolean)
         fun postSubscriptionChanged(post: Post, isSubscribed: Boolean)
     }
@@ -418,7 +419,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
 
             override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
                 return oldItem.likes == newItem.likes && oldItem.getBody() == newItem.getBody()
-                        && oldItem.subscribed == newItem.subscribed
+                        && oldItem.subscribed == newItem.subscribed && oldItem.friendsOnly == newItem.friendsOnly
             }
         }
     }

@@ -123,6 +123,7 @@
         android:label="{uname}" >
         <argument
             android:name="uname"
+            android:defaultValue=""
             app:argType="string" />
     </fragment>
     <fragment
@@ -137,9 +138,4 @@
         android:id="@id/discussions"
         android:name="com.juick.android.screens.discussions.DiscussionsFragment"
         android:label="Discussions" />
-    <fragment
-        android:id="@+id/profile"
-        android:name="com.juick.android.screens.me.MeFragment"
-        android:label="@string/Me"
-        tools:layout="@layout/fragment_me" />
 </navigation>

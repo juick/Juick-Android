@@ -34,6 +34,7 @@ import com.juick.android.JuickMessageMenuListener
 import com.juick.android.ProfileData
 import com.juick.android.Status
 import com.juick.android.Utils
+import com.juick.android.Utils.replaceUriParameter
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentPostsPageBinding
@@ -50,6 +51,8 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
     internal lateinit var vm: FeedViewModel
 
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
+
+    private var firstPage = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -73,7 +76,6 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                 findNavController(view).navigate(R.id.thread, threadArgs)
             }
         }
-        var firstPage = true
         var loading = false
         adapter.setOnLoadMoreRequestListener(
             object : OnLoadMoreRequestListener {
@@ -97,14 +99,9 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                 R.color.colorAccent
             )
         )
+
         binding.swipeContainer.setOnRefreshListener {
-            firstPage = true
-            vm.apiUrl.value = Utils.buildUrl(vm.apiUrl.value)
-                .appendQueryParameter("ts", "${System.currentTimeMillis()}")
-                .build().toString()
-            viewLifecycleOwner.lifecycleScope.launch {
-                ProfileData.refresh()
-            }
+            refreshFeed()
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -151,6 +148,17 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
+    fun refreshFeed() {
+        firstPage = true
+        val newUrl = Utils.buildUrl(vm.apiUrl.value)
+            .build()
+            .replaceUriParameter("ts", "${System.currentTimeMillis()}")
+            .toString()
+        vm.apiUrl.value = newUrl
+        viewLifecycleOwner.lifecycleScope.launch {
+            ProfileData.refresh()
+        }
+    }
     private fun stopRefreshing() {
         binding.swipeContainer.isRefreshing = false
         binding.list.visibility = View.VISIBLE
@@ -161,6 +169,10 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
         binding.list.visibility = View.GONE
         binding.errorText.visibility = View.VISIBLE
         binding.errorText.text = message
+    }
+
+    override fun postUpdated(post: Post) {
+        refreshFeed()
     }
 
     override fun postLikeChanged(post: Post, isLiked: Boolean) {

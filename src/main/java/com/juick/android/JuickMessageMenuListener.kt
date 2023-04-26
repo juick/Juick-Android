@@ -83,7 +83,7 @@ class JuickMessageMenuListener(
             val result = withContext(Dispatchers.IO) { App.instance.api.togglePrivacy(post.mid) }
             completion?.invoke(result.isSuccessful)
             scope.launch {
-                ProfileData.refresh()
+                adapter.postUpdatedListener?.postUpdated(post)
             }
         }
     }
@@ -198,7 +198,8 @@ class JuickMessageMenuListener(
             when (action) {
                 MENU_ACTION_BLOG -> {
                     val navController = Navigation.findNavController(view)
-                    val args = BlogFragmentArgs.Builder(uname)
+                    val args = BlogFragmentArgs.Builder()
+                        .setUname(uname)
                         .build()
                     navController.navigate(R.id.blog, args.toBundle())
                     true

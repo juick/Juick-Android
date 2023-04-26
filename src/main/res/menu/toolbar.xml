@@ -28,7 +28,7 @@
         android:title="@string/Discussions"
         android:icon="@drawable/ic_ei_bell"
         app:showAsAction="always"/>
-    <item android:id="@+id/profile"
+    <item android:id="@+id/blog"
         android:title="@string/Me"
         android:visible="false"
         android:icon="@drawable/av_96"

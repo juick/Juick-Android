@@ -327,7 +327,7 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
-        profileItem = menu.findItem(R.id.profile)
+        profileItem = menu.findItem(R.id.blog)
         ProfileData.userProfile.value.data?.let {
             profileItem.isVisible = it.uid > 0
         }
