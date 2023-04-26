@@ -33,11 +33,6 @@
             app:popUpTo="@id/home" />
     </fragment>
     <fragment
-        android:id="@+id/profile"
-        android:name="com.juick.android.screens.me.MeFragment"
-        android:label="@string/Me"
-        tools:layout="@layout/fragment_me" />
-    <fragment
         android:id="@+id/thread"
         android:name="com.juick.android.fragment.ThreadFragment"
         tools:layout="@layout/fragment_thread"
@@ -142,4 +137,9 @@
         android:id="@id/discussions"
         android:name="com.juick.android.screens.discussions.DiscussionsFragment"
         android:label="Discussions" />
+    <fragment
+        android:id="@+id/profile"
+        android:name="com.juick.android.screens.me.MeFragment"
+        android:label="@string/Me"
+        tools:layout="@layout/fragment_me" />
 </navigation>

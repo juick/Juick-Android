@@ -113,7 +113,6 @@ class MainActivity : AppCompatActivity() {
             R.id.discover,
             R.id.chats,
             R.id.no_auth,
-            R.id.profile,
             R.id.new_post
         )
             .build()
@@ -324,7 +323,7 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
-        val profileItem = menu.findItem(R.id.action_profile)
+        val profileItem = menu.findItem(R.id.profile)
         if (profileItem != null && avatar != null) {
             profileItem.actionView?.findViewById<ImageView>(R.id.profile_image)
                 ?.setImageBitmap(avatar)
