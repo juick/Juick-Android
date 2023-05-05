@@ -34,6 +34,7 @@ import com.juick.R
 import com.juick.android.widget.util.getLifecycleOwner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.*
 import okio.BufferedSink
 import okio.Okio
@@ -80,11 +81,15 @@ class Updater(private val activity: Activity) {
     }
 
     suspend fun checkUpdate() {
-        val update = App.instance.api.releases().firstOrNull {
-            Version(it.name) > Version(BuildConfig.VERSION_NAME)
-        }
-        if (update != null) {
-            showUpdateAvailable(update)
+        try {
+            val update = withContext(Dispatchers.IO) { App.instance.api.releases() }.firstOrNull {
+                Version(it.name) > Version(BuildConfig.VERSION_NAME)
+            }
+            if (update != null) {
+                showUpdateAvailable(update)
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Update check failed: ${e.message}")
         }
     }
 
@@ -148,5 +153,8 @@ class Updater(private val activity: Activity) {
             Log.d("Updater", "Update error: $e.message")
             Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
         }
+    }
+    companion object {
+        private val TAG = Updater::class.java.simpleName
     }
 }
