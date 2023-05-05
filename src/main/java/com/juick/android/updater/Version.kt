@@ -27,11 +27,11 @@ class Version(version: String) : Comparable<Version> {
         }
     }
 
-    override operator fun compareTo(another: Version): Int {
-        val maxLength = Math.max(numbers.size, another.numbers.size)
+    override operator fun compareTo(other: Version): Int {
+        val maxLength = Math.max(numbers.size, other.numbers.size)
         for (i in 0 until maxLength) {
             val left = if (i < numbers.size) numbers[i] else 0
-            val right = if (i < another.numbers.size) another.numbers[i] else 0
+            val right = if (i < other.numbers.size) other.numbers[i] else 0
             if (left != right) {
                 return if (left < right) -1 else 1
             }
