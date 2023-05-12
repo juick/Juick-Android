@@ -146,11 +146,12 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         holder.textTextView.text = StringUtils.EMPTY
         holder.textTextView.text = formatMessageText(holder.itemView.context, post)
         holder.textTextView.movementMethod = LinkMovementMethod.getInstance()
-        if (post.photo != null && post.photo?.small != null) {
+        if (post.photo != null && post.photo?.medium != null) {
             holder.photoLayout.visibility = View.VISIBLE
             holder.photoDescriptionView.visibility = View.GONE
             val drawable = Glide.with(holder.itemView.context)
-                .load(post.photo!!.small!!.url)
+                .load(post.photo!!.medium!!.url)
+                .override(post.photo!!.medium!!.width, post.photo!!.medium!!.height)
                 .transition(DrawableTransitionOptions.withCrossFade())
             if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
                 drawable.apply(RequestOptions.bitmapTransform(BlurTransformation()))
