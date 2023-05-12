@@ -45,7 +45,7 @@ class YouTubePreviewer : LinkPreviewer {
     }
 
     override fun hasViewableContent(message: String): Boolean {
-        return youtubeLink.matcher(message).find() && !BuildConfig.DEBUG
+        return youtubeLink.matcher(message).find()
     }
 
     override fun getPreviewUrl(message: String, callback: UrlCallback) {
