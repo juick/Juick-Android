@@ -17,6 +17,7 @@
 package com.juick.android
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
@@ -350,6 +351,7 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     fun processUri(data: Uri) {
         if (data.host == "juick.com") {
             val pathSegments = data.pathSegments
@@ -371,14 +373,19 @@ class MainActivity : AppCompatActivity() {
                     navController.navigate(R.id.home)
             }
         } else {
-            val intent = CustomTabsIntent.Builder().setDefaultColorSchemeParams(
-                CustomTabColorSchemeParams.Builder().setToolbarColor(
-                    ResourcesCompat.getColor(
-                        resources, R.color.colorMainBackground, null
-                    )
+            if (Build.VERSION.SDK_INT >= 16) {
+                val intent = CustomTabsIntent.Builder().setDefaultColorSchemeParams(
+                    CustomTabColorSchemeParams.Builder().setToolbarColor(
+                        ResourcesCompat.getColor(
+                            resources, R.color.colorMainBackground, null
+                        )
+                    ).build()
                 ).build()
-            ).build()
-            intent.launchUrl(this, data)
+                intent.launchUrl(this, data)
+            } else {
+                val intent = Intent(Intent.ACTION_VIEW, data)
+                startActivity(intent)
+            }
         }
     }
 

@@ -23,7 +23,7 @@ import com.juick.App
 import com.juick.R
 import com.juick.util.StringUtils
 
-private val App.account: Account?
+val App.account: Account?
     get() {
         val am = AccountManager.get(this)
         val accounts = am.getAccountsByType(App.instance.getString(R.string.com_juick))

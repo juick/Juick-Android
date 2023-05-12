@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -16,11 +16,11 @@
  */
 package com.juick.android
 
+import account
 import android.content.ContentResolver
 import android.os.Bundle
 import com.juick.App
 import com.juick.R
-import com.juick.android.Utils.account
 
 fun App.init() {
     //App.instance.signInProvider = { context, button -> null }
@@ -28,7 +28,7 @@ fun App.init() {
 
 fun MainActivity.refresh() {
     val messagesProviderAuthority = getString(R.string.messages_provider_authority)
-    val account = account
+    var account = App.instance.account
     ContentResolver.setIsSyncable(account, messagesProviderAuthority, 1)
     ContentResolver.setSyncAutomatically(account, messagesProviderAuthority, true)
     ContentResolver.addPeriodicSync(account, messagesProviderAuthority, Bundle.EMPTY, 300L)
