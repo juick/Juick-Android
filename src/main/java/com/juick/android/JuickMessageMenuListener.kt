@@ -19,6 +19,7 @@ package com.juick.android
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.view.Menu
 import android.view.View
 import android.widget.Toast
@@ -277,6 +278,11 @@ class JuickMessageMenuListener(
 
     override fun onSubscribeToggleClick(view: View?, post: Post) {
         subscribeMessageToggle(post)
+    }
+
+    override fun onLinkClick(view: View?, url: String) {
+        val activity = view?.context as MainActivity
+        activity.processUri(Uri.parse(url))
     }
 
     private fun processCommand(command: String, callback: ((PostResponse) -> Unit)? = null) {

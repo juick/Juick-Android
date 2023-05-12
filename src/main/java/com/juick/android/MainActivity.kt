@@ -35,6 +35,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
+import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -349,22 +351,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun processUri(data: Uri) {
-        val pathSegments = data.pathSegments
-        val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
-        val navController = navHostFragment.navController
-        when (pathSegments.size) {
-            1 -> {}
-            2 -> {
-                // thread
-                val threadId = pathSegments[1]
-                val args = ThreadFragmentArgs.Builder()
-                    .setMid(threadId.toInt())
-                    .build()
-                navController.popBackStack(R.id.home, false)
-                navController.navigate(R.id.thread, args.toBundle())
+        if (data.host == "juick.com") {
+            val pathSegments = data.pathSegments
+            val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
+            val navController = navHostFragment.navController
+            when (pathSegments.size) {
+                1 -> {}
+                2 -> {
+                    // thread
+                    val threadId = pathSegments[1]
+                    val args = ThreadFragmentArgs.Builder()
+                        .setMid(threadId.toInt())
+                        .build()
+                    navController.popBackStack(R.id.home, false)
+                    navController.navigate(R.id.thread, args.toBundle())
+                }
+
+                else ->                 // discover
+                    navController.navigate(R.id.home)
             }
-            else ->                 // discover
-                navController.navigate(R.id.home)
+        } else {
+            val intent = CustomTabsIntent.Builder().setDefaultColorSchemeParams(
+                CustomTabColorSchemeParams.Builder().setToolbarColor(
+                    ResourcesCompat.getColor(
+                        resources, R.color.colorMainBackground, null
+                    )
+                ).build()
+            ).build()
+            intent.launchUrl(this, data)
         }
     }
 

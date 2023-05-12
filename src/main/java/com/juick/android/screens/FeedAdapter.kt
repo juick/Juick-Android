@@ -17,7 +17,6 @@
 package com.juick.android.screens
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.text.SpannableStringBuilder
@@ -158,6 +157,9 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
                     .into(holder.photoImageView)
             } else {
                 drawable.into(holder.photoImageView)
+                holder.photoImageView.setOnClickListener {
+                    itemMenuListener?.onLinkClick(it, post.photo?.medium as String)
+                }
             }
         } else if (App.instance.hasViewableContent(post.text)) {
             holder.photoLayout.visibility = View.VISIBLE
@@ -170,6 +172,9 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
                             .into(holder.photoImageView)
                         holder.photoDescriptionView.visibility = View.VISIBLE
                         holder.photoDescriptionView.text = link.description
+                        holder.photoImageView.setOnClickListener {
+                            itemMenuListener?.onLinkClick(it, link.source)
+                        }
                     } else {
                         holder.photoLayout.visibility = View.GONE
                     }
@@ -342,6 +347,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         fun onItemClick(view: View?, post: Post)
         fun onLikeClick(view: View?, post: Post)
         fun onSubscribeToggleClick(view: View?, post: Post)
+        fun onLinkClick(view: View?, url: String)
     }
 
     companion object {
@@ -394,12 +400,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
                         widget.tag = "clicked"
                         val data = Uri.parse(link)
                         val activity = widget.context as MainActivity
-                        if (data.host == "juick.com") {
-                            activity.processUri(data)
-                        } else {
-                            val intent = Intent(Intent.ACTION_VIEW, data)
-                            widget.context.startActivity(intent)
-                        }
+                        activity.processUri(data)
                     }
                 }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }

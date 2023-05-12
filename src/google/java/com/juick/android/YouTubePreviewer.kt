@@ -73,6 +73,7 @@ class YouTubePreviewer : LinkPreviewer {
                                     if (thumbnail != null) {
                                         callback.invoke(
                                             LinkPreview(
+                                                linkMatcher.group(0)!!,
                                                 thumbnail.url,
                                                 video.snippet.title
                                             )
