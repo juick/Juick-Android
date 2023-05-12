@@ -16,23 +16,16 @@
  */
 package com.juick.android
 
-import android.accounts.Account
-import android.accounts.AccountManager
-import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import android.os.Bundle
-import android.provider.ContactsContract
 import android.util.Log
 import com.juick.App
-import com.juick.R
 import com.juick.api.model.ExternalToken
-import com.juick.util.StringUtils
+import isAuthenticated
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import java.net.URI
 import java.net.URISyntaxException
 
 /**
@@ -40,37 +33,6 @@ import java.net.URISyntaxException
  * @author Ugnich Anton
  */
 object Utils {
-    val account: Account?
-        get() {
-            val am = AccountManager.get(App.instance)
-            val accounts = am.getAccountsByType(App.instance.getString(R.string.com_juick))
-            return accounts.firstOrNull()
-        }
-
-    fun hasAuth(): Boolean {
-        return account != null
-    }
-
-    val nick: String?
-        get() {
-            val account = account
-            return account?.name
-        }
-    val accountData: Bundle?
-        get() {
-            val am = AccountManager.get(App.instance)
-            val account = account
-            if (account != null) {
-                var b: Bundle? = null
-                try {
-                    b = am.getAuthToken(account, StringUtils.EMPTY, null, false, null, null).result
-                } catch (e: Exception) {
-                    Log.d("getBasicAuthString", Log.getStackTraceString(e))
-                }
-                return b
-            }
-            return null
-        }
     private var eventsFactoryInstance: OkHttpClient.Builder? = null
     val eventsFactory: OkHttpClient.Builder?
         get() {
@@ -92,7 +54,7 @@ object Utils {
     fun updateToken(tokenType: String, prefToken: String) {
         val TAG = "updateFCMToken"
         Log.d(TAG, "currentToken $tokenType $prefToken")
-        if (hasAuth()) {
+        if (App.instance.isAuthenticated) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     App.instance.api.registerPush(listOf(ExternalToken(type = tokenType, token = prefToken)))

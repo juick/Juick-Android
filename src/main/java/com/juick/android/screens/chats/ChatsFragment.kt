@@ -32,11 +32,11 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
 import com.juick.R
 import com.juick.android.Status.*
-import com.juick.android.Utils
 import com.juick.api.model.Chat
 import com.juick.databinding.FragmentDialogListBinding
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
+import isAuthenticated
 import kotlinx.coroutines.launch
 
 /**
@@ -83,7 +83,7 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                if (Utils.hasAuth()) {
+                if (App.instance.isAuthenticated) {
                     vm.loadChats()
                     vm.chats.collect { resource ->
                         when (resource.status) {

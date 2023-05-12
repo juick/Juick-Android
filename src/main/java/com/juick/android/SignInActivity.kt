@@ -28,9 +28,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.juick.App
 import com.juick.R
-import com.juick.android.Utils.hasAuth
 import com.juick.databinding.ActivityLoginBinding
 import com.juick.util.StringUtils
+import isAuthenticated
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -88,7 +88,7 @@ class SignInActivity : AppCompatActivity() {
                 signInButton.setOnClickListener { application.signInProvider?.performSignIn() }
             }
         currentAction = intent.getIntExtra(EXTRA_ACTION, ACTION_ACCOUNT_CREATE)
-        if (hasAuth() && currentAction != ACTION_PASSWORD_UPDATE) {
+        if (App.instance.isAuthenticated && currentAction != ACTION_PASSWORD_UPDATE) {
             val builder = AlertDialog.Builder(this)
             builder.setNeutralButton(android.R.string.ok) { _, _ ->
                 setResult(RESULT_CANCELED)

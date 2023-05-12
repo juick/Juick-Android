@@ -16,13 +16,14 @@
  */
 package com.juick.android.screens.home
 
-import com.juick.android.screens.FeedViewModel
+import com.juick.App
 import com.juick.android.UrlBuilder
-import com.juick.android.Utils
+import com.juick.android.screens.FeedViewModel
+import isAuthenticated
 
 class HomeViewModel : FeedViewModel() {
     init {
-        if (Utils.hasAuth()) {
+        if (App.instance.isAuthenticated) {
             apiUrl.value = (UrlBuilder.home.toString())
         } else {
             apiUrl.value = (UrlBuilder.discussions.toString())

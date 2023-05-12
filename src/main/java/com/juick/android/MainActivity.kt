@@ -67,6 +67,7 @@ import com.juick.android.widget.util.setAppBarElevation
 import com.juick.api.model.Post
 import com.juick.databinding.ActivityMainBinding
 import com.juick.util.StringUtils
+import isAuthenticated
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,7 +81,7 @@ class MainActivity : AppCompatActivity() {
     private var notificationManager: NotificationManager? = null
     private lateinit var loginLauncher: ActivityResultLauncher<Intent>
     private fun showLogin() {
-        if (!Utils.hasAuth()) {
+        if (!App.instance.isAuthenticated) {
             loginLauncher.launch(Intent(this, SignInActivity::class.java))
         }
     }
@@ -155,14 +156,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         model.fab.setOnClickListener {
-            if (Utils.hasAuth()) {
+            if (App.instance.isAuthenticated) {
                 navController.navigate(R.id.new_post)
             } else {
                 showLogin()
             }
         }
         lifecycleScope.launch {
-            if (Utils.hasAuth()) {
+            if (App.instance.isAuthenticated) {
                 if (requestNotificationsPermission()) {
                     notificationManager = NotificationManager()
                 }

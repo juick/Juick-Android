@@ -45,13 +45,13 @@ import com.juick.android.ProfileData
 import com.juick.android.SignInActivity
 import com.juick.android.Status
 import com.juick.android.Utils.getMimeTypeFor
-import com.juick.android.Utils.hasAuth
 import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.android.screens.FeedAdapter
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentThreadBinding
 import com.juick.util.StringUtils
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
+import isAuthenticated
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -126,7 +126,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
             return
         }
         model.buttonSend.setOnClickListener {
-            if (!hasAuth()) {
+            if (!App.instance.isAuthenticated) {
                 startActivity(Intent(context, SignInActivity::class.java))
                 return@setOnClickListener
             }

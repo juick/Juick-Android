@@ -16,10 +16,9 @@
  */
 package com.juick
 
-import android.accounts.AccountManager
+import accountData
 import android.net.Uri
 import android.os.Build
-import android.text.TextUtils
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.appcompat.app.AppCompatDelegate
@@ -29,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.juick.android.*
 import com.juick.android.SignInActivity.SignInStatus
-import com.juick.android.Utils.accountData
 import com.juick.api.Api
 import com.juick.api.RequestBodyUtil
 import com.juick.api.model.Post
@@ -58,18 +56,14 @@ class App : MultiDexApplication() {
                     .header("User-Agent", "${getString(R.string.Juick)}/${BuildConfig.VERSION_CODE} " +
                             "${Version.userAgent()} Android/${Build.VERSION.SDK_INT}")
                     .method(original.method(), original.body())
-                val accountData = accountData
-                if (accountData != null) {
-                    val hash = accountData.getString(AccountManager.KEY_AUTHTOKEN)
-                    if (!TextUtils.isEmpty(hash)) {
-                        requestBuilder.addHeader("Authorization", "Juick $hash")
-                    }
+                if (accountData.isNotEmpty()) {
+                    requestBuilder.addHeader("Authorization", "Juick $accountData")
                 }
                 val request = requestBuilder.build()
                 val response = chain.proceed(request)
                 if (!response.isSuccessful) {
                     if (response.code() == 401) {
-                        if (accountData != null) {
+                        if (accountData.isNotEmpty()) {
                             authorizationCallback?.invoke()
                         }
                     }
