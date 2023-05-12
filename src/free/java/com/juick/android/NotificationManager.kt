@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -16,7 +16,7 @@
  */
 package com.juick.android
 
-import android.accounts.AccountManager
+import accountData
 import android.util.Log
 import com.here.oksse.OkSse
 import com.here.oksse.ServerSentEvent
@@ -38,7 +38,7 @@ class NotificationManager {
         es = eventsFactory!!
             .readTimeout(0, TimeUnit.SECONDS).build()
         val uri = Utils.buildUrl(BuildConfig.EVENTS_ENDPOINT)
-        val hash = Utils.accountData?.getString(AccountManager.KEY_AUTHTOKEN) ?: ""
+        val hash = App.instance.accountData
         if (hash.isNotEmpty()) {
             uri.appendQueryParameter("hash", hash)
         }
