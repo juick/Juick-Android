@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -19,8 +19,12 @@ package com.juick.api.model
 /**
  * Created by gerc on 10.02.2016.
  */
-data class Photo (
-    val thumbnail: String,
-    val small: String,
-    val medium: String
-)
+data class Attachment (
+    val url: String,
+    val height: Int,
+    val width: Int
+) {
+    var thumbnail: Attachment? = null
+    var small: Attachment? = null
+    var medium: Attachment? = null
+}

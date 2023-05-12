@@ -150,7 +150,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             holder.photoLayout.visibility = View.VISIBLE
             holder.photoDescriptionView.visibility = View.GONE
             val drawable = Glide.with(holder.itemView.context)
-                .load(post.photo!!.small)
+                .load(post.photo!!.small!!.url)
                 .transition(DrawableTransitionOptions.withCrossFade())
             if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
                 drawable.apply(RequestOptions.bitmapTransform(BlurTransformation()))
@@ -158,7 +158,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             } else {
                 drawable.into(holder.photoImageView)
                 holder.photoImageView.setOnClickListener {
-                    itemMenuListener?.onLinkClick(it, post.photo?.medium as String)
+                    itemMenuListener?.onLinkClick(it, post.photo?.url as String)
                 }
             }
         } else if (App.instance.hasViewableContent(post.text)) {

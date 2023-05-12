@@ -41,7 +41,8 @@ data class Post(
     var likes = 0
     var repliesby: String? = null
     var replyQuote: String? = null
-    var photo: Photo? = null
+    @JsonProperty("attachment")
+    var photo: Attachment? = null
     var friendsOnly: Boolean = false
     @JsonProperty("service")
     var isService = false
