@@ -151,7 +151,6 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             holder.photoDescriptionView.visibility = View.GONE
             val drawable = Glide.with(holder.itemView.context)
                 .load(post.photo!!.medium!!.url)
-                .override(post.photo!!.medium!!.width, post.photo!!.medium!!.height)
                 .transition(DrawableTransitionOptions.withCrossFade())
             if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
                 drawable.apply(RequestOptions.bitmapTransform(BlurTransformation()))
