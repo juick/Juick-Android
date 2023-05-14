@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -18,29 +18,25 @@ package com.juick.android.screens.chats
 
 import androidx.lifecycle.ViewModel
 import com.juick.App
-import com.juick.android.Resource
 import com.juick.api.model.Chat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 
 class ChatsViewModel : ViewModel() {
-    var chats = MutableStateFlow<Resource<List<Chat>>>(Resource.loading())
+    var chats = MutableStateFlow<Result<List<Chat>>?>(null)
         private set
 
     suspend fun loadChats() {
-        chats.value = Resource.loading()
+        chats.value = null
         try {
             val pms = withContext(Dispatchers.IO) {
                 App.instance.api.groupsPms(10).pms
             }
-            chats.value = Resource.success(data = pms)
+            chats.value = Result.success(pms)
         } catch (exception: Exception) {
             chats.value =
-                Resource.error(
-                    data = null,
-                    message = exception.message
-                )
+                Result.failure(exception)
         }
     }
 }

@@ -25,19 +25,19 @@ import kotlinx.coroutines.withContext
 
 object ProfileData {
     val anonymous = User(uid = 0, uname = "Anonymous")
-    var userProfile: MutableStateFlow<Resource<User>> = MutableStateFlow(Resource.loading())
+    var userProfile: MutableStateFlow<User?> = MutableStateFlow(null)
         private set
 
     suspend fun refresh() {
         userProfile.update {
-            Resource.loading()
+            null
         }
         try {
             userProfile.value = withContext(Dispatchers.IO) {
-                Resource.success(App.instance.api.me())
+                App.instance.api.me()
             }
         } catch (e: Exception) {
-            userProfile.value = Resource.success(anonymous)
+            userProfile.value = anonymous
         }
     }
 }

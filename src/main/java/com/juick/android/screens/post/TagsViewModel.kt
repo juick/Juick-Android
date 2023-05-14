@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -20,7 +20,6 @@ package com.juick.android.screens.post
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.juick.App
-import com.juick.android.Resource
 import com.juick.api.model.Tag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TagsViewModel : ViewModel() {
-    private val _tags = MutableStateFlow<Resource<List<Tag>>>(Resource.loading())
+    private val _tags = MutableStateFlow<Result<List<Tag>>?>(null)
     val tags = _tags.asStateFlow()
 
     init {
@@ -40,14 +39,11 @@ class TagsViewModel : ViewModel() {
                     App.instance.api.tags()
                 }
                 _tags.update {
-                    Resource.success(data = data)
+                    Result.success(data)
                 }
             } catch (exception: Exception) {
                 _tags.update {
-                    Resource.error(
-                        data = null,
-                        message = exception.message
-                    )
+                    Result.failure(exception)
                 }
             }
         }

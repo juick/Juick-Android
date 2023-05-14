@@ -29,7 +29,6 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
 import com.juick.R
 import com.juick.android.ProfileData
-import com.juick.android.Status
 import com.juick.android.widget.util.hideKeyboard
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentPmBinding
@@ -62,8 +61,8 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
             true
         }
         ProfileData.userProfile.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach {
-            if (it.status == Status.SUCCESS) {
-                adapter = MessagesListAdapter(it.data!!.uname) { imageView, url, _ ->
+            it?.let { user ->
+                adapter = MessagesListAdapter(user.uname) { imageView, url, _ ->
                     Glide.with(imageView.context)
                         .load(url)
                         .transition(DrawableTransitionOptions.withCrossFade())
@@ -78,14 +77,16 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
             })
         }.launchIn(lifecycleScope)
         vm.messages.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach {
-            when (it.status) {
-                Status.LOADING -> {}
-                Status.ERROR -> Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
-                Status.SUCCESS -> {
-                    it.data?.let { posts ->
+            when (it) {
+                null -> {}
+                else -> it.fold(
+                    onSuccess = { posts ->
                         adapter.addToEnd(posts, false)
+                    },
+                    onFailure = {
+                        Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
                     }
-                }
+                )
             }
         }.launchIn(lifecycleScope)
         vm.loadMessages()

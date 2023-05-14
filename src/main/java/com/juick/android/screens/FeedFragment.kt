@@ -32,14 +32,12 @@ import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
 import com.juick.android.ProfileData
-import com.juick.android.Status
 import com.juick.android.Utils
 import com.juick.android.Utils.replaceUriParameter
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentPostsPageBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -106,10 +104,10 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 ProfileData.userProfile.collect {
-                    if (it.status == Status.SUCCESS) {
+                    it?.let { user ->
                         adapter.setOnMenuListener(
                             JuickMessageMenuListener(
-                                requireActivity(), adapter, it.data!!
+                                requireActivity(), adapter, user
                             )
                         )
                     }
@@ -117,34 +115,38 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             }
         }
 
-        vm.feed.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach { resource ->
-            when(resource.status) {
-                Status.LOADING -> {
+        vm.feed.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach { result ->
+            when (result) {
+                null -> {
                     if (firstPage) {
                         binding.progressBar.visibility = View.VISIBLE
                         binding.list.visibility = View.GONE
                         binding.errorText.visibility = View.GONE
                     }
                 }
-                Status.SUCCESS -> {
-                    loading = false
-                    stopRefreshing()
-                    resource.data?.let {
+
+                else -> result.fold(
+                    onSuccess = { posts ->
+                        loading = false
+                        stopRefreshing()
+                        posts.let {
+                            if (firstPage) {
+                                adapter.submitList(it)
+                            } else {
+                                adapter.submitList(adapter.currentList + it)
+                            }
+                        }
+                    },
+                    onFailure = { exception ->
+                        loading = false
+                        stopRefreshing()
+                        Toast.makeText(requireContext(), exception.message, Toast.LENGTH_LONG)
+                            .show()
                         if (firstPage) {
-                            adapter.submitList(it)
-                        } else {
-                            adapter.submitList(adapter.currentList + it)
+                            setError(exception.message ?: getString(R.string.Error))
                         }
                     }
-                }
-                Status.ERROR -> {
-                    loading = false
-                    stopRefreshing()
-                    Toast.makeText(requireContext(), resource.message, Toast.LENGTH_LONG).show()
-                    if (firstPage) {
-                        setError(resource.message ?: getString(R.string.Error))
-                    }
-                }
+                )
             }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
     }

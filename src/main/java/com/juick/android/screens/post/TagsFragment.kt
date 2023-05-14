@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -32,7 +32,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.juick.R
-import com.juick.android.Status
 import com.juick.databinding.FragmentTagsListBinding
 import com.juick.databinding.ItemTagBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
@@ -64,17 +63,18 @@ class TagsFragment : BottomSheetDialogFragment(R.layout.fragment_tags_list) {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 vm.tags.collect { resource ->
-                    when (resource.status) {
-                        Status.SUCCESS -> {
-                            model.progressBar.visibility = View.GONE
-                            model.list.visibility = View.VISIBLE
-                            resource.data?.let { tags ->
-                                adapter.submitList(tags.map {
-                                    it.tag
-                                })
-                            }
+                    when (resource) {
+                        null -> {
+                            model.list.visibility = View.GONE
+                            model.progressBar.visibility = View.VISIBLE
                         }
-                        Status.ERROR -> {
+                        else -> resource.fold(
+                        onSuccess = { tags ->
+                            adapter.submitList(tags.map {
+                                it.tag
+                            })
+                        },
+                        onFailure = {
                             model.progressBar.visibility = View.GONE
                             model.list.visibility = View.VISIBLE
                             Toast.makeText(
@@ -82,11 +82,7 @@ class TagsFragment : BottomSheetDialogFragment(R.layout.fragment_tags_list) {
                                 R.string.network_error,
                                 Toast.LENGTH_LONG
                             ).show()
-                        }
-                        Status.LOADING -> {
-                            model.list.visibility = View.GONE
-                            model.progressBar.visibility = View.VISIBLE
-                        }
+                        })
                     }
                 }
             }

@@ -43,7 +43,6 @@ import com.juick.R
 import com.juick.android.JuickMessageMenuListener
 import com.juick.android.ProfileData
 import com.juick.android.SignInActivity
-import com.juick.android.Status
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.android.screens.FeedAdapter
@@ -205,11 +204,11 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         load()
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                ProfileData.userProfile.collect { it ->
-                    if (it.status == Status.SUCCESS) {
+                ProfileData.userProfile.collect {
+                    it?.let { user ->
                         adapter.setOnMenuListener(
                             JuickMessageMenuListener(
-                                requireActivity(), adapter, it.data!!
+                                requireActivity(), adapter, user
                             )
                         )
                     }

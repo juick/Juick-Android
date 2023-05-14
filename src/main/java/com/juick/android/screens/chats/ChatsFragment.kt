@@ -31,7 +31,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
 import com.juick.R
-import com.juick.android.Status.*
 import com.juick.api.model.Chat
 import com.juick.databinding.FragmentDialogListBinding
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter
@@ -86,29 +85,30 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
                 if (App.instance.isAuthenticated) {
                     vm.loadChats()
                     vm.chats.collect { resource ->
-                        when (resource.status) {
-                            SUCCESS -> {
-                                stopLoading()
-                                resource.data?.let { chats ->
+                        when (resource) {
+                            null -> {
+                                startLoading()
+                            }
+
+                            else -> resource.fold(
+                                onSuccess = { chats ->
+                                    stopLoading()
                                     if (chats.isNotEmpty()) {
                                         chatsAdapter.setItems(chats)
                                     } else {
                                         setError(getString(R.string.you_have_no_direct_messages))
                                     }
+                                },
+                                onFailure = {
+                                    stopLoading()
+                                    Toast.makeText(
+                                        requireContext(),
+                                        it.message,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    setError(it.message ?: getString(R.string.Error))
                                 }
-                            }
-                            ERROR -> {
-                                stopLoading()
-                                Toast.makeText(
-                                    requireContext(),
-                                    resource.message,
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                setError(resource.message ?: getString(R.string.Error))
-                            }
-                            LOADING -> {
-                                startLoading()
-                            }
+                            )
                         }
                     }
                 } else {

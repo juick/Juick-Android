@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -21,7 +21,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.juick.App
-import com.juick.android.Resource
 import com.juick.api.model.Post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,19 +29,19 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class PMViewModel(private val userName: String): ViewModel() {
-    val messages = MutableStateFlow<Resource<List<Post>>>(Resource.loading())
+    val messages = MutableStateFlow<Result<List<Post>>?>(null)
 
     fun loadMessages() {
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) { App.instance.api.pm(userName) }.let { newPms ->
                     messages.update {
-                        Resource.success(newPms)
+                        Result.success(newPms)
                     }
                 }
             } catch (e: Exception) {
                 messages.update {
-                    Resource.error(null, e.message)
+                    Result.failure(e)
                 }
             }
         }

@@ -19,7 +19,6 @@ package com.juick.android.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.juick.App
-import com.juick.android.Resource
 import com.juick.api.model.Post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +31,7 @@ open class FeedViewModel : ViewModel() {
     private val _apiUrl: MutableStateFlow<String> = MutableStateFlow("")
     val apiUrl = _apiUrl
 
-    private val _feed: MutableStateFlow<Resource<List<Post>>> = MutableStateFlow(Resource.loading())
+    private val _feed: MutableStateFlow<Result<List<Post>>?> = MutableStateFlow(null)
     val feed = _feed.asStateFlow()
 
     init {
@@ -41,17 +40,17 @@ open class FeedViewModel : ViewModel() {
                 if (it.isNotEmpty()) {
                     try {
                         _feed.update {
-                            Resource.loading()
+                            null
                         }
                         val posts = withContext(Dispatchers.IO) {
                             App.instance.api.getPosts(it)
                         }
                         _feed.update {
-                            Resource.success(posts)
+                            Result.success(posts)
                         }
                     } catch (e: Exception) {
                         _feed.update {
-                            Resource.error(data = null, message = e.message)
+                            Result.failure(e)
                         }
                     }
                 }

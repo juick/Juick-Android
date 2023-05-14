@@ -96,7 +96,8 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private var requestNotificationsPermission = RequestPermission(
-        this, Manifest.permission.POST_NOTIFICATIONS, Build.VERSION_CODES.TIRAMISU)
+        this, Manifest.permission.POST_NOTIFICATIONS, Build.VERSION_CODES.TIRAMISU
+    )
 
     @ExperimentalBadgeUtils
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,8 +127,7 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(this, navController, appBarConfiguration)
         //NavigationUI.setupWithNavController(toolbar, navController);
         setupWithNavController(navView, navController)
-        navController.addOnDestinationChangedListener {
-                _, destination, _ ->
+        navController.addOnDestinationChangedListener { _, destination, _ ->
             val id = destination.id
             var scrollFlags = (AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
                     or AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS)
@@ -195,10 +195,15 @@ class MainActivity : AppCompatActivity() {
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                ProfileData.userProfile.collect {
-                    when (it.status) {
-                        Status.SUCCESS -> {
-                            val user = it.data!!
+                ProfileData.userProfile.collect { user ->
+                    when (user) {
+                        null -> {
+                            avatar =
+                                ResourcesCompat.getDrawable(resources, R.drawable.av_96, null)!!
+                                    .toBitmap()
+                        }
+
+                        else -> {
                             val avatarUrl: String = user.avatar
                             Glide.with(this@MainActivity)
                                 .asBitmap()
@@ -227,12 +232,7 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         }
-
-                        else -> {
-                            avatar = ResourcesCompat.getDrawable(resources, R.drawable.av_96, null)!!.toBitmap()
-                        }
                     }
-
                 }
             }
         }
@@ -332,7 +332,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
         profileItem = menu.findItem(R.id.blog)
-        ProfileData.userProfile.value.data?.let {
+        ProfileData.userProfile.value?.let {
             profileItem.isVisible = it.uid > 0
         }
         if (avatar != null) {
