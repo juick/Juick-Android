@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -22,7 +22,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
@@ -38,8 +37,6 @@ import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentPostsPageBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -102,7 +99,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             refreshFeed()
         }
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 ProfileData.userProfile.collect {
                     it?.let { user ->
                         adapter.setOnMenuListener(
@@ -114,41 +111,44 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                 }
             }
         }
-
-        vm.feed.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach { result ->
-            when (result) {
-                null -> {
-                    if (firstPage) {
-                        binding.progressBar.visibility = View.VISIBLE
-                        binding.list.visibility = View.GONE
-                        binding.errorText.visibility = View.GONE
-                    }
-                }
-
-                else -> result.fold(
-                    onSuccess = { posts ->
-                        loading = false
-                        stopRefreshing()
-                        posts.let {
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                vm.feed.collect { result ->
+                    when (result) {
+                        null -> {
                             if (firstPage) {
-                                adapter.submitList(it)
-                            } else {
-                                adapter.submitList(adapter.currentList + it)
+                                binding.progressBar.visibility = View.VISIBLE
+                                binding.list.visibility = View.GONE
+                                binding.errorText.visibility = View.GONE
                             }
                         }
-                    },
-                    onFailure = { exception ->
-                        loading = false
-                        stopRefreshing()
-                        Toast.makeText(requireContext(), exception.message, Toast.LENGTH_LONG)
-                            .show()
-                        if (firstPage) {
-                            setError(exception.message ?: getString(R.string.Error))
-                        }
+
+                        else -> result.fold(
+                            onSuccess = { posts ->
+                                loading = false
+                                stopRefreshing()
+                                posts.let {
+                                    if (firstPage) {
+                                        adapter.submitList(it)
+                                    } else {
+                                        adapter.submitList(adapter.currentList + it)
+                                    }
+                                }
+                            },
+                            onFailure = { exception ->
+                                loading = false
+                                stopRefreshing()
+                                Toast.makeText(requireContext(), exception.message, Toast.LENGTH_LONG)
+                                    .show()
+                                if (firstPage) {
+                                    setError(exception.message ?: getString(R.string.Error))
+                                }
+                            }
+                        )
                     }
-                )
+                }
             }
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
+        }
     }
     fun refreshFeed() {
         firstPage = true
