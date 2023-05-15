@@ -69,8 +69,9 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                     adapter.currentList[adapter.itemCount - 1]?.let {
                         lastItem ->
                         val requestUrl = Utils.buildUrl(vm.apiUrl.value)
-                            .appendQueryParameter("before_mid", lastItem.mid.toString())
-                            .build().toString()
+                            .build()
+                            .replaceUriParameter("before_mid", lastItem.mid.toString())
+                            .toString()
                         firstPage = false
                         vm.apiUrl.value = requestUrl
                     }
@@ -117,10 +118,14 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                                 loading = false
                                 stopRefreshing()
                                 posts.let {
+                                    val needToScroll = haveNewPosts(adapter.currentList, it)
                                     if (firstPage) {
                                         adapter.submitList(it)
                                     } else {
                                         adapter.submitList(adapter.currentList + it)
+                                    }
+                                    if (needToScroll) {
+                                        binding.list.scrollToPosition(0)
                                     }
                                 }
                             },
@@ -143,12 +148,19 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
         firstPage = true
         val newUrl = Utils.buildUrl(vm.apiUrl.value)
             .build()
+            .replaceUriParameter("before_mid", "")
             .replaceUriParameter("ts", "${System.currentTimeMillis()}")
             .toString()
         vm.apiUrl.value = newUrl
         viewLifecycleOwner.lifecycleScope.launch {
             ProfileData.refresh()
         }
+    }
+    private fun haveNewPosts(oldPosts: List<Post>, newPosts: List<Post>): Boolean {
+        if (oldPosts.isEmpty() || newPosts.isEmpty()) {
+            return false
+        }
+        return oldPosts.maxBy { it.mid }.mid < newPosts.maxBy { it.mid }.mid
     }
     private fun stopRefreshing() {
         binding.swipeContainer.isRefreshing = false
