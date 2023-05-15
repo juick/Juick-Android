@@ -28,9 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 open class FeedViewModel : ViewModel() {
-    private val _apiUrl: MutableStateFlow<String> = MutableStateFlow("")
-    val apiUrl = _apiUrl
-
+    val apiUrl: MutableStateFlow<String> = MutableStateFlow("")
     private val _feed: MutableStateFlow<Result<List<Post>>?> = MutableStateFlow(null)
     val feed = _feed.asStateFlow()
 

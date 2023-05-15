@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.juick.android.screens.pm
+package com.juick.android.screens.chat
 
 import android.os.Bundle
 import android.util.Log
@@ -31,7 +31,7 @@ import com.juick.R
 import com.juick.android.ProfileData
 import com.juick.android.widget.util.hideKeyboard
 import com.juick.api.model.Post
-import com.juick.databinding.FragmentPmBinding
+import com.juick.databinding.FragmentChatBinding
 import com.stfalcon.chatkit.messages.MessagesListAdapter
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.Dispatchers
@@ -44,17 +44,17 @@ import kotlinx.coroutines.withContext
  *
  * @author ugnich
  */
-class PMFragment : Fragment(R.layout.fragment_pm) {
-    private val model by viewBinding(FragmentPmBinding::bind)
-    private lateinit var vm: PMViewModel
+class ChatFragment : Fragment(R.layout.fragment_chat) {
+    private val model by viewBinding(FragmentChatBinding::bind)
+    private lateinit var vm: ChatViewModel
     private lateinit var adapter: MessagesListAdapter<Post>
     private lateinit var uname: String
-    private val args by navArgs<PMFragmentArgs>()
+    private val args by navArgs<ChatFragmentArgs>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         uname = args.uname
-        vm = ViewModelProvider(this, PMViewModelFactory(uname))[PMViewModel::class.java]
+        vm = ViewModelProvider(this, ChatViewModelFactory(uname))[ChatViewModel::class.java]
         model.input.setInputListener { input: CharSequence ->
             postText(input.toString())
             hideKeyboard(activity)
@@ -83,8 +83,8 @@ class PMFragment : Fragment(R.layout.fragment_pm) {
                     onSuccess = { posts ->
                         adapter.addToEnd(posts, false)
                     },
-                    onFailure = {
-                        Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                    onFailure = { error ->
+                        Toast.makeText(requireContext(), error.message, Toast.LENGTH_LONG).show()
                     }
                 )
             }

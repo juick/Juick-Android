@@ -52,8 +52,8 @@
     </fragment>
     <fragment
         android:id="@+id/PMFragment"
-        tools:layout="@layout/fragment_pm"
-        android:name="com.juick.android.screens.pm.PMFragment"
+        tools:layout="@layout/fragment_chat"
+        android:name="com.juick.android.screens.chat.ChatFragment"
         android:label="{uname}" >
         <argument
             android:name="uname"

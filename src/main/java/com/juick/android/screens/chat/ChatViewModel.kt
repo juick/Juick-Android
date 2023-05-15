@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.juick.android.screens.pm
+package com.juick.android.screens.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PMViewModel(private val userName: String): ViewModel() {
+class ChatViewModel(private val userName: String): ViewModel() {
     val messages = MutableStateFlow<Result<List<Post>>?>(null)
 
     fun loadMessages() {
@@ -48,7 +48,7 @@ class PMViewModel(private val userName: String): ViewModel() {
     }
 }
 
-class PMViewModelFactory(private val userName: String): ViewModelProvider.Factory {
+class ChatViewModelFactory(private val userName: String): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return modelClass.getConstructor(String::class.java)
             .newInstance(userName)
