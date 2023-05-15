@@ -25,8 +25,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
@@ -53,15 +51,6 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
         super.onViewCreated(view, savedInstanceState)
         val adapter = FeedAdapter()
         adapter.postUpdatedListener = this
-        adapter.registerAdapterDataObserver(object: AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                val linearLayoutManager = binding.list.layoutManager as LinearLayoutManager
-                val visiblePosition = linearLayoutManager.findFirstVisibleItemPosition()
-                if (positionStart <= visiblePosition) {
-                    binding.list.scrollToPosition(0)
-                }
-            }
-        })
         binding.list.adapter = adapter
         adapter.setOnItemClickListener { _, pos ->
             adapter.currentList[pos]?.let {
