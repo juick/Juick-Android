@@ -148,7 +148,7 @@ dependencies {
     implementation "com.github.bumptech.glide:okhttp3-integration:$glide_version"
 
     implementation 'com.github.vitalyster:ChatKit:5e99a8bf3c'
-    huaweiImplementation 'com.huawei.hms:push:6.10.0.300'
+    huaweiImplementation 'com.huawei.hms:push:6.11.0.300'
 
     implementation 'com.github.Zhuinden:fragmentviewbindingdelegate-kt:1.0.2'
 
