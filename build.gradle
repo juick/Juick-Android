@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = "1.9.10"
+    ext.kotlin_version = "1.9.0"
     ext.navigation_version = "2.6.0"
     ext.okhttp_version = "3.12.13"
     ext.retrofit_version = "2.6.4"
@@ -17,13 +17,14 @@ buildscript {
         classpath 'com.google.gms:google-services:4.3.15'
         classpath 'com.huawei.agconnect:agcp:1.9.1.300'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlin_version-1.0.13"
     }
 }
 
 apply plugin: 'com.android.application'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 
 repositories {
     mavenCentral()
@@ -33,7 +34,7 @@ repositories {
 }
 
 android {
-    compileSdkVersion 33
+    compileSdk 33
     defaultConfig {
         targetSdkVersion 33
         versionCode 190
@@ -112,7 +113,6 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    kapt 'androidx.annotation:annotation:1.6.0'
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.browser:browser:1.5.0'
@@ -144,7 +144,7 @@ dependencies {
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.13.5"
 
     implementation "com.github.bumptech.glide:glide:$glide_version"
-    kapt "com.github.bumptech.glide:compiler:$glide_version"
+    ksp "com.github.bumptech.glide:ksp:$glide_version"
     implementation "com.github.bumptech.glide:okhttp3-integration:$glide_version"
 
     implementation 'com.github.vitalyster:ChatKit:5e99a8bf3c'
