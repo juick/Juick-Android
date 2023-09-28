@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ Copyright (C) 2008-2022, Juick
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2008-2023, Juick
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as
@@ -18,7 +17,8 @@
 
 <resources>
     <style name="AppTheme" parent="BaseTheme">
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/colorMainBackground</item>
+        <item name="android:navigationBarColor">@color/colorMainBackground</item>
     </style>
 </resources>
