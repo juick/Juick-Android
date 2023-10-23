@@ -140,9 +140,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         holder.usernameTextView.text = post.user.uname
         holder.premiumBadge.visibility = if (post.user.premium) View.VISIBLE else View.GONE
         holder.timestampTextView.text = MessageUtils.formatMessageTimestamp(post)
-        if (post.friendsOnly) {
-            holder.messagePrivacyView!!.visibility = View.VISIBLE
-        }
+        holder.messagePrivacyView?.visibility = if (post.friendsOnly) View.VISIBLE else View.GONE
         holder.textTextView.text = StringUtils.EMPTY
         holder.textTextView.text = formatMessageText(holder.itemView.context, post)
         holder.textTextView.movementMethod = LinkMovementMethod.getInstance()
