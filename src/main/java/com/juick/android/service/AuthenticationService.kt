@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
+import androidx.core.os.bundleOf
 import com.juick.R
 import com.juick.android.SignInActivity
 import com.juick.util.StringUtils
@@ -82,7 +83,8 @@ class AuthenticationService : Service() {
             arg1: Account,
             arg2: Array<String>
         ): Bundle {
-            TODO()
+            println("Has features: ${arg2.joinToString()}")
+            return bundleOf(AccountManager.KEY_BOOLEAN_RESULT to false)
         }
 
         override fun updateCredentials(
