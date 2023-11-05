@@ -37,7 +37,7 @@ android {
     compileSdk 33
     defaultConfig {
         targetSdkVersion 33
-        versionCode 191
+        versionCode 192
         versionName "3.1." + versionCode
         applicationId "com.juick"
         vectorDrawables.useSupportLibrary true
