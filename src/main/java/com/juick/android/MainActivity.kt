@@ -92,7 +92,6 @@ class MainActivity : AppCompatActivity() {
     private var avatar: Bitmap? = null
     private lateinit var badge: BadgeDrawable
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var profileItem: MenuItem
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private var requestNotificationsPermission = RequestPermission(
@@ -332,16 +331,18 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
-        profileItem = menu.findItem(R.id.blog)
+        val profileItem = menu.findItem(R.id.blog)
         ProfileData.userProfile.value?.let {
             profileItem.isVisible = it.uid > 0
+            if (profileItem.isVisible) {
+                profileItem.actionView?.setOnClickListener {
+                    onOptionsItemSelected(profileItem)
+                }
+            }
         }
         if (avatar != null) {
             profileItem.actionView?.findViewById<ImageView>(R.id.profile_image)
                 ?.setImageBitmap(avatar)
-            profileItem.actionView?.setOnClickListener {
-                onOptionsItemSelected(profileItem)
-            }
         }
         val discussionsItem = menu.findItem(R.id.discussions)
         if (discussionsItem != null) {
