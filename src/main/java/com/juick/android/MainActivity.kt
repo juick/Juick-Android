@@ -184,6 +184,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         badge = BadgeDrawable.create(this)
+        badge.isVisible = false
         badge.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
         badge.badgeTextColor = ContextCompat.getColor(this, R.color.colorMainBackground)
         model.toolbar.viewTreeObserver.addOnGlobalLayoutListener {
