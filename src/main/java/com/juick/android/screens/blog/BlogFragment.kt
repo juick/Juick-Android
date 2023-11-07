@@ -28,7 +28,7 @@ class BlogFragment : FeedFragment() {
     private val args by navArgs<BlogFragmentArgs>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val name = args.uname ?: ProfileData.userProfile.value?.name ?: ""
+        val name = args.uname.ifEmpty { ProfileData.userProfile.value?.name ?: "" }
         vm = ViewModelProvider(this, BlogViewModelFactory(name))[BlogViewModel::class.java]
         super.onViewCreated(view, savedInstanceState)
     }
