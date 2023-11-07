@@ -108,3 +108,7 @@ data class Post(
         }
     }
 }
+
+fun Post.isReply(): Boolean {
+    return rid > 0
+}

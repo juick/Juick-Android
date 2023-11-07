@@ -21,8 +21,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
-import com.juick.R
-import com.juick.android.MainActivity
 import com.juick.android.ProfileData
 import com.juick.android.screens.FeedFragment
 
