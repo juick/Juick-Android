@@ -130,16 +130,22 @@ class JuickMessageMenuListener(
                 Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
                 context.resources.getString(R.string.Share)
             )
-            if (post.rid == 0) {
-                val action = if (post.friendsOnly) MENU_ACTION_MAKE_PUBLIC else MENU_ACTION_MAKE_PRIVATE
-                val title = if (post.friendsOnly) context.getString(R.string.make_public) else context.getString(
-                                    R.string.make_private)
-                val item = popupMenu.menu.add(
-                    Menu.NONE, action, Menu.NONE,
-                    title
-                )
-                val icon = if (post.friendsOnly) R.drawable.ic_ei_unlock else R.drawable.ic_ei_lock
-                item.icon = ContextCompat.getDrawable(context, icon)
+            if (me.premium || me.admin) {
+                if (post.rid == 0) {
+                    val action =
+                        if (post.friendsOnly) MENU_ACTION_MAKE_PUBLIC else MENU_ACTION_MAKE_PRIVATE
+                    val title =
+                        if (post.friendsOnly) context.getString(R.string.make_public) else context.getString(
+                            R.string.make_private
+                        )
+                    val item = popupMenu.menu.add(
+                        Menu.NONE, action, Menu.NONE,
+                        title
+                    )
+                    val icon =
+                        if (post.friendsOnly) R.drawable.ic_ei_unlock else R.drawable.ic_ei_lock
+                    item.icon = ContextCompat.getDrawable(context, icon)
+                }
             }
             val itemText = if (post.rid == 0)
                 context.getString(R.string.DeletePost) else
@@ -164,16 +170,18 @@ class JuickMessageMenuListener(
                 Menu.NONE, MENU_ACTION_SUBSCRIBE, Menu.NONE,
                 context.resources.getString(R.string.Subscribe_to) + " @" + userName
             )
-            if (me.vip.contains(post.user)) {
-                popupMenu.menu.add(
-                    Menu.NONE, MENU_ACTION_REMOVE_FROM_VIP, Menu.NONE,
-                    context.resources.getString(R.string.remove_from_vip)
-                )
-            } else {
-                popupMenu.menu.add(
-                    Menu.NONE, MENU_ACTION_ADD_TO_VIP, Menu.NONE,
-                    context.resources.getString(R.string.add_to_vip)
-                )
+            if (me.premium || me.admin) {
+                if (me.vip.contains(post.user)) {
+                    popupMenu.menu.add(
+                        Menu.NONE, MENU_ACTION_REMOVE_FROM_VIP, Menu.NONE,
+                        context.resources.getString(R.string.remove_from_vip)
+                    )
+                } else {
+                    popupMenu.menu.add(
+                        Menu.NONE, MENU_ACTION_ADD_TO_VIP, Menu.NONE,
+                        context.resources.getString(R.string.add_to_vip)
+                    )
+                }
             }
             if (me.ignored.contains(post.user)) {
                 popupMenu.menu.add(

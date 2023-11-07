@@ -27,6 +27,7 @@ data class User(
 ) : IUser {
     var unreadCount: Int = 0
     val premium: Boolean = false
+    val admin: Boolean = false
     val vip: List<User> = listOf()
     val ignored: List<User> = listOf()
     var hash: String? = null
