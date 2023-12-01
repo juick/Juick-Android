@@ -1,6 +1,6 @@
 buildscript {
     ext.kotlin_version = "1.9.21"
-    ext.navigation_version = "2.6.0"
+    ext.navigation_version = "2.7.5"
     ext.okhttp_version = "3.12.13"
     ext.retrofit_version = "2.6.4"
     ext.glide_version = "4.16.0"
@@ -34,9 +34,9 @@ repositories {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
     defaultConfig {
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode 194
         versionName "3.1." + versionCode
         applicationId "com.juick"
@@ -99,28 +99,28 @@ android {
         checkGeneratedSources true
         checkReleaseBuilds false
     }
-    applicationVariants.all { variant ->
-        variant.outputs.all {
+    applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach {
             outputFileName = "Juick-${variant.flavorName}-v${variant.versionName}.apk"
         }
     }
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << '-Xlint:unchecked'
     options.deprecation = true
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.browser:browser:1.5.0'
+    implementation 'androidx.browser:browser:1.7.0'
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'
     googleImplementation 'com.google.android.gms:play-services-auth:20.7.0'
     // Firebase platform
     googleImplementation platform('com.google.firebase:firebase-bom:32.6.0')
@@ -174,6 +174,6 @@ googleServices {
     disableVersionCheck true
 }
 apply plugin: 'com.huawei.agconnect'
-android.applicationVariants.all { variant ->
+android.applicationVariants.configureEach { variant ->
     project.tasks.getByName('process' + variant.name.capitalize() + 'GoogleServices').enabled variant.name.contains('google')
 }

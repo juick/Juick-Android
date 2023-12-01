@@ -56,9 +56,9 @@
         android:fullBackupOnly="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/Juick"
-        android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:targetApi="lollipop">
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="tiramisu">
         <activity
             android:name=".android.MainActivity"
             android:exported="true"
