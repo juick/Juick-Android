@@ -376,7 +376,7 @@ class MainActivity : AppCompatActivity() {
                     navController.navigate(R.id.home)
             }
         } else {
-            if (Build.VERSION.SDK_INT >= 16) {
+            if (Build.VERSION.SDK_INT >= 19) {
                 val intent = CustomTabsIntent.Builder().setDefaultColorSchemeParams(
                     CustomTabColorSchemeParams.Builder().setToolbarColor(
                         ResourcesCompat.getColor(
