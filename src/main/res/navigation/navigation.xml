@@ -119,8 +119,7 @@
         android:label="@string/tags" />
     <fragment
         android:id="@+id/blog"
-        android:name="com.juick.android.screens.blog.BlogFragment"
-        android:label="{uname}" >
+        android:name="com.juick.android.screens.blog.BlogFragment">
         <argument
             android:name="uname"
             android:defaultValue=""

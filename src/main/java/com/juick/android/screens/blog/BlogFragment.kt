@@ -25,8 +25,9 @@ import com.juick.android.screens.FeedFragment
 
 class BlogFragment : FeedFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val name = arguments?.getString("uname") ?: ProfileData.userProfile.value?.name ?: ""
-        vm = ViewModelProvider(this, BlogViewModelFactory(name))[BlogViewModel::class.java]
+        val uname = arguments?.getString("uname") ?: ""
+        val blog = uname.ifEmpty { ProfileData.userProfile.value?.name ?: "" }
+        vm = ViewModelProvider(this, BlogViewModelFactory(blog))[BlogViewModel::class.java]
         super.onViewCreated(view, savedInstanceState)
     }
 }

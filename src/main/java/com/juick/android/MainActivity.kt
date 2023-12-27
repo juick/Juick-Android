@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(this, navController, appBarConfiguration)
         //NavigationUI.setupWithNavController(toolbar, navController);
         setupWithNavController(navView, navController)
-        navController.addOnDestinationChangedListener { _, destination, _ ->
+        navController.addOnDestinationChangedListener { _, destination, args ->
             val id = destination.id
             var scrollFlags = (AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
                     or AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS)
@@ -135,6 +135,11 @@ class MainActivity : AppCompatActivity() {
             (toolbar.layoutParams as AppBarLayout.LayoutParams).scrollFlags = scrollFlags
             val fabVisibility = if (shouldViewFab(id)) View.VISIBLE else View.GONE
             fab.visibility = fabVisibility
+            if (id == R.id.blog) {
+                val uname = args?.getString("uname") ?: ""
+                title = uname.ifEmpty { getString(R.string.Me) }
+                supportActionBar?.title = title
+            }
         }
 
         App.instance.authorizationCallback = {
