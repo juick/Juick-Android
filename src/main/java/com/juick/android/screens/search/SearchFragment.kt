@@ -20,13 +20,12 @@ package com.juick.android.screens.search
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.navArgs
 import com.juick.android.screens.FeedFragment
 
 class SearchFragment: FeedFragment() {
-    private val args by navArgs<SearchFragmentArgs>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        vm = ViewModelProvider(this, SearchViewModelFactory(args.search))[SearchViewModel::class.java]
+        val search = arguments?.getString("search") ?: ""
+        vm = ViewModelProvider(this, SearchViewModelFactory(search))[SearchViewModel::class.java]
         super.onViewCreated(view, savedInstanceState)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -57,10 +57,10 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
     init {
         chatsAdapter.setOnDialogClickListener { dialog: Chat ->
             val navController = findNavController(requireView())
-            val action = ChatsFragmentDirections.actionChatsToPMFragment(dialog.dialogName)
-            action.uid = dialog.id.toInt()
-            action.uname = dialog.dialogName
-            navController.navigate(action)
+            val action = Bundle()
+            action.putString("uname", dialog.dialogName)
+            action.putInt("uid", dialog.id.toInt())
+            navController.navigate(R.id.PMFragment, action)
         }
     }
 
@@ -113,8 +113,7 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
                     }
                 } else {
                     val navController = findNavController(requireView())
-                    val action = ChatsFragmentDirections.actionChatsToNoAuth()
-                    navController.navigate(action)
+                    navController.navigate(R.id.no_auth)
                 }
             }
         }

@@ -20,6 +20,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import android.widget.Toast
@@ -30,9 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import com.juick.App
 import com.juick.R
-import com.juick.android.fragment.ThreadFragmentArgs
 import com.juick.android.screens.FeedAdapter
-import com.juick.android.screens.blog.BlogFragmentArgs
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.User
@@ -207,10 +206,9 @@ class JuickMessageMenuListener(
             when (action) {
                 MENU_ACTION_BLOG -> {
                     val navController = Navigation.findNavController(view)
-                    val args = BlogFragmentArgs.Builder()
-                        .setUname(uname)
-                        .build()
-                    navController.navigate(R.id.blog, args.toBundle())
+                    val args = Bundle()
+                    args.putString("uname", uname)
+                    navController.navigate(R.id.blog, args)
                     true
                 }
                 MENU_ACTION_RECOMMEND -> likeMessage(post)
@@ -248,11 +246,10 @@ class JuickMessageMenuListener(
                     val navController = Navigation.findNavController(view)
                     navController.popBackStack(R.id.home, false)
                     if (rid > 0) {
-                        val args = ThreadFragmentArgs.Builder()
-                            .setMid(mid)
-                            .setScrollToEnd(true)
-                            .build()
-                        navController.navigate(R.id.thread, args.toBundle())
+                        val args = Bundle()
+                        args.putInt("mid", mid)
+                        args.putBoolean("scrollToEnd", true)
+                        navController.navigate(R.id.thread, args)
                     } else {
                         navController.navigate(R.id.home)
                     }

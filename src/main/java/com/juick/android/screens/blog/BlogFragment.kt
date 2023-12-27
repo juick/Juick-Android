@@ -20,15 +20,12 @@ package com.juick.android.screens.blog
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.navArgs
 import com.juick.android.ProfileData
 import com.juick.android.screens.FeedFragment
 
 class BlogFragment : FeedFragment() {
-    private val args by navArgs<BlogFragmentArgs>()
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val name = args.uname.ifEmpty { ProfileData.userProfile.value?.name ?: "" }
+        val name = arguments?.getString("uname") ?: ProfileData.userProfile.value?.name ?: ""
         vm = ViewModelProvider(this, BlogViewModelFactory(name))[BlogViewModel::class.java]
         super.onViewCreated(view, savedInstanceState)
     }

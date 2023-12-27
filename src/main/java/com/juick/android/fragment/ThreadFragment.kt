@@ -33,7 +33,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
@@ -71,7 +70,6 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
     private lateinit var adapter: FeedAdapter
     private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
     private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
-    private val args by navArgs<ThreadFragmentArgs>()
 
     private fun handleSelectedUri(uri: Uri?) {
         if (uri != null) {
@@ -120,8 +118,8 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mid = args.mid
-        scrollToEnd = args.scrollToEnd
+        mid = arguments?.getInt("mid") ?: 0
+        scrollToEnd = arguments?.getBoolean("scrollToEnd") ?: false
         if (mid == 0) {
             return
         }
@@ -294,11 +292,10 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
             response.newMessage?.let {
                 val navController = findNavController(requireView())
                 navController.popBackStack(R.id.home, false)
-                val args = ThreadFragmentArgs.Builder()
-                    .setMid(it.mid)
-                    .setScrollToEnd(true)
-                    .build()
-                navController.navigate(R.id.thread, args.toBundle())
+                val args = Bundle()
+                args.putInt("mid", it.mid)
+                args.putBoolean("scrollToEnd", true)
+                navController.navigate(R.id.thread, args)
             }
         }
     }

@@ -61,10 +61,6 @@ import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
-import com.juick.android.fragment.ThreadFragmentArgs
-import com.juick.android.screens.chats.ChatsFragmentDirections
-import com.juick.android.screens.home.HomeFragmentDirections
-import com.juick.android.screens.search.SearchFragmentArgs
 import com.juick.android.updater.Updater
 import com.juick.android.widget.util.setAppBarElevation
 import com.juick.api.model.Post
@@ -269,19 +265,18 @@ class MainActivity : AppCompatActivity() {
                         val navController = navHostFragment.navController
                         navController.popBackStack(R.id.chats, true)
                         navController.navigate(R.id.chats)
-                        val chatAction =
-                            ChatsFragmentDirections.actionChatsToPMFragment(jmsg.user.uname)
-                        chatAction.uid = jmsg.user.uid
-                        navController.navigate(chatAction)
+                        val chatAction = Bundle()
+                        chatAction.putString("uname", jmsg.user.uname)
+                        chatAction.putInt("uid", jmsg.user.uid)
+                        navController.navigate(R.id.PMFragment, chatAction)
                     } else {
                         val navHostFragment = model.navHost.getFragment<NavHostFragment>()
                         val navController = navHostFragment.navController
                         navController.popBackStack(R.id.home, false)
-                        val discoverAction =
-                            HomeFragmentDirections.actionDiscoverFragmentToThreadFragment()
-                        discoverAction.mid = jmsg.mid
-                        discoverAction.scrollToEnd = true
-                        navController.navigate(discoverAction)
+                        val discoverAction = Bundle()
+                        discoverAction.putInt("mid", jmsg.mid)
+                        discoverAction.putBoolean("scrollToEnd", true)
+                        navController.navigate(R.id.thread, discoverAction)
                     }
                 }
             } catch (e: IOException) {
@@ -323,8 +318,9 @@ class MainActivity : AppCompatActivity() {
                 model.toolbar.collapseActionView()
                 val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
                 val navController = navHostFragment.navController
-                val args = SearchFragmentArgs.Builder(s).build()
-                navController.navigate(R.id.search, args.toBundle())
+                val args = Bundle()
+                args.putString("search", s)
+                navController.navigate(R.id.search, args)
                 return true
             }
 
@@ -365,11 +361,10 @@ class MainActivity : AppCompatActivity() {
                 2 -> {
                     // thread
                     val threadId = pathSegments[1]
-                    val args = ThreadFragmentArgs.Builder()
-                        .setMid(threadId.toInt())
-                        .build()
+                    val args = Bundle()
+                    args.putInt("mid", threadId.toInt())
                     navController.popBackStack(R.id.home, false)
-                    navController.navigate(R.id.thread, args.toBundle())
+                    navController.navigate(R.id.thread, args)
                 }
 
                 else ->                 // discover

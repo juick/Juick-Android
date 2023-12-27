@@ -16,8 +16,6 @@
  */
 package com.juick.android.screens.post
 
-import android.app.Activity
-import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
@@ -25,14 +23,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation.findNavController
-import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.canhub.cropper.CropImageContract
@@ -43,7 +38,6 @@ import com.juick.R
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.databinding.FragmentNewPostBinding
-import com.juick.util.StringUtils
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
@@ -59,8 +53,6 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
     private val model by viewBinding(FragmentNewPostBinding::bind)
     private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
     private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
-    private val args by navArgs<NewPostFragmentArgs>()
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         attachmentLegacyLauncher =
@@ -90,8 +82,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                 tagState.remove<Any>("tag")
                 applyTag(tag)
             }
-            val action = NewPostFragmentDirections.actionNewPostToTags()
-            findNavController(view).navigate(action)
+            findNavController(view).navigate(R.id.tags)
         }
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
@@ -127,11 +118,13 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                 Toast.makeText(activity, "Attachment error: " + e.message, Toast.LENGTH_LONG).show()
             }
         }
-        if (StringUtils.defaultString(args.text).isNotEmpty()) {
-            applyTag(args.text)
+        val text = arguments?.getString("text") ?: ""
+        if (text.isNotEmpty()) {
+            applyTag(text)
         }
-        if (StringUtils.defaultString(args.uri).isNotEmpty()) {
-            attachImage(Uri.parse(args.uri))
+        val uri = arguments?.getString("uri") ?: ""
+        if (uri.isNotEmpty()) {
+            attachImage(Uri.parse(uri))
         }
         model.editMessage.requestFocus()
     }

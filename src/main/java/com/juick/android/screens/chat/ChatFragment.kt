@@ -22,7 +22,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -49,11 +48,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private lateinit var vm: ChatViewModel
     private lateinit var adapter: MessagesListAdapter<Post>
     private lateinit var uname: String
-    private val args by navArgs<ChatFragmentArgs>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        uname = args.uname
+        uname = arguments?.getString("uname") ?: ""
         vm = ViewModelProvider(this, ChatViewModelFactory(uname))[ChatViewModel::class.java]
         model.input.setInputListener { input: CharSequence ->
             postText(input.toString())
