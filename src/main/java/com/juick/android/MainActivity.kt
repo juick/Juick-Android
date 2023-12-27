@@ -116,7 +116,6 @@ class MainActivity : AppCompatActivity() {
             R.id.no_auth,
             R.id.new_post
         )
-            .setFallbackOnNavigateUpListener(::onSupportNavigateUp)
             .build()
         val navHostFragment = model.navHost.getFragment<NavHostFragment>()
         val navController = navHostFragment.navController
@@ -386,7 +385,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    
+
+    override fun onSupportNavigateUp(): Boolean {
+        val navHostFragment = model.navHost.getFragment<NavHostFragment>()
+        val navController = navHostFragment.navController
+        return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val navHostFragment = model.navHost.getFragment<NavHostFragment>()
         val navController = navHostFragment.navController
