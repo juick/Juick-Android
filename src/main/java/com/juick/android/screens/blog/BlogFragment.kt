@@ -26,7 +26,7 @@ class BlogFragment : FeedFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val uname = arguments?.getString("uname") ?: ""
-        val blog = uname.ifEmpty { profileViewModel.userProfile.value?.name ?: "" }
+        val blog = uname.ifEmpty { account.profile.value?.name ?: "" }
         vm.apiUrl.value = UrlBuilder.getUserPostsByName(blog).toString()
     }
 }

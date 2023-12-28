@@ -41,7 +41,7 @@ import com.canhub.cropper.CropImageOptions
 import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
-import com.juick.android.ProfileViewModel
+import com.juick.android.Account
 import com.juick.android.SignInActivity
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
@@ -62,7 +62,7 @@ import java.io.FileNotFoundException
  * @author Ugnich Anton
  */
 class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpdatedListener {
-    private val profileViewModel: ProfileViewModel by activityViewModels()
+    private val account by activityViewModels<Account>()
     private val model by viewBinding(FragmentThreadBinding::bind)
     private var rid = 0
     private var attachmentUri: Uri? = null
@@ -203,7 +203,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
         model.list.visibility = View.GONE
         model.progressBar.visibility = View.VISIBLE
         load()
-        profileViewModel.userProfile.observe(viewLifecycleOwner) {
+        account.profile.observe(viewLifecycleOwner) {
             it?.let { user ->
                 adapter.setOnMenuListener(
                     JuickMessageMenuListener(

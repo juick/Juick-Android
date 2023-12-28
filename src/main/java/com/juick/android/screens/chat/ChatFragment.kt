@@ -28,7 +28,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
 import com.juick.R
-import com.juick.android.ProfileViewModel
+import com.juick.android.Account
 import com.juick.android.widget.util.hideKeyboard
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentChatBinding
@@ -45,7 +45,7 @@ import kotlinx.coroutines.withContext
  * @author ugnich
  */
 class ChatFragment : Fragment(R.layout.fragment_chat) {
-    private val profileViewModel: ProfileViewModel by activityViewModels()
+    private val account by activityViewModels<Account>()
     private val model by viewBinding(FragmentChatBinding::bind)
     private lateinit var vm: ChatViewModel
     private lateinit var adapter: MessagesListAdapter<Post>
@@ -60,7 +60,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             hideKeyboard(activity)
             true
         }
-        profileViewModel.userProfile.observe(viewLifecycleOwner) {
+        account.profile.observe(viewLifecycleOwner) {
             it?.let { user ->
                 adapter = MessagesListAdapter(user.uname) { imageView, url, _ ->
                     Glide.with(imageView.context)

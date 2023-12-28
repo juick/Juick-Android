@@ -21,19 +21,19 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.juick.R
-import com.juick.android.ProfileViewModel
+import com.juick.android.Account
 import com.juick.android.SignInActivity
 import com.juick.databinding.FragmentNoAuthBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 
 class NoAuthFragment : Fragment(R.layout.fragment_no_auth) {
-    private val profileViewModel: ProfileViewModel by activityViewModels()
+    private val account by activityViewModels<Account>()
     private val binding by viewBinding(FragmentNoAuthBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.signInButton.setOnClickListener {
-            profileViewModel.signInStatus.value =
+            account.signInStatus.value =
                 SignInActivity.SignInStatus.SIGN_IN_PROGRESS
         }
     }

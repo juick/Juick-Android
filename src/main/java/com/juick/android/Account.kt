@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2023, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -25,19 +25,19 @@ import com.juick.api.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class ProfileViewModel: ViewModel() {
+class Account: ViewModel() {
     val signInStatus = MutableLiveData(SignInActivity.SignInStatus.SIGNED_OUT)
     val anonymous = User(uid = 0, uname = "Anonymous")
-    private val _userProfile = MutableLiveData<User?>(null)
-    val userProfile: LiveData<User?> get() = _userProfile
+    private val _profile = MutableLiveData<User?>(null)
+    val profile: LiveData<User?> get() = _profile
 
     fun refresh() {
-        _userProfile.postValue(null)
+        _profile.postValue(null)
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                _userProfile.postValue(App.instance.api.me())
+                _profile.postValue(App.instance.api.me())
             } catch (e: Exception) {
-                _userProfile.postValue(anonymous)
+                _profile.postValue(anonymous)
             }
         }
     }

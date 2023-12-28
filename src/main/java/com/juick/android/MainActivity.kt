@@ -43,9 +43,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI.onNavDestinationSelected
@@ -68,17 +66,14 @@ import com.juick.api.model.Post
 import com.juick.databinding.ActivityMainBinding
 import com.juick.util.StringUtils
 import isAuthenticated
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.IOException
 
 /**
  * @author Ugnich Anton
  */
 class MainActivity : AppCompatActivity() {
-
-    val profileViewModel: ProfileViewModel by viewModels()
+    val account by viewModels<Account>()
     private lateinit var model: ActivityMainBinding
     private var notificationManager: NotificationManager? = null
     private lateinit var loginLauncher: ActivityResultLauncher<Intent>
@@ -178,8 +173,8 @@ class MainActivity : AppCompatActivity() {
             Updater(this@MainActivity)
                 .checkUpdate()
         }
-        profileViewModel.refresh()
-        profileViewModel.signInStatus.observe(this) { signInStatus: SignInStatus ->
+        account.refresh()
+        account.signInStatus.observe(this) { signInStatus: SignInStatus ->
             if (signInStatus == SignInStatus.SIGN_IN_PROGRESS) {
                 showLogin()
             }
@@ -195,7 +190,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.discussions
             )
         }
-        profileViewModel.userProfile.observe(this) { user ->
+        account.profile.observe(this) { user ->
             when (user) {
                 null -> {
                     avatar =
@@ -328,7 +323,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
         val profileItem = menu.findItem(R.id.blog)
-        profileViewModel.userProfile.value?.let {
+        account.profile.value?.let {
             profileItem.isVisible = it.uid > 0
             if (profileItem.isVisible) {
                 profileItem.actionView?.setOnClickListener {

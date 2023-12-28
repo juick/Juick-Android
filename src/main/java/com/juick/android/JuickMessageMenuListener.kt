@@ -69,11 +69,11 @@ class JuickMessageMenuListener(
 
     private fun vipToggle(user: User, completion: ((Boolean) -> Unit)? = null) {
         val scope = (activity as LifecycleOwner).lifecycleScope
-        val profileViewModel = (activity as MainActivity).profileViewModel
+        val account = (activity as MainActivity).account
         scope.launch {
             val result = withContext(Dispatchers.IO) { App.instance.api.toggleVIP(user.name) }
             completion?.invoke(result.isSuccessful)
-            profileViewModel.refresh()
+            account.refresh()
         }
     }
     private fun privacyToggle(post: Post, completion: ((Boolean) -> Unit)? = null) {
@@ -291,12 +291,12 @@ class JuickMessageMenuListener(
 
     private fun processCommand(command: String, callback: ((PostResponse) -> Unit)? = null) {
         val scope = (activity as LifecycleOwner).lifecycleScope
-        val profileViewModel = (activity as MainActivity).profileViewModel
+        val account = (activity as MainActivity).account
         scope.launch {
             App.instance.sendMessage(command) {
                 Toast.makeText(activity, it.text, Toast.LENGTH_LONG).show()
                 callback?.invoke(it)
-                profileViewModel.refresh()
+                account.refresh()
             }
         }
     }

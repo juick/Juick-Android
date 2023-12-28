@@ -29,7 +29,7 @@ import androidx.navigation.Navigation.findNavController
 import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
-import com.juick.android.ProfileViewModel
+import com.juick.android.Account
 import com.juick.android.Utils
 import com.juick.android.Utils.replaceUriParameter
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
@@ -42,8 +42,8 @@ import kotlinx.coroutines.launch
  * Created by gerc on 03.06.2016.
  */
 open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnPostUpdatedListener {
-    protected val vm: FeedViewModel by activityViewModels()
-    protected val profileViewModel: ProfileViewModel by activityViewModels()
+    protected val vm by activityViewModels<FeedViewModel>()
+    internal val account by activityViewModels<Account>()
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
 
     private var firstPage = true
@@ -89,7 +89,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
         binding.swipeContainer.setOnRefreshListener {
             refreshFeed()
         }
-        profileViewModel.userProfile.observe(viewLifecycleOwner) {
+        account.profile.observe(viewLifecycleOwner) {
             it?.let { user ->
                 adapter.setOnMenuListener(
                     JuickMessageMenuListener(
@@ -149,7 +149,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             .replaceUriParameter("ts", "${System.currentTimeMillis()}")
             .toString()
         vm.apiUrl.value = newUrl
-        profileViewModel.refresh()
+        account.refresh()
     }
     private fun haveNewPosts(oldPosts: List<Post>, newPosts: List<Post>): Boolean {
         if (oldPosts.isEmpty() || newPosts.isEmpty()) {
