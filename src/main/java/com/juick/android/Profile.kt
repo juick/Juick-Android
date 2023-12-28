@@ -26,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ProfileViewModel: ViewModel() {
+    val signInStatus = MutableLiveData(SignInActivity.SignInStatus.SIGNED_OUT)
     val anonymous = User(uid = 0, uname = "Anonymous")
     private val _userProfile = MutableLiveData<User?>(null)
     val userProfile: LiveData<User?> get() = _userProfile

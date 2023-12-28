@@ -186,7 +186,6 @@ class App : MultiDexApplication() {
         NotificationSender(instance, jsonMapper)
     }
     val messages = MutableStateFlow<List<Post>>(listOf())
-    val signInStatus = MutableStateFlow(SignInStatus.SIGNED_OUT)
 
     companion object {
         init {

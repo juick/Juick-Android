@@ -19,19 +19,21 @@ package com.juick.android.screens.chats
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
-import com.juick.App
+import androidx.fragment.app.activityViewModels
 import com.juick.R
+import com.juick.android.ProfileViewModel
 import com.juick.android.SignInActivity
 import com.juick.databinding.FragmentNoAuthBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 
 class NoAuthFragment : Fragment(R.layout.fragment_no_auth) {
+    private val profileViewModel: ProfileViewModel by activityViewModels()
     private val binding by viewBinding(FragmentNoAuthBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.signInButton.setOnClickListener {
-            App.instance.signInStatus.value =
+            profileViewModel.signInStatus.value =
                 SignInActivity.SignInStatus.SIGN_IN_PROGRESS
         }
     }

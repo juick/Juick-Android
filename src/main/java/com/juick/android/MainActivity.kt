@@ -177,13 +177,11 @@ class MainActivity : AppCompatActivity() {
             }
             Updater(this@MainActivity)
                 .checkUpdate()
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                profileViewModel.refresh()
-                App.instance.signInStatus.collect { signInStatus: SignInStatus ->
-                    if (signInStatus == SignInStatus.SIGN_IN_PROGRESS) {
-                        showLogin()
-                    }
-                }
+        }
+        profileViewModel.refresh()
+        profileViewModel.signInStatus.observe(this) { signInStatus: SignInStatus ->
+            if (signInStatus == SignInStatus.SIGN_IN_PROGRESS) {
+                showLogin()
             }
         }
         badge = BadgeDrawable.create(this)
