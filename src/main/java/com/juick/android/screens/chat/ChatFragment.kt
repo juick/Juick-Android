@@ -21,13 +21,14 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
 import com.juick.R
-import com.juick.android.ProfileData
+import com.juick.android.ProfileViewModel
 import com.juick.android.widget.util.hideKeyboard
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentChatBinding
@@ -44,6 +45,7 @@ import kotlinx.coroutines.withContext
  * @author ugnich
  */
 class ChatFragment : Fragment(R.layout.fragment_chat) {
+    private val profileViewModel: ProfileViewModel by activityViewModels()
     private val model by viewBinding(FragmentChatBinding::bind)
     private lateinit var vm: ChatViewModel
     private lateinit var adapter: MessagesListAdapter<Post>
@@ -58,7 +60,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             hideKeyboard(activity)
             true
         }
-        ProfileData.userProfile.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach {
+        profileViewModel.userProfile.observe(viewLifecycleOwner) {
             it?.let { user ->
                 adapter = MessagesListAdapter(user.uname) { imageView, url, _ ->
                     Glide.with(imageView.context)
@@ -68,7 +70,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 }
                 model.messagesList.setAdapter(adapter)
             }
-        }.launchIn(lifecycleScope)
+        }
         App.instance.messages.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach { posts ->
             onNewMessages(posts.filter {
                 it.isOurs(uname)

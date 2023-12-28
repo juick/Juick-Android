@@ -21,6 +21,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -28,7 +29,7 @@ import androidx.navigation.Navigation.findNavController
 import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
-import com.juick.android.ProfileData
+import com.juick.android.ProfileViewModel
 import com.juick.android.Utils
 import com.juick.android.Utils.replaceUriParameter
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
@@ -42,7 +43,7 @@ import kotlinx.coroutines.launch
  */
 open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnPostUpdatedListener {
     internal lateinit var vm: FeedViewModel
-
+    private val profileViewModel: ProfileViewModel by activityViewModels()
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
 
     private var firstPage = true
@@ -88,17 +89,13 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
         binding.swipeContainer.setOnRefreshListener {
             refreshFeed()
         }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                ProfileData.userProfile.collect {
-                    it?.let { user ->
-                        adapter.setOnMenuListener(
-                            JuickMessageMenuListener(
-                                requireActivity(), adapter, user
-                            )
-                        )
-                    }
-                }
+        profileViewModel.userProfile.observe(viewLifecycleOwner) {
+            it?.let { user ->
+                adapter.setOnMenuListener(
+                    JuickMessageMenuListener(
+                        requireActivity(), adapter, user
+                    )
+                )
             }
         }
         lifecycleScope.launch {
@@ -144,7 +141,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             }
         }
     }
-    fun refreshFeed() {
+    private fun refreshFeed() {
         firstPage = true
         val newUrl = Utils.buildUrl(vm.apiUrl.value)
             .build()
@@ -152,9 +149,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             .replaceUriParameter("ts", "${System.currentTimeMillis()}")
             .toString()
         vm.apiUrl.value = newUrl
-        viewLifecycleOwner.lifecycleScope.launch {
-            ProfileData.refresh()
-        }
+        profileViewModel.refresh()
     }
     private fun haveNewPosts(oldPosts: List<Post>, newPosts: List<Post>): Boolean {
         if (oldPosts.isEmpty() || newPosts.isEmpty()) {

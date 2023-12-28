@@ -16,28 +16,28 @@
  */
 package com.juick.android
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.juick.App
 import com.juick.api.model.User
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 
-object ProfileData {
+class ProfileViewModel: ViewModel() {
     val anonymous = User(uid = 0, uname = "Anonymous")
-    var userProfile: MutableStateFlow<User?> = MutableStateFlow(null)
-        private set
+    private val _userProfile = MutableLiveData<User?>(null)
+    val userProfile: LiveData<User?> get() = _userProfile
 
-    suspend fun refresh() {
-        userProfile.update {
-            null
-        }
-        try {
-            userProfile.value = withContext(Dispatchers.IO) {
-                App.instance.api.me()
+    fun refresh() {
+        _userProfile.postValue(null)
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                _userProfile.postValue(App.instance.api.me())
+            } catch (e: Exception) {
+                _userProfile.postValue(anonymous)
             }
-        } catch (e: Exception) {
-            userProfile.value = anonymous
         }
     }
 }

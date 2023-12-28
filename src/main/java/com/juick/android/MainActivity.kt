@@ -32,6 +32,7 @@ import android.widget.ImageView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -76,6 +77,8 @@ import java.io.IOException
  * @author Ugnich Anton
  */
 class MainActivity : AppCompatActivity() {
+
+    val profileViewModel: ProfileViewModel by viewModels()
     private lateinit var model: ActivityMainBinding
     private var notificationManager: NotificationManager? = null
     private lateinit var loginLauncher: ActivityResultLauncher<Intent>
@@ -175,7 +178,7 @@ class MainActivity : AppCompatActivity() {
             Updater(this@MainActivity)
                 .checkUpdate()
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                ProfileData.refresh()
+                profileViewModel.refresh()
                 App.instance.signInStatus.collect { signInStatus: SignInStatus ->
                     if (signInStatus == SignInStatus.SIGN_IN_PROGRESS) {
                         showLogin()
@@ -194,45 +197,39 @@ class MainActivity : AppCompatActivity() {
                 R.id.discussions
             )
         }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                ProfileData.userProfile.collect { user ->
-                    when (user) {
-                        null -> {
-                            avatar =
-                                ResourcesCompat.getDrawable(resources, R.drawable.av_96, null)!!
-                                    .toBitmap()
-                        }
+        profileViewModel.userProfile.observe(this) { user ->
+            when (user) {
+                null -> {
+                    avatar =
+                        ResourcesCompat.getDrawable(resources, R.drawable.av_96, null)!!
+                            .toBitmap()
+                }
 
-                        else -> {
-                            val avatarUrl: String = user.avatar
-                            Glide.with(this@MainActivity)
-                                .asBitmap()
-                                .load(avatarUrl)
-                                .placeholder(R.drawable.av_96)
-                                .into(object : CustomTarget<Bitmap>() {
-                                    override fun onResourceReady(
-                                        resource: Bitmap,
-                                        transition: Transition<in Bitmap>?
-                                    ) {
-                                        avatar = resource
-                                        invalidateOptionsMenu()
-                                    }
-
-                                    override fun onLoadCleared(placeholder: Drawable?) {
-                                        avatar = null
-                                        invalidateOptionsMenu()
-                                    }
-                                })
-                            withContext(Dispatchers.Main) {
-                                if (user.unreadCount > 0) {
-                                    badge.isVisible = true
-                                    badge.number = user.unreadCount
-                                } else {
-                                    badge.isVisible = false
-                                }
+                else -> {
+                    val avatarUrl: String = user.avatar
+                    Glide.with(this@MainActivity)
+                        .asBitmap()
+                        .load(avatarUrl)
+                        .placeholder(R.drawable.av_96)
+                        .into(object : CustomTarget<Bitmap>() {
+                            override fun onResourceReady(
+                                resource: Bitmap,
+                                transition: Transition<in Bitmap>?
+                            ) {
+                                avatar = resource
+                                invalidateOptionsMenu()
                             }
-                        }
+
+                            override fun onLoadCleared(placeholder: Drawable?) {
+                                avatar = null
+                                invalidateOptionsMenu()
+                            }
+                        })
+                    if (user.unreadCount > 0) {
+                        badge.isVisible = true
+                        badge.number = user.unreadCount
+                    } else {
+                        badge.isVisible = false
                     }
                 }
             }
@@ -333,7 +330,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
         val profileItem = menu.findItem(R.id.blog)
-        ProfileData.userProfile.value?.let {
+        profileViewModel.userProfile.value?.let {
             profileItem.isVisible = it.uid > 0
             if (profileItem.isVisible) {
                 profileItem.actionView?.setOnClickListener {
