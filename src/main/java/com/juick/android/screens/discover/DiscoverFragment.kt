@@ -18,13 +18,13 @@ package com.juick.android.screens.discover
 
 import android.os.Bundle
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import com.juick.android.UrlBuilder
 import com.juick.android.screens.FeedFragment
 
 class DiscoverFragment : FeedFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        vm = ViewModelProvider(this)[DiscoverViewModel::class.java]
         super.onViewCreated(view, savedInstanceState)
+        vm.apiUrl.value = UrlBuilder.last.toString()
     }
 }

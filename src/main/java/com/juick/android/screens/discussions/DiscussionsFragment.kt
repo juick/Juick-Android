@@ -19,12 +19,12 @@ package com.juick.android.screens.discussions
 
 import android.os.Bundle
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import com.juick.android.UrlBuilder
 import com.juick.android.screens.FeedFragment
 
 class DiscussionsFragment : FeedFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        vm = ViewModelProvider(this)[DiscussionsViewModel::class.java]
         super.onViewCreated(view, savedInstanceState)
+        vm.apiUrl.value = UrlBuilder.discussions.toString()
     }
 }

@@ -19,17 +19,14 @@ package com.juick.android.screens.blog
 
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
-import com.juick.android.ProfileViewModel
+import com.juick.android.UrlBuilder
 import com.juick.android.screens.FeedFragment
 
 class BlogFragment : FeedFragment() {
-    private val profileViewModel: ProfileViewModel by activityViewModels()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val uname = arguments?.getString("uname") ?: ""
         val blog = uname.ifEmpty { profileViewModel.userProfile.value?.name ?: "" }
-        vm = ViewModelProvider(this, BlogViewModelFactory(blog))[BlogViewModel::class.java]
-        super.onViewCreated(view, savedInstanceState)
+        vm.apiUrl.value = UrlBuilder.getUserPostsByName(blog).toString()
     }
 }

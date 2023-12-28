@@ -42,8 +42,8 @@ import kotlinx.coroutines.launch
  * Created by gerc on 03.06.2016.
  */
 open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnPostUpdatedListener {
-    internal lateinit var vm: FeedViewModel
-    private val profileViewModel: ProfileViewModel by activityViewModels()
+    protected val vm: FeedViewModel by activityViewModels()
+    protected val profileViewModel: ProfileViewModel by activityViewModels()
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
 
     private var firstPage = true

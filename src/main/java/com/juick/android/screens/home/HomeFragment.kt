@@ -18,15 +18,21 @@ package com.juick.android.screens.home
 
 import android.os.Bundle
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import com.juick.App
+import com.juick.android.UrlBuilder
 import com.juick.android.screens.FeedFragment
+import isAuthenticated
 
 /**
  * Created by gerc on 03.06.2016.
  */
 class HomeFragment : FeedFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        vm = ViewModelProvider(this)[HomeViewModel::class.java]
         super.onViewCreated(view, savedInstanceState)
+        if (App.instance.isAuthenticated) {
+            vm.apiUrl.value = UrlBuilder.home.toString()
+        } else {
+            vm.apiUrl.value = UrlBuilder.discussions.toString()
+        }
     }
 }
