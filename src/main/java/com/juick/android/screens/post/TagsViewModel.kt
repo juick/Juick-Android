@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -17,20 +17,19 @@
 
 package com.juick.android.screens.post
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.juick.App
 import com.juick.api.model.Tag
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TagsViewModel : ViewModel() {
-    private val _tags = MutableStateFlow<Result<List<Tag>>?>(null)
-    val tags = _tags.asStateFlow()
+    private val _tags = MutableLiveData<Result<List<Tag>>?>(null)
+    val tags get () = _tags as LiveData<Result<List<Tag>>?>
 
     init {
         viewModelScope.launch {
@@ -38,13 +37,9 @@ class TagsViewModel : ViewModel() {
                 val data = withContext(Dispatchers.IO) {
                     App.instance.api.tags()
                 }
-                _tags.update {
-                    Result.success(data)
-                }
+                _tags.value = Result.success(data)
             } catch (exception: Exception) {
-                _tags.update {
-                    Result.failure(exception)
-                }
+                _tags.value = Result.failure(exception)
             }
         }
     }

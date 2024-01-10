@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -19,13 +19,9 @@ package com.juick.android.screens.post
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -35,13 +31,13 @@ import com.juick.R
 import com.juick.databinding.FragmentTagsListBinding
 import com.juick.databinding.ItemTagBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
-import kotlinx.coroutines.launch
 
 /**
  *
  * @author Ugnich Anton
  */
 class TagsFragment : BottomSheetDialogFragment(R.layout.fragment_tags_list) {
+    private val vm by viewModels<TagsViewModel>()
     private val model by viewBinding(FragmentTagsListBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -50,7 +46,7 @@ class TagsFragment : BottomSheetDialogFragment(R.layout.fragment_tags_list) {
         model.list.setHasFixedSize(true)
         val adapter = TagsAdapter()
         model.list.adapter = adapter
-        adapter.setOnItemClickListener { _, position ->
+        adapter.itemClickListener = { _, position ->
             val tag = adapter.currentList[position]
             val navController = NavHostFragment.findNavController(this)
             navController.previousBackStackEntry?.savedStateHandle?.set("tag", tag)
@@ -59,31 +55,29 @@ class TagsFragment : BottomSheetDialogFragment(R.layout.fragment_tags_list) {
         /* adapter.setOnItemLongClickListener((view12, position) -> ((BaseActivity) getActivity())
                 .replaceFragment(FeedBuilder.feedFor(
                         UrlBuilder.getPostsByTag(uid, adapter.getItem(position)))));*/
-        val vm = ViewModelProvider(this)[TagsViewModel::class.java]
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                vm.tags.collect { resource ->
-                    when (resource) {
-                        null -> {
-                            model.list.visibility = View.GONE
-                            model.progressBar.visibility = View.VISIBLE
-                        }
-                        else -> resource.fold(
+        vm.tags.observe(viewLifecycleOwner) { resource ->
+            when (resource) {
+                null -> {
+                    model.list.visibility = View.GONE
+                    model.progressBar.visibility = View.VISIBLE
+                }
+
+                else -> {
+                    model.progressBar.visibility = View.GONE
+                    model.list.visibility = View.VISIBLE
+                    resource.fold(
                         onSuccess = { tags ->
                             adapter.submitList(tags.map {
                                 it.tag
                             })
                         },
                         onFailure = {
-                            model.progressBar.visibility = View.GONE
-                            model.list.visibility = View.VISIBLE
                             Toast.makeText(
                                 requireContext(),
                                 R.string.network_error,
                                 Toast.LENGTH_LONG
                             ).show()
                         })
-                    }
                 }
             }
         }
@@ -91,72 +85,26 @@ class TagsFragment : BottomSheetDialogFragment(R.layout.fragment_tags_list) {
 
     internal class TagsAdapter : ListAdapter<String, TagsAdapter.TagsViewHolder>(DIFF_CALLBACK) {
         var itemClickListener: ((View?, Int) -> Unit)? = null
-        var itemLongClickListener: OnItemLongClickListener? = null
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TagsViewHolder {
-            val viewHolder = TagsViewHolder(
+            return TagsViewHolder(
                 ItemTagBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             )
-            viewHolder.setOnItemClickListener(itemClickListener)
-            viewHolder.setOnItemLongClickListener(itemLongClickListener)
-            return viewHolder
         }
 
         override fun onBindViewHolder(holder: TagsViewHolder, position: Int) {
             val tag = getItem(position)
             holder.binding.text.text = tag
-        }
-
-        fun setOnItemClickListener(itemClickListener: (View?, Int) -> Unit) {
-            this.itemClickListener = itemClickListener
-        }
-
-        fun setOnItemLongClickListener(itemClickListener: OnItemLongClickListener?) {
-            itemLongClickListener = itemClickListener
-        }
-
-        interface OnItemClickListener {
-            fun onItemClick(view: View?, pos: Int)
-        }
-
-        interface OnItemLongClickListener {
-            fun onItemLongClick(view: View?, pos: Int)
+            holder.itemView.setOnClickListener { v ->
+                itemClickListener?.invoke(v, position)
+            }
         }
 
         internal class TagsViewHolder(val binding: ItemTagBinding) :
-            RecyclerView.ViewHolder(binding.root),
-            View.OnClickListener,
-            OnLongClickListener {
-            var itemClickListener: ((View?, Int) -> Unit)? = null
-            var itemLongClickListener: OnItemLongClickListener? = null
+            RecyclerView.ViewHolder(binding.root)
 
-            init {
-                itemView.setOnClickListener(this)
-                itemView.setOnLongClickListener(this)
-            }
-
-            fun setOnItemClickListener(listener: ((View?, Int) -> Unit)?) {
-                itemClickListener = listener
-            }
-
-            fun setOnItemLongClickListener(listener: OnItemLongClickListener?) {
-                itemLongClickListener = listener
-            }
-
-            override fun onClick(v: View) {
-                itemClickListener?.invoke(v, bindingAdapterPosition)
-            }
-
-            override fun onLongClick(v: View): Boolean {
-                if (itemLongClickListener != null) {
-                    itemLongClickListener?.onItemLongClick(v, bindingAdapterPosition)
-                    return true
-                }
-                return false
-            }
-        }
         companion object {
-            val DIFF_CALLBACK = object: DiffUtil.ItemCallback<String>() {
+            val DIFF_CALLBACK = object : DiffUtil.ItemCallback<String>() {
                 override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
                     return oldItem == newItem
                 }
