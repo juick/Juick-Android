@@ -1,6 +1,6 @@
 buildscript {
     ext.kotlin_version = "1.9.22"
-    ext.navigation_version = "2.7.6"
+    ext.navigation_version = "2.7.7"
     ext.okhttp_version = "3.12.13"
     ext.retrofit_version = "2.6.4"
     ext.glide_version = "4.16.0"
