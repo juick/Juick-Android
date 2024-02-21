@@ -61,7 +61,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: corretto
-          java-version-file: .java-version
+          java-version: '21'
 
       - name: Upgrade Gradle
         if: ${{ steps.latest-gradle-version.outputs.value != steps.used-gradle-version.outputs.result }}
