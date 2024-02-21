@@ -1,4 +1,4 @@
-name: Upgrade Gradle Wrapper
+name: Upgrade Gradle
 
 on:
   workflow_dispatch:
@@ -14,8 +14,8 @@ on:
     - cron: "0 6 * * MON-FRI"
 
 jobs:
-  upgrade-gradle-wrapper:
-    name: Upgrade Gradle Wrapper
+  upgrade-gradle:
+    name: Upgrade Gradle
     runs-on: ubuntu-latest
     steps:
       - id: latest-gradle-version
@@ -57,30 +57,30 @@ jobs:
           echo "result=$usedGradleVersion" >> "$GITHUB_OUTPUT"
 
       - name: Set up JDK
-        if: $
+        if: ${{ steps.latest-gradle-version.outputs.value != steps.used-gradle-version.outputs.result }}
         uses: actions/setup-java@v4
         with:
           distribution: corretto
-          java-version-file: .java-version
+          java-version: '21'
 
-      - name: Upgrade Gradle Wrapper
-        if: $
+      - name: Upgrade Gradle
+        if: ${{ steps.latest-gradle-version.outputs.value != steps.used-gradle-version.outputs.result }}
         run: ./gradlew wrapper --gradle-version latest
 
       - id: create-pr
         name: Create PR
-        if: $
+        if: ${{ steps.latest-gradle-version.outputs.value != steps.used-gradle-version.outputs.result }}
         uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: Upgrade Gradle Wrapper to v$
-          branch: chore/upgrade-gradle-to-v$
-          title: Upgrade Gradle to v$
-          body: $
+          commit-message: Upgrade Gradle to v${{ steps.latest-gradle-version.outputs.value }}
+          branch: chore/upgrade-gradle-to-v${{ steps.latest-gradle-version.outputs.value }}
+          title: Upgrade Gradle to v${{ steps.latest-gradle-version.outputs.value }}
+          body: ${{ steps.latest-gradle-version.outputs.description }}
           labels: backend,dependencies,infrastructure
 
       - name: Add PR URL to the summary
-        if: $
+        if: ${{ steps.latest-gradle-version.outputs.value != steps.used-gradle-version.outputs.result }}
         run: |
           echo "# Created PR" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "[$]($)" >> $GITHUB_STEP_SUMMARY
+          echo "[${{ steps.create-pr.outputs.pull-request-number }}](${{ steps.create-pr.outputs.pull-request-url }})" >> $GITHUB_STEP_SUMMARY
