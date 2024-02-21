@@ -12,7 +12,7 @@ jobs:
     outputs:
       should_run: ${{ steps.should_run.outputs.should_run }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: print latest_commit
         run: echo ${{ github.sha }}
       - id: should_run
@@ -29,7 +29,7 @@ jobs:
         BUILD_SDK: [16, 21, 31]
     steps:
     - name: checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
