@@ -23,46 +23,59 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <ScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1">
-        <RelativeLayout
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            >
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:indeterminateOnly="true"
-                android:visibility="gone" />
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="8dp"
-                android:layout_below="@id/progressBar">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:indeterminateOnly="true"
+            android:visibility="gone" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/imagePreview"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="spread_inside">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editMessage"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:importantForAutofill="no"
-                android:minLines="7"
+                android:layout_height="wrap_content"
                 android:gravity="top"
+                android:importantForAutofill="no"
                 android:inputType="textCapSentences|textMultiLine"
+                android:minLines="7"
                 tools:targetApi="o"
                 tools:text="*weather the weather is cold!" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <ImageView
-                android:id="@+id/imagePreview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:scaleType="fitEnd"
-                tools:src="@drawable/elevation_pre_lollipop" />
-        </RelativeLayout>
-    </ScrollView>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageView
+            android:id="@+id/imagePreview"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:contentDescription="@string/Attach"
+            android:scaleType="centerInside"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
+            tools:src="@drawable/new_image" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
