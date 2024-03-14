@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -19,15 +19,41 @@ package com.juick.android.service
 import android.util.Log
 import com.huawei.hms.push.HmsMessageService
 import com.huawei.hms.push.RemoteMessage
+import com.juick.App
+import com.juick.R
 import com.juick.android.Utils.updateToken
+import com.juick.api.model.Post
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.IOException
 
 class HmsReceiverService : HmsMessageService() {
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Log.d("HMS", remoteMessage.data)
+    private val TAG = "HMS"
+    override fun onMessageReceived(message: RemoteMessage) {
+        val data = App.instance.jsonMapper.readTree(message.data)
+        val msg = data[App.instance.getString(R.string.notification_extra)]
+        Log.d(TAG, "onMessageReceived $data ${message.messageType}")
+        val isForegroundMessage = false
+        if (isForegroundMessage) {
+            Log.d(TAG, "Message received in foreground")
+            try {
+                val reply: Post = App.instance.jsonMapper.convertValue(msg, Post::class.java)
+                if (!reply.isService) {
+                    App.instance.messages.value = listOf(reply)
+                }
+            } catch (e: IOException) {
+                Log.d(TAG, "JSON exception: " + e.message)
+            }
+        } else {
+            CoroutineScope(Dispatchers.IO).launch {
+                App.instance.notificationSender.showNotification(msg.toPrettyString())
+            }
+        }
     }
 
     override fun onNewToken(s: String) {
-        Log.d("HMS", "Token: $s")
+        Log.d(TAG, "Token: $s")
         updateToken("hcm", s)
     }
 }
