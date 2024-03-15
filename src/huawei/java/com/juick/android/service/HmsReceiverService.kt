@@ -23,9 +23,6 @@ import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.updateToken
 import com.juick.api.model.Post
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.IOException
 
 class HmsReceiverService : HmsMessageService() {
@@ -34,21 +31,14 @@ class HmsReceiverService : HmsMessageService() {
         val data = App.instance.jsonMapper.readTree(message.data)
         val msg = data[App.instance.getString(R.string.notification_extra)]
         Log.d(TAG, "onMessageReceived $data ${message.messageType}")
-        val isForegroundMessage = false
-        if (isForegroundMessage) {
-            Log.d(TAG, "Message received in foreground")
-            try {
-                val reply: Post = App.instance.jsonMapper.convertValue(msg, Post::class.java)
-                if (!reply.isService) {
-                    App.instance.messages.value = listOf(reply)
-                }
-            } catch (e: IOException) {
-                Log.d(TAG, "JSON exception: " + e.message)
+        try {
+            val reply: Post = App.instance.jsonMapper.convertValue(msg, Post::class.java)
+            if (!reply.isService) {
+                App.instance.messages.value = listOf(reply)
             }
-        } else {
-            CoroutineScope(Dispatchers.IO).launch {
-                App.instance.notificationSender.showNotification(msg.toPrettyString())
-            }
+            App.instance.notificationSender.showNotification(msg.toPrettyString())
+        } catch (e: IOException) {
+            Log.d(TAG, "JSON exception: " + e.message)
         }
     }
 
