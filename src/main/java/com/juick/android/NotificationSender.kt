@@ -22,6 +22,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -29,7 +31,11 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.juick.App
 import com.juick.BuildConfig
@@ -117,26 +123,32 @@ class NotificationSender(private val context: Context, private val jsonMapper: O
                             )
                         )
                     }
-                    val avatarBitmap = Glide.with(context).asBitmap()
-                        .load(jmsg.user.avatar)
-                        .fallback(R.drawable.av_96)
-                        .placeholder(R.drawable.av_96)
-                        .centerCrop().submit()
-                    try {
-                        val avatar = avatarBitmap.get()
-                        notificationBuilder.setLargeIcon(avatar)
-                    } catch (e: ExecutionException) {
-                        Log.w(TAG, "Avatar was not loaded", e)
-                    } catch (e: InterruptedException) {
-                        Log.w(TAG, "Avatar was not loaded", e)
-                    }
                     if (Build.VERSION.SDK_INT < 26) {
                         notificationBuilder.setDefaults(
                             (Notification.DEFAULT_LIGHTS
                                     or Notification.DEFAULT_VIBRATE or Notification.DEFAULT_SOUND).inv()
                         )
                     }
-                    notify(jmsg, notificationBuilder)
+                    Glide.with(context).asBitmap()
+                        .load(jmsg.user.avatar)
+                        .fallback(R.drawable.av_96)
+                        .placeholder(R.drawable.av_96)
+                        .centerCrop().into(object : CustomTarget<Bitmap>() {
+                            override fun onResourceReady(
+                                resource: Bitmap,
+                                transition: Transition<in Bitmap>?
+                            ) {
+                                notificationBuilder.setLargeIcon(resource)
+                                notify(jmsg, notificationBuilder)
+                            }
+
+                            override fun onLoadCleared(placeholder: Drawable?) {
+                                notificationBuilder.setLargeIcon(
+                                    ContextCompat.getDrawable(context, R.drawable.av_96)?.toBitmap()
+                                )
+                                notify(jmsg, notificationBuilder)
+                            }
+                        })
                 } else {
                     Log.d(TAG, "Notification silenced: $notificationId")
                 }
