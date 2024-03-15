@@ -35,6 +35,8 @@ import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.api.model.Post
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.concurrent.ExecutionException
 
 class NotificationSender(private val context: Context, private val jsonMapper: ObjectMapper) {
@@ -61,7 +63,7 @@ class NotificationSender(private val context: Context, private val jsonMapper: O
         }
     }
 
-    fun showNotification(msgStr: String?) {
+    suspend fun showNotification(msgStr: String?) {
         try {
             val jmsg = jsonMapper.readValue(msgStr, Post::class.java)
             val notificationId = getId(jmsg)
@@ -117,13 +119,14 @@ class NotificationSender(private val context: Context, private val jsonMapper: O
                             )
                         )
                     }
-                    val avatarBitmap = Glide.with(context).asBitmap()
-                        .load(jmsg.user.avatar)
-                        .fallback(R.drawable.av_96)
-                        .placeholder(R.drawable.av_96)
-                        .centerCrop().submit()
                     try {
-                        val avatar = avatarBitmap.get()
+                        val avatarBitmap =
+                            Glide.with(context).asBitmap()
+                                .load(jmsg.user.avatar)
+                                .fallback(R.drawable.av_96)
+                                .placeholder(R.drawable.av_96)
+                                .centerCrop().submit()
+                        val avatar = withContext(Dispatchers.IO) { avatarBitmap.get() }
                         notificationBuilder.setLargeIcon(avatar)
                     } catch (e: ExecutionException) {
                         Log.w(TAG, "Avatar was not loaded", e)

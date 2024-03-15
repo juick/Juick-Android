@@ -38,6 +38,7 @@ import com.juick.R
 import com.juick.android.MainActivity
 import com.juick.android.screens.FeedAdapter
 import com.juick.api.model.Post
+import kotlinx.coroutines.test.runTest
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,7 +55,7 @@ internal class UITest {
         }
     }
     @Test
-    fun isCorrectNotification_NotificationSender() {
+    fun isCorrectNotification_NotificationSender() = runTest {
         assumeTrue("UIAutomator tests require API18", android.os.Build.VERSION.SDK_INT >= 18)
         val notificationData = this.javaClass.getResourceAsStream("/test_notification.json")
         val notificationJson = App.instance.jsonMapper.readTree(notificationData)
