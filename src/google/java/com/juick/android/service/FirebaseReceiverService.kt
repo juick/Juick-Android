@@ -23,9 +23,6 @@ import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.updateToken
 import com.juick.api.model.Post
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.IOException
 
 /**
@@ -41,9 +38,7 @@ class FirebaseReceiverService : FirebaseMessagingService() {
             if (!reply.isService) {
                 App.instance.messages.value = listOf(reply)
             }
-            CoroutineScope(Dispatchers.Main).launch {
-                App.instance.notificationSender.showNotification(msg)
-            }
+            App.instance.notificationSender.showNotification(msg)
         } catch (e: IOException) {
             Log.d(TAG, "JSON exception: " + e.message)
         }
