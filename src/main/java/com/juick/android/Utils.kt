@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -52,18 +52,24 @@ object Utils {
     }
 
     fun updateToken(tokenType: String, prefToken: String) {
-        val TAG = "updateFCMToken"
-        Log.d(TAG, "currentToken $tokenType $prefToken")
         if (App.instance.isAuthenticated) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    App.instance.api.registerPush(listOf(ExternalToken(type = tokenType, token = prefToken)))
+                    App.instance.api.registerPush(
+                        listOf(
+                            ExternalToken(
+                                type = tokenType,
+                                token = prefToken
+                            )
+                        )
+                    )
                 } catch (e: Exception) {
-                    Log.d(TAG, "Failed to register", e)
+                    Log.d(NotificationSender.TAG, "Failed to register", e)
                 }
             }
         }
     }
+
     @Throws(URISyntaxException::class)
     fun buildUrl(url: String): Uri.Builder {
         val uri = Uri.parse(url)

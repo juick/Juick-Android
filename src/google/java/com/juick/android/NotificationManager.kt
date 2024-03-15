@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -19,11 +19,14 @@ package com.juick.android
 import android.content.Context
 import com.juick.App
 import android.text.TextUtils
+import android.util.Log
 import com.juick.R
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.juick.android.Utils.updateToken
+import com.juick.android.service.FirebaseReceiverService
 
 class NotificationManager {
     init {
@@ -32,9 +35,19 @@ class NotificationManager {
             if (GoogleApiAvailability.getInstance()
                     .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
             ) {
-                FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        Log.w(FirebaseReceiverService.TAG, "Fetching FCM registration token failed", task.exception)
+                        return@OnCompleteListener
+                    }
+
+                    // Get new FCM registration token
+                    val token = task.result
+
+                    // Log and toast
+                    Log.d(FirebaseReceiverService.TAG, "Token received: $token")
                     updateToken("fcm", token)
-                }
+                })
             }
         }
     }

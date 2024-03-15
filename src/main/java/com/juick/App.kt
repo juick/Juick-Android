@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -22,12 +22,14 @@ import android.os.Build
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.multidex.MultiDexApplication
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.juick.android.*
-import com.juick.android.SignInActivity.SignInStatus
 import com.juick.api.Api
 import com.juick.api.RequestBodyUtil
 import com.juick.api.model.Post
@@ -99,7 +101,7 @@ class App : MultiDexApplication() {
         if (!BuildConfig.DEBUG) {
             errorReporter = ErrorReporter(this, "support@juick.com", errorSubject)
         }
-
+        ProcessLifecycleOwner.get().lifecycle.addObserver(AppLifecycleManager)
         init()
     }
 
@@ -194,5 +196,17 @@ class App : MultiDexApplication() {
 
         lateinit var instance: App
             private set
+    }
+
+    object AppLifecycleManager : DefaultLifecycleObserver {
+        var isInForeground = true
+
+        override fun onStart(owner: LifecycleOwner) {
+            isInForeground = true
+        }
+
+        override fun onStop(owner: LifecycleOwner) {
+            isInForeground = false
+        }
     }
 }

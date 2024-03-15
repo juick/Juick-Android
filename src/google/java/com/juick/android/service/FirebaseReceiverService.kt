@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -29,29 +29,27 @@ import java.io.IOException
  * Created by vt on 03/12/15.
  */
 class FirebaseReceiverService : FirebaseMessagingService() {
-    private val TAG = FirebaseReceiverService::class.java.simpleName
     override fun onMessageReceived(message: RemoteMessage) {
         val data = message.data
         val msg = data[App.instance.getString(R.string.notification_extra)]
         Log.d(TAG, "onMessageReceived $data")
-        val isForegroundMessage = message.notification != null
-        if (isForegroundMessage) {
-            Log.d(TAG, "Message received in foreground")
-            try {
-                val reply: Post = App.instance.jsonMapper.readValue(msg, Post::class.java)
-                if (!reply.isService) {
-                    App.instance.messages.value = listOf(reply)
-                }
-            } catch (e: IOException) {
-                Log.d(TAG, "JSON exception: " + e.message)
+        try {
+            val reply: Post = App.instance.jsonMapper.readValue(msg, Post::class.java)
+            if (!reply.isService) {
+                App.instance.messages.value = listOf(reply)
             }
-        } else {
             App.instance.notificationSender.showNotification(msg)
+        } catch (e: IOException) {
+            Log.d(TAG, "JSON exception: " + e.message)
         }
     }
 
     override fun onNewToken(refreshedToken: String) {
         Log.d(TAG, "Refreshed token: $refreshedToken")
         updateToken("fcm", refreshedToken)
+    }
+
+    companion object {
+        const val TAG = "FCM"
     }
 }

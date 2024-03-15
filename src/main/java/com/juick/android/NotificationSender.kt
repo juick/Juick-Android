@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -31,6 +31,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.api.model.Post
@@ -63,70 +64,85 @@ class NotificationSender(private val context: Context, private val jsonMapper: O
     fun showNotification(msgStr: String?) {
         try {
             val jmsg = jsonMapper.readValue(msgStr, Post::class.java)
+            val notificationId = getId(jmsg)
             if (jmsg.isService) {
-                handler.post { notificationManager.cancel(getId(jmsg).toString(), 0) }
+                Log.d(TAG, "Notification cleared: $notificationId")
+                handler.post { notificationManager.cancel(notificationId.toString(), 0) }
+                val updatedMessages = App.instance.messages.value.toMutableList().apply {
+                    removeAll { if (jmsg.mid != 0) { it.mid == notificationId } else {it.user.uid == notificationId } }
+                }.toList()
+                App.instance.messages.value = updatedMessages
             } else {
-                var title = "@${jmsg.user.uname}"
-                if (jmsg.tags.isNotEmpty()) {
-                    title = "$title: ${jmsg.tagsString}"
-                }
-                val body = if (TextUtils.isEmpty(jmsg.text)) {
-                    "sent an image"
-                } else {
-                    if (jmsg.text.length > 64) {
-                        jmsg.text.substring(0, 60) + "..."
-                    } else {
-                        jmsg.text
+                if (!App.AppLifecycleManager.isInForeground) {
+                    Log.d(TAG, "Notification added: $notificationId")
+                    var title = "@${jmsg.user.uname}"
+                    if (jmsg.tags.isNotEmpty()) {
+                        title = "$title: ${jmsg.tagsString}"
                     }
-                }
-                val contentIntent = PendingIntent.getActivity(
-                    context,
-                    getId(jmsg), createNewEventIntent(msgStr), PendingIntent.FLAG_UPDATE_CURRENT
-                )
-                val notificationBuilder = NotificationCompat.Builder(context, channelId)
-                notificationBuilder.setSmallIcon(R.drawable.ic_notification)
-                    .setContentTitle(title)
-                    .setContentText(body)
-                    .setAutoCancel(true).setWhen(0)
-                    .setContentIntent(contentIntent)
-                    .setGroup("messages")
-                    .setColor(ContextCompat.getColor(context, R.color.colorAccent))
-                    .setGroupSummary(true)
-                notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(jmsg.text))
-                if (jmsg.user.uid > 0) {
-                    notificationBuilder.addAction(
-                        if (Build.VERSION.SDK_INT <= 19) R.drawable.ic_ab_reply2 else R.drawable.ic_ab_reply,
-                        context.getString(R.string.reply), PendingIntent.getActivity(
-                            context,
-                            getId(jmsg), createNewEventIntent(msgStr),
-                            PendingIntent.FLAG_UPDATE_CURRENT
+                    val body = if (TextUtils.isEmpty(jmsg.text)) {
+                        "sent an image"
+                    } else {
+                        if (jmsg.text.length > 64) {
+                            jmsg.text.substring(0, 60) + "..."
+                        } else {
+                            jmsg.text
+                        }
+                    }
+                    val contentIntent = PendingIntent.getActivity(
+                        context,
+                        getId(jmsg),
+                        createNewEventIntent(msgStr),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    val notificationBuilder = NotificationCompat.Builder(context, channelId)
+                    notificationBuilder.setSmallIcon(R.drawable.ic_notification)
+                        .setContentTitle(title)
+                        .setContentText(body)
+                        .setAutoCancel(true).setWhen(0)
+                        .setContentIntent(contentIntent)
+                        .setGroup("messages")
+                        .setColor(ContextCompat.getColor(context, R.color.colorAccent))
+                        .setGroupSummary(true)
+                    notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                    notificationBuilder.setStyle(
+                        NotificationCompat.BigTextStyle().bigText(jmsg.text)
+                    )
+                    if (jmsg.user.uid > 0) {
+                        notificationBuilder.addAction(
+                            if (Build.VERSION.SDK_INT <= 19) R.drawable.ic_ab_reply2 else R.drawable.ic_ab_reply,
+                            context.getString(R.string.reply), PendingIntent.getActivity(
+                                context,
+                                getId(jmsg), createNewEventIntent(msgStr),
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                            )
                         )
-                    )
+                    }
+                    val avatarBitmap = Glide.with(context).asBitmap()
+                        .load(jmsg.user.avatar)
+                        .fallback(R.drawable.av_96)
+                        .placeholder(R.drawable.av_96)
+                        .centerCrop().submit()
+                    try {
+                        val avatar = avatarBitmap.get()
+                        notificationBuilder.setLargeIcon(avatar)
+                    } catch (e: ExecutionException) {
+                        Log.w(TAG, "Avatar was not loaded", e)
+                    } catch (e: InterruptedException) {
+                        Log.w(TAG, "Avatar was not loaded", e)
+                    }
+                    if (Build.VERSION.SDK_INT < 26) {
+                        notificationBuilder.setDefaults(
+                            (Notification.DEFAULT_LIGHTS
+                                    or Notification.DEFAULT_VIBRATE or Notification.DEFAULT_SOUND).inv()
+                        )
+                    }
+                    notify(jmsg, notificationBuilder)
+                } else {
+                    Log.d(TAG, "Notification silenced: $notificationId")
                 }
-                val avatarBitmap = Glide.with(context).asBitmap()
-                    .load(jmsg.user.avatar)
-                    .fallback(R.drawable.av_96)
-                    .placeholder(R.drawable.av_96)
-                    .centerCrop().submit()
-                try {
-                    val avatar = avatarBitmap.get()
-                    notificationBuilder.setLargeIcon(avatar)
-                } catch (e: ExecutionException) {
-                    Log.w(NotificationSender::class.java.simpleName, "Avatar was not loaded", e)
-                } catch (e: InterruptedException) {
-                    Log.w(NotificationSender::class.java.simpleName, "Avatar was not loaded", e)
-                }
-                if (Build.VERSION.SDK_INT < 26) {
-                    notificationBuilder.setDefaults(
-                        (Notification.DEFAULT_LIGHTS
-                                or Notification.DEFAULT_VIBRATE or Notification.DEFAULT_SOUND).inv()
-                    )
-                }
-                notify(jmsg, notificationBuilder)
             }
         } catch (e: Exception) {
-            Log.e(NotificationSender::class.java.simpleName, "GCM message error", e)
+            Log.e(TAG, "GCM message error", e)
         }
     }
 
@@ -149,5 +165,6 @@ class NotificationSender(private val context: Context, private val jsonMapper: O
 
     companion object {
         private lateinit var channelId: String
+        const val TAG = "Notification"
     }
 }
