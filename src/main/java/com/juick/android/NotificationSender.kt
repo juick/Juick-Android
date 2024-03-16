@@ -34,14 +34,12 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.api.model.Post
-import java.util.concurrent.ExecutionException
 
 class NotificationSender(private val context: Context, private val jsonMapper: ObjectMapper) {
     private val notificationManager =
