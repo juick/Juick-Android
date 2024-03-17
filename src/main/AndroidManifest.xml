@@ -30,7 +30,7 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
-    <uses-sdk tools:overrideLibrary="com.canhub.cropper" />
+    <uses-sdk tools:overrideLibrary="com.canhub.cropper, androidx.annotation.experimental" />
 
     <uses-feature
         android:name="android.hardware.location.network"
