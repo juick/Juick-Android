@@ -217,7 +217,9 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
                 App.instance.messages.collect { messages ->
                     messages.forEach { post ->
                         if (adapter.itemCount > 0) {
-                            if (adapter.currentList[0]?.mid == post.mid && post.isReply()) {
+                            if (adapter.currentList[0]?.mid == post.mid && post.isReply()
+                                && !adapter.currentList.contains(post)
+                            ) {
                                 adapter.submitList(adapter.currentList + post)
                                 val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
                                 val total = adapter.currentList.size - 1 - 1
