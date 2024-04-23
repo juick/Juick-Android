@@ -74,8 +74,7 @@
         android:layout_height="58dp"
         android:layout_alignParentBottom="true"
 
-        android:background="?android:attr/windowBackground"
-        app:itemBackground="@color/colorMainBackground"
+        android:background="@color/colorMainBackground"
         app:itemIconTint="@color/bottom_nav_color"
         app:labelVisibilityMode="unlabeled"
         app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
