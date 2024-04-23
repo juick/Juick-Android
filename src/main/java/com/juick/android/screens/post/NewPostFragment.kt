@@ -120,7 +120,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         }
         val text = arguments?.getString("text") ?: ""
         if (text.isNotEmpty()) {
-            applyTag(text)
+            model.editMessage.setText(text)
         }
         val uri = arguments?.getString("uri") ?: ""
         if (uri.isNotEmpty()) {
