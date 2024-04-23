@@ -37,6 +37,9 @@
         android:name="com.juick.android.fragment.ThreadFragment"
         tools:layout="@layout/fragment_thread"
         android:label="Thread" >
+        <deepLink
+            app:action="android.intent.action.VIEW"
+            app:uri="https://juick.com/.*/{mid}" />
         <argument
             android:name="mid"
             app:argType="integer"

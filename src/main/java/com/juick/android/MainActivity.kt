@@ -277,11 +277,6 @@ class MainActivity : AppCompatActivity() {
                 Log.d(this.javaClass.simpleName, "Invalid JSON data", e)
             }
         }
-        if (action == Intent.ACTION_VIEW) {
-            val data = intent.data
-            data?.let { processUri(it) }
-            intent.action = ""
-        }
         if (action == Intent.ACTION_SEND) {
             val mime = intent.type
             val extras = intent.extras as Bundle
@@ -301,6 +296,12 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.removeFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
+        val navController = navHostFragment.navController
+        navController.handleDeepLink(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
