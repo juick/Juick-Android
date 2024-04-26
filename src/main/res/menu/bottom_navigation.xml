@@ -23,7 +23,7 @@
         android:title="@string/Subscriptions" />
     <item
         android:id="@+id/discover"
-        android:icon="@drawable/ic_ei_search"
+        android:icon="@drawable/icon_discover"
         android:title="@string/Discover" />
     <item
         android:id="@+id/chats"
