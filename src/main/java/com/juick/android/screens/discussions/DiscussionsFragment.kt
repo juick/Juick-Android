@@ -25,6 +25,8 @@ import com.juick.android.screens.FeedFragment
 class DiscussionsFragment : FeedFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        vm.apiUrl.value = UrlBuilder.discussions.toString()
+        if (vm.apiUrl.value.isEmpty()) {
+            vm.apiUrl.value = UrlBuilder.discussions.toString()
+        }
     }
 }

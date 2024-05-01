@@ -175,8 +175,8 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
                 model.buttonAttachment.isSelected = false
             }
         }
-        model.list.adapter = adapter
-        val linearLayoutManager = model.list.layoutManager as LinearLayoutManager
+        model.threadList.adapter = adapter
+        val linearLayoutManager = model.threadList.layoutManager as LinearLayoutManager
         adapter.setOnItemClickListener { widget: View?, position: Int ->
             if (widget?.tag == null || widget.tag != "clicked") {
                 val post = adapter.currentList[position]
@@ -196,11 +196,11 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
             }
             if (pos != 0) {
                 adapter.notifyItemChanged(pos)
-                model.list.scrollToPosition(pos)
+                model.threadList.scrollToPosition(pos)
             }
         }
         model.swipeContainer.isEnabled = false
-        model.list.visibility = View.GONE
+        model.threadList.visibility = View.GONE
         model.progressBar.visibility = View.VISIBLE
         load()
         account.profile.observe(viewLifecycleOwner) {
@@ -224,7 +224,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
                                 val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
                                 val total = adapter.currentList.size - 1 - 1
                                 if (lastVisible == total) {
-                                    model.list.scrollToPosition(post.rid)
+                                    model.threadList.scrollToPosition(post.rid)
                                 }
                             }
                         }
@@ -239,11 +239,11 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
             try {
                 val posts = App.instance.api.thread(mid)
                 withContext(Dispatchers.Main) {
-                    model.list.visibility = View.VISIBLE
+                    model.threadList.visibility = View.VISIBLE
                     model.progressBar.visibility = View.GONE
                     adapter.submitList(posts)
                     if (scrollToEnd) {
-                        model.list.scrollToPosition(posts.size - 1)
+                        model.threadList.scrollToPosition(posts.size - 1)
                     }
                 }
             } catch (e: Exception) {

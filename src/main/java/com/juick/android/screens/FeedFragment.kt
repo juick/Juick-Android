@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -42,7 +43,7 @@ import kotlinx.coroutines.launch
  * Created by gerc on 03.06.2016.
  */
 open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnPostUpdatedListener {
-    protected val vm by activityViewModels<FeedViewModel>()
+    protected val vm by viewModels<FeedViewModel>()
     internal val account by activityViewModels<Account>()
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
 
@@ -52,7 +53,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
         super.onViewCreated(view, savedInstanceState)
         val adapter = FeedAdapter()
         adapter.postUpdatedListener = this
-        binding.list.adapter = adapter
+        binding.feedList.adapter = adapter
         adapter.setOnItemClickListener { _, pos ->
             adapter.currentList[pos]?.let {
                 post ->
@@ -105,7 +106,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                         null -> {
                             if (firstPage) {
                                 binding.progressBar.visibility = View.VISIBLE
-                                binding.list.visibility = View.GONE
+                                binding.feedList.visibility = View.GONE
                                 binding.errorText.visibility = View.GONE
                             }
                         }
@@ -122,7 +123,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                                         adapter.submitList(adapter.currentList + it)
                                     }
                                     if (needToScroll) {
-                                        binding.list.scrollToPosition(0)
+                                        binding.feedList.scrollToPosition(0)
                                     }
                                 }
                             },
@@ -159,12 +160,12 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
     }
     private fun stopRefreshing() {
         binding.swipeContainer.isRefreshing = false
-        binding.list.visibility = View.VISIBLE
+        binding.feedList.visibility = View.VISIBLE
         binding.progressBar.visibility = View.GONE
         binding.errorText.visibility = View.GONE
     }
     private fun setError(message: String) {
-        binding.list.visibility = View.GONE
+        binding.feedList.visibility = View.GONE
         binding.errorText.visibility = View.VISIBLE
         binding.errorText.text = message
     }

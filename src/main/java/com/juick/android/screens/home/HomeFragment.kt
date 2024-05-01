@@ -30,9 +30,13 @@ class HomeFragment : FeedFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (App.instance.isAuthenticated) {
-            vm.apiUrl.value = UrlBuilder.home.toString()
+            if (vm.apiUrl.value.isEmpty()) {
+                vm.apiUrl.value = UrlBuilder.home.toString()
+            }
         } else {
-            vm.apiUrl.value = UrlBuilder.discussions.toString()
+            if (vm.apiUrl.value.isEmpty()) {
+                vm.apiUrl.value = UrlBuilder.discussions.toString()
+            }
         }
     }
 }

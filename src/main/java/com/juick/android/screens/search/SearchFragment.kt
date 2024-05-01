@@ -26,6 +26,8 @@ class SearchFragment: FeedFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val search = arguments?.getString("search") ?: ""
-        vm.apiUrl.value = UrlBuilder.search(search).toString()
+        if (vm.apiUrl.value.isEmpty()) {
+            vm.apiUrl.value = UrlBuilder.search(search).toString()
+        }
     }
 }
