@@ -32,7 +32,7 @@
             app:launchSingleTop="true"
             app:popUpTo="@id/home" />
     </fragment>
-    <fragment
+    <dialog
         android:id="@+id/thread"
         android:name="com.juick.android.fragment.ThreadFragment"
         tools:layout="@layout/fragment_thread"
@@ -52,7 +52,7 @@
             android:name="scrollToEnd"
             app:argType="boolean"
             android:defaultValue="false" />
-    </fragment>
+    </dialog>
     <fragment
         android:id="@+id/PMFragment"
         tools:layout="@layout/fragment_chat"

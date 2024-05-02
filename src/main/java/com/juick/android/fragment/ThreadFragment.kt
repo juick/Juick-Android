@@ -28,7 +28,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -38,10 +37,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.juick.App
 import com.juick.R
-import com.juick.android.JuickMessageMenuListener
 import com.juick.android.Account
+import com.juick.android.JuickMessageMenuListener
 import com.juick.android.SignInActivity
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
@@ -61,7 +63,7 @@ import java.io.FileNotFoundException
  *
  * @author Ugnich Anton
  */
-class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpdatedListener {
+class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), FeedAdapter.OnPostUpdatedListener {
     private val account by activityViewModels<Account>()
     private val model by viewBinding(FragmentThreadBinding::bind)
     private var rid = 0
@@ -120,6 +122,8 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (dialog as? BottomSheetDialog)?.behavior?.state =
+            BottomSheetBehavior.STATE_EXPANDED
         mid = arguments?.getInt("mid") ?: 0
         scrollToEnd = arguments?.getBoolean("scrollToEnd") ?: false
         if (mid == 0) {
@@ -207,7 +211,7 @@ class ThreadFragment : Fragment(R.layout.fragment_thread), FeedAdapter.OnPostUpd
             it?.let { user ->
                 adapter.setOnMenuListener(
                     JuickMessageMenuListener(
-                        requireActivity(), adapter, user
+                        requireActivity(), this, adapter, user
                     )
                 )
             }

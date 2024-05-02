@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -26,9 +26,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import com.juick.App
 import com.juick.R
 import com.juick.android.screens.FeedAdapter
@@ -44,7 +45,7 @@ import kotlinx.coroutines.withContext
  * @author Ugnich Anton
  */
 class JuickMessageMenuListener(
-    private val activity: Context, private val adapter: FeedAdapter, private val me: User) : FeedAdapter.OnItemClickListener {
+    private val activity: Context, private val fragment: Fragment, private val adapter: FeedAdapter, private val me: User) : FeedAdapter.OnItemClickListener {
     private fun confirmAction(context: Context, resId: Int, action: Runnable) : Boolean {
         val builder = AlertDialog.Builder(context)
         var result = false
@@ -204,7 +205,7 @@ class JuickMessageMenuListener(
             val uname = post.user.uname
             when (action) {
                 MENU_ACTION_BLOG -> {
-                    val navController = Navigation.findNavController(view)
+                    val navController = findNavController(fragment)
                     val args = Bundle()
                     args.putString("uname", uname)
                     navController.navigate(R.id.blog, args)
@@ -242,7 +243,7 @@ class JuickMessageMenuListener(
                 MENU_ACTION_DELETE_POST -> confirmAction(activity, R.string.Are_you_sure_delete) {
                     processCommand("D #" +
                             if (rid == 0) "$mid" else "$mid/$rid")
-                    val navController = Navigation.findNavController(view)
+                    val navController = findNavController(fragment)
                     navController.popBackStack(R.id.home, false)
                     if (rid > 0) {
                         val args = Bundle()

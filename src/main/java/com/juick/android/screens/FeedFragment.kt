@@ -94,7 +94,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             it?.let { user ->
                 adapter.setOnMenuListener(
                     JuickMessageMenuListener(
-                        requireActivity(), adapter, user
+                        requireActivity(), this, adapter, user
                     )
                 )
             }
