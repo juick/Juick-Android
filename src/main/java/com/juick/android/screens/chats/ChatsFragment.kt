@@ -26,7 +26,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.juick.App
@@ -56,7 +56,7 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
 
     init {
         chatsAdapter.setOnDialogClickListener { dialog: Chat ->
-            val navController = findNavController(requireView())
+            val navController = findNavController(this)
             val action = Bundle()
             action.putString("uname", dialog.dialogName)
             action.putInt("uid", dialog.id.toInt())
@@ -112,7 +112,7 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
                         }
                     }
                 } else {
-                    val navController = findNavController(requireView())
+                    val navController = findNavController(this@ChatsFragment)
                     navController.navigate(R.id.no_auth)
                 }
             }

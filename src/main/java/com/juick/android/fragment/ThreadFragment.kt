@@ -32,7 +32,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
@@ -294,12 +294,11 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
             setFormEnabled(true)
             Toast.makeText(context, response.text, Toast.LENGTH_LONG).show()
             response.newMessage?.let {
-                val navController = findNavController(requireView())
-                navController.popBackStack(R.id.home, false)
-                val args = Bundle()
-                args.putInt("mid", it.mid)
-                args.putBoolean("scrollToEnd", true)
-                navController.navigate(R.id.thread, args)
+                model.textReplyTo.text = ""
+                model.editMessage.text?.clear()
+                mid = it.mid
+                scrollToEnd = true
+                load()
             }
         }
     }

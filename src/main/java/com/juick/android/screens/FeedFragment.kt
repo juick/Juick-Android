@@ -26,7 +26,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import com.juick.App
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
@@ -59,7 +59,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                 post ->
                 val threadArgs = Bundle()
                 threadArgs.putInt("mid", post.mid)
-                findNavController(view).navigate(R.id.thread, threadArgs)
+                findNavController(this).navigate(R.id.thread, threadArgs)
             }
         }
         var loading = false

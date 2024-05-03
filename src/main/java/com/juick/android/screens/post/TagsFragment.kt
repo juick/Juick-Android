@@ -22,7 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -48,7 +48,7 @@ class TagsFragment : BottomSheetDialogFragment(R.layout.fragment_tags_list) {
         model.list.adapter = adapter
         adapter.itemClickListener = { _, position ->
             val tag = adapter.currentList[position]
-            val navController = NavHostFragment.findNavController(this)
+            val navController = findNavController(this)
             navController.previousBackStackEntry?.savedStateHandle?.set("tag", tag)
             dismiss()
         }

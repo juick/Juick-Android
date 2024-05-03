@@ -27,7 +27,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.canhub.cropper.CropImageContract
@@ -74,7 +74,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
             }
         }
         model.buttonTags.setOnClickListener {
-            val navController = findNavController(requireView())
+            val navController = findNavController(this)
             val tagState = navController.currentBackStackEntry
                 ?.savedStateHandle as SavedStateHandle
             val tagData = tagState.getLiveData<String>("tag")
@@ -82,7 +82,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                 tagState.remove<Any>("tag")
                 applyTag(tag)
             }
-            findNavController(view).navigate(R.id.tags)
+            navController.navigate(R.id.tags)
         }
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
@@ -150,7 +150,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                 model.progressBar.visibility = View.GONE
                 Toast.makeText(activity, response.text, Toast.LENGTH_LONG).show()
                 response.newMessage?.let {
-                    val navController = findNavController(requireView())
+                    val navController = findNavController(this@NewPostFragment)
                     navController.popBackStack(R.id.new_post, true)
                     val args = Bundle()
                     args.putInt("mid", it.mid)
