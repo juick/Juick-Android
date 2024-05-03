@@ -281,13 +281,14 @@ class JuickMessageMenuListener(
         likeMessage(post)
     }
 
-    override fun onSubscribeToggleClick(view: View?, post: Post) {
+    override fun onSubscribeToggleClick(post: Post) {
         subscribeMessageToggle(post)
     }
 
-    override fun onLinkClick(view: View?, url: String) {
-        val activity = view?.context as MainActivity
-        activity.processUri(Uri.parse(url))
+    override fun onLinkClick(url: String) {
+        (activity as MainActivity).apply {
+            processUri(Uri.parse(url))
+        }
     }
 
     private fun processCommand(command: String, callback: ((PostResponse) -> Unit)? = null) {

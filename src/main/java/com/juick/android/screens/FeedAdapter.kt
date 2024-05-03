@@ -19,6 +19,7 @@ package com.juick.android.screens
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -35,6 +36,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.text.getSpans
+import androidx.navigation.NavDeepLinkBuilder
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -142,7 +144,10 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         holder.timestampTextView.text = MessageUtils.formatMessageTimestamp(post)
         holder.messagePrivacyView?.visibility = if (post.friendsOnly) View.VISIBLE else View.GONE
         holder.textTextView.text = StringUtils.EMPTY
-        holder.textTextView.text = formatMessageText(holder.itemView.context, post)
+        holder.textTextView.text = formatMessageText(holder.itemView.context, post) {
+            uri ->
+            itemMenuListener?.onLinkClick(uri)
+        }
         holder.textTextView.movementMethod = LinkMovementMethod.getInstance()
         if (post.photo != null && post.photo?.medium != null) {
             holder.photoLayout.visibility = View.VISIBLE
@@ -156,7 +161,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             } else {
                 drawable.into(holder.photoImageView)
                 holder.photoImageView.setOnClickListener {
-                    itemMenuListener?.onLinkClick(it, post.photo?.url as String)
+                    itemMenuListener?.onLinkClick(post.photo?.url as String)
                 }
             }
         } else if (App.instance.hasViewableContent(post.text)) {
@@ -171,7 +176,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
                         holder.photoDescriptionView.visibility = View.VISIBLE
                         holder.photoDescriptionView.text = link.description
                         holder.photoImageView.setOnClickListener {
-                            itemMenuListener?.onLinkClick(it, link.source)
+                            itemMenuListener?.onLinkClick(link.source)
                         }
                     } else {
                         holder.photoLayout.visibility = View.GONE
@@ -183,7 +188,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         if (!isReply) {
             if (showSubscriptions) {
                 holder.repliesTextView?.setOnClickListener {
-                    itemMenuListener?.onSubscribeToggleClick(holder.repliesTextView, post)
+                    itemMenuListener?.onSubscribeToggleClick(post)
                 }
                 if (post.subscribed) {
                     holder.repliesTextView?.setCompoundDrawables(
@@ -344,12 +349,12 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
     interface OnItemClickListener {
         fun onItemClick(view: View?, post: Post)
         fun onLikeClick(view: View?, post: Post)
-        fun onSubscribeToggleClick(view: View?, post: Post)
-        fun onLinkClick(view: View?, url: String)
+        fun onSubscribeToggleClick(post: Post)
+        fun onLinkClick(url: String)
     }
 
     companion object {
-        fun formatMessageText(context: Context, jmsg: Post): SpannableStringBuilder {
+        fun formatMessageText(context: Context, jmsg: Post, onLinkClicked: ((String) -> Unit)? = null): SpannableStringBuilder {
             val tagLine = SpannableStringBuilder()
             var nextSpanStart = 0
             for (tag in jmsg.tags) {
@@ -358,9 +363,9 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
                 tagLine.setSpan(object : ClickableSpan() {
                     override fun onClick(widget: View) {
                         widget.tag = "clicked"
-                        val activity = widget.context as MainActivity
+                        /*val activity = widget.context as MainActivity
                         activity.title = "#$tag"
-                        /*activity.replaceFragment(
+                        activity.replaceFragment(
                                 FeedBuilder.feedFor(
                                         UrlBuilder.getPostsByTag(jmsg.getUser().getUid(), tag)));*/
                     }
@@ -396,9 +401,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
                 textContent.setSpan(object : ClickableSpan() {
                     override fun onClick(widget: View) {
                         widget.tag = "clicked"
-                        val data = Uri.parse(link)
-                        val activity = widget.context as MainActivity
-                        activity.processUri(data)
+                        onLinkClicked?.invoke(link)
                     }
                 }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }

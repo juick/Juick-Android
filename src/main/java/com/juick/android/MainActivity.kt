@@ -112,7 +112,8 @@ class MainActivity : AppCompatActivity() {
             R.id.discover,
             R.id.chats,
             R.id.no_auth,
-            R.id.new_post
+            R.id.new_post,
+            R.id.discussions
         )
             .build()
         val navHostFragment = model.navHost.getFragment<NavHostFragment>()
