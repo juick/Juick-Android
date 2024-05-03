@@ -38,6 +38,7 @@ android {
         versionCode 207
         versionName "3.1." + versionCode
         applicationId "com.juick"
+        namespace "com.juick"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         def addConstant = {constantName, constantValue ->
@@ -63,13 +64,13 @@ android {
     }
     buildTypes {
         debug {
-            applicationIdSuffix ".debug"
-            namespace "com.juick.debug"
+            //noinspection GradlePath
+            applicationIdSuffix "${System.env.APP_ID_SUFFIX ?: '.debug'}"
+            namespace "com.juick${System.env.APP_ID_SUFFIX ?: '.debug'}"
             debuggable true
             multiDexKeepProguard file('multidex-config.pro')
         }
         release {
-            namespace "com.juick"
             minifyEnabled false
             /*
             shrinkResources true
