@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -29,14 +29,11 @@ class ChatsViewModel : ViewModel() {
 
     suspend fun loadChats() {
         chats.value = null
-        try {
+        chats.value = runCatching {
             val pms = withContext(Dispatchers.IO) {
                 App.instance.api.groupsPms(10).pms
             }
-            chats.value = Result.success(pms)
-        } catch (exception: Exception) {
-            chats.value =
-                Result.failure(exception)
+            return@runCatching pms
         }
     }
 }

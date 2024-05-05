@@ -29,17 +29,15 @@ import kotlinx.coroutines.withContext
 
 class TagsViewModel : ViewModel() {
     private val _tags = MutableLiveData<Result<List<Tag>>?>(null)
-    val tags get () = _tags as LiveData<Result<List<Tag>>?>
+    val tags get() = _tags as LiveData<Result<List<Tag>>?>
 
     init {
         viewModelScope.launch {
-            try {
+            _tags.value = runCatching {
                 val data = withContext(Dispatchers.IO) {
                     App.instance.api.tags()
                 }
-                _tags.value = Result.success(data)
-            } catch (exception: Exception) {
-                _tags.value = Result.failure(exception)
+                return@runCatching data
             }
         }
     }

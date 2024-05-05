@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -32,16 +32,12 @@ class ChatViewModel(private val userName: String): ViewModel() {
     val messages = MutableStateFlow<Result<List<Post>>?>(null)
 
     fun loadMessages() {
+        messages.update { null }
         viewModelScope.launch {
-            try {
-                withContext(Dispatchers.IO) { App.instance.api.pm(userName) }.let { newPms ->
-                    messages.update {
-                        Result.success(newPms)
-                    }
-                }
-            } catch (e: Exception) {
-                messages.update {
-                    Result.failure(e)
+            messages.update {
+                runCatching {
+                    val newPms = withContext(Dispatchers.IO) { App.instance.api.pm(userName) }
+                    return@runCatching newPms
                 }
             }
         }
