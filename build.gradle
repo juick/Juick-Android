@@ -63,8 +63,6 @@ android {
     }
     buildTypes {
         debug {
-            applicationIdSuffix ".debug"
-            namespace "com.juick.debug"
             debuggable true
             multiDexKeepProguard file('multidex-config.pro')
         }
