@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -34,21 +34,17 @@ open class FeedViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            apiUrl.collect {
-                if (it.isNotEmpty()) {
-                    try {
-                        _feed.update {
-                            null
-                        }
-                        val posts = withContext(Dispatchers.IO) {
-                            App.instance.api.getPosts(it)
-                        }
-                        _feed.update {
-                            Result.success(posts)
-                        }
-                    } catch (e: Exception) {
-                        _feed.update {
-                            Result.failure(e)
+            apiUrl.collect { url ->
+                if (url.isNotEmpty()) {
+                    _feed.update {
+                        null
+                    }
+                    _feed.update {
+                        runCatching {
+                            val posts = withContext(Dispatchers.IO) {
+                                App.instance.api.getPosts(url)
+                            }
+                            return@runCatching posts
                         }
                     }
                 }
