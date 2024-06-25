@@ -4,7 +4,7 @@ buildscript {
     ext.okhttp_version = "3.12.13"
     ext.retrofit_version = "2.6.4"
     ext.glide_version = "4.16.0"
-    ext.androidx_test_version = "1.5.0"
+    ext.androidx_test_version = "1.6.0"
 
     repositories {
         mavenCentral()
