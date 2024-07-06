@@ -27,11 +27,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView.ItemDecoration
-import com.faltenreich.skeletonlayout.Skeleton
-import com.faltenreich.skeletonlayout.applySkeleton
 import com.juick.App
 import com.juick.R
 import com.juick.android.Account
@@ -55,14 +50,12 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
     private lateinit var adapter: FeedAdapter
     private var firstPage = true
     private val _postsKey = "posts"
-    private lateinit var skeleton: Skeleton
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter = FeedAdapter()
         adapter.postUpdatedListener = this
         binding.feedList.adapter = adapter
-        skeleton = binding.feedList.applySkeleton(R.layout.item_post_skeleton, 4)
         adapter.setOnItemClickListener { _, pos ->
             adapter.currentList[pos]?.let {
                 post ->
@@ -112,7 +105,8 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                     when (result) {
                         null -> {
                             if (firstPage) {
-                                skeleton.showSkeleton()
+                                binding.progressBar.visibility = View.VISIBLE
+                                binding.feedList.visibility = View.GONE
                                 binding.errorText.visibility = View.GONE
                             }
                         }
@@ -181,7 +175,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
     private fun stopRefreshing() {
         binding.swipeContainer.isRefreshing = false
         binding.feedList.visibility = View.VISIBLE
-        skeleton.showOriginal()
+        binding.progressBar.visibility = View.GONE
         binding.errorText.visibility = View.GONE
     }
     private fun setError(message: String) {

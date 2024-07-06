@@ -39,6 +39,12 @@
             android:clipToPadding="false"
             app:layoutManager="LinearLayoutManager" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:indeterminateOnly="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <TextView
         android:id="@+id/error_text"
         android:layout_width="wrap_content"
