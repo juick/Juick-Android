@@ -22,6 +22,7 @@ buildscript {
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'com.google.devtools.ksp'
 
 repositories {

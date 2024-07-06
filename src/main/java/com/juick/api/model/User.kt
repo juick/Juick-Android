@@ -16,15 +16,18 @@
  */
 package com.juick.api.model
 
+import android.os.Parcelable
 import com.stfalcon.chatkit.commons.models.IUser
+import kotlinx.parcelize.Parcelize
 
 /**
  * Created by gerc on 10.02.2016.
  */
+@Parcelize
 data class User(
     val uid: Int,
     val uname: String
-) : IUser {
+) : IUser, Parcelable {
     var unreadCount: Int = 0
     val premium: Boolean = false
     val admin: Boolean = false

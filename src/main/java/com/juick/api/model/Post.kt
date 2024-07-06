@@ -16,22 +16,25 @@
  */
 package com.juick.api.model
 
+import android.os.Parcelable
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.juick.util.StringUtils
 import com.stfalcon.chatkit.commons.models.IMessage
+import kotlinx.parcelize.Parcelize
 import java.util.*
 
 /**
  * Created by gerc on 10.02.2016.
  */
+@Parcelize
 data class Post(
     private var user: User,
     var mid: Int = 0,
     var rid: Int = 0,
     var subscribed: Boolean = false
-) : IMessage {
+) : IMessage, Parcelable {
     var replyto = 0
     var to: User? = null
     private var body: String? = null
