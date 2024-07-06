@@ -152,6 +152,7 @@ dependencies {
     implementation 'com.github.Zhuinden:fragmentviewbindingdelegate-kt:1.0.2'
 
     implementation 'com.vanniktech:android-image-cropper:4.5.0'
+    implementation 'com.faltenreich:skeletonlayout:5.0.0'
 
     implementation 'androidx.multidex:multidex:2.0.1'
 
