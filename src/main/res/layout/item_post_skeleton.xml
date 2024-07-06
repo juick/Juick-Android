@@ -25,6 +25,11 @@
     android:layout_marginVertical="@dimen/list_vertical_margin"
     android:background="@color/colorTextBackground"
     android:orientation="vertical">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorBorder"
+        android:contentDescription="@string/divider" />
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -93,4 +98,9 @@
             android:text="@string/lorem"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorBorder"
+        android:contentDescription="@string/divider" />
 </LinearLayout>
