@@ -37,6 +37,7 @@ import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -75,18 +76,23 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             onNewMessages(posts.filter {
                 it.isOurs(uname)
             })
+            App.instance.messages.update { listOf() }
         }.launchIn(lifecycleScope)
         vm.messages.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach {
             when (it) {
                 null -> {}
-                else -> it.fold(
-                    onSuccess = { posts ->
-                        adapter.addToEnd(posts, false)
-                    },
-                    onFailure = { error ->
-                        Toast.makeText(requireContext(), error.message, Toast.LENGTH_LONG).show()
-                    }
-                )
+                else -> {
+                    it.fold(
+                        onSuccess = { posts ->
+                            adapter.addToEnd(posts, false)
+                        },
+                        onFailure = { error ->
+                            Toast.makeText(requireContext(), error.message, Toast.LENGTH_LONG)
+                                .show()
+                        }
+                    )
+                    vm.messages.update { Result.success(listOf()) }
+                }
             }
         }.launchIn(lifecycleScope)
         vm.loadMessages()

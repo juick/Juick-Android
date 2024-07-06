@@ -111,32 +111,41 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                             }
                         }
 
-                        else -> result.fold(
-                            onSuccess = { posts ->
-                                loading = false
-                                stopRefreshing()
-                                posts.let {
-                                    val needToScroll = haveNewPosts(adapter.currentList, it)
+                        else -> {
+                            result.fold(
+                                onSuccess = { posts ->
+                                    loading = false
+                                    stopRefreshing()
+                                    if (posts.size > 0) {
+                                        posts.let {
+                                            val needToScroll = haveNewPosts(adapter.currentList, it)
+                                            if (firstPage) {
+                                                adapter.submitList(it)
+                                            } else {
+                                                adapter.submitList(adapter.currentList + it)
+                                            }
+                                            if (needToScroll) {
+                                                binding.feedList.scrollToPosition(0)
+                                            }
+                                        }
+                                    }
+                                },
+                                onFailure = { exception ->
+                                    loading = false
+                                    stopRefreshing()
+                                    Toast.makeText(
+                                        requireContext(),
+                                        exception.message,
+                                        Toast.LENGTH_LONG
+                                    )
+                                        .show()
                                     if (firstPage) {
-                                        adapter.submitList(it)
-                                    } else {
-                                        adapter.submitList(adapter.currentList + it)
-                                    }
-                                    if (needToScroll) {
-                                        binding.feedList.scrollToPosition(0)
+                                        setError(exception.message ?: getString(R.string.Error))
                                     }
                                 }
-                            },
-                            onFailure = { exception ->
-                                loading = false
-                                stopRefreshing()
-                                Toast.makeText(requireContext(), exception.message, Toast.LENGTH_LONG)
-                                    .show()
-                                if (firstPage) {
-                                    setError(exception.message ?: getString(R.string.Error))
-                                }
-                            }
-                        )
+                            )
+                            vm.feedReceived()
+                        }
                     }
                 }
             }

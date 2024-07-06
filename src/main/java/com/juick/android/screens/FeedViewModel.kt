@@ -51,4 +51,7 @@ open class FeedViewModel : ViewModel() {
             }
         }
     }
+    fun feedReceived() {
+        _feed.update { Result.success(listOf()) }
+    }
 }

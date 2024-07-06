@@ -55,6 +55,7 @@ import com.juick.util.StringUtils
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import isAuthenticated
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
@@ -233,6 +234,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
                             }
                         }
                     }
+                    App.instance.messages.update { listOf() }
                 }
             }
         }
