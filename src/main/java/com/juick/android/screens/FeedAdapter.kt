@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -18,8 +18,6 @@ package com.juick.android.screens
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.net.Uri
-import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -36,7 +34,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.text.getSpans
-import androidx.navigation.NavDeepLinkBuilder
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -50,7 +47,6 @@ import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
-import com.juick.android.MainActivity
 import com.juick.android.widget.util.BlurTransformation
 import com.juick.android.widget.util.setCompatElevation
 import com.juick.android.widget.util.setDrawableTint

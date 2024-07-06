@@ -16,6 +16,7 @@
  */
 package com.juick.android.screens
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.juick.App
@@ -27,7 +28,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-open class FeedViewModel : ViewModel() {
+open class FeedViewModel(val state: SavedStateHandle) : ViewModel() {
     val apiUrl: MutableStateFlow<String> = MutableStateFlow("")
     private val _feed: MutableStateFlow<Result<List<Post>>?> = MutableStateFlow(null)
     val feed = _feed.asStateFlow()

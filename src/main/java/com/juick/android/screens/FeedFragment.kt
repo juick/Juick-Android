@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -29,8 +29,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import com.juick.App
 import com.juick.R
-import com.juick.android.JuickMessageMenuListener
 import com.juick.android.Account
+import com.juick.android.JuickMessageMenuListener
 import com.juick.android.Utils
 import com.juick.android.Utils.replaceUriParameter
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
@@ -46,12 +46,13 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
     protected val vm by viewModels<FeedViewModel>()
     internal val account by activityViewModels<Account>()
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
-
+    private lateinit var adapter: FeedAdapter
     private var firstPage = true
+    private val POSTS_KEY = "posts"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val adapter = FeedAdapter()
+        adapter = FeedAdapter()
         adapter.postUpdatedListener = this
         binding.feedList.adapter = adapter
         adapter.setOnItemClickListener { _, pos ->
@@ -62,12 +63,10 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                 findNavController(this).navigate(R.id.thread, threadArgs)
             }
         }
-        var loading = false
         adapter.setOnLoadMoreRequestListener(
             object : OnLoadMoreRequestListener {
                 override fun onLoadMore() {
-                    if (loading) return
-                    loading = true
+                    if (vm.feed.value == null) return
                     adapter.currentList[adapter.itemCount - 1]?.let {
                         lastItem ->
                         val requestUrl = Utils.buildUrl(vm.apiUrl.value)
@@ -114,24 +113,26 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                         else -> {
                             result.fold(
                                 onSuccess = { posts ->
-                                    loading = false
                                     stopRefreshing()
-                                    if (posts.size > 0) {
+                                    if (posts.isNotEmpty()) {
                                         posts.let {
-                                            val needToScroll = haveNewPosts(adapter.currentList, it)
-                                            if (firstPage) {
-                                                adapter.submitList(it)
+                                            val needToScroll =
+                                                haveNewPosts(adapter.currentList, it)
+                                            val newList = if (firstPage) {
+                                                it
                                             } else {
-                                                adapter.submitList(adapter.currentList + it)
+                                                adapter.currentList + it
                                             }
+                                            adapter.submitList(newList)
+                                            vm.state[POSTS_KEY] = newList
                                             if (needToScroll) {
                                                 binding.feedList.scrollToPosition(0)
                                             }
                                         }
+                                        vm.feedReceived()
                                     }
                                 },
                                 onFailure = { exception ->
-                                    loading = false
                                     stopRefreshing()
                                     Toast.makeText(
                                         requireContext(),
@@ -144,11 +145,14 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                                     }
                                 }
                             )
-                            vm.feedReceived()
                         }
                     }
                 }
             }
+        }
+        val initialState: List<Post>? = vm.state[POSTS_KEY]
+        if (initialState != null) {
+            adapter.submitList(initialState)
         }
     }
     private fun refreshFeed() {

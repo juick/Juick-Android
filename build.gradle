@@ -115,6 +115,7 @@ dependencies {
     implementation 'androidx.browser:browser:1.8.0'
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
+    implementation "androidx.savedstate:savedstate-ktx:1.2.1"
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 
