@@ -48,7 +48,6 @@ import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
 import com.juick.android.widget.util.BlurTransformation
-import com.juick.android.widget.util.setCompatElevation
 import com.juick.android.widget.util.setDrawableTint
 import com.juick.api.model.LinkPreview
 import com.juick.api.model.Post
@@ -214,7 +213,6 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
                 holder.repliesTextView?.text = "$replies"
                 holder.likesTextView?.visibility = View.VISIBLE
                 holder.likesTextView?.text = "$likes"
-                holder.bottomBarLayout?.setCompatElevation(holder.bottomBarDividerView)
             }
         } else {
             if (post.nextRid == post.rid) {
@@ -293,7 +291,6 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         var replyToTextView: TextView?
         var menuImageView: ImageView
         var backImageView: ImageView?
-        var bottomBarDividerView: View?
 
         init {
             container = itemView.findViewById(R.id.container)
@@ -315,7 +312,6 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             )
             replyToTextView = itemView.findViewById(R.id.replyto)
             bottomBarLayout = itemView.findViewById(R.id.bottom_bar_layout)
-            bottomBarDividerView = itemView.findViewById(R.id.bottom_bar_elevation_pre_lollipop)
             likesTextView?.setDrawableTint()
             repliesTextView = itemView.findViewById(R.id.replies)
             repliesTextView?.setCompoundDrawables(

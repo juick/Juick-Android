@@ -61,7 +61,6 @@ import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.updater.Updater
-import com.juick.android.widget.util.setAppBarElevation
 import com.juick.api.model.Post
 import com.juick.databinding.ActivityMainBinding
 import com.juick.util.StringUtils
@@ -101,7 +100,6 @@ class MainActivity : AppCompatActivity() {
         //toolbar.inflateMenu(R.menu.toolbar);
         setSupportActionBar(toolbar)
 
-        setAppBarElevation(model.appbarLayout)
         //CollapsingToolbarLayout layout = model.collapsingToolbarLayout;
         val navView = model.bottomNav
         val fab = model.fab

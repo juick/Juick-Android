@@ -22,8 +22,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_weight="1"
+    android:layout_marginVertical="@dimen/list_vertical_margin"
+    android:background="@color/colorTextBackground"
     android:orientation="vertical">
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorBorder"
+        android:contentDescription="@string/divider" />
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,8 +37,7 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        tools:targetApi="lollipop">
+        android:paddingBottom="@dimen/activity_vertical_margin">
         <ImageView
             android:id="@+id/user_picture"
             android:layout_width="@dimen/avatar_size"
@@ -89,11 +94,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/user_picture"
             app:layout_goneMarginTop="0dp"
+            android:maxLines="4"
             android:text="@string/lorem"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
     <View
-        android:id="@+id/bottom_bar_elevation_pre_lollipop"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/colorBorder"

@@ -19,6 +19,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="@color/colorMainBackground"
     android:id="@+id/main_layout">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -40,6 +43,11 @@
                 android:minHeight="?attr/actionBarSize"
                 android:theme="@style/AppTheme.AppBarOverlay"
                 app:layout_collapseMode="pin" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/colorBorder"
+                android:contentDescription="@string/divider" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.fragment.app.FragmentContainerView
@@ -67,7 +75,12 @@
             tools:targetApi="lollipop" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@id/bottom_nav"
+        android:background="@color/colorBorder"
+        android:contentDescription="@string/divider" />
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"

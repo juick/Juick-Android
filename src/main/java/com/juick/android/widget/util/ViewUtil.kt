@@ -63,41 +63,6 @@ fun hideKeyboard(activity: Activity?) {
     }
 }
 
-/**
- * Toolbar elevation for API < 21
- *
- * @param appBarLayout AppBarLayout
- */
-fun Activity.setAppBarElevation(appBarLayout: AppBarLayout) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-        val toolbarHeight = resources.getDimension(R.dimen.toolbar_elevation)
-        val elevationView = View(this)
-        elevationView.layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, toolbarHeight.toInt()
-        )
-        ViewCompat.setBackground(elevationView,
-            ContextCompat.getDrawable(this, R.drawable.elevation_pre_lollipop))
-        appBarLayout.addView(elevationView, 1)
-    }
-}
-
-fun LinearLayout.setCompatElevation(view: View?) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-        val params = layoutParams as MarginLayoutParams
-        params.bottomMargin = 0
-        layoutParams = params
-        val toolbarHeight = resources.getDimension(R.dimen.bottom_bar_elevation)
-        view?.let { elevationView ->
-            elevationView.visibility = View.VISIBLE
-            val elevationParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, toolbarHeight.toInt()
-            )
-            elevationParams.bottomMargin = resources.getDimension(R.dimen.toolbar_elevation).toInt()
-            elevationView.layoutParams = elevationParams
-        }
-    }
-}
-
 fun Context.getLifecycleOwner(): LifecycleOwner? {
     var curContext = this
     var maxDepth = 20

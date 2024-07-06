@@ -21,12 +21,14 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorPrimaryDark">@color/colorDimmed</item>
+        <item name="android:colorBackground">@color/colorMainBackground</item>
+        <item name="android:windowBackground">@color/colorMainBackground</item>
     </style>
     <style name="AppTheme" parent="BaseTheme">
     </style>
     <style name="AppTheme.AppBarOverlay">
         <item name="android:textColorPrimary">@color/colorPrimary</item>
-        <item name="android:background">@color/colorMainBackground</item>
+        <item name="android:background">@color/colorTextBackground</item>
         <item name="iconTint">@color/colorText</item>
     </style>
 </resources>
