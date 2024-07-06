@@ -48,7 +48,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
     private lateinit var adapter: FeedAdapter
     private var firstPage = true
-    private val POSTS_KEY = "posts"
+    private val _postsKey = "posts"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -124,7 +124,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                                                 adapter.currentList + it
                                             }
                                             adapter.submitList(newList)
-                                            vm.state[POSTS_KEY] = newList
+                                            vm.state[_postsKey] = newList
                                             if (needToScroll) {
                                                 binding.feedList.scrollToPosition(0)
                                             }
@@ -150,7 +150,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                 }
             }
         }
-        val initialState: List<Post>? = vm.state[POSTS_KEY]
+        val initialState: List<Post>? = vm.state[_postsKey]
         if (initialState != null) {
             adapter.submitList(initialState)
         }
