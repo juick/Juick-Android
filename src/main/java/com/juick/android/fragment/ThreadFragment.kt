@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -37,6 +37,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
+import com.faltenreich.skeletonlayout.Skeleton
+import com.faltenreich.skeletonlayout.applySkeleton
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -55,6 +57,7 @@ import com.juick.util.StringUtils
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import isAuthenticated
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -75,6 +78,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
     private lateinit var adapter: FeedAdapter
     private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
     private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
+    private lateinit var skeleton: Skeleton
 
     private fun handleSelectedUri(uri: Uri?) {
         if (uri != null) {
@@ -181,6 +185,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
             }
         }
         model.threadList.adapter = adapter
+        skeleton = model.threadList.applySkeleton(R.layout.item_post_skeleton, 1)
         val linearLayoutManager = model.threadList.layoutManager as LinearLayoutManager
         adapter.setOnItemClickListener { widget: View?, position: Int ->
             if (widget?.tag == null || widget.tag != "clicked") {
@@ -205,8 +210,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
             }
         }
         model.swipeContainer.isEnabled = false
-        model.threadList.visibility = View.GONE
-        model.progressBar.visibility = View.VISIBLE
+        skeleton.showSkeleton()
         load()
         account.profile.observe(viewLifecycleOwner) {
             it?.let { user ->
@@ -245,8 +249,8 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
             try {
                 val posts = App.instance.api.thread(mid)
                 withContext(Dispatchers.Main) {
-                    model.threadList.visibility = View.VISIBLE
-                    model.progressBar.visibility = View.GONE
+                    Thread.sleep(3000)
+                    skeleton.showOriginal()
                     adapter.submitList(posts)
                     if (scrollToEnd) {
                         model.threadList.scrollToPosition(posts.size - 1)
@@ -290,9 +294,9 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
 
     @Throws(FileNotFoundException::class)
     suspend fun postReply(body: String?) {
-        model.progressBar.visibility = View.VISIBLE
+        skeleton.showSkeleton()
         App.instance.sendMessage(body, attachmentUri, attachmentMime) { response ->
-            model.progressBar.visibility = View.GONE
+            skeleton.showOriginal()
             setFormEnabled(true)
             Toast.makeText(context, response.text, Toast.LENGTH_LONG).show()
             response.newMessage?.let {
