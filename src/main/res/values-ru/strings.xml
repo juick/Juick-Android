@@ -109,5 +109,6 @@
     <string name="make_private">Для друзей</string>
     <string name="confirm_make_public">Сделать публичным?</string>
     <string name="confirm_make_private">Скрыть пост?</string>
+    <string name="feed_new_messages">К новым</string>
 
 </resources>

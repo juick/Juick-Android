@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -99,6 +100,12 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                 )
             }
         }
+        binding.feedRefreshButton.setOnClickListener {
+            binding.feedList.postDelayed({
+                binding.feedList.layoutManager?.scrollToPosition(0)
+                binding.feedRefreshButton.isVisible = false
+            }, 200)
+        }
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 vm.feed.collect { result ->
@@ -127,7 +134,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                                             adapter.submitList(newList)
                                             vm.state[_postsKey] = newList
                                             if (needToScroll) {
-                                                binding.feedList.scrollToPosition(0)
+                                                binding.feedRefreshButton.isVisible = true
                                             }
                                         }
                                         vm.feedReceived()

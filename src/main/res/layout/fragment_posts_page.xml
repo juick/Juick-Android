@@ -45,6 +45,23 @@
         android:indeterminateOnly="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/feed_refresh_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:backgroundTint="@color/colorPrimary"
+        android:contentDescription="@string/feed_new_messages"
+        android:tint="@color/white"
+        android:text="@string/feed_new_messages"
+        android:textColor="@color/colorTextBackground"
+        app:backgroundTint="@color/colorAccent"
+        app:borderWidth="0dp"
+        tools:visibility="visible"
+        android:visibility="gone"
+        app:tint="@color/colorMainBackground"
+        tools:targetApi="lollipop" />
     <TextView
         android:id="@+id/error_text"
         android:layout_width="wrap_content"

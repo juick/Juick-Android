@@ -126,4 +126,5 @@
     <string name="make_private">Make private</string>
     <string name="confirm_make_public">Make public?</string>
     <string name="confirm_make_private">Make private?</string>
+    <string name="feed_new_messages">New messages</string>
 </resources>
