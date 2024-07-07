@@ -25,17 +25,15 @@ import com.juick.BuildConfig
 import com.juick.android.Utils.eventsFactory
 import com.juick.api.model.Post
 import kotlinx.coroutines.flow.update
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 class NotificationManager {
-    private var es: OkHttpClient? = null
+    private lateinit var events: ServerSentEvent
     fun onResume() {
-        if (es != null) return
-        es = eventsFactory!!
+        val es = eventsFactory!!
             .readTimeout(0, TimeUnit.SECONDS).build()
         val uri = Utils.buildUrl(BuildConfig.EVENTS_ENDPOINT)
         val hash = App.instance.accountData
@@ -46,7 +44,7 @@ class NotificationManager {
             .url(uri.build().toString())
             .build()
         val sse = OkSse(es)
-        sse.newServerSentEvent(request, object : ServerSentEvent.Listener {
+        events = sse.newServerSentEvent(request, object : ServerSentEvent.Listener {
             override fun onOpen(sse: ServerSentEvent, response: Response) {
                 Log.d(TAG, "Event listener opened")
             }
@@ -82,11 +80,17 @@ class NotificationManager {
                 return true
             }
 
-            override fun onClosed(sse: ServerSentEvent) {}
+            override fun onClosed(sse: ServerSentEvent) {
+                Log.d(TAG, "Event listener closed")
+            }
             override fun onPreRetry(sse: ServerSentEvent, originalRequest: Request): Request {
                 return originalRequest
             }
         })
+    }
+
+    fun onPause() {
+        events.close()
     }
 
     companion object {

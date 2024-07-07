@@ -47,4 +47,5 @@ class NotificationManager {
     }
 
     fun onResume() {}
+    fun onPause() {}
 }
