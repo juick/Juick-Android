@@ -54,6 +54,8 @@
         android:backgroundTint="@color/colorPrimary"
         android:contentDescription="@string/feed_new_messages"
         android:tint="@color/white"
+        app:icon="@drawable/ei_arrow_up"
+        app:iconTint="@color/colorTextBackground"
         android:text="@string/feed_new_messages"
         android:textColor="@color/colorTextBackground"
         app:backgroundTint="@color/colorAccent"
