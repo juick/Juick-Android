@@ -38,15 +38,16 @@ open class FeedViewModel(val state: SavedStateHandle) : ViewModel() {
             apiUrl.collect { url ->
                 if (url.isNotEmpty()) {
                     _feed.update {
-                        null
-                    }
-                    _feed.update {
                         runCatching {
                             val posts = withContext(Dispatchers.IO) {
                                 App.instance.api.getPosts(url)
                             }
                             return@runCatching posts
                         }
+                    }
+                } else {
+                    _feed.update {
+                        null
                     }
                 }
             }

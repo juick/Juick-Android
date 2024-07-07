@@ -202,4 +202,9 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
     override fun postSubscriptionChanged(post: Post, isSubscribed: Boolean) {
 
     }
+
+    override fun onResume() {
+        super.onResume()
+        refreshFeed()
+    }
 }
