@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PostResponse (
-    val newMessage: Post?,
+    val newMessage: Post? = null,
     val text: String,
-    val markdown: String?
+    val markdown: String? = null
 )
