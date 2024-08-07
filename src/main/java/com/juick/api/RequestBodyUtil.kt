@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -17,14 +17,13 @@
 package com.juick.api
 
 import okhttp3.MediaType
-import java.io.InputStream
 import okhttp3.RequestBody
-import okhttp3.internal.Util
-import java.io.IOException
-import kotlin.Throws
+import okhttp3.internal.closeQuietly
 import okio.BufferedSink
-import okio.Okio
 import okio.Source
+import okio.source
+import java.io.IOException
+import java.io.InputStream
 
 object RequestBodyUtil {
     fun create(mediaType: MediaType?, inputStream: InputStream): RequestBody {
@@ -45,10 +44,10 @@ object RequestBodyUtil {
             override fun writeTo(sink: BufferedSink) {
                 lateinit var source: Source
                 try {
-                    source = Okio.source(inputStream)
+                    source = inputStream.source()
                     sink.writeAll(source)
                 } finally {
-                    Util.closeQuietly(source)
+                    source.closeQuietly()
                 }
             }
         }

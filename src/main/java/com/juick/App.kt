@@ -17,6 +17,7 @@
 package com.juick
 
 import accountData
+import android.app.Application
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -25,7 +26,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.multidex.MultiDexApplication
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -39,7 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import okhttp3.*
-import okhttp3.internal.Version
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
@@ -48,7 +48,7 @@ import java.io.FileNotFoundException
 /**
  * Created by gerc on 14.02.2016.
  */
-class App : MultiDexApplication() {
+class App : Application() {
     val api: Api by lazy {
         val client = OkHttpClient.Builder()
             .addInterceptor { chain: Interceptor.Chain ->
@@ -56,15 +56,15 @@ class App : MultiDexApplication() {
                 val requestBuilder = original.newBuilder()
                     .header("Accept", "application/json")
                     .header("User-Agent", "${getString(R.string.Juick)}/${BuildConfig.VERSION_CODE} " +
-                            "${Version.userAgent()} Android/${Build.VERSION.SDK_INT}")
-                    .method(original.method(), original.body())
+                            "okhttp/${OkHttp.VERSION} Android/${Build.VERSION.SDK_INT}")
+                    .method(original.method, original.body)
                 if (accountData.isNotEmpty()) {
                     requestBuilder.addHeader("Authorization", "Juick $accountData")
                 }
                 val request = requestBuilder.build()
                 val response = chain.proceed(request)
                 if (!response.isSuccessful) {
-                    if (response.code() == 401) {
+                    if (response.code == 401) {
                         if (accountData.isNotEmpty()) {
                             authorizationCallback?.invoke()
                         }
@@ -112,11 +112,11 @@ class App : MultiDexApplication() {
     suspend fun auth(username: String, password: String): User {
         val client = OkHttpClient.Builder()
             .authenticator { _, response ->
-                if (response.request().header("Authorization") != null) {
+                if (response.request.header("Authorization") != null) {
                     return@authenticator null // Give up, we've already failed to authenticate.
                 }
                 val basicAuth = Credentials.basic(username, password)
-                response.request().newBuilder()
+                response.request.newBuilder()
                     .header("Authorization", basicAuth)
                     .build()
             }
@@ -148,7 +148,7 @@ class App : MultiDexApplication() {
             Log.d("sendMessage", "$attachmentMime $attachmentUri")
             contentResolver.openInputStream(attachmentUri)?.let { stream ->
                 val requestFile =
-                    RequestBodyUtil.create(MediaType.parse("multipart/form-data"), stream)
+                    RequestBodyUtil.create("multipart/form-data".toMediaTypeOrNull(), stream)
                 body = MultipartBody.Part.createFormData(
                     "attach",
                     String.format(
@@ -162,7 +162,7 @@ class App : MultiDexApplication() {
         try {
             val message = withContext(Dispatchers.IO) {
                 instance.api.newPost(
-                    RequestBody.create(MediaType.parse("text/plain"), txt ?: ""),
+                    RequestBody.create("text/plain".toMediaTypeOrNull(), txt ?: ""),
                     body
                 )
             }

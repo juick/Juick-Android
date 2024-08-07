@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -19,11 +19,8 @@ package com.juick.android.updater
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.util.Log
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -35,9 +32,9 @@ import com.juick.android.widget.util.getLifecycleOwner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.*
 import okio.BufferedSink
-import okio.Okio
+import okio.buffer
+import okio.sink
 import java.io.File
 import java.io.IOException
 import java.io.InterruptedIOException
@@ -70,7 +67,7 @@ class Updater(private val activity: Activity) {
         try {
             val responseBody = App.instance.api.download(url)
             val file = File(activity.applicationContext.getFileStreamPath(filename).path)
-            val sink: BufferedSink = Okio.buffer(Okio.sink(file))
+            val sink: BufferedSink = file.sink().buffer()
             sink.writeAll(responseBody.source())
             sink.close()
             return file
@@ -111,15 +108,9 @@ class Updater(private val activity: Activity) {
     }
 
     private fun updateApp(downloadUrl: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            downloadUpdate(downloadUrl)
-        } else {
-            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
-            activity.startActivity(browserIntent)
-        }
+        downloadUpdate(downloadUrl)
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     private fun downloadUpdate(url: String) {
         Toast.makeText(activity, activity.getString(R.string.downloading_update), Toast.LENGTH_LONG).show()
         val scope = activity.getLifecycleOwner()?.lifecycleScope

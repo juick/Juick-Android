@@ -41,7 +41,6 @@ android {
         versionName "3.1." + versionCode
         applicationId "com.juick"
         vectorDrawables.useSupportLibrary true
-        multiDexEnabled true
         def addConstant = {constantName, constantValue ->
             manifestPlaceholders += [ (constantName):constantValue]
             buildConfigField "String", "${constantName}", "\"${constantValue}\""
@@ -66,7 +65,6 @@ android {
     buildTypes {
         debug {
             debuggable true
-            multiDexKeepProguard file('multidex-config.pro')
         }
         release {
             namespace "com.juick"
