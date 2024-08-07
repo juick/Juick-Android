@@ -40,8 +40,8 @@ android {
     defaultConfig {
         targetSdkVersion 34
         minSdkVersion 24
-        versionCode 216
-        versionName "3.1." + versionCode
+        versionCode 217
+        versionName "3.2." + versionCode
         applicationId "com.juick"
         vectorDrawables.useSupportLibrary true
         def addConstant = {constantName, constantValue ->
