@@ -4,6 +4,7 @@ buildscript {
     ext.okhttp_version = "4.12.0"
     ext.retrofit_version = "2.11.0"
     ext.glide_version = "4.16.0"
+    ext.androidx_fragment_version = "1.8.2"
     ext.androidx_test_version = "1.6.1"
 
     repositories {
@@ -140,7 +141,7 @@ dependencies {
     implementation 'com.vanniktech:android-image-cropper:4.5.0'
 
     // Fragment testing
-    debugImplementation "androidx.fragment:fragment-testing:1.8.2"
+    debugImplementation "androidx.fragment:fragment-testing-manifest:$androidx_fragment_version"
 
     // Core library
     androidTestImplementation "androidx.test:core-ktx:$androidx_test_version"
@@ -150,6 +151,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:truth:1.6.0'
 
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation("androidx.fragment:fragment-testing:$androidx_fragment_version")
     // UI Automator
     androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.3'
 }
