@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -38,6 +38,7 @@ import com.juick.R
 import com.juick.android.MainActivity
 import com.juick.android.screens.FeedAdapter
 import com.juick.api.model.Post
+import com.juick.util.getString
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,7 +58,7 @@ internal class UITest {
     fun isCorrectNotification_NotificationSender() {
         assumeTrue("UIAutomator tests require API18", android.os.Build.VERSION.SDK_INT >= 18)
         val notificationData = this.javaClass.getResourceAsStream("/test_notification.json")
-        val notificationJson = App.instance.jsonMapper.readTree(notificationData)
+        val notificationJson = App.instance.jsonMapper.parseToJsonElement(notificationData?.getString() ?: "")
         App.instance.notificationSender.showNotification(notificationJson.toString())
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.openNotification()

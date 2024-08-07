@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -17,6 +17,9 @@
 
 package com.juick.api.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ExternalToken(
     val type: String,
     val token: String,

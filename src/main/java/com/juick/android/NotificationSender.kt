@@ -35,13 +35,12 @@ import androidx.core.graphics.drawable.toBitmap
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.api.model.Post
 
-class NotificationSender(private val context: Context, private val jsonMapper: ObjectMapper) {
+class NotificationSender(private val context: Context) {
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val handler = Handler(Looper.getMainLooper())
@@ -67,7 +66,7 @@ class NotificationSender(private val context: Context, private val jsonMapper: O
 
     fun showNotification(msgStr: String?) {
         try {
-            val jmsg = jsonMapper.readValue(msgStr, Post::class.java)
+            val jmsg = App.instance.jsonMapper.decodeFromString<Post>(msgStr ?: "")
             val notificationId = getId(jmsg)
             if (jmsg.isService) {
                 Log.d(TAG, "Notification cleared: $notificationId")

@@ -23,7 +23,7 @@ import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.updateToken
 import com.juick.api.model.Post
-import java.io.IOException
+import kotlinx.serialization.SerializationException
 
 /**
  * Created by vt on 03/12/15.
@@ -31,15 +31,15 @@ import java.io.IOException
 class FirebaseReceiverService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         val data = message.data
-        val msg = data[App.instance.getString(R.string.notification_extra)]
+        val msg = data[App.instance.getString(R.string.notification_extra)] ?: ""
         Log.d(TAG, "onMessageReceived $data")
         try {
-            val reply: Post = App.instance.jsonMapper.readValue(msg, Post::class.java)
+            val reply: Post = App.instance.jsonMapper.decodeFromString<Post>(msg)
             if (!reply.isService) {
                 App.instance.messages.value = listOf(reply)
             }
             App.instance.notificationSender.showNotification(msg)
-        } catch (e: IOException) {
+        } catch (e: SerializationException) {
             Log.d(TAG, "JSON exception: " + e.message)
         }
     }

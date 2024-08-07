@@ -17,12 +17,14 @@ buildscript {
         classpath 'com.huawei.agconnect:agcp:1.9.1.303'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlin_version-1.0.24"
+        classpath "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin:$kotlin_version"
     }
 }
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'com.google.devtools.ksp'
 
 repositories {
@@ -103,6 +105,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1'
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.browser:browser:1.8.0'
@@ -123,10 +126,7 @@ dependencies {
     freeImplementation 'com.github.heremaps:oksse:0.9.0'
 
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation "com.squareup.retrofit2:converter-jackson:$retrofit_version"
-    // Jackson 2.14 requires API26
-    //noinspection GradleDependency
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.13.5"
+    implementation "com.squareup.retrofit2:converter-kotlinx-serialization:$retrofit_version"
 
     implementation "com.github.bumptech.glide:glide:$glide_version"
     ksp "com.github.bumptech.glide:ksp:$glide_version"
@@ -138,8 +138,6 @@ dependencies {
     implementation 'com.github.Zhuinden:fragmentviewbindingdelegate-kt:1.0.2'
 
     implementation 'com.vanniktech:android-image-cropper:4.5.0'
-
-    implementation 'androidx.multidex:multidex:2.0.1'
 
     // Fragment testing
     debugImplementation "androidx.fragment:fragment-testing:1.8.2"

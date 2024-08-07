@@ -23,20 +23,22 @@ import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.updateToken
 import com.juick.api.model.Post
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import java.io.IOException
 
 class HmsReceiverService : HmsMessageService() {
     private val TAG = "HMS"
     override fun onMessageReceived(message: RemoteMessage) {
-        val data = App.instance.jsonMapper.readTree(message.data)
-        val msg = data[App.instance.getString(R.string.notification_extra)]
+        val data = App.instance.jsonMapper.parseToJsonElement(message.data)
+        val msg = data.jsonObject[App.instance.getString(R.string.notification_extra)]
         Log.d(TAG, "onMessageReceived $data ${message.messageType}")
         try {
-            val reply: Post = App.instance.jsonMapper.convertValue(msg, Post::class.java)
+            val reply: Post = App.instance.jsonMapper.decodeFromJsonElement(msg!!.jsonObject)
             if (!reply.isService) {
                 App.instance.messages.value = listOf(reply)
             }
-            App.instance.notificationSender.showNotification(msg.toPrettyString())
+            App.instance.notificationSender.showNotification(msg.jsonObject.toString())
         } catch (e: IOException) {
             Log.d(TAG, "JSON exception: " + e.message)
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -246,9 +246,9 @@ class MainActivity : AppCompatActivity() {
         val action = StringUtils.defaultString(intent.action)
         if (action == BuildConfig.INTENT_NEW_EVENT_ACTION) {
             intent.action = ""
-            val msg = intent.getStringExtra(getString(R.string.notification_extra))
+            val msg = intent.getStringExtra(getString(R.string.notification_extra)) ?: ""
             try {
-                val jmsg = App.instance.jsonMapper.readValue(msg, Post::class.java)
+                val jmsg = App.instance.jsonMapper.decodeFromString<Post>(msg)
                 if (jmsg.user.uid == 0) {
                     setTitle(R.string.Discussions)
                     //replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));

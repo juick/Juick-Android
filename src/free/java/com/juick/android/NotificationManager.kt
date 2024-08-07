@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -59,7 +59,7 @@ class NotificationManager {
                 if (event == "msg") {
                     try {
                         val reply: Post =
-                            App.instance.jsonMapper.readValue(message, Post::class.java)
+                            App.instance.jsonMapper.decodeFromString<Post>(message)
                         App.instance.messages.update { listOf(reply) }
                     } catch (e: IOException) {
                         Log.d(TAG, "JSON exception: " + e.message)

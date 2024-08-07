@@ -26,9 +26,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.juick.android.*
 import com.juick.api.Api
 import com.juick.api.RequestBodyUtil
@@ -38,11 +35,14 @@ import com.juick.api.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.jackson.JacksonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.io.FileNotFoundException
 
 /**
@@ -77,14 +77,12 @@ class App : Application() {
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.API_ENDPOINT)
             .client(client)
-            .addConverterFactory(jacksonConverterFactory)
+            .addConverterFactory(kotlinxSerializationConverterFactory)
             .build()
         retrofit.create(Api::class.java)
     }
-    val jsonMapper: ObjectMapper by lazy {
-        val mapper = jacksonObjectMapper()
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        mapper
+    val jsonMapper = Json  {
+        ignoreUnknownKeys = true
     }
 
     var authorizationCallback: (() -> Unit)? = null
@@ -105,8 +103,9 @@ class App : Application() {
         init()
     }
 
-    internal val jacksonConverterFactory: JacksonConverterFactory by lazy {
-        JacksonConverterFactory.create(jsonMapper)
+    internal val kotlinxSerializationConverterFactory: Converter.Factory by lazy {
+        jsonMapper.asConverterFactory(
+            "application/json; charset=UTF8".toMediaType())
     }
 
     suspend fun auth(username: String, password: String): User {
@@ -124,7 +123,7 @@ class App : Application() {
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.API_ENDPOINT)
             .client(client)
-            .addConverterFactory(jacksonConverterFactory)
+            .addConverterFactory(kotlinxSerializationConverterFactory)
             .build()
         return retrofit.create(Api::class.java).me()
     }
@@ -185,7 +184,7 @@ class App : Application() {
 
     var signInProvider: SignInProvider? = null
     val notificationSender: NotificationSender by lazy {
-        NotificationSender(instance, jsonMapper)
+        NotificationSender(instance)
     }
     val messages = MutableStateFlow<List<Post>>(listOf())
 

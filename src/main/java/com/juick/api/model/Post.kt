@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -17,18 +17,19 @@
 package com.juick.api.model
 
 import android.os.Parcelable
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.juick.util.StringUtils
 import com.stfalcon.chatkit.commons.models.IMessage
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.*
 
 /**
  * Created by gerc on 10.02.2016.
  */
 @Parcelize
+@Serializable
 data class Post(
     private var user: User,
     var mid: Int = 0,
@@ -38,22 +39,23 @@ data class Post(
     var replyto = 0
     var to: User? = null
     private var body: String? = null
+    @Serializable(with = DateSerializer::class)
     private var timestamp: Date? = null
     var tags: List<String> = ArrayList()
     var replies = 0
     var likes = 0
     var repliesby: String? = null
     var replyQuote: String? = null
-    @JsonProperty("attachment")
+    @SerialName("attachment")
     var photo: Attachment? = null
     var friendsOnly: Boolean = false
-    @JsonProperty("service")
+    @SerialName("service")
     var isService = false
 
-    @JsonIgnore
+    @Transient
     var nextRid = 0
 
-    @JsonIgnore
+    @Transient
     var prevRid = 0
     val tagsString: String
         get() {
@@ -76,7 +78,6 @@ data class Post(
         return user
     }
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
     override fun getCreatedAt(): Date {
         return timestamp ?: Date()
     }
@@ -93,7 +94,6 @@ data class Post(
         this.body = body
     }
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
     fun getTimestamp(): Date? {
         return timestamp
     }

@@ -24,7 +24,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
@@ -32,6 +31,8 @@ import com.juick.android.widget.util.getLifecycleOwner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import okio.BufferedSink
 import okio.buffer
 import okio.sink
@@ -40,19 +41,20 @@ import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.UnknownHostException
 
-
+@Serializable
 data class Asset(
     val name: String,
-    @JsonProperty("content_type") val contentType: String,
-    @JsonProperty("browser_download_url") val browserDownloadUrl: String,
+    @SerialName("content_type") val contentType: String,
+    @SerialName("browser_download_url") val browserDownloadUrl: String,
 )
 
+@Serializable
 data class Release(
     val name: String,
     val body: String,
     val url: String,
     val assets: List<Asset>,
-    @JsonProperty("tag_name") val tagName: String
+    @SerialName("tag_name") val tagName: String
 )
 
 private const val FILENAME_APK = "update.apk"

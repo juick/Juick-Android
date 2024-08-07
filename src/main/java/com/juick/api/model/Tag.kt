@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -16,9 +16,12 @@
  */
 package com.juick.api.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * Created by gerc on 15.02.2016.
  */
+@Serializable
 data class Tag (
     val tag: String
 )

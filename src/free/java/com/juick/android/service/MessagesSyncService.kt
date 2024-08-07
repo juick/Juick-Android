@@ -29,6 +29,7 @@ import com.juick.R
 import com.juick.api.model.Post
 import com.juick.api.model.User
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 
 class MessagesSyncService : LifecycleService() {
     private class MessagesSyncAdapter(private val lifecycleScope: LifecycleCoroutineScope,
@@ -47,7 +48,7 @@ class MessagesSyncService : LifecycleService() {
                     if (me.unreadCount > 0) {
                         val announcement = Post(user = User(0, "Juick"))
                         announcement.setBody(context.getString(R.string.unread_discussions))
-                        val messageData = App.instance.jsonMapper.writeValueAsString(announcement)
+                        val messageData = App.instance.jsonMapper.encodeToString<Post>(announcement)
                         App.instance.notificationSender.showNotification(messageData)
                     }
                 } catch (e: Exception) {

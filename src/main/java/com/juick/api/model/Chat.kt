@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -16,24 +16,21 @@
  */
 package com.juick.api.model
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.stfalcon.chatkit.commons.models.IDialog
 import com.stfalcon.chatkit.commons.models.IUser
-import java.util.*
+import kotlinx.serialization.Serializable
+import java.util.Date
 
 /**
  * Created by gerc on 11.03.2016.
  */
+@Serializable
 data class Chat(val uname: String) : IDialog<Post> {
     var uid = 0
     var avatar: String? = null
     var messagesCount = 0
 
-    @get:JsonFormat(
-        shape = JsonFormat.Shape.STRING,
-        pattern = "yyyy-MM-dd HH:mm:ss",
-        timezone = "UTC"
-    )
+    @Serializable(with = DateSerializer::class)
     var lastMessageTimestamp: Date? = null
     var lastMessageText: String? = null
     private var lastMessage: Post? = null
