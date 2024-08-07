@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        BUILD_SDK: [16, 21, 31, 34]
+        BUILD_SDK: [24, 31, 34]
     steps:
     - name: checkout
       uses: actions/checkout@v4
@@ -41,12 +41,7 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '17'
-    - name: Configure legacy build
-      if: matrix.BUILD_SDK == 16
-      run: |
-        echo "emulator_arch=x86" >> $GITHUB_ENV
     - name: Configure build
-      if: matrix.BUILD_SDK != 16
       run: |
         echo "emulator_arch=x86_64" >> $GITHUB_ENV
     - name: run tests
