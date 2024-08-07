@@ -138,7 +138,7 @@ dependencies {
 
     implementation 'com.github.Zhuinden:fragmentviewbindingdelegate-kt:1.0.2'
 
-    implementation 'com.vanniktech:android-image-cropper:4.5.0'
+    implementation 'com.vanniktech:android-image-cropper:4.6.0'
 
     // Fragment testing
     debugImplementation "androidx.fragment:fragment-testing-manifest:$androidx_fragment_version"
