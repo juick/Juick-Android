@@ -1,10 +1,10 @@
 buildscript {
     ext.kotlin_version = "2.0.10"
     ext.navigation_version = "2.7.7"
-    ext.okhttp_version = "3.12.13"
-    ext.retrofit_version = "2.6.4"
+    ext.okhttp_version = "4.12.0"
+    ext.retrofit_version = "2.11.0"
     ext.glide_version = "4.16.0"
-    ext.androidx_test_version = "1.5.0"
+    ext.androidx_test_version = "1.6.1"
 
     repositories {
         mavenCentral()
@@ -36,6 +36,7 @@ android {
     compileSdk 34
     defaultConfig {
         targetSdkVersion 34
+        minSdkVersion 24
         versionCode 216
         versionName "3.1." + versionCode
         applicationId "com.juick"
@@ -70,26 +71,19 @@ android {
         release {
             namespace "com.juick"
             minifyEnabled false
-            /*
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-             */
         }
     }
     flavorDimensions += "notifications"
     productFlavors {
         google {
             dimension "notifications"
-            minSdkVersion 21
         }
         huawei {
             dimension "notifications"
-            minSdkVersion 17
             buildConfigField "boolean", "HIDE_NSFW", "true"
         }
         free {
             dimension "notifications"
-            minSdkVersion 14
         }
     }
     lint {
@@ -111,8 +105,8 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.browser:browser:1.8.0'
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
@@ -120,23 +114,17 @@ dependencies {
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 
-    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'com.google.android.material:material:1.12.0'
     googleImplementation 'com.google.android.gms:play-services-auth:21.2.0'
     // Firebase platform
     googleImplementation platform('com.google.firebase:firebase-bom:33.1.2')
     googleImplementation 'com.google.firebase:firebase-messaging'
 
-    // okhttp 3.13+ require API21
-    //noinspection GradleDependency
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    //noinspection GradleDependency
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
     freeImplementation 'com.github.heremaps:oksse:0.9.0'
 
-    // retrofit 2.7.x require API21
-    //noinspection GradleDependency
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    //noinspection GradleDependency
     implementation "com.squareup.retrofit2:converter-jackson:$retrofit_version"
     // Jackson 2.14 requires API26
     //noinspection GradleDependency
@@ -156,16 +144,16 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
 
     // Fragment testing
-    debugImplementation "androidx.fragment:fragment-testing:1.6.2"
+    debugImplementation "androidx.fragment:fragment-testing:1.8.2"
 
     // Core library
     androidTestImplementation "androidx.test:core-ktx:$androidx_test_version"
 
     // Assertions
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.ext:truth:1.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.ext:truth:1.6.0'
 
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
     // UI Automator
     androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.3'
 }
