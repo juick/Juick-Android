@@ -49,6 +49,9 @@
             <action android:name="android.intent.action.SENDTO" />
             <data android:scheme="*" />
         </intent>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
     </queries>
     <application
         android:name=".App"

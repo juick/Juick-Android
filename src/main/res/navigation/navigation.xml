@@ -37,13 +37,10 @@
         android:name="com.juick.android.fragment.ThreadFragment"
         tools:layout="@layout/fragment_thread"
         android:label="Thread" >
-        <deepLink
-            app:action="android.intent.action.VIEW"
-            app:uri="https://juick.com/.*/{mid}" />
         <argument
             android:name="mid"
             app:argType="integer"
-            android:defaultValue="0" />
+            android:defaultValue="1" />
         <action
             android:id="@+id/action_thread_self"
             app:destination="@id/thread"

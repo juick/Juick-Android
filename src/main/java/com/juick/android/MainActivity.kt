@@ -18,6 +18,8 @@ package com.juick.android
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
@@ -29,6 +31,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,11 +41,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsCallback
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.browser.customtabs.CustomTabsServiceConnection
+import androidx.browser.customtabs.CustomTabsSession
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -90,6 +98,42 @@ class MainActivity : AppCompatActivity() {
     private var requestNotificationsPermission = RequestPermission(
         this, Manifest.permission.POST_NOTIFICATIONS, Build.VERSION_CODES.TIRAMISU
     )
+
+    private var browserClient: CustomTabsClient? = null
+    private var browserSession: CustomTabsSession? = null
+
+    private var browserReady = MutableLiveData(false)
+    private var initialUri: Uri? = null
+
+    private var browserConnection = object : CustomTabsServiceConnection() {
+        override fun onServiceDisconnected(name: ComponentName?) {
+            browserClient = null
+            browserSession = null
+        }
+
+        override fun onCustomTabsServiceConnected(name: ComponentName, client: CustomTabsClient) {
+            client.warmup(0)
+            browserSession = client.newSession(CustomTabsCallback())
+            browserClient = client
+            browserReady.value = true
+        }
+
+    }
+
+    private fun bindCustomTabService(context: Context) {
+        // Check for an existing connection
+        if (browserClient != null) {
+            // Do nothing if there is an existing service connection
+            return
+        }
+        // Get the default browser package name, this will be null if
+        // the default browser does not provide a CustomTabsService
+        val packageName = CustomTabsClient.getPackageName(context, null)
+            ?: // Do nothing as service connection is not supported
+            return
+        CustomTabsClient.bindCustomTabsService(context, packageName, browserConnection)
+    }
+
 
     @ExperimentalBadgeUtils
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -226,6 +270,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        bindCustomTabService(this)
+        browserReady.observe(this) { status ->
+            if (status) {
+                initialUri?.let {
+                    openUri(it)
+                }
+            }
+        }
     }
 
     private fun shouldHideNavView(view: Int): Boolean {
@@ -290,6 +342,13 @@ class MainActivity : AppCompatActivity() {
             navController.navigate(R.id.new_post, postArgs)
             intent.action = ""
         }
+        if (action == Intent.ACTION_VIEW) {
+            intent.setFlags(0)
+            intent.data?.let {
+                processUri(it)
+            }
+            intent.action = ""
+        }
     }
 
     override fun onPause() {
@@ -300,12 +359,6 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            intent.removeFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
-        val navController = navHostFragment.navController
-        navController.handleDeepLink(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -356,7 +409,10 @@ class MainActivity : AppCompatActivity() {
             val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
             val navController = navHostFragment.navController
             when (pathSegments.size) {
-                1 -> {}
+                1 -> {
+                    initialUri = data
+                }
+
                 2 -> {
                     // thread
                     val threadId = pathSegments[1]
@@ -370,19 +426,27 @@ class MainActivity : AppCompatActivity() {
                     navController.navigate(R.id.home)
             }
         } else {
-            if (Build.VERSION.SDK_INT >= 19) {
-                val intent = CustomTabsIntent.Builder().setDefaultColorSchemeParams(
+            initialUri = data
+        }
+    }
+
+    private fun openUri(uri: Uri) {
+        val handleDeepLinks = uri.host == "juick.com"
+        browserSession?.let {
+            val intent = CustomTabsIntent.Builder()
+                .setSession(it)
+                .setSendToExternalDefaultHandlerEnabled(handleDeepLinks)
+                .setDefaultColorSchemeParams(
                     CustomTabColorSchemeParams.Builder().setToolbarColor(
                         ResourcesCompat.getColor(
                             resources, R.color.colorMainBackground, null
                         )
                     ).build()
                 ).build()
-                intent.launchUrl(this, data)
-            } else {
-                val intent = Intent(Intent.ACTION_VIEW, data)
-                startActivity(intent)
-            }
+            intent.launchUrl(this, uri)
+            initialUri = null
+        } ?: run {
+            Toast.makeText(this, "Can not open link", Toast.LENGTH_LONG).show()
         }
     }
 
