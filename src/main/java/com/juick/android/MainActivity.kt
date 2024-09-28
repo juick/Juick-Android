@@ -410,7 +410,7 @@ class MainActivity : AppCompatActivity() {
             val navController = navHostFragment.navController
             when (pathSegments.size) {
                 1 -> {
-                    initialUri = data
+                    openUri(data)
                 }
 
                 2 -> {
@@ -426,7 +426,7 @@ class MainActivity : AppCompatActivity() {
                     navController.navigate(R.id.home)
             }
         } else {
-            initialUri = data
+            openUri(data)
         }
     }
 
@@ -444,9 +444,8 @@ class MainActivity : AppCompatActivity() {
                     ).build()
                 ).build()
             intent.launchUrl(this, uri)
-            initialUri = null
         } ?: run {
-            Toast.makeText(this, "Can not open link", Toast.LENGTH_LONG).show()
+            initialUri = uri
         }
     }
 
