@@ -44,6 +44,7 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.io.FileNotFoundException
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by gerc on 14.02.2016.
@@ -73,6 +74,7 @@ class App : Application() {
                 response
             }
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS))
+            .readTimeout(30, TimeUnit.SECONDS)
             .build()
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.API_ENDPOINT)
@@ -119,6 +121,7 @@ class App : Application() {
                     .header("Authorization", basicAuth)
                     .build()
             }
+            .readTimeout(30, TimeUnit.SECONDS)
             .build()
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.API_ENDPOINT)
