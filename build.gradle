@@ -119,7 +119,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     googleImplementation 'com.google.android.gms:play-services-auth:21.2.0'
     // Firebase platform
-    googleImplementation platform('com.google.firebase:firebase-bom:33.5.0')
+    googleImplementation platform('com.google.firebase:firebase-bom:33.5.1')
     googleImplementation 'com.google.firebase:firebase-messaging'
 
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
