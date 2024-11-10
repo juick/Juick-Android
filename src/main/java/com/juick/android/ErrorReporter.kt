@@ -16,6 +16,7 @@
  */
 package com.juick.android
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -45,10 +46,9 @@ class ErrorReporter(
             Uri.parse(Uri.fromParts("mailto", email, null).toString() + parameters.toString())
         intent.data = targetUri
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        val resolvedActivity = intent.resolveActivity(context.packageManager)
-        if (resolvedActivity != null) {
+        try {
             context.startActivity(intent)
-        } else {
+        } catch (e: ActivityNotFoundException) {
             Log.d(TAG, "Email client is not installed")
         }
         defaultHandler.uncaughtException(t, e)
