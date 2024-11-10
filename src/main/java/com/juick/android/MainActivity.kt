@@ -18,6 +18,7 @@ package com.juick.android
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -102,7 +103,7 @@ class MainActivity : AppCompatActivity() {
     private var browserClient: CustomTabsClient? = null
     private var browserSession: CustomTabsSession? = null
 
-    private var browserReady = MutableLiveData(false)
+    private var browserSessionSupported = MutableLiveData<Boolean?>(null)
     private var initialUri: Uri? = null
 
     private var browserConnection = object : CustomTabsServiceConnection() {
@@ -115,7 +116,7 @@ class MainActivity : AppCompatActivity() {
             client.warmup(0)
             browserSession = client.newSession(CustomTabsCallback())
             browserClient = client
-            browserReady.value = true
+            browserSessionSupported.value = true
         }
 
     }
@@ -129,9 +130,12 @@ class MainActivity : AppCompatActivity() {
         // Get the default browser package name, this will be null if
         // the default browser does not provide a CustomTabsService
         val packageName = CustomTabsClient.getPackageName(context, null)
-            ?: // Do nothing as service connection is not supported
+        packageName?.let {
+            CustomTabsClient.bindCustomTabsService(context, it, browserConnection)
+        } ?: run {
+            browserSessionSupported.value = false
             return
-        CustomTabsClient.bindCustomTabsService(context, packageName, browserConnection)
+        }
     }
 
 
@@ -271,10 +275,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
         bindCustomTabService(this)
-        browserReady.observe(this) { status ->
-            if (status) {
-                initialUri?.let {
-                    openUri(it)
+        browserSessionSupported.observe(this) { supported ->
+            when (supported) {
+                null -> {}
+                else -> {
+                    if (supported) {
+                        initialUri?.let {
+                            openUri(it)
+                        }
+                    }
                 }
             }
         }
@@ -443,9 +452,27 @@ class MainActivity : AppCompatActivity() {
                         )
                     ).build()
                 ).build()
-            intent.launchUrl(this, uri)
+            try {
+                intent.launchUrl(this, uri)
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
+            }
         } ?: run {
-            initialUri = uri
+            if (browserSessionSupported.value == true) {
+                initialUri = uri
+            } else {
+                openUriFallback(uri)
+            }
+        }
+    }
+
+    private fun openUriFallback(uri: Uri) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
         }
     }
 
