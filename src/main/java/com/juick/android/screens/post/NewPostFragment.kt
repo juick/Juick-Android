@@ -18,12 +18,10 @@ package com.juick.android.screens.post
 
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -56,14 +54,11 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
     private var attachmentMime: String? = null
 
     private val model by viewBinding(FragmentNewPostBinding::bind)
-    private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
     private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
     private val messagePosted = MutableStateFlow<Result<PostResponse>?>(null)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        attachmentLegacyLauncher =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri -> attachImage(uri) }
         attachmentMediaLauncher = registerForActivityResult(CropImageContract()) {
                 result ->
             if (result.isSuccessful) {
@@ -94,19 +89,15 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
                 try {
-                    if (Build.VERSION.SDK_INT >= 21) {
-                        attachmentMediaLauncher.launch(
-                            CropImageContractOptions(
-                                uri = null,
-                                cropImageOptions = CropImageOptions(
-                                    imageSourceIncludeCamera = true,
-                                    imageSourceIncludeGallery = true
-                                ),
+                    attachmentMediaLauncher.launch(
+                        CropImageContractOptions(
+                            uri = null,
+                            cropImageOptions = CropImageOptions(
+                                imageSourceIncludeCamera = true,
+                                imageSourceIncludeGallery = true
                             ),
-                        )
-                    } else {
-                        attachmentLegacyLauncher.launch("image/*")
-                    }
+                        ),
+                    )
                 } catch (e: Exception) {
                     Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
                 }

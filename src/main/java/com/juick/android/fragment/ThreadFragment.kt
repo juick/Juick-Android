@@ -19,7 +19,6 @@ package com.juick.android.fragment
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -27,7 +26,6 @@ import android.text.style.StyleSpan
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -73,7 +71,6 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
     private var mid = 0
     private var scrollToEnd = false
     private lateinit var adapter: FeedAdapter
-    private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
     private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
     private val messagePosted = MutableStateFlow<Result<PostResponse>?>(null)
 
@@ -115,10 +112,6 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
                 ).show()
             }
         }
-        attachmentLegacyLauncher =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-                handleSelectedUri(uri)
-            }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -161,19 +154,15 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
         }
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
-                if (Build.VERSION.SDK_INT >= 21) {
-                    attachmentMediaLauncher.launch(
-                        CropImageContractOptions(
-                            uri = null,
-                            cropImageOptions = CropImageOptions(
-                                imageSourceIncludeCamera = true,
-                                imageSourceIncludeGallery = true,
-                            ),
+                attachmentMediaLauncher.launch(
+                    CropImageContractOptions(
+                        uri = null,
+                        cropImageOptions = CropImageOptions(
+                            imageSourceIncludeCamera = true,
+                            imageSourceIncludeGallery = true,
                         ),
-                    )
-                } else {
-                    attachmentLegacyLauncher.launch("image/*")
-                }
+                    ),
+                )
             } else {
                 attachmentUri = null
                 attachmentMime = null
