@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -25,8 +25,10 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -37,8 +39,11 @@ import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
+import com.juick.api.model.PostResponse
 import com.juick.databinding.FragmentNewPostBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -53,6 +58,8 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
     private val model by viewBinding(FragmentNewPostBinding::bind)
     private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
     private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
+    private val messagePosted = MutableStateFlow<Result<PostResponse>?>(null)
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         attachmentLegacyLauncher =
@@ -126,6 +133,36 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         if (uri.isNotEmpty()) {
             attachImage(Uri.parse(uri))
         }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                messagePosted.collect { response ->
+                    when (response) {
+                        null -> {}
+                        else -> {
+                            response.fold(
+                                onSuccess = { post ->
+                                    model.progressBar.visibility = View.GONE
+                                    Toast.makeText(activity, post.text, Toast.LENGTH_LONG).show()
+                                    post.newMessage?.let {
+                                        val navController = findNavController(this@NewPostFragment)
+                                        navController.popBackStack(R.id.new_post, true)
+                                        val args = Bundle()
+                                        args.putInt("mid", it.mid)
+                                        navController.navigate(R.id.thread, args)
+                                    }
+                                    setFormEnabled(true)
+                                },
+                                onFailure = {
+                                    Toast.makeText (context, requireContext().getString(R.string.network_error), Toast.LENGTH_LONG).show()
+                                }
+                            )
+                            messagePosted.update { null }
+                        }
+
+                    }
+                }
+            }
+        }
         model.editMessage.requestFocus()
     }
 
@@ -145,20 +182,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         }
         setFormEnabled(false)
         model.progressBar.visibility = View.VISIBLE
-        lifecycleScope.launch {
-            App.instance.sendMessage(msg, attachmentUri, attachmentMime) { response ->
-                model.progressBar.visibility = View.GONE
-                Toast.makeText(activity, response.text, Toast.LENGTH_LONG).show()
-                response.newMessage?.let {
-                    val navController = findNavController(this@NewPostFragment)
-                    navController.popBackStack(R.id.new_post, true)
-                    val args = Bundle()
-                    args.putInt("mid", it.mid)
-                    navController.navigate(R.id.thread, args)
-                }
-                setFormEnabled(true)
-            }
-        }
+        App.instance.sendMessage(lifecycleScope, messagePosted, msg, attachmentUri, attachmentMime)
     }
 
     private fun attachImage(uri: Uri?) {

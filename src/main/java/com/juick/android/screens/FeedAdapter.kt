@@ -60,7 +60,6 @@ import com.juick.util.StringUtils
  */
 class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK) {
     private var loadMoreRequestListener: OnLoadMoreRequestListener? = null
-    var postUpdatedListener: OnPostUpdatedListener? = null
     private var itemClickListener: ((View?, Int) -> Unit)? = null
     private var itemMenuListener: OnItemClickListener? = null
     private var scrollListener: ((View?, Int, Int) -> Unit)? = null
@@ -266,12 +265,6 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
 
     interface OnLoadMoreRequestListener {
         fun onLoadMore()
-    }
-
-    interface OnPostUpdatedListener {
-        fun postUpdated(post: Post)
-        fun postLikeChanged(post: Post, isLiked: Boolean)
-        fun postSubscriptionChanged(post: Post, isSubscribed: Boolean)
     }
 
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

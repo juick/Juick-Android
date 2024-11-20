@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -32,7 +32,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
@@ -48,13 +47,14 @@ import com.juick.android.SignInActivity
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.android.screens.FeedAdapter
-import com.juick.api.model.Post
+import com.juick.api.model.PostResponse
 import com.juick.api.model.isReply
 import com.juick.databinding.FragmentThreadBinding
 import com.juick.util.StringUtils
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import isAuthenticated
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,7 +64,7 @@ import java.io.FileNotFoundException
  *
  * @author Ugnich Anton
  */
-class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), FeedAdapter.OnPostUpdatedListener {
+class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
     private val account by activityViewModels<Account>()
     private val model by viewBinding(FragmentThreadBinding::bind)
     private var rid = 0
@@ -75,6 +75,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
     private lateinit var adapter: FeedAdapter
     private lateinit var attachmentLegacyLauncher: ActivityResultLauncher<String>
     private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
+    private val messagePosted = MutableStateFlow<Result<PostResponse>?>(null)
 
     private fun handleSelectedUri(uri: Uri?) {
         if (uri != null) {
@@ -98,7 +99,6 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adapter = FeedAdapter(showSubscriptions = true)
-        adapter.postUpdatedListener = this
         attachmentMediaLauncher = registerForActivityResult(CropImageContract()) {
             result ->
             if (result.isSuccessful) {
@@ -212,7 +212,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
             it?.let { user ->
                 adapter.setOnMenuListener(
                     JuickMessageMenuListener(
-                        requireActivity(), this, adapter, user
+                        requireActivity(), this, messagePosted, user
                     )
                 )
             }
@@ -235,6 +235,36 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
                         }
                     }
                     App.instance.messages.update { listOf() }
+                }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                messagePosted.collect { response ->
+                    when (response) {
+                        null -> {}
+                        else -> {
+                            response.fold(
+                                onSuccess = { post ->
+                                    model.progressBar.visibility = View.GONE
+                                    setFormEnabled (true)
+                                    Toast.makeText (context, post.text, Toast.LENGTH_LONG).show()
+                                    post.newMessage?.let {
+                                        model.textReplyTo.text = ""
+                                        model.editMessage.text?.clear()
+                                        mid = it.mid
+                                        scrollToEnd = true
+                                    }
+                                    load()
+                                },
+                                onFailure = {
+                                    Toast.makeText (context, requireContext().getString(R.string.network_error), Toast.LENGTH_LONG).show()
+                                }
+                            )
+                            messagePosted.update { null }
+                        }
+
+                    }
                 }
             }
         }
@@ -289,30 +319,8 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread), Feed
     }
 
     @Throws(FileNotFoundException::class)
-    suspend fun postReply(body: String?) {
+    fun postReply(body: String?) {
         model.progressBar.visibility = View.VISIBLE
-        App.instance.sendMessage(body, attachmentUri, attachmentMime) { response ->
-            model.progressBar.visibility = View.GONE
-            setFormEnabled(true)
-            Toast.makeText(context, response.text, Toast.LENGTH_LONG).show()
-            response.newMessage?.let {
-                model.textReplyTo.text = ""
-                model.editMessage.text?.clear()
-                mid = it.mid
-                scrollToEnd = true
-                load()
-            }
-        }
-    }
-
-    override fun postUpdated(post: Post) {
-        load()
-    }
-    override fun postLikeChanged(post: Post, isLiked: Boolean) {
-
-    }
-
-    override fun postSubscriptionChanged(post: Post, isSubscribed: Boolean) {
-        load()
+        App.instance.sendMessage(lifecycleScope, messagePosted, body, attachmentUri, attachmentMime)
     }
 }

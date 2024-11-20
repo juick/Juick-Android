@@ -32,9 +32,10 @@ import com.juick.api.RequestBodyUtil
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.User
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -131,19 +132,13 @@ class App : Application() {
         return retrofit.create(Api::class.java).me()
     }
 
-    suspend fun sendMessage(
-        txt: String?,
-        messageListener: (PostResponse) -> Unit
-    ) {
-        sendMessage(txt, null, null, messageListener)
-    }
-
     @Throws(FileNotFoundException::class)
-    suspend fun sendMessage(
-        txt: String?,
-        attachmentUri: Uri?,
-        attachmentMime: String?,
-        messageListener: (PostResponse) -> Unit
+    fun sendMessage(
+        scope: CoroutineScope,
+        receiver: MutableStateFlow<Result<PostResponse>?>,
+        txt: String? = null,
+        attachmentUri: Uri? = null,
+        attachmentMime: String? = null
     ) {
         var body: MultipartBody.Part? = null
         if (attachmentUri != null) {
@@ -161,16 +156,15 @@ class App : Application() {
                 )
             }
         }
-        try {
-            val message = withContext(Dispatchers.IO) {
-                instance.api.newPost(
-                    RequestBody.create("text/plain".toMediaTypeOrNull(), txt ?: ""),
-                    body
-                )
+        scope.launch {
+            receiver.update {
+                runCatching {
+                    instance.api.newPost(
+                        RequestBody.create("text/plain".toMediaTypeOrNull(), txt ?: ""),
+                        body
+                    )
+                }
             }
-            messageListener.invoke(message)
-        } catch (e: Exception) {
-            messageListener.invoke(PostResponse(null, e.message ?: "", ""))
         }
     }
 

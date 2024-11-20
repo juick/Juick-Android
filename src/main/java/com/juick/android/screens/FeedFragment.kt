@@ -36,26 +36,29 @@ import com.juick.android.Utils
 import com.juick.android.Utils.replaceUriParameter
 import com.juick.android.screens.FeedAdapter.OnLoadMoreRequestListener
 import com.juick.api.model.Post
+import com.juick.api.model.PostResponse
 import com.juick.databinding.FragmentPostsPageBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
 /**
  * Created by gerc on 03.06.2016.
  */
-open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnPostUpdatedListener {
+open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
     protected val vm by viewModels<FeedViewModel>()
     internal val account by activityViewModels<Account>()
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
     private lateinit var adapter: FeedAdapter
     private var firstPage = true
     private val _postsKey = "posts"
+    private val messagePosted = MutableStateFlow<Result<PostResponse>?>(null)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter = FeedAdapter()
-        adapter.postUpdatedListener = this
         binding.feedList.adapter = adapter
         adapter.setOnItemClickListener { _, pos ->
             adapter.currentList[pos]?.let {
@@ -95,7 +98,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
             it?.let { user ->
                 adapter.setOnMenuListener(
                     JuickMessageMenuListener(
-                        requireActivity(), this, adapter, user
+                        requireActivity(), this, messagePosted, user
                     )
                 )
             }
@@ -158,6 +161,28 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
                 }
             }
         }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                messagePosted.collect { response ->
+                    when (response) {
+                        null -> {}
+                        else -> {
+                            response.fold(
+                                onSuccess = {
+                                    Toast.makeText(activity, it.text, Toast.LENGTH_LONG).show()
+                                    account.refresh()
+                                    refreshFeed()
+                                },
+                                onFailure = {
+
+                                }
+                            )
+                            messagePosted.update { null }
+                        }
+                    }
+                }
+            }
+        }
         val initialState: List<Post>? = vm.state[_postsKey]
         if (initialState != null) {
             adapter.submitList(initialState)
@@ -189,18 +214,6 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page), FeedAdapter.OnP
         binding.feedList.visibility = View.GONE
         binding.errorText.visibility = View.VISIBLE
         binding.errorText.text = message
-    }
-
-    override fun postUpdated(post: Post) {
-        refreshFeed()
-    }
-
-    override fun postLikeChanged(post: Post, isLiked: Boolean) {
-
-    }
-
-    override fun postSubscriptionChanged(post: Post, isSubscribed: Boolean) {
-
     }
 
     override fun onResume() {

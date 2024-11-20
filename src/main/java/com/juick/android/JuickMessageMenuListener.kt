@@ -23,7 +23,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -37,6 +36,7 @@ import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.User
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -45,8 +45,13 @@ import kotlinx.coroutines.withContext
  * @author Ugnich Anton
  */
 class JuickMessageMenuListener(
-    private val activity: Context, private val fragment: Fragment, private val adapter: FeedAdapter, private val me: User) : FeedAdapter.OnItemClickListener {
-    private fun confirmAction(context: Context, resId: Int, action: Runnable) : Boolean {
+    private val activity: Context,
+    private val fragment: Fragment,
+    private val receiver: MutableStateFlow<Result<PostResponse>?>,
+    private val me: User
+) : FeedAdapter.OnItemClickListener {
+
+    private fun confirmAction(context: Context, resId: Int, action: Runnable): Boolean {
         val builder = AlertDialog.Builder(context)
         var result = false
         builder.setIcon(android.R.drawable.ic_dialog_alert)
@@ -62,9 +67,7 @@ class JuickMessageMenuListener(
             activity,
             R.string.Are_you_sure_recommend
         ) {
-            processCommand("! #${post.mid}") {
-                adapter.postUpdatedListener?.postLikeChanged(post, true)
-            }
+            processCommand("! #${post.mid}")
         }
     }
 
@@ -82,9 +85,6 @@ class JuickMessageMenuListener(
         scope.launch {
             val result = withContext(Dispatchers.IO) { App.instance.api.togglePrivacy(post.mid) }
             completion?.invoke(result.isSuccessful)
-            scope.launch {
-                adapter.postUpdatedListener?.postUpdated(post)
-            }
         }
     }
 
@@ -94,19 +94,14 @@ class JuickMessageMenuListener(
                 activity,
                 R.string.unsubscribe_from_comments
             ) {
-                processCommand("U #${post.mid}") {
-                    adapter.postUpdatedListener?.postSubscriptionChanged(post, false)
-                }
-
+                processCommand("U #${post.mid}")
             }
         } else {
             confirmAction(
                 activity,
                 R.string.subscribe_to_comments
             ) {
-                processCommand("S #${post.mid}") {
-                    adapter.postUpdatedListener?.postSubscriptionChanged(post, true)
-                }
+                processCommand("S #${post.mid}")
             }
         }
     }
@@ -291,16 +286,9 @@ class JuickMessageMenuListener(
         }
     }
 
-    private fun processCommand(command: String, callback: ((PostResponse) -> Unit)? = null) {
+    private fun processCommand(command: String) {
         val scope = (activity as LifecycleOwner).lifecycleScope
-        val account = (activity as MainActivity).account
-        scope.launch {
-            App.instance.sendMessage(command) {
-                Toast.makeText(activity, it.text, Toast.LENGTH_LONG).show()
-                callback?.invoke(it)
-                account.refresh()
-            }
-        }
+        App.instance.sendMessage(scope = scope, receiver = receiver, txt = command)
     }
 
     companion object {
