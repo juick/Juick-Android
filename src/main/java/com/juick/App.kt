@@ -40,6 +40,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.Retrofit
@@ -160,7 +161,7 @@ class App : Application() {
             receiver.update {
                 runCatching {
                     instance.api.newPost(
-                        RequestBody.create("text/plain".toMediaTypeOrNull(), txt ?: ""),
+                        (txt ?: "").toRequestBody("text/plain".toMediaTypeOrNull()),
                         body
                     )
                 }
