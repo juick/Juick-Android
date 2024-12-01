@@ -23,7 +23,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -58,9 +57,9 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI.onNavDestinationSelected
 import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
 import androidx.navigation.ui.NavigationUI.setupWithNavController
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.toBitmap
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
@@ -247,24 +246,23 @@ class MainActivity : AppCompatActivity() {
 
                 else -> {
                     val avatarUrl: String = user.avatar
-                    Glide.with(this@MainActivity)
-                        .asBitmap()
-                        .load(avatarUrl)
-                        .placeholder(R.drawable.av_96)
-                        .into(object : CustomTarget<Bitmap>() {
-                            override fun onResourceReady(
-                                resource: Bitmap,
-                                transition: Transition<in Bitmap>?
-                            ) {
-                                avatar = resource
-                                invalidateOptionsMenu()
-                            }
+                    val request = ImageRequest.Builder(this@MainActivity)
+                        .data(avatarUrl)
+                        .target(
+                            onStart = {
 
-                            override fun onLoadCleared(placeholder: Drawable?) {
+                            },
+                            onSuccess = {
+                                avatar = it.toBitmap()
+                                invalidateOptionsMenu()
+                            },
+                            onError = {
                                 avatar = null
                                 invalidateOptionsMenu()
                             }
-                        })
+                        )
+                        .build()
+                    this@MainActivity.imageLoader.enqueue(request)
                     if (user.unreadCount > 0) {
                         badge.isVisible = true
                         badge.number = user.unreadCount

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -17,25 +17,15 @@
 package com.juick.android.widget.util
 
 import android.graphics.Bitmap
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
-import java.nio.charset.Charset
-import java.security.MessageDigest
+import coil3.size.Size
+import coil3.size.pxOrElse
+import coil3.transform.Transformation
 
-class BlurTransformation : BitmapTransformation() {
-    override fun transform(
-        pool: BitmapPool,
-        toTransform: Bitmap,
-        outWidth: Int,
-        outHeight: Int
-    ): Bitmap {
-        val downSampled = Bitmap.createScaledBitmap(toTransform, 30, 30, false)
-        return Bitmap.createScaledBitmap(downSampled, outWidth, outHeight, false)
-    }
 
-    override fun updateDiskCacheKey(messageDigest: MessageDigest) {
-        messageDigest.update(javaClass.name.toByteArray(Charset.forName("UTF-8")))
-    }
+class BlurTransformation : Transformation() {
+
+    override val cacheKey: String
+        get() = javaClass.name
 
     override fun equals(other: Any?): Boolean {
         return other is BlurTransformation
@@ -43,5 +33,10 @@ class BlurTransformation : BitmapTransformation() {
 
     override fun hashCode(): Int {
         return javaClass.name.hashCode()
+    }
+
+    override suspend fun transform(input: Bitmap, size: Size): Bitmap {
+        val downSampled = Bitmap.createScaledBitmap(input, 30, 30, false)
+        return Bitmap.createScaledBitmap(downSampled, size.width.pxOrElse { 320 }, size.height.pxOrElse { 240 }, false)
     }
 }

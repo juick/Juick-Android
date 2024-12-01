@@ -22,8 +22,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -32,9 +30,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.toBitmap
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
@@ -112,7 +110,7 @@ class NotificationSender(private val context: Context) {
                     )
                     if (jmsg.user.uid > 0) {
                         notificationBuilder.addAction(
-                            if (Build.VERSION.SDK_INT <= 19) R.drawable.ic_ab_reply2 else R.drawable.ic_ab_reply,
+                            R.drawable.ic_ab_reply,
                             context.getString(R.string.reply), PendingIntent.getActivity(
                                 context,
                                 getId(jmsg), createNewEventIntent(msgStr),
@@ -126,26 +124,24 @@ class NotificationSender(private val context: Context) {
                                     or Notification.DEFAULT_VIBRATE or Notification.DEFAULT_SOUND).inv()
                         )
                     }
-                    Glide.with(context).asBitmap()
-                        .load(jmsg.user.avatar)
-                        .fallback(R.drawable.av_96)
-                        .placeholder(R.drawable.av_96)
-                        .centerCrop().into(object : CustomTarget<Bitmap>() {
-                            override fun onResourceReady(
-                                resource: Bitmap,
-                                transition: Transition<in Bitmap>?
-                            ) {
-                                notificationBuilder.setLargeIcon(resource)
+                    val request = ImageRequest.Builder(context)
+                        .data(jmsg.user.avatar)
+                        .target(
+                            onStart = {
+                            },
+                            onSuccess = {
+                                notificationBuilder.setLargeIcon(it.toBitmap())
                                 notify(jmsg, notificationBuilder)
-                            }
-
-                            override fun onLoadCleared(placeholder: Drawable?) {
+                            },
+                            onError = {
                                 notificationBuilder.setLargeIcon(
                                     ContextCompat.getDrawable(context, R.drawable.av_96)?.toBitmap()
                                 )
                                 notify(jmsg, notificationBuilder)
                             }
-                        })
+                        )
+                        .build()
+                    context.imageLoader.enqueue(request)
                 } else {
                     Log.d(TAG, "Notification silenced: $notificationId")
                 }

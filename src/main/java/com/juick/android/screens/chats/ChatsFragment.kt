@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -27,8 +27,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import coil3.load
+import coil3.request.crossfade
 import com.juick.App
 import com.juick.R
 import com.juick.api.model.Chat
@@ -46,10 +46,9 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
     private val model by viewBinding(FragmentDialogListBinding::bind)
     private val chatsAdapter: DialogsListAdapter<Chat> =
         DialogsListAdapter { imageView: ImageView, url: String?, _: Any? ->
-            Glide.with(imageView.context)
-                .load(url)
-                .transition(DrawableTransitionOptions.withCrossFade())
-                .into(imageView)
+            imageView.load(url) {
+                crossfade(true)
+            }
         }
 
     private lateinit var vm: ChatsViewModel

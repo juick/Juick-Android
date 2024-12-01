@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -24,8 +24,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import coil3.load
+import coil3.request.crossfade
 import com.juick.App
 import com.juick.R
 import com.juick.android.Account
@@ -64,10 +64,9 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         account.profile.observe(viewLifecycleOwner) {
             it?.let { user ->
                 adapter = MessagesListAdapter(user.uname) { imageView, url, _ ->
-                    Glide.with(imageView.context)
-                        .load(url)
-                        .transition(DrawableTransitionOptions.withCrossFade())
-                        .into(imageView)
+                    imageView.load(url) {
+                        crossfade(true)
+                    }
                 }
                 model.messagesList.setAdapter(adapter)
             }

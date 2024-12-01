@@ -28,8 +28,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import coil3.load
+import coil3.request.crossfade
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
@@ -105,8 +105,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                 attachmentUri = null
                 attachmentMime = null
                 model.buttonAttachment.isSelected = false
-                Glide.with(requireContext())
-                    .clear(model.imagePreview)
+                model.imagePreview.setImageBitmap(null)
             }
         }
         model.buttonSend.setOnClickListener {
@@ -186,10 +185,9 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                     try {
                         requireContext().contentResolver.openInputStream(uri).use { bitmapStream ->
                             val image = BitmapFactory.decodeStream(bitmapStream)
-                            Glide.with(requireContext())
-                                .load(image)
-                                .transition(DrawableTransitionOptions.withCrossFade())
-                                .into(model.imagePreview)
+                            model.imagePreview.load(image) {
+                                crossfade(true)
+                            }
                         }
                     } catch (e: IOException) {
                         Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
