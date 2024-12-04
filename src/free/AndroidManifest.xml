@@ -20,7 +20,6 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
-    <uses-sdk tools:overrideLibrary="androidx.browser" />
     <application
         android:name=".App">
         <provider
