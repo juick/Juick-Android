@@ -70,7 +70,7 @@ class AuthenticationService : Service() {
         ): Bundle {
             val result = Bundle()
             result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name)
-            result.putString(AccountManager.KEY_ACCOUNT_TYPE, context.getString(R.string.com_juick))
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE, context.getString(R.string.applicationId))
             result.putString(
                 AccountManager.KEY_AUTHTOKEN,
                 AccountManager.get(context).getUserData(account, "hash")

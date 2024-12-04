@@ -76,7 +76,7 @@ class SignInActivity : AppCompatActivity() {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
                             this@SignInActivity,
-                            R.string.Unknown_nick_or_wrong_password,
+                            e.localizedMessage,
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -122,7 +122,7 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun updateAccount(nick: String, hash: String, action: Int) {
-        val account = Account(nick, getString(R.string.com_juick))
+        val account = Account(nick, getString(R.string.applicationId))
         val am = AccountManager.get(this@SignInActivity)
         if (action == ACTION_PASSWORD_UPDATE) {
             am.setAuthToken(account, StringUtils.EMPTY, hash)
@@ -133,7 +133,7 @@ class SignInActivity : AppCompatActivity() {
         }
         val result = Bundle()
         result.putString(AccountManager.KEY_ACCOUNT_NAME, nick)
-        result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick))
+        result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.applicationId))
         result.putString(AccountManager.KEY_AUTHTOKEN, hash)
         authenticatorResponse?.onResult(result)
         setResult(RESULT_OK)

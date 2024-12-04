@@ -40,6 +40,7 @@ android {
         versionCode 224
         versionName "3.2." + versionCode
         applicationId "com.juick"
+        namespace "com.juick"
         vectorDrawables.useSupportLibrary true
         def addConstant = {constantName, constantValue ->
             manifestPlaceholders += [ (constantName):constantValue]
@@ -65,9 +66,9 @@ android {
     buildTypes {
         debug {
             debuggable true
+            applicationIdSuffix ".debug"
         }
         release {
-            namespace "com.juick"
             minifyEnabled false
         }
     }
@@ -94,6 +95,8 @@ android {
         variant.outputs.configureEach {
             outputFileName = "Juick-${variant.flavorName}-v${variant.versionName}.apk"
         }
+        variant.resValue "string", "applicationId", "${applicationId}"
+        variant.resValue "string", "messages_provider_authority", "${applicationId}.messages"
     }
 }
 

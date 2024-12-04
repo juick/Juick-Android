@@ -26,7 +26,7 @@ import com.juick.util.StringUtils
 val App.account: Account?
     get() {
         val am = AccountManager.get(this)
-        val accounts = am.getAccountsByType(App.instance.getString(R.string.com_juick))
+        val accounts = am.getAccountsByType(App.instance.getString(R.string.applicationId))
         return accounts.firstOrNull()
     }
 

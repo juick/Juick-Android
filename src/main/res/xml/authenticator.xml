@@ -17,7 +17,7 @@
   -->
 
 <account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accountType="com.juick"
+    android:accountType="@string/applicationId"
     android:icon="@mipmap/ic_launcher"
     android:smallIcon="@mipmap/ic_launcher"
     android:label="@string/Juick"/>
