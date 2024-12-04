@@ -69,7 +69,13 @@ class YouTubePreviewer : LinkPreviewer {
                             )
                             withContext(Dispatchers.Main) {
                                 playlist.items.firstOrNull()?.let { video ->
-                                    val thumbnail = video.snippet.thumbnails["default"]
+                                    val maxres = "maxres"
+                                    val default = "default"
+                                    val high = "high"
+                                    val thumbKey = if (video.snippet.thumbnails.containsKey(maxres)) maxres
+                                    else if (video.snippet.thumbnails.containsKey(high)) high
+                                    else default
+                                    val thumbnail = video.snippet.thumbnails[thumbKey]
                                     if (thumbnail != null) {
                                         callback.invoke(
                                             LinkPreview(
