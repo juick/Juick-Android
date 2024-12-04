@@ -4,6 +4,8 @@ buildscript {
     ext.okhttp_version = "4.12.0"
     ext.retrofit_version = "2.11.0"
     ext.androidx_fragment_version = "1.8.5"
+    ext.compose_bom_version = "2024.11.00"
+    ext.androidx_activity_version = "1.9.3"
     ext.androidx_test_version = "1.6.1"
 
     repositories {
@@ -17,6 +19,7 @@ buildscript {
         classpath 'com.huawei.agconnect:agcp:1.9.1.304'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin:$kotlin_version"
     }
 }
 
@@ -24,6 +27,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 repositories {
     mavenCentral()
@@ -59,6 +63,7 @@ android {
     buildFeatures {
         buildConfig true
         viewBinding true
+        compose true
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -97,6 +102,7 @@ android {
         }
         variant.resValue "string", "applicationId", "${applicationId}"
         variant.resValue "string", "messages_provider_authority", "${applicationId}.messages"
+        project.tasks.getByName('process' + variant.name.capitalize() + 'GoogleServices').enabled variant.name.contains('google')
     }
 }
 
@@ -140,6 +146,17 @@ dependencies {
 
     implementation 'com.vanniktech:android-image-cropper:4.6.0'
 
+    // Compose
+    implementation "androidx.activity:activity-compose:$androidx_activity_version"
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.1.0"
+    implementation platform("androidx.compose:compose-bom:$compose_bom_version")
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material:material-icons-extended'
+    implementation 'androidx.compose.material3:material3'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+
     // Fragment testing
     debugImplementation "androidx.fragment:fragment-testing-manifest:$androidx_fragment_version"
 
@@ -160,6 +177,3 @@ googleServices {
     disableVersionCheck true
 }
 apply plugin: 'com.huawei.agconnect'
-android.applicationVariants.configureEach { variant ->
-    project.tasks.getByName('process' + variant.name.capitalize() + 'GoogleServices').enabled variant.name.contains('google')
-}
