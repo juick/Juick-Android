@@ -22,15 +22,17 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
+import androidx.activity.ComponentActivity
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.juick.App
 import com.juick.R
 import com.juick.util.StringUtils
@@ -39,24 +41,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class GoogleSignInProvider : SignInProvider {
-    private lateinit var googleClient: GoogleSignInClient
-    private lateinit var context: Activity
-    override fun prepareSignIn(context: Activity, button: RelativeLayout): View? {
+    private lateinit var context: ComponentActivity
+    private lateinit var credentialManager: CredentialManager
+    private lateinit var googleClientId: String
+    override fun prepareSignIn(context: ComponentActivity, button: RelativeLayout): View? {
         this.context = context
-        val googleClientId =
+        credentialManager = CredentialManager.create(context)
+        googleClientId =
             StringUtils.defaultString(context.resources.getString(R.string.default_web_client_id))
         return if (TextUtils.isEmpty(googleClientId)) {
             null
         } else {
-            // Configure sign-in to request the user's ID, email address, and basic
-            // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(googleClientId)
-                .requestEmail()
-                .build()
-            // Build a GoogleSignInClient with the options specified by gso.
-            googleClient = GoogleSignIn.getClient(context, gso)
-
             // Set the dimensions of the sign-in button.
             val signInButton = SignInButton(context)
             signInButton.setSize(SignInButton.SIZE_STANDARD)
@@ -87,14 +82,29 @@ class GoogleSignInProvider : SignInProvider {
         }
     }
 
-    override fun performSignIn() {
-        val signInIntent = googleClient.signInIntent
-        context.startActivityForResult(signInIntent, RC_SIGN_IN)
+    override fun performSignIn(completion: (Result<String>) -> Unit) {
+        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(true)
+            .setServerClientId(googleClientId)
+            .build()
+        val request: GetCredentialRequest = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+        context.lifecycleScope.launch {
+            try {
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = context,
+                )
+                handleSignInResult(result)
+            } catch (e: GetCredentialException) {
+                handleFailure(e)
+            }
+        }
     }
 
     private fun handleSignInResult(
-        completedTask: Task<GoogleSignInAccount>,
-        successCallback: SignInSuccessCallback
+        result: GetCredentialResponse
     ) {
         val scope = (context as LifecycleOwner).lifecycleScope
         scope.launch(Dispatchers.IO) {
