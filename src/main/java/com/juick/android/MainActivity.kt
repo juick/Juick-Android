@@ -57,9 +57,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI.onNavDestinationSelected
 import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
 import androidx.navigation.ui.NavigationUI.setupWithNavController
-import coil3.imageLoader
-import coil3.request.ImageRequest
-import coil3.toBitmap
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
@@ -69,6 +66,7 @@ import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.updater.Updater
+import com.juick.android.widget.util.loadImage
 import com.juick.api.model.Post
 import com.juick.databinding.ActivityMainBinding
 import com.juick.util.StringUtils
@@ -246,23 +244,10 @@ class MainActivity : AppCompatActivity() {
 
                 else -> {
                     val avatarUrl: String = user.avatar
-                    val request = ImageRequest.Builder(this@MainActivity)
-                        .data(avatarUrl)
-                        .target(
-                            onStart = {
-
-                            },
-                            onSuccess = {
-                                avatar = it.toBitmap()
-                                invalidateOptionsMenu()
-                            },
-                            onError = {
-                                avatar = null
-                                invalidateOptionsMenu()
-                            }
-                        )
-                        .build()
-                    this@MainActivity.imageLoader.enqueue(request)
+                    lifecycleScope.launch {
+                        avatar = loadImage(avatarUrl)
+                        invalidateOptionsMenu()
+                    }
                     if (user.unreadCount > 0) {
                         badge.isVisible = true
                         badge.number = user.unreadCount

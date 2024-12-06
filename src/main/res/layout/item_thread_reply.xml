@@ -80,14 +80,20 @@
     <RelativeLayout
         android:id="@+id/photo_wrapper"
         android:visibility="gone"
+        tools:visibility="visible"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/text">
 
         <ImageView
             android:id="@+id/photo"
             android:contentDescription="@string/attached_photo"
-            android:layout_width="fill_parent"
+            tools:src="@drawable/av_96"
+            tools:scaleType="center"
+            android:layout_centerInParent="true"
+            android:adjustViewBounds="true"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <TextView

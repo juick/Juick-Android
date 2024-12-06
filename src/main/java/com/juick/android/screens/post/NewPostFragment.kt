@@ -28,8 +28,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
-import coil3.load
-import coil3.request.crossfade
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
@@ -185,9 +183,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                     try {
                         requireContext().contentResolver.openInputStream(uri).use { bitmapStream ->
                             val image = BitmapFactory.decodeStream(bitmapStream)
-                            model.imagePreview.load(image) {
-                                crossfade(true)
-                            }
+                            model.imagePreview.setImageBitmap(image)
                         }
                     } catch (e: IOException) {
                         Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()

@@ -29,21 +29,19 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
-import coil3.imageLoader
-import coil3.request.ImageRequest
-import coil3.toBitmap
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
+import com.juick.android.widget.util.loadImage
 import com.juick.api.model.Post
+import kotlinx.coroutines.runBlocking
 
-class NotificationSender(private val context: Context) {
-    private val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+object NotificationSender {
     private val handler = Handler(Looper.getMainLooper())
 
-    init {
+    fun showNotification(context: Context, msgStr: String?) {
+        val notificationManager =
+            context.applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= 26) {
             channelId = context.getString(R.string.default_notification_channel_id)
             var channel = notificationManager.getNotificationChannel(channelId)
@@ -57,12 +55,9 @@ class NotificationSender(private val context: Context) {
                 channel.enableVibration(true)
                 channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 notificationManager.createNotificationChannel(channel)
+                channel.description = context.getString(R.string.juick_notifications)
             }
-            channel.description = context.getString(R.string.juick_notifications)
         }
-    }
-
-    fun showNotification(msgStr: String?) {
         try {
             val jmsg = App.instance.jsonMapper.decodeFromString<Post>(msgStr ?: "")
             val notificationId = getId(jmsg)
@@ -92,7 +87,7 @@ class NotificationSender(private val context: Context) {
                     val contentIntent = PendingIntent.getActivity(
                         context,
                         getId(jmsg),
-                        createNewEventIntent(msgStr),
+                        createNewEventIntent(context, msgStr),
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
                     val notificationBuilder = NotificationCompat.Builder(context, channelId)
@@ -113,7 +108,7 @@ class NotificationSender(private val context: Context) {
                             R.drawable.ic_ab_reply,
                             context.getString(R.string.reply), PendingIntent.getActivity(
                                 context,
-                                getId(jmsg), createNewEventIntent(msgStr),
+                                getId(jmsg), createNewEventIntent(context, msgStr),
                                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                             )
                         )
@@ -124,42 +119,24 @@ class NotificationSender(private val context: Context) {
                                     or Notification.DEFAULT_VIBRATE or Notification.DEFAULT_SOUND).inv()
                         )
                     }
-                    val request = ImageRequest.Builder(context)
-                        .data(jmsg.user.avatar)
-                        .target(
-                            onStart = {
-                            },
-                            onSuccess = {
-                                notificationBuilder.setLargeIcon(it.toBitmap())
-                                notify(jmsg, notificationBuilder)
-                            },
-                            onError = {
-                                notificationBuilder.setLargeIcon(
-                                    ContextCompat.getDrawable(context, R.drawable.av_96)?.toBitmap()
-                                )
-                                notify(jmsg, notificationBuilder)
-                            }
-                        )
-                        .build()
-                    context.imageLoader.enqueue(request)
+                    runBlocking {
+                        notificationBuilder.setLargeIcon(loadImage(jmsg.user.avatar))
+                        notificationManager.notify(getId(jmsg).toString(), 0, notificationBuilder.build())
+                    }
                 } else {
                     Log.d(TAG, "Notification silenced: $notificationId")
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "GCM message error", e)
+            Log.e(TAG, "Notification error", e)
         }
-    }
-
-    private fun notify(jmsg: Post, notificationBuilder: NotificationCompat.Builder) {
-        notificationManager.notify(getId(jmsg).toString(), 0, notificationBuilder.build())
     }
 
     private fun getId(jmsg: Post): Int {
         return if (jmsg.mid != 0) jmsg.mid else jmsg.user.uid
     }
 
-    private fun createNewEventIntent(jmsg: String?): Intent {
+    private fun createNewEventIntent(context: Context, jmsg: String?): Intent {
         val intent = Intent(context, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -167,9 +144,6 @@ class NotificationSender(private val context: Context) {
         intent.putExtra(context.getString(R.string.notification_extra), jmsg)
         return intent
     }
-
-    companion object {
-        private lateinit var channelId: String
-        const val TAG = "Notification"
-    }
+    private lateinit var channelId: String
+    const val TAG = "Notification"
 }

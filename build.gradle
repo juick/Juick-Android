@@ -135,10 +135,6 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-kotlinx-serialization:$retrofit_version"
 
-    implementation platform("io.coil-kt.coil3:coil-bom:3.0.4")
-    implementation "io.coil-kt.coil3:coil"
-    implementation "io.coil-kt.coil3:coil-network-okhttp"
-
     implementation 'com.github.vitalyster:ChatKit:5e99a8bf3c'
     huaweiImplementation 'com.huawei.hms:push:6.12.0.300'
 

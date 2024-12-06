@@ -36,6 +36,7 @@ import com.google.common.truth.Truth.assertThat
 import com.juick.App
 import com.juick.R
 import com.juick.android.MainActivity
+import com.juick.android.NotificationSender
 import com.juick.android.screens.FeedAdapter
 import com.juick.api.model.Post
 import com.juick.util.getString
@@ -56,10 +57,10 @@ internal class UITest {
     }
     @Test
     fun isCorrectNotification_NotificationSender() {
-        assumeTrue("UIAutomator tests require API18", android.os.Build.VERSION.SDK_INT >= 18)
         val notificationData = this.javaClass.getResourceAsStream("/test_notification.json")
         val notificationJson = App.instance.jsonMapper.parseToJsonElement(notificationData?.getString() ?: "")
-        App.instance.notificationSender.showNotification(notificationJson.toString())
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        NotificationSender.showNotification(context, notificationJson.toString())
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.openNotification()
         device.wait(Until.hasObject(By.textStartsWith("Hello, world!")), 5000)

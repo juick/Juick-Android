@@ -181,9 +181,6 @@ class App : Application() {
     }
 
     var signInProvider: SignInProvider? = null
-    val notificationSender: NotificationSender by lazy {
-        NotificationSender(instance)
-    }
     val messages = MutableStateFlow<List<Post>>(listOf())
 
     companion object {

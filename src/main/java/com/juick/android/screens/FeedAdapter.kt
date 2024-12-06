@@ -19,7 +19,6 @@ package com.juick.android.screens
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -36,27 +35,24 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.text.getSpans
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import coil3.ImageLoader
-import coil3.imageLoader
-import coil3.load
-import coil3.request.ImageRequest
-import coil3.request.crossfade
-import coil3.request.transformations
-import coil3.toBitmap
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.JuickMessageMenuListener
-import com.juick.android.widget.util.BlurTransformation
+import com.juick.android.widget.util.getLifecycleOwner
+import com.juick.android.widget.util.load
+import com.juick.android.widget.util.loadImage
 import com.juick.android.widget.util.setDrawableTint
 import com.juick.api.model.LinkPreview
 import com.juick.api.model.Post
 import com.juick.util.MessageUtils
 import com.juick.util.StringUtils
+import kotlinx.coroutines.launch
 
 /**
  *
@@ -112,9 +108,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         val type = getItemViewType(position)
         val post = currentList[position]
         val isReply = type != TYPE_MESSAGE
-        holder.upicImageView.load(post.user.avatar) {
-            crossfade(true)
-        }
+        holder.upicImageView.load(post.user.avatar, false, false)
         holder.usernameTextView.text = post.user.uname
         holder.premiumBadge.visibility = if (post.user.premium) View.VISIBLE else View.GONE
         holder.timestampTextView.text = MessageUtils.formatMessageTimestamp(post)
@@ -128,15 +122,10 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         if (post.photo != null && post.photo?.medium != null) {
             holder.photoLayout.visibility = View.VISIBLE
             holder.photoDescriptionView.visibility = View.GONE
-            holder.photoImageView.load(post.photo?.medium?.url ?: "") {
-                crossfade(true)
-                if (BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)) {
-                    transformations(BlurTransformation())
-                } else {
-                    holder.photoImageView.setOnClickListener {
-                        itemMenuListener?.onLinkClick(post.photo?.url as String)
-                    }
-                }
+            val shouldBlur = BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)
+            holder.photoImageView.load(post.photo?.medium?.url ?: "", true, shouldBlur)
+            holder.photoImageView.setOnClickListener {
+                itemMenuListener?.onLinkClick(post.photo?.url as String)
             }
         } else if (App.instance.hasViewableContent(post.text)) {
             holder.photoLayout.visibility = View.VISIBLE
@@ -144,9 +133,7 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             App.instance.previewers.firstOrNull()
                 ?.getPreviewUrl(post.text) { link: LinkPreview? ->
                     if (link != null) {
-                        holder.photoImageView.load(link.url) {
-                            crossfade(true)
-                        }
+                        holder.photoImageView.load(link.url)
                         holder.photoDescriptionView.visibility = View.VISIBLE
                         holder.photoDescriptionView.text = link.description
                         holder.photoImageView.setOnClickListener {
@@ -210,27 +197,20 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             itemMenuListener?.onLikeClick(holder.likesTextView, post)
         }
         if (post.rid > 0 && post.replyto > 0) {
-            var request = ImageRequest.Builder(holder.itemView.context)
-                .data(post.to?.avatar ?: "")
-                .crossfade(true)
-                .size(48)
-                .target(
-                    onStart = {
 
-                    },
-                    onSuccess = {
+            post.to?.avatar?.let {
+                holder.itemView.context.getLifecycleOwner()?.lifecycleScope?.launch {
+                    loadImage(it)?.let { bitmap ->
+                        val scaled = Bitmap.createScaledBitmap(bitmap, bitmap.width  /2, bitmap.height/2, false)
                         holder.replyToTextView?.setCompoundDrawablesWithIntrinsicBounds(
-                            BitmapDrawable(holder.itemView.context.resources, it.toBitmap()), null, null, null
-                        )
-                    },
-                    onError = {
-                        holder.replyToTextView?.setCompoundDrawablesWithIntrinsicBounds(
-                            null, null, null, null
+                            BitmapDrawable(holder.itemView.context.resources, scaled),
+                            null,
+                            null,
+                            null
                         )
                     }
-                )
-                .build()
-            holder.itemView.context.imageLoader.enqueue(request)
+                }
+            }
             holder.replyToTextView?.text = post.to?.uname
             holder.replyToTextView?.visibility = View.VISIBLE
             holder.replyToTextView?.tag = post

@@ -122,17 +122,19 @@
     <RelativeLayout
         android:id="@+id/photo_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/colorTextBackground"
-        tools:visibility="gone"
+        tools:visibility="visible"
         android:visibility="visible">
         <ImageView
             android:id="@+id/photo"
             android:layout_alignParentTop="true"
             tools:src="@drawable/av_96"
-            tools:scaleType="centerInside"
-            tools:adjustViewBounds="true"
-            android:layout_width="fill_parent"
+            tools:scaleType="center"
+            android:layout_centerInParent="true"
+            android:adjustViewBounds="true"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/attached_photo" />
         <TextView

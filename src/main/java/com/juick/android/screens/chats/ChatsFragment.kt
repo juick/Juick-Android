@@ -27,10 +27,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
-import coil3.load
-import coil3.request.crossfade
 import com.juick.App
 import com.juick.R
+import com.juick.android.widget.util.load
 import com.juick.api.model.Chat
 import com.juick.databinding.FragmentDialogListBinding
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter
@@ -46,9 +45,7 @@ class ChatsFragment : Fragment(R.layout.fragment_dialog_list) {
     private val model by viewBinding(FragmentDialogListBinding::bind)
     private val chatsAdapter: DialogsListAdapter<Chat> =
         DialogsListAdapter { imageView: ImageView, url: String?, _: Any? ->
-            imageView.load(url) {
-                crossfade(true)
-            }
+            imageView.load(url ?: "")
         }
 
     private lateinit var vm: ChatsViewModel

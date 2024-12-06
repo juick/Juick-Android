@@ -21,6 +21,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.juick.App
 import com.juick.R
+import com.juick.android.NotificationSender
 import com.juick.android.Utils.updateToken
 import com.juick.api.model.Post
 import kotlinx.serialization.SerializationException
@@ -38,7 +39,7 @@ class FirebaseReceiverService : FirebaseMessagingService() {
             if (!reply.isService) {
                 App.instance.messages.value = listOf(reply)
             }
-            App.instance.notificationSender.showNotification(msg)
+            NotificationSender.showNotification(this, msg)
         } catch (e: SerializationException) {
             Log.d(TAG, "JSON exception: " + e.message)
         }

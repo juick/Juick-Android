@@ -21,6 +21,7 @@ import com.huawei.hms.push.HmsMessageService
 import com.huawei.hms.push.RemoteMessage
 import com.juick.App
 import com.juick.R
+import com.juick.android.NotificationSender
 import com.juick.android.Utils.updateToken
 import com.juick.api.model.Post
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -38,7 +39,7 @@ class HmsReceiverService : HmsMessageService() {
             if (!reply.isService) {
                 App.instance.messages.value = listOf(reply)
             }
-            App.instance.notificationSender.showNotification(msg.jsonObject.toString())
+            NotificationSender.showNotification(this, msg.jsonObject.toString())
         } catch (e: IOException) {
             Log.d(TAG, "JSON exception: " + e.message)
         }

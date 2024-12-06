@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2020, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -21,20 +21,20 @@ import android.content.*
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.juick.App
 import com.juick.R
+import com.juick.android.NotificationSender
+import com.juick.android.widget.util.getLifecycleOwner
 import com.juick.api.model.Post
 import com.juick.api.model.User
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 
 class MessagesSyncService : LifecycleService() {
-    private class MessagesSyncAdapter(private val lifecycleScope: LifecycleCoroutineScope,
-                                      appContext: Context) :
-        AbstractThreadedSyncAdapter(appContext, true) {
+    private class MessagesSyncAdapter(private val context: Context) :
+        AbstractThreadedSyncAdapter(context, true) {
         override fun onPerformSync(
             account: Account,
             extras: Bundle,
@@ -42,14 +42,14 @@ class MessagesSyncService : LifecycleService() {
             provider: ContentProviderClient,
             syncResult: SyncResult
         ) {
-            lifecycleScope.launch {
+            context.getLifecycleOwner()?.lifecycleScope?.launch {
                 try {
                     val me = App.instance.api.me()
                     if (me.unreadCount > 0) {
                         val announcement = Post(user = User(0, "Juick"))
                         announcement.setBody(context.getString(R.string.unread_discussions))
                         val messageData = App.instance.jsonMapper.encodeToString<Post>(announcement)
-                        App.instance.notificationSender.showNotification(messageData)
+                        NotificationSender.showNotification(context, messageData)
                     }
                 } catch (e: Exception) {
                     Log.w(this.javaClass.simpleName, "Sync error", e)
@@ -62,8 +62,7 @@ class MessagesSyncService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
         messagesSyncAdapter = MessagesSyncAdapter(
-            lifecycleScope,
-            applicationContext
+            this
         )
     }
 

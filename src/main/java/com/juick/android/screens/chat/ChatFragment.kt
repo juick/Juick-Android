@@ -24,12 +24,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
-import coil3.load
-import coil3.request.crossfade
 import com.juick.App
 import com.juick.R
 import com.juick.android.Account
 import com.juick.android.widget.util.hideKeyboard
+import com.juick.android.widget.util.load
 import com.juick.api.model.Post
 import com.juick.databinding.FragmentChatBinding
 import com.stfalcon.chatkit.messages.MessagesListAdapter
@@ -64,9 +63,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         account.profile.observe(viewLifecycleOwner) {
             it?.let { user ->
                 adapter = MessagesListAdapter(user.uname) { imageView, url, _ ->
-                    imageView.load(url) {
-                        crossfade(true)
-                    }
+                    imageView.load(url ?: "")
                 }
                 model.messagesList.setAdapter(adapter)
             }
