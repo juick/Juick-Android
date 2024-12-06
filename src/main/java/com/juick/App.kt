@@ -52,7 +52,11 @@ import java.util.concurrent.TimeUnit
  * Created by gerc on 14.02.2016.
  */
 class App : Application() {
+
+    private val cacheSize = (50 * 1024 * 1024).toLong()
+
     val api: Api by lazy {
+        val networkCache = Cache(applicationContext.cacheDir, cacheSize)
         val client = OkHttpClient.Builder()
             .addInterceptor { chain: Interceptor.Chain ->
                 val original = chain.request()
@@ -73,10 +77,14 @@ class App : Application() {
                         }
                     }
                 }
+                if (BuildConfig.DEBUG && response.networkResponse == null) {
+                    Log.d("App", "Cached response: ${request.url}")
+                }
                 response
             }
-            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS))
+            .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS))
             .readTimeout(30, TimeUnit.SECONDS)
+            .cache(networkCache)
             .build()
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.API_ENDPOINT)
