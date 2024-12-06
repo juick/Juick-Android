@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2022, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -16,124 +16,113 @@
  */
 package com.juick.android
 
-import android.app.Activity
 import android.content.Intent
+import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
-import androidx.lifecycle.LifecycleOwner
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.juick.App
 import com.juick.R
 import com.juick.util.StringUtils
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
-class GoogleSignInProvider : SignInProvider {
-    private lateinit var googleClient: GoogleSignInClient
-    private lateinit var context: Activity
-    override fun prepareSignIn(context: Activity, button: RelativeLayout): View? {
+class GoogleSignInProvider(): SignInProvider {
+    private lateinit var context: ComponentActivity
+    private lateinit var credentialManager: CredentialManager
+    private lateinit var googleClientId: String
+    private var signInContinuation: CancellableContinuation<Result<Bundle>>? = null
+    private lateinit var signUpLauncher: ActivityResultLauncher<Intent>
+
+    override fun prepareSignIn(context: ComponentActivity, container: RelativeLayout): View? {
         this.context = context
-        val googleClientId =
-            StringUtils.defaultString(context.resources.getString(R.string.default_web_client_id))
+        signUpLauncher = context.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (signInContinuation?.isCompleted == true) {
+                return@registerForActivityResult
+            }
+            result.data?.extras?.let {
+                signInContinuation?.resume(Result.success(it))
+            } ?: run {
+                signInContinuation?.resumeWithException(IllegalStateException("No signup data"))
+            }
+        }
+        googleClientId = StringUtils.defaultString(context.resources.getString(R.string.default_web_client_id))
         return if (TextUtils.isEmpty(googleClientId)) {
             null
         } else {
-            // Configure sign-in to request the user's ID, email address, and basic
-            // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(googleClientId)
-                .requestEmail()
-                .build()
-            // Build a GoogleSignInClient with the options specified by gso.
-            googleClient = GoogleSignIn.getClient(context, gso)
-
             // Set the dimensions of the sign-in button.
             val signInButton = SignInButton(context)
             signInButton.setSize(SignInButton.SIZE_STANDARD)
             signInButton.setColorScheme(SignInButton.COLOR_LIGHT)
-            button.addView(signInButton)
+            container.addView(signInButton)
             signInButton
         }
     }
 
-    override fun onSignInResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?,
-        requestCallback: SignInRequestCallback,
-        successCallback: SignInSuccessCallback
-    ) {
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            handleSignInResult(task, successCallback)
-        }
-        if (requestCode == RC_SIGN_UP) {
-            val nick = data?.getStringExtra("nick") ?: ""
-            val password = data?.getStringExtra("password") ?: ""
-            requestCallback.invoke(nick, password)
-        }
-    }
+    override suspend fun performSignIn(): Result<Bundle> = suspendCancellableCoroutine { continuation ->
+        signInContinuation = continuation
+        credentialManager = CredentialManager.create(context)
 
-    override fun performSignIn() {
-        val signInIntent = googleClient.signInIntent
-        context.startActivityForResult(signInIntent, RC_SIGN_IN)
-    }
-
-    private fun handleSignInResult(
-        completedTask: Task<GoogleSignInAccount>,
-        successCallback: SignInSuccessCallback
-    ) {
-        val scope = (context as LifecycleOwner).lifecycleScope
-        scope.launch(Dispatchers.IO) {
+        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(true)
+            .setServerClientId(googleClientId)
+            .build()
+        val request: GetCredentialRequest = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+        context.lifecycleScope.launch {
             try {
-                val account = completedTask.getResult(ApiException::class.java)
-                account.idToken?.let {
-                    token ->
-                    Log.i(SignInActivity::class.java.simpleName, "Success: $token")
-                    val data = App.instance.api.googleAuth(token)
-                    if (data.user == null) {
-                        data.authCode?.let { authCode ->
-                            Log.i(SignInActivity::class.java.simpleName, authCode)
-                            withContext(Dispatchers.Main) {
-                                val signupIntent =
-                                    Intent(context, SignUpActivity::class.java)
-                                signupIntent.putExtra("email", data.account)
-                                signupIntent.putExtra("authCode", data.authCode)
-                                context.startActivityForResult(signupIntent, RC_SIGN_UP)
-                            }
-                        }
-                    } else {
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = context,
+                )
+                val token = GoogleIdTokenCredential.createFrom(result.credential.data)
+                Log.i(TAG, "Success: $token")
+                val data = App.instance.api.googleAuth(token.idToken)
+                if (data.user == null) {
+                    data.authCode?.let { authCode ->
+                        Log.i(SignInActivity::class.java.simpleName, authCode)
                         withContext(Dispatchers.Main) {
-                            successCallback.invoke(data.user.name, data.user.hash!!)
+                            val signupIntent =
+                                Intent(context, SignUpActivity::class.java)
+                            signupIntent.putExtra("email", data.account)
+                            signupIntent.putExtra("authCode", data.authCode)
+                            signUpLauncher.launch(signupIntent)
                         }
                     }
+                } else {
+                    signInContinuation?.resume(Result.success(
+                        bundleOf(
+                            "nick" to data.user.name,
+                            "hash" to (data.user.hash ?: "")
+                        )
+                    ))
                 }
-            } catch (e: ApiException) {
-                // The ApiException status code indicates the detailed failure reason.
-                // Please refer to the GoogleSignInStatusCodes class reference for more information.
-                Log.w(
-                    SignInActivity::class.java.simpleName,
-                    "signInResult:failed code=" + e.statusCode
-                )
+            } catch (e: GetCredentialException) {
+                Log.e(TAG, "Google error", e)
+                signInContinuation?.resumeWithException(e)
             }
         }
     }
 
     companion object {
-        private const val RC_SIGN_IN = 9001
-        private const val RC_SIGN_UP = 9002
+        private val TAG = GoogleSignInProvider::class.simpleName
     }
 }

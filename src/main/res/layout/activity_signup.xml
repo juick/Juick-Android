@@ -68,7 +68,7 @@
                     android:inputType="textPassword"
                     android:maxLines="1"
                     android:textColorHint="#cbcaca"
-                    android:autofillHints="password"
+                    android:autofillHints="password_new"
                     tools:targetApi="o" />
             </com.google.android.material.textfield.TextInputLayout>
 

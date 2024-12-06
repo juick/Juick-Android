@@ -19,4 +19,4 @@ package com.juick.api.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AuthResponse(val account: String?, val authCode: String?, val user: User?)
+data class AuthResponse(val account: String? = null, val authCode: String? = null, val user: User? = null)

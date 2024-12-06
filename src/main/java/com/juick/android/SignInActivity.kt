@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -85,7 +85,39 @@ class SignInActivity : AppCompatActivity() {
         }
         application.signInProvider?.prepareSignIn(this, model.signInButtonPlaceholder)
             ?.let { signInButton ->
-                signInButton.setOnClickListener { application.signInProvider?.performSignIn() }
+                signInButton.setOnClickListener {
+                    lifecycleScope.launch {
+                        application.signInProvider?.performSignIn()?.fold(
+                            onSuccess = { bundle ->
+                                val nick = bundle.getString("nick") ?: ""
+                                val password = bundle.getString("password")
+                                val hash = bundle.getString("hash") ?: ""
+                                password?.let {
+                                    // sign in with the new account after signup
+                                    model.juickNick.setText(nick)
+                                    model.juickPassword.setText(password)
+                                    model.buttonSave.performClick()
+                                } ?: run {
+                                    // update existing account
+                                    updateAccount(
+                                        nick,
+                                        hash,
+                                        ACTION_ACCOUNT_CREATE
+                                    )
+                                }
+                            },
+                            onFailure = {
+                                val builder = AlertDialog.Builder(this@SignInActivity)
+                                builder.setNeutralButton(android.R.string.ok) { _, _ ->
+                                    setResult(RESULT_CANCELED)
+                                    finish()
+                                }
+                                builder.setMessage(it.localizedMessage)
+                                builder.show()
+                            }
+                        )
+                    }
+                }
             }
         currentAction = intent.getIntExtra(EXTRA_ACTION, ACTION_ACCOUNT_CREATE)
         if (App.instance.isAuthenticated && currentAction != ACTION_PASSWORD_UPDATE) {
@@ -96,28 +128,6 @@ class SignInActivity : AppCompatActivity() {
             }
             builder.setMessage(R.string.Only_one_account)
             builder.show()
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        application.signInProvider?.onSignInResult(
-            requestCode,
-            resultCode,
-            data,
-            { nick: String?, password: String? ->
-                if (!TextUtils.isEmpty(nick)) {
-                    model.juickNick.setText(nick)
-                    model.juickPassword.setText(password)
-                    model.buttonSave.performClick()
-                }
-            }) { username: String, hash: String ->
-            updateAccount(
-                username,
-                hash,
-                ACTION_ACCOUNT_CREATE
-            )
         }
     }
 
