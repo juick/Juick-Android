@@ -56,6 +56,7 @@ android {
         addConstant("INTENT_NEW_EVENT_ACTION", "com.juick.NEW_EVENT_ACTION")
 
         buildConfigField "boolean", "HIDE_NSFW", "false"
+        buildConfigField "boolean", "ENABLE_COMPOSE_UI", "false"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testHandleProfiling true
@@ -76,6 +77,10 @@ android {
         }
         release {
             minifyEnabled false
+        }
+        next {
+            initWith debug
+            buildConfigField "boolean", "ENABLE_COMPOSE_UI", "true"
         }
     }
     flavorDimensions += "notifications"
@@ -145,16 +150,16 @@ dependencies {
     implementation 'com.vanniktech:android-image-cropper:4.6.0'
 
     // Compose
-    implementation "androidx.activity:activity-compose:$androidx_activity_version"
-    implementation "androidx.constraintlayout:constraintlayout-compose:1.1.0"
-    implementation platform("androidx.compose:compose-bom:$compose_bom_version")
-    implementation 'androidx.compose.ui:ui'
-    implementation 'androidx.compose.ui:ui-graphics'
-    implementation 'androidx.compose.ui:ui-viewbinding'
-    implementation 'androidx.compose.ui:ui-tooling-preview'
-    implementation 'androidx.compose.material:material-icons-extended'
-    implementation 'androidx.compose.material3:material3'
-    debugImplementation 'androidx.compose.ui:ui-tooling'
+    nextImplementation "androidx.activity:activity-compose:$androidx_activity_version"
+    nextImplementation "androidx.constraintlayout:constraintlayout-compose:1.1.0"
+    nextImplementation platform("androidx.compose:compose-bom:$compose_bom_version")
+    nextImplementation 'androidx.compose.ui:ui'
+    nextImplementation 'androidx.compose.ui:ui-graphics'
+    nextImplementation 'androidx.compose.ui:ui-viewbinding'
+    nextImplementation 'androidx.compose.ui:ui-tooling-preview'
+    nextImplementation 'androidx.compose.material:material-icons-extended'
+    nextImplementation 'androidx.compose.material3:material3'
+    nextImplementation 'androidx.compose.ui:ui-tooling'
 
     // Fragment testing
     debugImplementation "androidx.fragment:fragment-testing-manifest:$androidx_fragment_version"
