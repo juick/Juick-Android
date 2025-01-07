@@ -81,7 +81,7 @@ class GoogleSignInProvider(): SignInProvider {
         credentialManager = CredentialManager.create(context)
 
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(true)
+            .setFilterByAuthorizedAccounts(false)
             .setServerClientId(googleClientId)
             .build()
         val request: GetCredentialRequest = GetCredentialRequest.Builder()
