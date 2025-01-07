@@ -148,7 +148,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-kotlinx-serialization:$retrofit_version"
 
     implementation 'com.github.vitalyster:ChatKit:5e99a8bf3c'
-    huaweiImplementation 'com.huawei.hms:push:6.12.0.300'
+    huaweiImplementation 'com.huawei.hms:push:6.13.0.300'
 
     implementation 'com.github.Zhuinden:fragmentviewbindingdelegate-kt:1.0.2'
 
