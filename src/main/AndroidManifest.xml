@@ -95,6 +95,7 @@
         </activity>
         <activity
             android:name=".android.SignInActivity"
+            android:launchMode="singleTask"
             android:exported="false"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             />
