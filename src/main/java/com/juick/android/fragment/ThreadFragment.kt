@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -116,8 +116,10 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (dialog as? BottomSheetDialog)?.behavior?.state =
-            BottomSheetBehavior.STATE_EXPANDED
+        (dialog as? BottomSheetDialog)?.behavior?.let {
+            it.state = BottomSheetBehavior.STATE_EXPANDED
+            it.isDraggable = false
+        }
         mid = arguments?.getInt("mid") ?: 0
         scrollToEnd = arguments?.getBoolean("scrollToEnd") ?: false
         if (mid == 0) {
