@@ -28,7 +28,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.SignInButton
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -115,7 +114,7 @@ class GoogleSignInProvider(): SignInProvider {
                         )
                     ))
                 }
-            } catch (e: GetCredentialException) {
+            } catch (e: Exception) {
                 Log.e(TAG, "Google error", e)
                 signInContinuation?.resumeWithException(e)
             }
