@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -24,8 +24,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Attachment (
     val url: String,
-    val height: Int,
-    val width: Int
+    val height: Int? = 0,
+    val width: Int? = 0
 ) {
     var thumbnail: Attachment? = null
     var small: Attachment? = null
