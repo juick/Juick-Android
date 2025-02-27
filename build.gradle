@@ -156,7 +156,7 @@ dependencies {
 
     // Compose
     nextImplementation "androidx.activity:activity-compose:$androidx_activity_version"
-    nextImplementation "androidx.constraintlayout:constraintlayout-compose:1.1.0"
+    nextImplementation "androidx.constraintlayout:constraintlayout-compose:1.1.1"
     nextImplementation platform("androidx.compose:compose-bom:$compose_bom_version")
     nextImplementation 'androidx.compose.ui:ui'
     nextImplementation 'androidx.compose.ui:ui-graphics'
