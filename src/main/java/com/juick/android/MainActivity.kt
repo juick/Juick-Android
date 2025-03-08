@@ -414,8 +414,14 @@ class MainActivity : AppCompatActivity() {
                     navController.navigate(R.id.thread, args)
                 }
 
-                else ->                 // discover
-                    navController.navigate(R.id.home)
+                else ->
+                    if (pathSegments[0] == "i") {
+                        // images
+                        openUri(data)
+                    } else {
+                        // discover
+                        navController.navigate(R.id.home)
+                    }
             }
         } else {
             openUri(data)
