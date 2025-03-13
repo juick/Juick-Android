@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -24,6 +24,7 @@ import android.widget.ImageView.ScaleType
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.lifecycleScope
 import com.juick.App
+import com.juick.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -48,13 +49,24 @@ fun ImageView.load(url: String, scaleToScreenDensity: Boolean = true, blur: Bool
                     setImageBitmap(image)
                 }
             }
+        } ?: run {
+            withContext(Dispatchers.Main) {
+                setImageDrawable(context.getDrawable(R.drawable.ei_refresh))
+                tag = -1
+            }
         }
     }
 }
 
 suspend fun loadImage(url: String): Bitmap? {
     if (url.isEmpty()) return null
-    return BitmapFactory.decodeStream(
-        App.instance.api.download(url).byteStream()
-    )
+    try {
+        val bytes = App.instance.api.download(url).byteStream()
+        return BitmapFactory.decodeStream(
+            bytes
+        )
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return null
 }

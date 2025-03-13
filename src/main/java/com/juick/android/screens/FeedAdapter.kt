@@ -125,7 +125,12 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             val shouldBlur = BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)
             holder.photoImageView.load(post.photo?.medium?.url ?: "", true, shouldBlur)
             holder.photoImageView.setOnClickListener {
-                itemMenuListener?.onLinkClick(post.photo?.url as String)
+                if (holder.photoImageView.tag == -1) {
+                    holder.photoImageView.tag = null
+                    notifyItemChanged(position)
+                } else {
+                    itemMenuListener?.onLinkClick(post.photo?.url as String)
+                }
             }
         } else if (App.instance.hasViewableContent(post.text)) {
             holder.photoLayout.visibility = View.VISIBLE
