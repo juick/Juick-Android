@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -16,10 +16,8 @@
  */
 package com.juick.api.model
 
-import android.os.Parcelable
 import com.juick.util.StringUtils
 import com.stfalcon.chatkit.commons.models.IMessage
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -28,14 +26,13 @@ import java.util.*
 /**
  * Created by gerc on 10.02.2016.
  */
-@Parcelize
 @Serializable
 data class Post(
-    private var user: User,
+    @Serializable private var user: User,
     var mid: Int = 0,
     var rid: Int = 0,
     var subscribed: Boolean = false
-) : IMessage, Parcelable {
+) : IMessage {
     var replyto = 0
     var to: User? = null
     private var body: String? = null
