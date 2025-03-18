@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -214,8 +214,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 refresh()
             }
-            Updater(this@MainActivity)
-                .checkUpdate()
+            if (BuildConfig.ENABLE_UPDATER) {
+                Updater(this@MainActivity)
+                    .checkUpdate()
+            }
         }
         account.refresh()
         account.signInStatus.observe(this) { signInStatus: SignInStatus ->
