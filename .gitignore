@@ -14,7 +14,5 @@ release/**
 google/**
 huawei/**
 free/**
-/src/release/google/google-services.json
-/src/release/huawei/agconnect-services.json
 .kotlin
 src/store
