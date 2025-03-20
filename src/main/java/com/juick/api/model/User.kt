@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2025, Juick
+ * Copyright (C) 2008-2024, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -16,17 +16,20 @@
  */
 package com.juick.api.model
 
+import android.os.Parcelable
 import com.stfalcon.chatkit.commons.models.IUser
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 /**
  * Created by gerc on 10.02.2016.
  */
+@Parcelize
 @Serializable
 data class User(
     val uid: Int = 0,
     val uname: String
-) : IUser {
+) : IUser, Parcelable {
     var unreadCount: Int = 0
     val premium: Boolean = false
     val admin: Boolean = false
