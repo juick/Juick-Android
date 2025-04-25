@@ -1,1 +1,26 @@
+pluginManagement {
+    repositories {
+        mavenCentral()
+        google()
+        maven { url 'https://developer.huawei.com/repo/' }
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace == 'com.android') {
+                useModule("com.android.tools.build:gradle:${requested.version}")
+            }
+            if (requested.id.id == "com.huawei.agconnect") {
+                useModule("com.huawei.agconnect:agcp:${requested.version}")
+            }
+        }
+    }
+}
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        google()
+        maven { url 'https://developer.huawei.com/repo/' }
+    }
+}
 rootProject.name = "Juick"
+include ("Juick")
