@@ -1,29 +1,11 @@
-buildscript {
-    ext.kotlin_version = "2.0.21"
-    ext.navigation_version = "2.8.9"
-    ext.okhttp_version = "4.12.0"
-    ext.retrofit_version = "2.11.0"
-    ext.androidx_fragment_version = "1.8.6"
-    ext.lifecycle_version = "2.8.7"
-    ext.compose_bom_version = "2025.04.01"
-    ext.androidx_activity_version = "1.10.1"
-    ext.androidx_test_version = "1.6.1"
-}
-
 plugins {
-    id 'com.android.application' version '8.9.2'
-    id 'org.jetbrains.kotlin.android' version "$kotlin_version"
-    id 'org.jetbrains.kotlin.plugin.parcelize' version "$kotlin_version"
-    id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
-    id 'org.jetbrains.kotlin.plugin.compose' version "$kotlin_version"
-    id 'com.google.gms.google-services' version '4.4.2'
-    id 'com.huawei.agconnect' version '1.9.1.304'
-}
-repositories {
-    mavenCentral()
-    google()
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://developer.huawei.com/repo/' }
+    alias libs.plugins.androidApplication
+    alias libs.plugins.kotlin
+    alias libs.plugins.kotlin.plugin.parcelize
+    alias libs.plugins.kotlin.plugin.serialization
+    alias libs.plugins.kotlin.plugin.compose
+    alias libs.plugins.google.services
+    alias libs.plugins.huawei.connect
 }
 
 android {
@@ -116,66 +98,61 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3'
-    implementation 'androidx.core:core-ktx:1.16.0'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.browser:browser:1.8.0'
-    implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
-    implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
-    implementation "androidx.savedstate:savedstate-ktx:1.2.1"
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation libs.kotlinx.serialization.json
+    implementation libs.core.ktx
+    implementation libs.appcompat
+    implementation libs.browser
+    implementation libs.navigation.fragment.ktx
+    implementation libs.navigation.ui.ktx
+    implementation libs.savedstate.ktx
+    implementation libs.swiperefreshlayout
+    implementation libs.lifecycle.viewmodel.compose
+    implementation libs.lifecycle.extensions
 
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation libs.material
 
     // Sign in with Google
-    googleImplementation "androidx.credentials:credentials-play-services-auth:1.5.0"
-    googleImplementation 'com.google.android.gms:play-services-auth:21.3.0'
-    googleImplementation "com.google.android.libraries.identity.googleid:googleid:1.1.1"
+    googleImplementation libs.credentials.play.services.auth
+    googleImplementation libs.play.services.auth
+    googleImplementation libs.googleid
 
     // Firebase platform
-    googleImplementation platform('com.google.firebase:firebase-bom:33.13.0')
-    googleImplementation 'com.google.firebase:firebase-messaging'
+    googleImplementation platform(libs.firebase.bom)
+    googleImplementation libs.firebase.messaging
 
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
-    freeImplementation 'com.github.heremaps:oksse:0.9.0'
+    implementation libs.okhttp
+    implementation libs.logging.interceptor
+    freeImplementation libs.oksse
 
-    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation "com.squareup.retrofit2:converter-kotlinx-serialization:$retrofit_version"
+    implementation libs.retrofit
+    implementation libs.converter.kotlinx.serialization
 
-    implementation 'com.github.vitalyster:ChatKit:5e99a8bf3c'
-    huaweiImplementation 'com.huawei.hms:push:6.13.0.300'
+    implementation libs.chatkit
+    huaweiImplementation libs.push
 
-    implementation 'com.github.Zhuinden:fragmentviewbindingdelegate-kt:1.0.2'
+    implementation libs.fragmentviewbindingdelegate.kt
 
-    implementation 'com.vanniktech:android-image-cropper:4.6.0'
+    implementation libs.android.image.cropper
 
     // Compose
-    nextImplementation "androidx.activity:activity-compose:$androidx_activity_version"
-    nextImplementation "androidx.constraintlayout:constraintlayout-compose:1.1.1"
-    nextImplementation platform("androidx.compose:compose-bom:$compose_bom_version")
-    nextImplementation 'androidx.compose.ui:ui'
-    nextImplementation 'androidx.compose.ui:ui-graphics'
-    nextImplementation 'androidx.compose.ui:ui-viewbinding'
-    nextImplementation 'androidx.compose.ui:ui-tooling-preview'
-    nextImplementation 'androidx.compose.material:material-icons-extended'
-    nextImplementation 'androidx.compose.material3:material3'
-    nextImplementation 'androidx.compose.ui:ui-tooling'
-
-    // Fragment testing
-    debugImplementation "androidx.fragment:fragment-testing-manifest:$androidx_fragment_version"
-
+    nextImplementation libs.activity.compose
+    nextImplementation libs.constraintlayout.compose
+    nextImplementation platform(libs.compose.bom)
+    nextImplementation libs.ui
+    nextImplementation libs.ui.graphics
+    nextImplementation libs.ui.viewbinding
+    nextImplementation libs.ui.tooling.preview
+    nextImplementation libs.material.icons.extended
+    nextImplementation libs.material3
+    nextImplementation libs.ui.tooling
     // Core library
-    androidTestImplementation "androidx.test:core-ktx:$androidx_test_version"
+    androidTestImplementation libs.test.core.ktx
 
     // Assertions
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.ext:truth:1.6.0'
+    androidTestImplementation libs.junit
+    androidTestImplementation libs.truth
 
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-    androidTestImplementation("androidx.fragment:fragment-testing:$androidx_fragment_version")
+    androidTestImplementation libs.espresso.core
     // UI Automator
-    androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.3'
+    androidTestImplementation libs.uiautomator.v18
 }
