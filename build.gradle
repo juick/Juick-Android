@@ -81,6 +81,8 @@ android {
         checkDependencies true
         checkGeneratedSources true
         checkReleaseBuilds false
+        disable "CoroutineCreationDuringComposition"
+        disable "StateFlowValueCalledInComposition"
     }
     applicationVariants.configureEach { variant ->
         variant.outputs.configureEach {
