@@ -23,6 +23,7 @@
         <item name="colorPrimaryDark">@color/colorDimmed</item>
         <item name="android:colorBackground">@color/colorMainBackground</item>
         <item name="android:windowBackground">@color/colorMainBackground</item>
+        <item name="bottomSheetDialogTheme">@style/BottomSheetStyle</item>
     </style>
     <style name="AppTheme" parent="BaseTheme">
     </style>
@@ -30,5 +31,8 @@
         <item name="android:textColorPrimary">@color/colorPrimary</item>
         <item name="android:background">@color/colorTextBackground</item>
         <item name="iconTint">@color/colorText</item>
+    </style>
+    <style name="BottomSheetStyle" parent="Theme.Material3.DayNight.BottomSheetDialog">
+        <item name="android:backgroundDimEnabled">false</item>
     </style>
 </resources>
