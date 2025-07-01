@@ -16,3 +16,4 @@ huawei/**
 free/**
 .kotlin
 src/store
+src/google/google-services.json
