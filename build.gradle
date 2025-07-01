@@ -13,7 +13,7 @@ android {
     defaultConfig {
         targetSdkVersion 35
         minSdkVersion 24
-        versionCode 234
+        versionCode 235
         versionName "3.2." + versionCode
         applicationId "com.juick"
         namespace "com.juick"
