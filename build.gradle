@@ -8,6 +8,12 @@ plugins {
     alias libs.plugins.huawei.connect
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     compileSdk 35
     defaultConfig {
@@ -46,6 +52,14 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+        }
+    }
     buildTypes {
         debug {
             debuggable true
@@ -53,6 +67,7 @@ android {
         }
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
         }
         next {
             initWith debug
@@ -61,6 +76,7 @@ android {
         store {
             initWith release
             buildConfigField "boolean", "ENABLE_UPDATER", "false"
+            signingConfig signingConfigs.release
         }
     }
     flavorDimensions += "notifications"
