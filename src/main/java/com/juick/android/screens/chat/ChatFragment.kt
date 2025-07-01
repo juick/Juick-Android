@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -66,6 +66,23 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                     imageView.load(url ?: "")
                 }
                 model.messagesList.setAdapter(adapter)
+                vm.messages.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach { newPosts ->
+                    when (newPosts) {
+                        null -> {}
+                        else -> {
+                            newPosts.fold(
+                                onSuccess = { posts ->
+                                    adapter.addToEnd(posts, false)
+                                },
+                                onFailure = { error ->
+                                    Toast.makeText(requireContext(), error.message, Toast.LENGTH_LONG)
+                                        .show()
+                                }
+                            )
+                            vm.messages.update { Result.success(listOf()) }
+                        }
+                    }
+                }.launchIn(lifecycleScope)
             }
         }
         App.instance.messages.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach { posts ->
@@ -73,23 +90,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 it.isOurs(uname)
             })
             App.instance.messages.update { listOf() }
-        }.launchIn(lifecycleScope)
-        vm.messages.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach {
-            when (it) {
-                null -> {}
-                else -> {
-                    it.fold(
-                        onSuccess = { posts ->
-                            adapter.addToEnd(posts, false)
-                        },
-                        onFailure = { error ->
-                            Toast.makeText(requireContext(), error.message, Toast.LENGTH_LONG)
-                                .show()
-                        }
-                    )
-                    vm.messages.update { Result.success(listOf()) }
-                }
-            }
         }.launchIn(lifecycleScope)
         vm.loadMessages()
     }
