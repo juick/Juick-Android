@@ -15,5 +15,6 @@ google/**
 huawei/**
 free/**
 .kotlin
-src/store
+src/store/*
+!src/store/AndroidManifest.xml
 src/google/google-services.json
