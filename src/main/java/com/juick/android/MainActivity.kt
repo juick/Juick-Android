@@ -403,6 +403,9 @@ class MainActivity : AppCompatActivity() {
             val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
             val navController = navHostFragment.navController
             when (pathSegments.size) {
+                0 -> {
+                    navController.navigate(R.id.home)
+                }
                 1 -> {
                     openUri(data)
                 }
