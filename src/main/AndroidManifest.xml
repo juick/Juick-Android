@@ -101,6 +101,7 @@
             />
         <activity
             android:name=".android.SignUpActivity"
+            android:launchMode="singleTask"
             android:exported="false"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             />

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -21,8 +21,9 @@ import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager
 import android.content.Intent
 import android.os.Bundle
-import android.text.TextUtils
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -48,8 +49,23 @@ class SignInActivity : AppCompatActivity() {
     private var currentAction = 0
     private lateinit var model: ActivityLoginBinding
     private val application = App.instance
+    private lateinit var signUpLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        signUpLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                result.data?.extras?.let {
+                    // sign in with the new account after signup
+                    updateAccount(it.getString("nick", ""),
+                        it.getString("hash", ""), currentAction)
+                } ?: run {
+                    Toast.makeText(
+                        this@SignInActivity, R.string.Error,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         authenticatorResponse =
             intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
         authenticatorResponse?.onRequestContinued()
@@ -87,35 +103,41 @@ class SignInActivity : AppCompatActivity() {
             ?.let { signInButton ->
                 signInButton.setOnClickListener {
                     lifecycleScope.launch {
-                        application.signInProvider?.performSignIn()?.fold(
-                            onSuccess = { bundle ->
-                                val nick = bundle.getString("nick") ?: ""
-                                val password = bundle.getString("password")
-                                val hash = bundle.getString("hash") ?: ""
-                                password?.let {
-                                    // sign in with the new account after signup
-                                    model.juickNick.setText(nick)
-                                    model.juickPassword.setText(password)
-                                    model.buttonSave.performClick()
-                                } ?: run {
-                                    // update existing account
-                                    updateAccount(
-                                        nick,
-                                        hash,
-                                        ACTION_ACCOUNT_CREATE
-                                    )
+                        try {
+                            application.signInProvider?.performSignIn()?.fold(
+                                onSuccess = { bundle ->
+                                    val nick = bundle.getString("nick") ?: ""
+                                    val account = bundle.getString("email") ?: ""
+                                    val authCode = bundle.getString("authCode")
+                                    val hash = bundle.getString("hash") ?: ""
+                                    authCode?.let {
+                                        val signupIntent =
+                                            Intent(this@SignInActivity, SignUpActivity::class.java)
+                                        signupIntent.putExtra("email", account)
+                                        signupIntent.putExtra("authCode", authCode)
+                                        signUpLauncher.launch(signupIntent)
+                                    } ?: run {
+                                        // update existing account
+                                        updateAccount(
+                                            nick,
+                                            hash,
+                                            ACTION_ACCOUNT_CREATE
+                                        )
+                                    }
+                                },
+                                onFailure = {
+                                    Toast.makeText(
+                                        this@SignInActivity,
+                                        it.localizedMessage, Toast.LENGTH_LONG
+                                    ).show()
                                 }
-                            },
-                            onFailure = {
-                                val builder = AlertDialog.Builder(this@SignInActivity)
-                                builder.setNeutralButton(android.R.string.ok) { _, _ ->
-                                    setResult(RESULT_CANCELED)
-                                    finish()
-                                }
-                                builder.setMessage(it.localizedMessage)
-                                builder.show()
-                            }
-                        )
+                            )
+                        } catch (e: Exception) {
+                            Toast.makeText(
+                                this@SignInActivity,
+                                e.localizedMessage, Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
             }

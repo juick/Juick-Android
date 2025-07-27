@@ -36,19 +36,13 @@ class SignUpActivity : AppCompatActivity() {
         val authCode = intent.getStringExtra("authCode")
         model.buttonCreate.setOnClickListener {
             val nick = model.newNick.text.toString()
-            val password = model.newPassword.text.toString()
-            val confirm = model.confirmPassword.text.toString()
-            if (password != confirm) {
-                Toast.makeText(this, "Passwords did not match", Toast.LENGTH_LONG).show()
-                return@setOnClickListener
-            }
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    App.instance.api.signup(nick, password, authCode)
+                    val user = App.instance.api.signup(nick, authCode)
                     withContext(Dispatchers.Main) {
                         val successIntent = Intent()
                         successIntent.putExtra("nick", nick)
-                        successIntent.putExtra("password", password)
+                        successIntent.putExtra("hash", user.hash)
                         setResult(RESULT_OK, successIntent)
                         finish()
                     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -16,7 +16,6 @@
  */
 package com.juick.android
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.RelativeLayout
@@ -26,12 +25,4 @@ interface SignInProvider {
 
     fun prepareSignIn(context: ComponentActivity, button: RelativeLayout): View?
     suspend fun performSignIn(): Result<Bundle>
-    fun onSignInResult(
-        requestCode: Int, resultCode: Int, data: Intent?,
-        requestCallback: SignInRequestCallback, successCallback: SignInSuccessCallback
-    ) {
-    }
 }
-
-typealias SignInRequestCallback = ((username: String, password: String) -> Unit)
-typealias SignInSuccessCallback = ((username: String, hash: String) -> Unit)

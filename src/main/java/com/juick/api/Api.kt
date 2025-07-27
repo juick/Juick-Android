@@ -71,9 +71,9 @@ interface Api {
     @FormUrlEncoded
     @POST("signup")
     suspend fun signup(
-        @Field("username") username: String?, @Field("password") password: String?,
+        @Field("username") username: String?,
         @Field("verificationCode") verificationCode: String?
-    )
+    ): User
     @GET("apps/android/releases")
     suspend fun releases(): List<Release>
 
