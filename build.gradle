@@ -49,9 +49,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = '17'
-    }
     signingConfigs {
         release {
             keyAlias keystoreProperties['keyAlias']
@@ -108,6 +105,10 @@ android {
         variant.resValue "string", "messages_provider_authority", "${applicationId}.messages"
         project.tasks.getByName('process' + variant.name.capitalize() + 'GoogleServices').enabled variant.name.contains('google')
     }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 tasks.withType(JavaCompile).configureEach {
