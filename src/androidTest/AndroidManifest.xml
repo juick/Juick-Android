@@ -27,11 +27,5 @@
             tools:node="merge">
             <intent-filter tools:node="removeAll" />
         </activity>
-        <activity
-            android:name="androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity"
-            android:exported="true"
-            tools:node="merge">
-            <intent-filter tools:node="removeAll" />
-        </activity>
     </application>
 </manifest>

@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.juick.App
 import com.juick.R
 import com.juick.android.Account
@@ -34,11 +35,15 @@ import com.juick.databinding.FragmentChatBinding
 import com.stfalcon.chatkit.messages.MessagesListAdapter
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.Dispatchers
+import android.text.util.Linkify
+import android.text.method.LinkMovementMethod
+import android.widget.TextView
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.regex.Pattern
 
 /**
  *
@@ -50,6 +55,40 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private lateinit var vm: ChatViewModel
     private lateinit var adapter: MessagesListAdapter<Post>
     private lateinit var uname: String
+
+    // Helper: traverse a view subtree and make links clickable
+    private fun applyLinkifyToView(root: android.view.View) {
+        fun traverse(v: android.view.View) {
+            if (v is TextView && v.id == com.stfalcon.chatkit.R.id.messageText) {
+                // detect all link types: web, email, phone, map and custom schemes
+                Linkify.addLinks(v, Linkify.ALL)
+
+                // Ensure custom scheme links are recognized
+                // Match <scheme>://<non-space-chars>
+                val schemePattern = Pattern.compile("\\b([a-zA-Z][\\w+.-]*):\\/\\/([^\\s]+)", Pattern.CASE_INSENSITIVE)
+                val schemeTransform = Linkify.TransformFilter { match, _ ->
+                    // return the full matched URL (scheme://rest)
+                    "${'$'}{match.group(1)}://${'$'}{match.group(2)}"
+                }
+                // Pass empty scheme - transform returns the full URL
+                Linkify.addLinks(v, schemePattern, "", null, schemeTransform)
+
+                v.movementMethod = LinkMovementMethod.getInstance()
+                v.isClickable = true
+                v.isFocusable = true
+                v.linksClickable = true
+            } else if (v is android.view.ViewGroup) {
+                for (i in 0 until v.childCount) traverse(v.getChildAt(i))
+            }
+        }
+        traverse(root)
+    }
+
+    // Convenience: apply linkify to all currently visible message views
+    private fun applyLinkifyToVisibleMessages() {
+        val root = model.messagesList as? android.view.View ?: return
+        applyLinkifyToView(root)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -66,6 +105,18 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                     imageView.load(url ?: "")
                 }
                 model.messagesList.setAdapter(adapter)
+                // ensure visible message TextViews have clickable links
+                applyLinkifyToVisibleMessages()
+                // attach a listener to linkify views when they are attached (covers viewholder binding ordering)
+                model.messagesList.addOnChildAttachStateChangeListener(object : RecyclerView.OnChildAttachStateChangeListener {
+                    override fun onChildViewAttachedToWindow(view: View) {
+                        applyLinkifyToView(view)
+                    }
+
+                    override fun onChildViewDetachedFromWindow(view: View) {
+                        // no-op
+                    }
+                })
                 vm.messages.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED).onEach { newPosts ->
                     when (newPosts) {
                         null -> {}
@@ -73,6 +124,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                             newPosts.fold(
                                 onSuccess = { posts ->
                                     adapter.addToEnd(posts, false)
+                                    // newly added messages might need linkify
+                                    applyLinkifyToVisibleMessages()
                                 },
                                 onFailure = { error ->
                                     Toast.makeText(requireContext(), error.message, Toast.LENGTH_LONG)
