@@ -231,4 +231,4 @@ DEPENDENCIES
   fastlane-plugin-load_json (~> 0.0.1)
 
 BUNDLED WITH
-   1.17.2
+   2.4.22
