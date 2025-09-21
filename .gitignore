@@ -30,3 +30,4 @@ src/google/google-services.json
 # scan temporary files
 **/fastlane/test_output
 .env
+vendor/bundle
