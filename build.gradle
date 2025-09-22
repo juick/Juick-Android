@@ -173,7 +173,7 @@ dependencies {
 
     androidTestImplementation libs.espresso.core
     // Espresso intents for intercepting ACTION_VIEW
-    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.7.0'
     // Fragment testing helpers (launchFragmentInContainer)
     androidTestImplementation 'androidx.fragment:fragment-testing:1.5.7'
     // UI Automator
