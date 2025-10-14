@@ -139,12 +139,6 @@ class JuickMessageMenuListener(
                 itemText
             )
         } else {
-            if (post.rid == 0) {
-                popupMenu.menu.add(
-                    Menu.NONE, MENU_ACTION_RECOMMEND, Menu.NONE,
-                    context.getString(R.string.Recommend_message)
-                )
-            }
             val userName = post.user.uname
             popupMenu.menu.add(
                 Menu.NONE, MENU_ACTION_BLOG, Menu.NONE,
@@ -302,7 +296,6 @@ class JuickMessageMenuListener(
     }
 
     companion object {
-        private const val MENU_ACTION_RECOMMEND = 1
         private const val MENU_ACTION_BLOG = 2
         private const val MENU_ACTION_SUBSCRIBE = 3
         private const val MENU_ACTION_SHARE = 5
