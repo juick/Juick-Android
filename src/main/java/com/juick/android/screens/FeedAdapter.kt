@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -50,6 +50,8 @@ import com.juick.android.widget.util.loadImage
 import com.juick.android.widget.util.setDrawableTint
 import com.juick.api.model.LinkPreview
 import com.juick.api.model.Post
+import com.juick.api.model.User
+import com.juick.api.model.isLikedBy
 import com.juick.util.MessageUtils
 import com.juick.util.StringUtils
 import kotlinx.coroutines.launch
@@ -58,7 +60,7 @@ import kotlinx.coroutines.launch
  *
  * @author Ugnich Anton
  */
-class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK) {
+class FeedAdapter(private val me: User, private val showSubscriptions: Boolean = false) : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK) {
     private var loadMoreRequestListener: OnLoadMoreRequestListener? = null
     private var itemClickListener: ((View?, Int) -> Unit)? = null
     private var itemMenuListener: OnItemClickListener? = null
@@ -184,6 +186,11 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
                 holder.repliesTextView?.text = "$replies"
                 holder.likesTextView?.visibility = View.VISIBLE
                 holder.likesTextView?.text = "$likes"
+                if (post.isLikedBy(me)) {
+                    holder.likesTextView?.setTextColor(holder.itemView.context.getColor(R.color.colorAccent))
+                    holder.likesTextView?.getCompoundDrawables()[0]?.setTint(
+                        holder.itemView.context.getColor(R.color.colorAccent))
+                }
             }
         } else {
             if (post.nextRid == post.rid) {
