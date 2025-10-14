@@ -118,5 +118,5 @@ fun Post.isReply(): Boolean {
 }
 
 fun Post.isLikedBy(visitor: User): Boolean {
-    return recommendations.any { user -> user.uid == visitor.uid }
+    return recommendations.any { user -> user.uid == visitor.uid && visitor.uid > 0 }
 }
