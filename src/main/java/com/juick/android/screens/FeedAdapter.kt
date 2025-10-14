@@ -180,18 +180,21 @@ class FeedAdapter(private val me: User, private val showSubscriptions: Boolean =
             } else {
                 val replies =
                     if (post.replies > 0) post.replies else holder.itemView.context.getString(R.string.reply)
-                val likes =
-                    if (post.likes > 0) post.likes else holder.itemView.context.getString(R.string.recommend)
+
                 holder.repliesTextView?.visibility = View.VISIBLE
                 holder.repliesTextView?.text = "$replies"
-                holder.likesTextView?.visibility = View.VISIBLE
-                holder.likesTextView?.text = "$likes"
-                if (post.isLikedBy(me)) {
-                    holder.likesTextView?.setTextColor(holder.itemView.context.getColor(R.color.colorAccent))
-                    holder.likesTextView?.getCompoundDrawables()[0]?.setTint(
-                        holder.itemView.context.getColor(R.color.colorAccent))
-                }
             }
+            val likes =
+                if (post.likes > 0) post.likes else holder.itemView.context.getString(R.string.recommend)
+            holder.likesTextView?.visibility = View.VISIBLE
+            holder.likesTextView?.text = "$likes"
+            val likeTintColor = if (post.isLikedBy(me)) {
+                holder.itemView.context.getColor(R.color.colorAccent)
+            } else {
+                holder.itemView.context.getColor(android.R.color.darker_gray)
+            }
+            holder.likesTextView?.setTextColor(likeTintColor)
+            holder.likesTextView?.getCompoundDrawables()[0]?.setTint(likeTintColor)
         } else {
             if (post.nextRid == post.rid) {
                 holder.backImageView?.visibility = View.VISIBLE
