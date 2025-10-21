@@ -45,6 +45,7 @@ import com.juick.android.SignInActivity
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.android.screens.FeedAdapter
+import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.isReply
 import com.juick.databinding.FragmentThreadBinding
@@ -70,9 +71,9 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
     private var attachmentMime: String? = null
     private var mid = 0
     private var scrollToEnd = false
-    private lateinit var adapter: FeedAdapter
     private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
     private val messagePosted = MutableStateFlow<Result<PostResponse>?>(null)
+    private val apiResponded = MutableStateFlow<Result<Post>?>(null)
 
     private fun handleSelectedUri(uri: Uri?) {
         if (uri != null) {
@@ -95,7 +96,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = FeedAdapter(showSubscriptions = true)
+
         attachmentMediaLauncher = registerForActivityResult(CropImageContract()) {
             result ->
             if (result.isSuccessful) {
@@ -171,47 +172,50 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
                 model.buttonAttachment.isSelected = false
             }
         }
-        model.threadList.adapter = adapter
         val linearLayoutManager = model.threadList.layoutManager as LinearLayoutManager
-        adapter.setOnItemClickListener { widget: View?, position: Int ->
-            if (widget?.tag == null || widget.tag != "clicked") {
-                val post = adapter.currentList[position]
-                onReply(post?.rid ?: 0, StringUtils.defaultString(post?.text))
-            }
-        }
-        adapter.setOnScrollListener { _, replyTo, rid ->
-            var pos = 0
-            for (i in adapter.currentList.indices) {
-                val p = adapter.currentList[i]
-                if (p.rid == replyTo) {
-                    p.nextRid = replyTo
-                    if (p.prevRid == 0) p.prevRid = rid
-                    pos = i
-                    break
+        account.profile.observe(viewLifecycleOwner) {
+            it?.let { user ->
+                val adapter = FeedAdapter(user, showSubscriptions = true)
+                adapter.setOnMenuListener(
+                    JuickMessageMenuListener(
+                        requireActivity(), this, messagePosted, apiResponded, user
+                    )
+                )
+                adapter.setOnItemClickListener { widget: View?, position: Int ->
+                    if (widget?.tag == null || widget.tag != "clicked") {
+                        val post = adapter.currentList[position]
+                        onReply(post?.rid ?: 0, StringUtils.defaultString(post?.text))
+                    }
                 }
-            }
-            if (pos != 0) {
-                adapter.notifyItemChanged(pos)
-                model.threadList.scrollToPosition(pos)
+                adapter.setOnScrollListener { _, replyTo, rid ->
+                    var pos = 0
+                    for (i in adapter.currentList.indices) {
+                        val p = adapter.currentList[i]
+                        if (p.rid == replyTo) {
+                            p.nextRid = replyTo
+                            if (p.prevRid == 0) p.prevRid = rid
+                            pos = i
+                            break
+                        }
+                    }
+                    if (pos != 0) {
+                        adapter.notifyItemChanged(pos)
+                        model.threadList.scrollToPosition(pos)
+                    }
+                }
+                model.threadList.adapter = adapter
             }
         }
+
         model.swipeContainer.isEnabled = false
         model.threadList.visibility = View.GONE
         model.progressBar.visibility = View.VISIBLE
         load()
-        account.profile.observe(viewLifecycleOwner) {
-            it?.let { user ->
-                adapter.setOnMenuListener(
-                    JuickMessageMenuListener(
-                        requireActivity(), this, messagePosted, user
-                    )
-                )
-            }
-        }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 App.instance.messages.collect { messages ->
                     messages.forEach { post ->
+                        val adapter = (model.threadList.adapter as FeedAdapter)
                         if (adapter.itemCount > 0) {
                             if (adapter.currentList[0]?.mid == post.mid && post.isReply()
                                 && !adapter.currentList.contains(post)
@@ -259,6 +263,26 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
                 }
             }
         }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                apiResponded.collect { response ->
+                    when (response) {
+                        null -> {}
+                        else -> {
+                            response.fold(
+                                onSuccess = {
+                                    load()
+                                },
+                                onFailure = {
+                                    Toast.makeText (context, it.localizedMessage, Toast.LENGTH_LONG).show()
+                                }
+                            )
+                            apiResponded.update { null }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun load() {
@@ -268,7 +292,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
                 withContext(Dispatchers.Main) {
                     model.threadList.visibility = View.VISIBLE
                     model.progressBar.visibility = View.GONE
-                    adapter.submitList(posts)
+                    (model.threadList.adapter as FeedAdapter).submitList(posts)
                     if (scrollToEnd) {
                         model.threadList.scrollToPosition(posts.size - 1)
                     }

@@ -51,6 +51,7 @@ data class Post(
     var friendsOnly: Boolean = false
     @SerialName("service")
     var isService = false
+    var recommendations: List<User> = ArrayList()
 
     @Transient
     var nextRid = 0
@@ -114,4 +115,8 @@ data class Post(
 
 fun Post.isReply(): Boolean {
     return rid > 0
+}
+
+fun Post.isLikedBy(visitor: User): Boolean {
+    return recommendations.any { user -> user.uid == visitor.uid && visitor.uid > 0 }
 }

@@ -52,6 +52,16 @@ interface Api {
         @Part file: MultipartBody.Part?
     ): PostResponse
 
+    @POST("like")
+    suspend fun like(
+        @Query("mid") mid: Int
+    ): Post
+
+    @POST("subscribe")
+    suspend fun subscribe(
+        @Query("mid") mid: Int
+    ): Post
+
     @GET("tags")
     suspend fun tags(): List<Tag>
 

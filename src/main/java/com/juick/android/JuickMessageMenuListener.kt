@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -16,15 +16,17 @@
  */
 package com.juick.android
 
+import account
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -35,8 +37,10 @@ import com.juick.android.screens.FeedAdapter
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.User
+import com.juick.api.model.isLikedBy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -48,6 +52,7 @@ class JuickMessageMenuListener(
     private val activity: Context,
     private val fragment: Fragment,
     private val receiver: MutableStateFlow<Result<PostResponse>?>,
+    private val postReceiver: MutableStateFlow<Result<Post>?>,
     private val me: User
 ) : FeedAdapter.OnItemClickListener {
 
@@ -62,12 +67,9 @@ class JuickMessageMenuListener(
         return result
     }
 
-    private fun likeMessage(post: Post) : Boolean {
-        return confirmAction(
-            activity,
-            R.string.Are_you_sure_recommend
-        ) {
-            processCommand("! #${post.mid}")
+    private suspend fun likeMessage(post: Post): Result<Post>? {
+        return runCatching {
+            App.instance.api.like(post.mid)
         }
     }
 
@@ -88,21 +90,9 @@ class JuickMessageMenuListener(
         }
     }
 
-    private fun subscribeMessageToggle(post: Post): Boolean {
-        return if (post.subscribed) {
-            confirmAction(
-                activity,
-                R.string.unsubscribe_from_comments
-            ) {
-                processCommand("U #${post.mid}")
-            }
-        } else {
-            confirmAction(
-                activity,
-                R.string.subscribe_to_comments
-            ) {
-                processCommand("S #${post.mid}")
-            }
+    private suspend fun subscribeMessageToggle(post: Post): Result<Post> {
+        return runCatching {
+            App.instance.api.subscribe(post.mid)
         }
     }
 
@@ -149,12 +139,6 @@ class JuickMessageMenuListener(
                 itemText
             )
         } else {
-            if (post.rid == 0) {
-                popupMenu.menu.add(
-                    Menu.NONE, MENU_ACTION_RECOMMEND, Menu.NONE,
-                    context.getString(R.string.Recommend_message)
-                )
-            }
             val userName = post.user.uname
             popupMenu.menu.add(
                 Menu.NONE, MENU_ACTION_BLOG, Menu.NONE,
@@ -206,7 +190,6 @@ class JuickMessageMenuListener(
                     navController.navigate(R.id.blog, args)
                     true
                 }
-                MENU_ACTION_RECOMMEND -> likeMessage(post)
                 MENU_ACTION_SUBSCRIBE -> confirmAction(
                     activity,
                     R.string.Are_you_sure_subscribe
@@ -272,17 +255,38 @@ class JuickMessageMenuListener(
         popupMenu.show()
     }
 
+    private fun handleLike(post: Post) {
+        val scope = (activity as LifecycleOwner).lifecycleScope
+        scope.launch {
+            postReceiver.update {
+                likeMessage(post)
+            }
+        }
+    }
+
     override fun onLikeClick(view: View?, post: Post) {
-        likeMessage(post)
+        val liked = post.isLikedBy(me)
+        if (liked) {
+            handleLike(post)
+        } else {
+            confirmAction(activity, R.string.Are_you_sure_recommend) {
+                handleLike(post)
+            }
+        }
     }
 
     override fun onSubscribeToggleClick(post: Post) {
-        subscribeMessageToggle(post)
+        val scope = (activity as LifecycleOwner).lifecycleScope
+        scope.launch {
+            postReceiver.update {
+                subscribeMessageToggle(post)
+            }
+        }
     }
 
     override fun onLinkClick(url: String) {
         (activity as MainActivity).apply {
-            processUri(Uri.parse(url))
+            processUri(url.toUri())
         }
     }
 
@@ -292,7 +296,6 @@ class JuickMessageMenuListener(
     }
 
     companion object {
-        private const val MENU_ACTION_RECOMMEND = 1
         private const val MENU_ACTION_BLOG = 2
         private const val MENU_ACTION_SUBSCRIBE = 3
         private const val MENU_ACTION_SHARE = 5

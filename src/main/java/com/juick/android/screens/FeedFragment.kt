@@ -51,38 +51,46 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
     protected val vm by viewModels<FeedViewModel>()
     internal val account by activityViewModels<Account>()
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
-    private lateinit var adapter: FeedAdapter
     private var firstPage = true
     private val _postsKey = "posts"
     private val messagePosted = MutableStateFlow<Result<PostResponse>?>(null)
+    private val apiResponded = MutableStateFlow<Result<Post>?>(null)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        adapter = FeedAdapter()
-        binding.feedList.adapter = adapter
-        adapter.setOnItemClickListener { _, pos ->
-            adapter.currentList[pos]?.let {
-                post ->
-                val threadArgs = Bundle()
-                threadArgs.putInt("mid", post.mid)
-                findNavController(this).navigate(R.id.thread, threadArgs)
-            }
-        }
-        adapter.setOnLoadMoreRequestListener(
-            object : OnLoadMoreRequestListener {
-                override fun onLoadMore() {
-                    if (vm.feed.value == null) return
-                    adapter.currentList[adapter.itemCount - 1]?.let {
-                        lastItem ->
-                        val requestUrl = Utils.buildUrl(vm.apiUrl.value)
-                            .build()
-                            .replaceUriParameter("before_mid", lastItem.mid.toString())
-                            .toString()
-                        firstPage = false
-                        vm.apiUrl.value = requestUrl
+        account.profile.observe(viewLifecycleOwner) {
+            it?.let { user ->
+                val adapter = FeedAdapter(user)
+                adapter.setOnItemClickListener { _, pos ->
+                    adapter.currentList[pos]?.let { post ->
+                        val threadArgs = Bundle()
+                        threadArgs.putInt("mid", post.mid)
+                        findNavController(this).navigate(R.id.thread, threadArgs)
                     }
                 }
-            })
+                adapter.setOnLoadMoreRequestListener(
+                    object : OnLoadMoreRequestListener {
+                        override fun onLoadMore() {
+                            if (vm.feed.value == null) return
+                            adapter.currentList[adapter.itemCount - 1]?.let { lastItem ->
+                                val requestUrl = Utils.buildUrl(vm.apiUrl.value)
+                                    .build()
+                                    .replaceUriParameter("before_mid", lastItem.mid.toString())
+                                    .toString()
+                                firstPage = false
+                                vm.apiUrl.value = requestUrl
+                            }
+                        }
+                    })
+                binding.feedList.adapter = adapter
+                val initialState: List<Post>? = vm.state[_postsKey]
+                if (initialState != null) {
+                    (binding.feedList.adapter as FeedAdapter).submitList(initialState)
+                }
+            }
+        }
+
+
 
         binding.swipeContainer.setColorSchemeColors(
             ContextCompat.getColor(
@@ -96,9 +104,10 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
         }
         account.profile.observe(viewLifecycleOwner) {
             it?.let { user ->
-                adapter.setOnMenuListener(
+                (binding.feedList.adapter as FeedAdapter).setOnMenuListener(
                     JuickMessageMenuListener(
-                        requireActivity(), this, messagePosted, user
+                        requireActivity(), this, messagePosted,
+                        apiResponded,user
                     )
                 )
             }
@@ -128,13 +137,13 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
                                     if (posts.isNotEmpty()) {
                                         posts.let {
                                             val needToScroll =
-                                                haveNewPosts(adapter.currentList, it)
+                                                haveNewPosts((binding.feedList.adapter as FeedAdapter).currentList, it)
                                             val newList = if (firstPage) {
                                                 it
                                             } else {
-                                                adapter.currentList + it
+                                                (binding.feedList.adapter as FeedAdapter).currentList + it
                                             }
-                                            adapter.submitList(newList)
+                                            (binding.feedList.adapter as FeedAdapter).submitList(newList)
                                             vm.state[_postsKey] = newList
                                             if (needToScroll) {
                                                 binding.feedRefreshButton.isVisible = true
@@ -183,9 +192,26 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
                 }
             }
         }
-        val initialState: List<Post>? = vm.state[_postsKey]
-        if (initialState != null) {
-            adapter.submitList(initialState)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                apiResponded.collect { response ->
+                    when (response) {
+                        null -> {}
+                        else -> {
+                            response.fold(
+                                onSuccess = {
+                                    account.refresh()
+                                    refreshFeed()
+                                },
+                                onFailure = {
+
+                                }
+                            )
+                            apiResponded.update { null }
+                        }
+                    }
+                }
+            }
         }
     }
     private fun refreshFeed() {
