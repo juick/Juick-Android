@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -204,35 +205,36 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
                     }
                 }
                 model.threadList.adapter = adapter
+                load()
+                lifecycleScope.launch {
+                    repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                        App.instance.messages.collect { messages ->
+                            messages.forEach { post ->
+                                val adapter = (model.threadList.adapter as FeedAdapter)
+                                if (adapter.itemCount > 0) {
+                                    if (adapter.currentList[0]?.mid == post.mid && post.isReply()
+                                        && !adapter.currentList.contains(post)
+                                    ) {
+                                        adapter.submitList(adapter.currentList + post)
+                                        val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
+                                        val total = adapter.currentList.size - 1 - 1
+                                        if (lastVisible == total) {
+                                            model.threadList.scrollToPosition(post.rid)
+                                        }
+                                    }
+                                }
+                            }
+                            App.instance.messages.update { listOf() }
+                        }
+                    }
+                }
             }
         }
 
         model.swipeContainer.isEnabled = false
         model.threadList.visibility = View.GONE
         model.progressBar.visibility = View.VISIBLE
-        load()
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                App.instance.messages.collect { messages ->
-                    messages.forEach { post ->
-                        val adapter = (model.threadList.adapter as FeedAdapter)
-                        if (adapter.itemCount > 0) {
-                            if (adapter.currentList[0]?.mid == post.mid && post.isReply()
-                                && !adapter.currentList.contains(post)
-                            ) {
-                                adapter.submitList(adapter.currentList + post)
-                                val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
-                                val total = adapter.currentList.size - 1 - 1
-                                if (lastVisible == total) {
-                                    model.threadList.scrollToPosition(post.rid)
-                                }
-                            }
-                        }
-                    }
-                    App.instance.messages.update { listOf() }
-                }
-            }
-        }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 messagePosted.collect { response ->
@@ -298,6 +300,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
                     }
                 }
             } catch (e: Exception) {
+                Log.e("Thread", "Load error", e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         App.instance,
