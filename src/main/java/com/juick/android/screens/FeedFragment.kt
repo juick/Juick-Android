@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -82,15 +82,72 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
                             }
                         }
                     })
+                adapter.setOnMenuListener(
+                    JuickMessageMenuListener(
+                        requireActivity(), this, messagePosted,
+                        apiResponded,user
+                    )
+                )
+
+                lifecycleScope.launch {
+                    viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                        vm.feed.collect { result ->
+                            when (result) {
+                                null -> {
+                                    if (firstPage) {
+                                        binding.progressBar.visibility = View.VISIBLE
+                                        binding.feedList.visibility = View.GONE
+                                        binding.errorText.visibility = View.GONE
+                                    }
+                                }
+
+                                else -> {
+                                    result.fold(
+                                        onSuccess = { posts ->
+                                            stopRefreshing()
+                                            if (posts.isNotEmpty()) {
+                                                posts.let {
+                                                    val needToScroll =
+                                                        haveNewPosts(adapter.currentList, it)
+                                                    val newList = if (firstPage) {
+                                                        it
+                                                    } else {
+                                                        adapter.currentList + it
+                                                    }
+                                                    adapter.submitList(newList)
+                                                    vm.state[_postsKey] = newList
+                                                    if (needToScroll) {
+                                                        binding.feedRefreshButton.isVisible = true
+                                                    }
+                                                }
+                                                vm.feedReceived()
+                                            }
+                                        },
+                                        onFailure = { exception ->
+                                            stopRefreshing()
+                                            Toast.makeText(
+                                                requireContext(),
+                                                exception.message,
+                                                Toast.LENGTH_LONG
+                                            )
+                                                .show()
+                                            if (firstPage) {
+                                                setError(exception.message ?: getString(R.string.Error))
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
                 binding.feedList.adapter = adapter
                 val initialState: List<Post>? = vm.state[_postsKey]
                 if (initialState != null) {
-                    (binding.feedList.adapter as FeedAdapter).submitList(initialState)
+                    adapter.submitList(initialState)
                 }
             }
         }
-
-
 
         binding.swipeContainer.setColorSchemeColors(
             ContextCompat.getColor(
@@ -102,73 +159,11 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
         binding.swipeContainer.setOnRefreshListener {
             refreshFeed()
         }
-        account.profile.observe(viewLifecycleOwner) {
-            it?.let { user ->
-                (binding.feedList.adapter as FeedAdapter).setOnMenuListener(
-                    JuickMessageMenuListener(
-                        requireActivity(), this, messagePosted,
-                        apiResponded,user
-                    )
-                )
-            }
-        }
         binding.feedRefreshButton.setOnClickListener {
             binding.feedList.postDelayed({
                 binding.feedList.layoutManager?.scrollToPosition(0)
                 binding.feedRefreshButton.isVisible = false
             }, 200)
-        }
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                vm.feed.collect { result ->
-                    when (result) {
-                        null -> {
-                            if (firstPage) {
-                                binding.progressBar.visibility = View.VISIBLE
-                                binding.feedList.visibility = View.GONE
-                                binding.errorText.visibility = View.GONE
-                            }
-                        }
-
-                        else -> {
-                            result.fold(
-                                onSuccess = { posts ->
-                                    stopRefreshing()
-                                    if (posts.isNotEmpty()) {
-                                        posts.let {
-                                            val needToScroll =
-                                                haveNewPosts((binding.feedList.adapter as FeedAdapter).currentList, it)
-                                            val newList = if (firstPage) {
-                                                it
-                                            } else {
-                                                (binding.feedList.adapter as FeedAdapter).currentList + it
-                                            }
-                                            (binding.feedList.adapter as FeedAdapter).submitList(newList)
-                                            vm.state[_postsKey] = newList
-                                            if (needToScroll) {
-                                                binding.feedRefreshButton.isVisible = true
-                                            }
-                                        }
-                                        vm.feedReceived()
-                                    }
-                                },
-                                onFailure = { exception ->
-                                    stopRefreshing()
-                                    Toast.makeText(
-                                        requireContext(),
-                                        exception.message,
-                                        Toast.LENGTH_LONG
-                                    )
-                                        .show()
-                                    if (firstPage) {
-                                        setError(exception.message ?: getString(R.string.Error))
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            }
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
