@@ -37,7 +37,6 @@ import com.juick.android.screens.FeedAdapter
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.User
-import com.juick.api.model.isLikedBy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -265,8 +264,7 @@ class JuickMessageMenuListener(
     }
 
     override fun onLikeClick(view: View?, post: Post) {
-        val liked = post.isLikedBy(me)
-        if (liked) {
+        if (post.liked) {
             handleLike(post)
         } else {
             confirmAction(activity, R.string.Are_you_sure_recommend) {

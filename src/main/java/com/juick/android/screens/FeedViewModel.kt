@@ -16,6 +16,7 @@
  */
 package com.juick.android.screens
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,16 +28,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.URI
+import java.net.URL
 
 open class FeedViewModel(val state: SavedStateHandle) : ViewModel() {
-    val apiUrl: MutableStateFlow<String> = MutableStateFlow("")
+    val apiUrl: MutableStateFlow<Uri> = MutableStateFlow(Uri.EMPTY)
     private val _feed: MutableStateFlow<Result<List<Post>>?> = MutableStateFlow(null)
     val feed = _feed.asStateFlow()
 
     init {
         viewModelScope.launch {
             apiUrl.collect { url ->
-                if (url.isNotEmpty()) {
+                if (url != Uri.EMPTY) {
                     _feed.update {
                         runCatching {
                             val posts = withContext(Dispatchers.IO) {

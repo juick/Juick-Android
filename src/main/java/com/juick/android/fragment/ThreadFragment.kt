@@ -118,6 +118,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        model.threadList.adapter = FeedAdapter(true)
         (dialog as? BottomSheetDialog)?.behavior?.let {
             it.state = BottomSheetBehavior.STATE_EXPANDED
             it.isDraggable = false
@@ -176,7 +177,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
         val linearLayoutManager = model.threadList.layoutManager as LinearLayoutManager
         account.profile.observe(viewLifecycleOwner) {
             it?.let { user ->
-                val adapter = FeedAdapter(user, showSubscriptions = true)
+                val adapter = model.threadList.adapter as FeedAdapter
                 adapter.setOnMenuListener(
                     JuickMessageMenuListener(
                         requireActivity(), this, messagePosted, apiResponded, user

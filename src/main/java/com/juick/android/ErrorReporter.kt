@@ -22,6 +22,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import java.lang.Thread.UncaughtExceptionHandler
+import androidx.core.net.toUri
 
 class ErrorReporter(
     private val context: Context,
@@ -43,7 +44,7 @@ class ErrorReporter(
             .appendQueryParameter("subject", subject)
             .build()
         val targetUri =
-            Uri.parse(Uri.fromParts("mailto", email, null).toString() + parameters.toString())
+            (Uri.fromParts("mailto", email, null).toString() + parameters.toString()).toUri()
         intent.data = targetUri
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         try {

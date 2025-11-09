@@ -16,6 +16,7 @@
  */
 package com.juick.api
 
+import android.net.Uri
 import com.juick.android.updater.Release
 import com.juick.api.model.*
 import com.juick.api.model.Tag
@@ -24,6 +25,7 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
+import java.net.URL
 
 /**
  * Created by gerc on 14.02.2016.
@@ -36,7 +38,7 @@ interface Api {
     @POST("messages/set_privacy")
     suspend fun togglePrivacy(@Query("mid") mid: Int): Response<Void>
     @GET
-    suspend fun getPosts(@Url url: String): List<Post>
+    suspend fun getPosts(@Url url: Uri): List<Post>
 
     @GET("pm")
     suspend fun pm(@Query("uname") uname: String): List<Post>

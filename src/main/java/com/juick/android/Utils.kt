@@ -71,8 +71,7 @@ object Utils {
     }
 
     @Throws(URISyntaxException::class)
-    fun buildUrl(url: String): Uri.Builder {
-        val uri = Uri.parse(url)
+    fun buildUrl(uri: Uri): Uri.Builder {
         return Uri.Builder()
             .scheme(uri.scheme)
             .authority(uri.authority)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -29,13 +29,14 @@ import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+import androidx.core.net.toUri
 
 class NotificationManager {
     private lateinit var events: ServerSentEvent
     fun onResume() {
         val es = eventsFactory!!
             .readTimeout(0, TimeUnit.SECONDS).build()
-        val uri = Utils.buildUrl(BuildConfig.EVENTS_ENDPOINT)
+        val uri = Utils.buildUrl(BuildConfig.EVENTS_ENDPOINT.toUri())
         val hash = App.instance.accountData
         if (hash.isNotEmpty()) {
             uri.appendQueryParameter("hash", hash)

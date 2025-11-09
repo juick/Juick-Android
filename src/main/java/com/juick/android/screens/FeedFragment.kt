@@ -58,9 +58,10 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.feedList.adapter = FeedAdapter()
         account.profile.observe(viewLifecycleOwner) {
             it?.let { user ->
-                val adapter = FeedAdapter(user)
+                val adapter = binding.feedList.adapter as FeedAdapter
                 adapter.setOnItemClickListener { _, pos ->
                     adapter.currentList[pos]?.let { post ->
                         val threadArgs = Bundle()
@@ -73,10 +74,12 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
                         override fun onLoadMore() {
                             if (vm.feed.value == null) return
                             adapter.currentList[adapter.itemCount - 1]?.let { lastItem ->
+                                val oldValue = vm.apiUrl.value.getQueryParameter("before_mid")
+                                if ("${lastItem.mid}" == oldValue) return
                                 val requestUrl = Utils.buildUrl(vm.apiUrl.value)
                                     .build()
                                     .replaceUriParameter("before_mid", lastItem.mid.toString())
-                                    .toString()
+                                    .replaceUriParameter("ts", "${System.currentTimeMillis()}")
                                 firstPage = false
                                 vm.apiUrl.value = requestUrl
                             }
@@ -106,19 +109,17 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
                                         onSuccess = { posts ->
                                             stopRefreshing()
                                             if (posts.isNotEmpty()) {
-                                                posts.let {
-                                                    val needToScroll =
-                                                        haveNewPosts(adapter.currentList, it)
-                                                    val newList = if (firstPage) {
-                                                        it
-                                                    } else {
-                                                        adapter.currentList + it
-                                                    }
-                                                    adapter.submitList(newList)
-                                                    vm.state[_postsKey] = newList
-                                                    if (needToScroll) {
-                                                        binding.feedRefreshButton.isVisible = true
-                                                    }
+                                                val needToScroll =
+                                                    haveNewPosts(adapter.currentList, posts)
+                                                val newList = if (firstPage) {
+                                                    posts
+                                                } else {
+                                                    adapter.currentList + posts
+                                                }
+                                                adapter.submitList(newList)
+                                                vm.state[_postsKey] = newList
+                                                if (needToScroll) {
+                                                    binding.feedRefreshButton.isVisible = true
                                                 }
                                                 vm.feedReceived()
                                             }
@@ -215,7 +216,6 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
             .build()
             .replaceUriParameter("before_mid", "")
             .replaceUriParameter("ts", "${System.currentTimeMillis()}")
-            .toString()
         vm.apiUrl.value = newUrl
         account.refresh()
     }
