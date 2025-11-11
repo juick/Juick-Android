@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
 /**
  * Created by gerc on 03.06.2016.
  */
-open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
+open class FeedFragment : Fragment(R.layout.fragment_posts_page) {
     protected val vm by viewModels<FeedViewModel>()
     internal val account by activityViewModels<Account>()
     private val binding by viewBinding(FragmentPostsPageBinding::bind)
@@ -58,95 +58,94 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.feedList.adapter = FeedAdapter()
-        account.profile.observe(viewLifecycleOwner) {
-            it?.let { user ->
-                val adapter = binding.feedList.adapter as FeedAdapter
-                adapter.setOnItemClickListener { _, pos ->
-                    adapter.currentList[pos]?.let { post ->
-                        val threadArgs = Bundle()
-                        threadArgs.putInt("mid", post.mid)
-                        findNavController(this).navigate(R.id.thread, threadArgs)
+        val adapter = FeedAdapter()
+        adapter.setOnItemClickListener { _, pos ->
+            adapter.currentList[pos]?.let { post ->
+                val threadArgs = Bundle()
+                threadArgs.putInt("mid", post.mid)
+                findNavController(this).navigate(R.id.thread, threadArgs)
+            }
+        }
+        adapter.setOnLoadMoreRequestListener(
+            object : OnLoadMoreRequestListener {
+                override fun onLoadMore() {
+                    if (vm.feed.value == null) return
+                    adapter.currentList[adapter.itemCount - 1]?.let { lastItem ->
+                        val oldValue = vm.apiUrl.value.getQueryParameter("before_mid")
+                        if ("${lastItem.mid}" == oldValue) return
+                        val requestUrl = Utils.buildUrl(vm.apiUrl.value)
+                            .build()
+                            .replaceUriParameter("before_mid", lastItem.mid.toString())
+                            .replaceUriParameter("ts", "${System.currentTimeMillis()}")
+                        firstPage = false
+                        vm.apiUrl.value = requestUrl
                     }
                 }
-                adapter.setOnLoadMoreRequestListener(
-                    object : OnLoadMoreRequestListener {
-                        override fun onLoadMore() {
-                            if (vm.feed.value == null) return
-                            adapter.currentList[adapter.itemCount - 1]?.let { lastItem ->
-                                val oldValue = vm.apiUrl.value.getQueryParameter("before_mid")
-                                if ("${lastItem.mid}" == oldValue) return
-                                val requestUrl = Utils.buildUrl(vm.apiUrl.value)
-                                    .build()
-                                    .replaceUriParameter("before_mid", lastItem.mid.toString())
-                                    .replaceUriParameter("ts", "${System.currentTimeMillis()}")
-                                firstPage = false
-                                vm.apiUrl.value = requestUrl
+            })
+        binding.feedList.adapter = adapter
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                vm.feed.collect { result ->
+                    when (result) {
+                        null -> {
+                            if (firstPage) {
+                                binding.progressBar.visibility = View.VISIBLE
+                                binding.feedList.visibility = View.GONE
+                                binding.errorText.visibility = View.GONE
                             }
                         }
-                    })
+
+                        else -> {
+                            result.fold(
+                                onSuccess = { posts ->
+                                    stopRefreshing()
+                                    if (posts.isNotEmpty()) {
+                                        val needToScroll =
+                                            haveNewPosts(adapter.currentList, posts)
+                                        val newList = if (firstPage) {
+                                            posts
+                                        } else {
+                                            adapter.currentList + posts
+                                        }
+                                        adapter.submitList(newList) {
+                                            vm.state[_postsKey] = newList
+                                            if (needToScroll) {
+                                                binding.feedRefreshButton.isVisible = true
+                                            }
+                                            vm.feedReceived()
+                                        }
+                                    }
+                                },
+                                onFailure = { exception ->
+                                    stopRefreshing()
+                                    Toast.makeText(
+                                        requireContext(),
+                                        exception.message,
+                                        Toast.LENGTH_LONG
+                                    )
+                                        .show()
+                                    if (firstPage) {
+                                        setError(exception.message ?: getString(R.string.Error))
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        val initialState: List<Post>? = vm.state[_postsKey]
+        if (initialState != null) {
+            adapter.submitList(initialState)
+        }
+        account.profile.observe(viewLifecycleOwner) {
+            it?.let { user ->
                 adapter.setOnMenuListener(
                     JuickMessageMenuListener(
                         requireActivity(), this, messagePosted,
-                        apiResponded,user
+                        apiResponded, user
                     )
                 )
-
-                lifecycleScope.launch {
-                    viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                        vm.feed.collect { result ->
-                            when (result) {
-                                null -> {
-                                    if (firstPage) {
-                                        binding.progressBar.visibility = View.VISIBLE
-                                        binding.feedList.visibility = View.GONE
-                                        binding.errorText.visibility = View.GONE
-                                    }
-                                }
-
-                                else -> {
-                                    result.fold(
-                                        onSuccess = { posts ->
-                                            stopRefreshing()
-                                            if (posts.isNotEmpty()) {
-                                                val needToScroll =
-                                                    haveNewPosts(adapter.currentList, posts)
-                                                val newList = if (firstPage) {
-                                                    posts
-                                                } else {
-                                                    adapter.currentList + posts
-                                                }
-                                                adapter.submitList(newList)
-                                                vm.state[_postsKey] = newList
-                                                if (needToScroll) {
-                                                    binding.feedRefreshButton.isVisible = true
-                                                }
-                                                vm.feedReceived()
-                                            }
-                                        },
-                                        onFailure = { exception ->
-                                            stopRefreshing()
-                                            Toast.makeText(
-                                                requireContext(),
-                                                exception.message,
-                                                Toast.LENGTH_LONG
-                                            )
-                                                .show()
-                                            if (firstPage) {
-                                                setError(exception.message ?: getString(R.string.Error))
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                binding.feedList.adapter = adapter
-                val initialState: List<Post>? = vm.state[_postsKey]
-                if (initialState != null) {
-                    adapter.submitList(initialState)
-                }
             }
         }
 
@@ -210,6 +209,7 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
             }
         }
     }
+
     private fun refreshFeed() {
         firstPage = true
         val newUrl = Utils.buildUrl(vm.apiUrl.value)
@@ -219,18 +219,21 @@ open class FeedFragment: Fragment(R.layout.fragment_posts_page) {
         vm.apiUrl.value = newUrl
         account.refresh()
     }
+
     private fun haveNewPosts(oldPosts: List<Post>, newPosts: List<Post>): Boolean {
         if (oldPosts.isEmpty() || newPosts.isEmpty()) {
             return false
         }
         return oldPosts.maxBy { it.mid }.mid < newPosts.maxBy { it.mid }.mid
     }
+
     private fun stopRefreshing() {
         binding.swipeContainer.isRefreshing = false
         binding.feedList.visibility = View.VISIBLE
         binding.progressBar.visibility = View.GONE
         binding.errorText.visibility = View.GONE
     }
+
     private fun setError(message: String) {
         binding.feedList.visibility = View.GONE
         binding.errorText.visibility = View.VISIBLE
