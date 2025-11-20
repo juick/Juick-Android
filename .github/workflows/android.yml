@@ -23,4 +23,4 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
     - name: Build
-      run: ./gradlew --no-daemon lint${{ matrix.FLAVOR }}Debug
+      run: ./gradlew --no-daemon lint${{ matrix.FLAVOR }}Next
