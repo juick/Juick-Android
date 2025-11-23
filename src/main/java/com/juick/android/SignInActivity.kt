@@ -16,11 +16,14 @@
  */
 package com.juick.android
 
+import account
+import accountData
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -71,6 +74,13 @@ class SignInActivity : AppCompatActivity() {
         authenticatorResponse?.onRequestContinued()
         model = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(model.root)
+        currentAction = intent.getIntExtra(EXTRA_ACTION, ACTION_ACCOUNT_CREATE)
+        if (currentAction == ACTION_PASSWORD_UPDATE) {
+            model.juickNick.setText(App.instance.account?.name ?: "")
+            model.juickNick.isEnabled = false
+        } else {
+            model.juickNick.isEnabled = true
+        }
         model.buttonSave.setOnClickListener {
             val nick = model.juickNick.text.toString()
             val password = model.juickPassword.text.toString()
@@ -141,7 +151,6 @@ class SignInActivity : AppCompatActivity() {
                     }
                 }
             }
-        currentAction = intent.getIntExtra(EXTRA_ACTION, ACTION_ACCOUNT_CREATE)
         if (App.instance.isAuthenticated && currentAction != ACTION_PASSWORD_UPDATE) {
             val builder = AlertDialog.Builder(this)
             builder.setNeutralButton(android.R.string.ok) { _, _ ->
@@ -154,11 +163,17 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun updateAccount(nick: String, hash: String, action: Int) {
-        val account = Account(nick, getString(R.string.applicationId))
         val am = AccountManager.get(this@SignInActivity)
         if (action == ACTION_PASSWORD_UPDATE) {
-            am.setAuthToken(account, StringUtils.EMPTY, hash)
+            val account = App.instance.account
+            account?.let {
+                am.invalidateAuthToken(account.type,  App.instance.accountData)
+                am.setAuthToken(account, StringUtils.EMPTY, hash)
+            } ?: run {
+                Log.d("Auth", "Account missing")
+            }
         } else {
+            val account = Account(nick, getString(R.string.applicationId))
             val userData = Bundle()
             userData.putString("hash", hash)
             am.addAccountExplicitly(account, StringUtils.EMPTY, userData)
