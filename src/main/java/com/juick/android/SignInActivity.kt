@@ -131,7 +131,7 @@ class SignInActivity : AppCompatActivity() {
                                         updateAccount(
                                             nick,
                                             hash,
-                                            ACTION_ACCOUNT_CREATE
+                                            currentAction
                                         )
                                     }
                                 },
