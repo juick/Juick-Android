@@ -235,6 +235,7 @@ DEPENDENCIES
   fastlane
   fastlane-plugin-huawei_appgallery_connect
   fastlane-plugin-load_json (~> 0.0.1)
+  public_suffix (~> 5.1)
 
 BUNDLED WITH
    2.4.22
