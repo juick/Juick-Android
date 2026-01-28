@@ -93,7 +93,7 @@ class ChatLinkClickTest {
         // Use Espresso to click the message text (synchronized)
         Espresso.onView(
             CoreMatchers.allOf(
-                ViewMatchers.withId(com.juick.R.id.messageText),
+                ViewMatchers.withId(com.stfalcon.chatkit.R.id.messageText),
                 ViewMatchers.withText("Check https://example.com")
             )
         ).perform(ViewActions.click())

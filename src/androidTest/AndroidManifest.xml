@@ -20,12 +20,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-sdk tools:overrideLibrary="android_libs.ub_uiautomator" />
-    <application android:name=".App">
+    <application>
         <activity
             android:name="androidx.test.core.app.InstrumentationActivityInvoker$BootstrapActivity"
             android:exported="true"
             tools:node="merge">
-            <intent-filter tools:node="removeAll" />
         </activity>
     </application>
 </manifest>
