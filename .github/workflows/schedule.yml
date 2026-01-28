@@ -8,7 +8,7 @@ on:
 
 jobs:
   check_date:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Check latest commit
     outputs:
       should_run: ${{ steps.should_run.outputs.should_run }}
@@ -24,10 +24,10 @@ jobs:
   connectedCheck:
     needs: check_date
     if: ${{ needs.check_date.outputs.should_run != 'false' }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        BUILD_SDK: [24, 31, 34]
+        BUILD_SDK: [24, 35]
     steps:
     - name: checkout
       uses: actions/checkout@v6
@@ -41,16 +41,10 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '17'
-    - name: Configure build
-      run: |
-        echo "emulator_arch=x86_64" >> $GITHUB_ENV
     - name: run tests
-      uses: vitalyster/android-emulator-runner@xvfb
+      uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: ${{ matrix.BUILD_SDK }}
-        arch: ${{ env.emulator_arch }}
-        target: google_apis
+        arch: x86_64
         force-avd-creation: false
-        disable-animations: true
-        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
         script: ./gradlew --no-daemon connectedFreeDebugAndroidTest
