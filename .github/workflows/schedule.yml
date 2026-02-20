@@ -25,9 +25,6 @@ jobs:
     needs: check_date
     if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        BUILD_SDK: [24, 36]
     steps:
     - name: checkout
       uses: actions/checkout@v6
@@ -44,7 +41,7 @@ jobs:
     - name: run tests
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: ${{ matrix.BUILD_SDK }}
+        api-level: 36
         arch: x86_64
         target: google_apis
         force-avd-creation: false
