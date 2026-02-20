@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        BUILD_SDK: [24, 35]
+        BUILD_SDK: [24, 36]
     steps:
     - name: checkout
       uses: actions/checkout@v6
