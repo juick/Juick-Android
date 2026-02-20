@@ -46,5 +46,6 @@ jobs:
       with:
         api-level: ${{ matrix.BUILD_SDK }}
         arch: x86_64
+        target: google_apis
         force-avd-creation: false
         script: ./gradlew --no-daemon connectedFreeDebugAndroidTest
