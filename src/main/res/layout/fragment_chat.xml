@@ -31,6 +31,8 @@
         app:outcomingTextSize="14sp"
         app:incomingTextColor="@color/colorText"
         app:incomingDefaultBubbleColor="@color/colorTextBackground"
+        app:outcomingTextColor="@color/white"
+        app:outcomingTextLinkColor="@color/white"
         app:outcomingDefaultBubbleColor="@color/colorAccent"/>
     <com.stfalcon.chatkit.messages.MessageInput
         android:id="@+id/input"

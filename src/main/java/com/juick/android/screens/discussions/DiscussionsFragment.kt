@@ -17,16 +17,17 @@
 
 package com.juick.android.screens.discussions
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import com.juick.android.UrlBuilder
+import com.juick.android.Uris
 import com.juick.android.screens.FeedFragment
 
 class DiscussionsFragment : FeedFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (vm.apiUrl.value.isEmpty()) {
-            vm.apiUrl.value = UrlBuilder.discussions.toString()
+        if (vm.apiUrl.value == Uri.EMPTY) {
+            vm.apiUrl.value = Uris.discussions
         }
     }
 }

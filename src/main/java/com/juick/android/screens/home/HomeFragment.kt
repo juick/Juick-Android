@@ -16,10 +16,11 @@
  */
 package com.juick.android.screens.home
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import com.juick.App
-import com.juick.android.UrlBuilder
+import com.juick.android.Uris
 import com.juick.android.screens.FeedFragment
 import isAuthenticated
 
@@ -30,12 +31,12 @@ class HomeFragment : FeedFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (App.instance.isAuthenticated) {
-            if (vm.apiUrl.value.isEmpty()) {
-                vm.apiUrl.value = UrlBuilder.home.toString()
+            if (vm.apiUrl.value == Uri.EMPTY) {
+                vm.apiUrl.value = Uris.home
             }
         } else {
-            if (vm.apiUrl.value.isEmpty()) {
-                vm.apiUrl.value = UrlBuilder.discussions.toString()
+            if (vm.apiUrl.value == Uri.EMPTY) {
+                vm.apiUrl.value = Uris.discussions
             }
         }
     }

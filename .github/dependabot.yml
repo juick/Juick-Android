@@ -15,3 +15,13 @@ updates:
   labels:
     - "dependencies"
     - "automerge"
+- package-ecosystem: bundler
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  allow:
+  - dependency-type: direct
+  labels:
+    - "dependencies"
+    - "automerge"

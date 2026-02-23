@@ -17,9 +17,10 @@
 
 package com.juick.android.screens.blog
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import com.juick.android.UrlBuilder
+import com.juick.android.Uris
 import com.juick.android.screens.FeedFragment
 
 class BlogFragment : FeedFragment() {
@@ -27,8 +28,8 @@ class BlogFragment : FeedFragment() {
         super.onViewCreated(view, savedInstanceState)
         val uname = arguments?.getString("uname") ?: ""
         val blog = uname.ifEmpty { account.profile.value?.name ?: "" }
-        if (vm.apiUrl.value.isEmpty()) {
-            vm.apiUrl.value = UrlBuilder.getUserPostsByName(blog).toString()
+        if (vm.apiUrl.value == Uri.EMPTY) {
+            vm.apiUrl.value = Uris.getUserPostsByName(blog)
         }
     }
 }

@@ -17,17 +17,18 @@
 
 package com.juick.android.screens.search
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import com.juick.android.UrlBuilder
+import com.juick.android.Uris
 import com.juick.android.screens.FeedFragment
 
 class SearchFragment: FeedFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val search = arguments?.getString("search") ?: ""
-        if (vm.apiUrl.value.isEmpty()) {
-            vm.apiUrl.value = UrlBuilder.search(search).toString()
+        if (vm.apiUrl.value == Uri.EMPTY) {
+            vm.apiUrl.value = Uris.search(search)
         }
     }
 }

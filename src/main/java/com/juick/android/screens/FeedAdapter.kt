@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2025, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -178,13 +178,21 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
             } else {
                 val replies =
                     if (post.replies > 0) post.replies else holder.itemView.context.getString(R.string.reply)
-                val likes =
-                    if (post.likes > 0) post.likes else holder.itemView.context.getString(R.string.recommend)
+
                 holder.repliesTextView?.visibility = View.VISIBLE
                 holder.repliesTextView?.text = "$replies"
-                holder.likesTextView?.visibility = View.VISIBLE
-                holder.likesTextView?.text = "$likes"
             }
+            val likes =
+                if (post.likes > 0) post.likes else holder.itemView.context.getString(R.string.recommend)
+            holder.likesTextView?.visibility = View.VISIBLE
+            holder.likesTextView?.text = "$likes"
+            val likeTintColor = if (post.liked) {
+                holder.itemView.context.getColor(R.color.colorAccent)
+            } else {
+                holder.itemView.context.getColor(android.R.color.darker_gray)
+            }
+            holder.likesTextView?.setTextColor(likeTintColor)
+            holder.likesTextView?.getCompoundDrawables()[0]?.setTint(likeTintColor)
         } else {
             if (post.nextRid == post.rid) {
                 holder.backImageView?.visibility = View.VISIBLE

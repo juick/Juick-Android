@@ -15,11 +15,11 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdk 35
+    compileSdk = 36
     defaultConfig {
-        targetSdkVersion 35
+        targetSdkVersion 36
         minSdkVersion 24
-        versionCode 237
+        versionCode 246
         versionName "3.2." + versionCode
         applicationId "com.juick"
         namespace "com.juick"
@@ -107,8 +107,10 @@ android {
     }
 }
 
-kotlin {
-    jvmToolchain(17)
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.toString()
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -172,6 +174,10 @@ dependencies {
     androidTestImplementation libs.truth
 
     androidTestImplementation libs.espresso.core
+    // Espresso intents for intercepting ACTION_VIEW
+    androidTestImplementation libs.espresso.intents
+    // Fragment testing helpers (launchFragmentInContainer)
+    androidTestImplementation libs.fragment.testing
     // UI Automator
     androidTestImplementation libs.uiautomator.v18
 }
