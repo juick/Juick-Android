@@ -24,4 +24,3 @@ updates:
   - dependency-type: direct
   labels:
     - "dependencies"
-    - "automerge"
