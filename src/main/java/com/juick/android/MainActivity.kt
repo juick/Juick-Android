@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2025, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -17,7 +17,6 @@
 package com.juick.android
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
@@ -396,7 +395,6 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    @SuppressLint("ObsoleteSdkInt")
     fun processUri(data: Uri) {
         if (data.host == "juick.com") {
             val pathSegments = data.pathSegments
@@ -412,16 +410,21 @@ class MainActivity : AppCompatActivity() {
 
                 2 -> {
                     // thread
-                    val threadId = pathSegments[1]
-                    val args = Bundle()
-                    args.putInt("mid", threadId.toInt())
-                    navController.popBackStack(R.id.home, false)
-                    navController.navigate(R.id.thread, args)
+                    val threadId = pathSegments[1].toIntOrNull() ?: 0
+                    if (threadId > 0) {
+                        val args = Bundle()
+                        args.putInt("mid", threadId)
+                        navController.popBackStack(R.id.home, false)
+                        navController.navigate(R.id.thread, args)
+                    } else {
+                        // e.g. /i/video.mp4
+                        openUri(data)
+                    }
                 }
 
                 else ->
                     if (pathSegments[0] == "i") {
-                        // images
+                        // images (/i/p/1.jpg)
                         openUri(data)
                     } else {
                         // discover
