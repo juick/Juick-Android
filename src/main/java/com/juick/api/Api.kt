@@ -70,6 +70,9 @@ interface Api {
     @GET("thread")
     suspend fun thread(@Query("mid") messageId: Int): List<Post>
 
+    @POST("thread/mark_read/{mid}/{rid}")
+    suspend fun markRead(@Path("mid") mid: Int, @Path("rid") rid: Int): Response<Void>
+
     @PUT("notifications")
     suspend fun registerPush(@Body tokens: List<ExternalToken>)
 

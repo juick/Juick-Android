@@ -296,6 +296,8 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
                     model.threadList.visibility = View.VISIBLE
                     model.progressBar.visibility = View.GONE
                     (model.threadList.adapter as FeedAdapter).submitList(posts)
+                    val lastReply = posts.last()
+                    App.instance.api.markRead(lastReply.mid, lastReply.rid)
                     if (scrollToEnd) {
                         model.threadList.scrollToPosition(posts.size - 1)
                     }
