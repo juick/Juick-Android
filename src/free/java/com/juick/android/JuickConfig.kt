@@ -16,11 +16,11 @@
  */
 package com.juick.android
 
-import account
 import android.content.ContentResolver
 import android.os.Bundle
 import com.juick.App
 import com.juick.R
+import com.juick.android.service.account
 
 fun App.init() {
     //App.instance.signInProvider = { context, button -> null }

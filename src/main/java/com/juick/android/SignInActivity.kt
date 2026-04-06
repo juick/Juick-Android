@@ -16,8 +16,6 @@
  */
 package com.juick.android
 
-import account
-import accountData
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager
@@ -32,9 +30,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.juick.App
 import com.juick.R
+import com.juick.android.service.account
+import com.juick.android.service.accountData
+import com.juick.android.service.isAuthenticated
 import com.juick.databinding.ActivityLoginBinding
 import com.juick.util.StringUtils
-import isAuthenticated
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

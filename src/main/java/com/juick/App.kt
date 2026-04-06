@@ -16,7 +16,6 @@
  */
 package com.juick
 
-import accountData
 import android.app.Application
 import android.net.Uri
 import android.os.Build
@@ -27,6 +26,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.juick.android.*
+import com.juick.android.service.accountData
 import com.juick.api.Api
 import com.juick.api.RequestBodyUtil
 import com.juick.api.model.Post

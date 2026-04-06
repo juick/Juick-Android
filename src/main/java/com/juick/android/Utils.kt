@@ -20,8 +20,8 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.juick.App
+import com.juick.android.service.isAuthenticated
 import com.juick.api.model.ExternalToken
-import isAuthenticated
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

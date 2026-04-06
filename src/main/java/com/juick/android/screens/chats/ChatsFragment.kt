@@ -29,12 +29,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import com.juick.App
 import com.juick.R
+import com.juick.android.service.isAuthenticated
 import com.juick.android.widget.util.load
 import com.juick.api.model.Chat
 import com.juick.databinding.FragmentDialogListBinding
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
-import isAuthenticated
 import kotlinx.coroutines.launch
 
 /**

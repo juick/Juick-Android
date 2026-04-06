@@ -22,7 +22,7 @@ import android.view.View
 import com.juick.App
 import com.juick.android.Uris
 import com.juick.android.screens.FeedFragment
-import isAuthenticated
+import com.juick.android.service.isAuthenticated
 
 /**
  * Created by gerc on 03.06.2016.

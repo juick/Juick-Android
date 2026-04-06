@@ -16,7 +16,6 @@
  */
 package com.juick.android
 
-import accountData
 import android.util.Log
 import com.here.oksse.OkSse
 import com.here.oksse.ServerSentEvent
@@ -30,6 +29,7 @@ import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import androidx.core.net.toUri
+import com.juick.android.service.accountData
 
 class NotificationManager {
     private lateinit var events: ServerSentEvent
