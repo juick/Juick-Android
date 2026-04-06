@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2025, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -46,13 +46,13 @@ import com.juick.android.SignInActivity
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.android.screens.FeedAdapter
+import com.juick.android.service.isAuthenticated
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.isReply
 import com.juick.databinding.FragmentThreadBinding
 import com.juick.util.StringUtils
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
-import isAuthenticated
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update

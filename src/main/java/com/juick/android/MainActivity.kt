@@ -64,12 +64,12 @@ import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
+import com.juick.android.service.isAuthenticated
 import com.juick.android.updater.Updater
 import com.juick.android.widget.util.loadImage
 import com.juick.api.model.Post
 import com.juick.databinding.ActivityMainBinding
 import com.juick.util.StringUtils
-import isAuthenticated
 import kotlinx.coroutines.launch
 import java.io.IOException
 
