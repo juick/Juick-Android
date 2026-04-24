@@ -94,4 +94,8 @@ interface Api {
 
     @GET
     suspend fun download(@Url url: String): ResponseBody
+
+    @Multipart
+    @POST("me/upload")
+    suspend fun uploadAvatar(@Part avatar: MultipartBody.Part): Response<Void>
 }

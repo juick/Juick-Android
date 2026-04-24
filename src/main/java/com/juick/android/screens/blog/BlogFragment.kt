@@ -19,13 +19,32 @@ package com.juick.android.screens.blog
 
 import android.net.Uri
 import android.os.Bundle
+import android.view.Menu
 import android.view.View
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.juick.App
+import com.juick.R
 import com.juick.android.Uris
+import com.juick.android.Utils.getMimeTypeFor
+import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.android.screens.FeedAdapter
 import com.juick.android.screens.FeedFragment
 import com.juick.android.widget.util.load
 import com.juick.api.model.Post
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.FileNotFoundException
+import java.io.IOException
 
 class BlogFragment : FeedFragment() {
     private val passedUname: String?
@@ -38,6 +57,19 @@ class BlogFragment : FeedFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        avatarMediaLauncher = registerForActivityResult(CropImageContract()) { result ->
+            if (result.isSuccessful) {
+                val uriContent = result.uriContent
+                uploadAvatar(uriContent)
+            } else {
+                val exception = result.error
+                Toast.makeText(
+                    activity,
+                    exception?.message ?: getText(R.string.Error),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
         ensureBlogUrl()
         account.profile.observe(viewLifecycleOwner) {
             ensureBlogUrl()
@@ -64,21 +96,145 @@ class BlogFragment : FeedFragment() {
 
     private fun bindProfileHeader() {
         binding.profileHeader.isVisible = true
-        binding.profileHeaderSubtitle.text = getString(com.juick.R.string.blog)
+        binding.profileHeaderSubtitle.text = getString(R.string.blog)
 
         if (isOwnBlog) {
-            binding.profileHeaderSettings.isVisible = true
+            binding.profileHeaderEdit.isVisible = true
+            binding.profileHeaderSettings.isVisible = false
             binding.profileHeaderUsername.text = account.profile.value?.name ?: passedUname.orEmpty()
             val avatarUrl = account.profile.value?.avatar
             if (!avatarUrl.isNullOrEmpty()) {
                 binding.profileHeaderAvatar.load(avatarUrl, false, false)
             } else {
-                binding.profileHeaderAvatar.setImageResource(com.juick.R.drawable.av_96)
+                binding.profileHeaderAvatar.setImageResource(R.drawable.av_96)
+            }
+            binding.profileHeaderEdit.setOnClickListener {
+                avatarMediaLauncher.launch(
+                    CropImageContractOptions(
+                        uri = null,
+                        cropImageOptions = CropImageOptions(
+                            imageSourceIncludeCamera = true,
+                            imageSourceIncludeGallery = true
+                        ),
+                    ),
+                )
             }
         } else {
-            binding.profileHeaderSettings.isVisible = false
+            binding.profileHeaderEdit.isVisible = false
+            binding.profileHeaderSettings.isVisible = true
             binding.profileHeaderUsername.text = passedUname.orEmpty()
-            binding.profileHeaderAvatar.setImageResource(com.juick.R.drawable.av_96)
+            binding.profileHeaderAvatar.setImageResource(R.drawable.av_96)
         }
+        binding.profileHeaderSettings.setOnClickListener { v ->
+            showHeaderMenu(v)
+        }
+    }
+
+    private fun uploadAvatar(uri: Uri?) {
+        if (uri == null) return
+        val mime = getMimeTypeFor(requireContext(), uri)
+        if (mime == null || !isImageTypeAllowed(mime)) {
+            Toast.makeText(activity, R.string.wrong_image_format, Toast.LENGTH_LONG).show()
+            return
+        }
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    App.instance.uploadAvatar(uri, mime)
+                } catch (e: IOException) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(activity, "Avatar error: " + e.message, Toast.LENGTH_LONG).show()
+                    }
+                    return@withContext
+                }
+            }
+            account.refresh()
+        }
+    }
+
+    private fun showHeaderMenu(view: View) {
+        val userName = passedUname ?: return
+        if (isOwnBlog) return
+
+        val popupMenu = PopupMenu(requireContext(), view)
+        popupMenu.setForceShowIcon(true)
+        popupMenu.menu.add(
+            Menu.NONE, MENU_ACTION_SUBSCRIBE, Menu.NONE,
+            getString(R.string.Subscribe_to) + " @" + userName
+        )
+        val me = account.profile.value
+        if (me != null && (me.premium || me.admin)) {
+            if (me.vip.any { it.name == userName }) {
+                popupMenu.menu.add(
+                    Menu.NONE, MENU_ACTION_REMOVE_FROM_VIP, Menu.NONE,
+                    getString(R.string.remove_from_vip)
+                )
+            } else {
+                popupMenu.menu.add(
+                    Menu.NONE, MENU_ACTION_ADD_TO_VIP, Menu.NONE,
+                    getString(R.string.add_to_vip)
+                )
+            }
+        }
+        if (me != null && me.ignored.any { it.name == userName }) {
+            popupMenu.menu.add(
+                Menu.NONE, MENU_ACTION_REMOVE_FROM_IGNORELIST, Menu.NONE,
+                getString(R.string.remove_from_ignore_list) + " @" + userName
+            )
+        } else {
+            popupMenu.menu.add(
+                Menu.NONE, MENU_ACTION_ADD_TO_IGNORELIST, Menu.NONE,
+                getString(R.string.add_to_ignore_list) + " @" + userName
+            )
+        }
+        popupMenu.setOnMenuItemClickListener {
+            when (it.itemId) {
+                MENU_ACTION_SUBSCRIBE -> {
+                    processCommand("S @${userName}")
+                    true
+                }
+                MENU_ACTION_ADD_TO_IGNORELIST -> {
+                    processCommand("BL @${userName}")
+                    true
+                }
+                MENU_ACTION_REMOVE_FROM_IGNORELIST -> {
+                    processCommand("BL @${userName}")
+                    true
+                }
+                MENU_ACTION_ADD_TO_VIP -> {
+                    lifecycleScope.launch {
+                        withContext(Dispatchers.IO) { App.instance.api.toggleVIP(userName) }
+                        account.refresh()
+                    }
+                    true
+                }
+                MENU_ACTION_REMOVE_FROM_VIP -> {
+                    lifecycleScope.launch {
+                        withContext(Dispatchers.IO) { App.instance.api.toggleVIP(userName) }
+                        account.refresh()
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
+    }
+
+    private fun processCommand(command: String) {
+        lifecycleScope.launch {
+            App.instance.api.newPost(
+                command.toRequestBody("text/plain".toMediaTypeOrNull()),
+                null
+            )
+        }
+    }
+
+    companion object {
+        private const val MENU_ACTION_SUBSCRIBE = 3
+        private const val MENU_ACTION_ADD_TO_VIP = 7
+        private const val MENU_ACTION_REMOVE_FROM_VIP = 8
+        private const val MENU_ACTION_ADD_TO_IGNORELIST = 9
+        private const val MENU_ACTION_REMOVE_FROM_IGNORELIST = 10
     }
 }

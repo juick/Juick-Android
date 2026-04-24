@@ -46,6 +46,7 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -175,6 +176,24 @@ class App : Application() {
                 }
             }
         }
+    }
+
+    @Throws(IOException::class)
+    suspend fun uploadAvatar(attachmentUri: Uri, attachmentMime: String) {
+        val stream = contentResolver.openInputStream(attachmentUri)
+            ?: throw FileNotFoundException("Cannot open $attachmentUri")
+        val requestFile =
+            RequestBodyUtil.create("multipart/form-data".toMediaTypeOrNull(), stream)
+        val body = MultipartBody.Part.createFormData(
+            "avatar",
+            String.format(
+                "avatar.%s",
+                MimeTypeMap.getSingleton().getExtensionFromMimeType(attachmentMime)
+            ),
+            requestFile
+        )
+        val response = instance.api.uploadAvatar(body)
+        Log.d("Avatar", "response: $response")
     }
 
     val previewers: ArrayList<LinkPreviewer> = arrayListOf()

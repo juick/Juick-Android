@@ -97,16 +97,11 @@ class JuickMessageMenuListener(
         val context = view?.context as Context
         val popupMenu = PopupMenu(context, view)
         popupMenu.setForceShowIcon(true)
-        if (me.uid == 0) {
-            popupMenu.menu.add(
-                Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
-                context.getString(R.string.Share)
-            )
-        } else if (post.user.uid == me.uid) {
-            popupMenu.menu.add(
-                Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
-                context.resources.getString(R.string.Share)
-            )
+        popupMenu.menu.add(
+            Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
+            context.getString(R.string.Share)
+        )
+        if (post.user.uid == me.uid) {
             if (me.premium || me.admin) {
                 if (post.rid == 0) {
                     val action =
@@ -131,74 +126,17 @@ class JuickMessageMenuListener(
                 Menu.NONE, MENU_ACTION_DELETE_POST, Menu.NONE,
                 itemText
             )
-        } else {
-            val userName = post.user.uname
-            popupMenu.menu.add(
-                Menu.NONE, MENU_ACTION_SUBSCRIBE, Menu.NONE,
-                context.resources.getString(R.string.Subscribe_to) + " @" + userName
-            )
-            if (me.premium || me.admin) {
-                if (me.vip.contains(post.user)) {
-                    popupMenu.menu.add(
-                        Menu.NONE, MENU_ACTION_REMOVE_FROM_VIP, Menu.NONE,
-                        context.resources.getString(R.string.remove_from_vip)
-                    )
-                } else {
-                    popupMenu.menu.add(
-                        Menu.NONE, MENU_ACTION_ADD_TO_VIP, Menu.NONE,
-                        context.resources.getString(R.string.add_to_vip)
-                    )
-                }
-            }
-            if (me.ignored.contains(post.user)) {
-                popupMenu.menu.add(
-                    Menu.NONE, MENU_ACTION_REMOVE_FROM_IGNORELIST, Menu.NONE,
-                    context.resources.getString(R.string.remove_from_ignore_list) + " @" + userName
-                )
-            } else {
-                popupMenu.menu.add(
-                    Menu.NONE, MENU_ACTION_ADD_TO_IGNORELIST, Menu.NONE,
-                    context.resources.getString(R.string.add_to_ignore_list) + " @" + userName
-                )
-            }
-            popupMenu.menu.add(
-                Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
-                context.resources.getString(R.string.Share)
-            )
         }
         popupMenu.setOnMenuItemClickListener {
-            val action = it.itemId
             val mid = post.mid
             val rid = post.rid
-            val uname = post.user.uname
-            when (action) {
-                MENU_ACTION_SUBSCRIBE -> confirmAction(
-                    activity,
-                    R.string.Are_you_sure_subscribe
-                ) {
-                    processCommand("S @${uname}")
-                }
-                MENU_ACTION_ADD_TO_IGNORELIST -> confirmAction(
-                    activity,
-                    R.string.Are_you_sure_blacklist
-                ) {
-                    processCommand("BL @${uname}")
-                }
-                MENU_ACTION_REMOVE_FROM_IGNORELIST -> {
-                    processCommand("BL @${uname}")
+            when (it.itemId) {
+                MENU_ACTION_SHARE -> {
+                    val intent = Intent(Intent.ACTION_SEND)
+                    intent.type = "text/plain"
+                    intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/m/$mid")
+                    activity.startActivity(intent)
                     true
-                }
-                MENU_ACTION_ADD_TO_VIP -> confirmAction(
-                    activity,
-                    R.string.confirm_add_to_vip
-                ) {
-                    vipToggle(post.user)
-                }
-                MENU_ACTION_REMOVE_FROM_VIP -> confirmAction(
-                    activity,
-                    R.string.confirm_remove_from_vip
-                ) {
-                    vipToggle(post.user)
                 }
                 MENU_ACTION_DELETE_POST -> confirmAction(activity, R.string.Are_you_sure_delete) {
                     processCommand("D #" +
@@ -213,13 +151,6 @@ class JuickMessageMenuListener(
                     } else {
                         navController.navigate(R.id.home)
                     }
-                }
-                MENU_ACTION_SHARE -> {
-                    val intent = Intent(Intent.ACTION_SEND)
-                    intent.type = "text/plain"
-                    intent.putExtra(Intent.EXTRA_TEXT, "https://juick.com/m/$mid")
-                    activity.startActivity(intent)
-                    true
                 }
                 MENU_ACTION_MAKE_PUBLIC -> {
                     confirmAction(activity, R.string.confirm_make_public) {
