@@ -35,4 +35,12 @@
     <style name="BottomSheetStyle" parent="Theme.Material3.DayNight.BottomSheetDialog">
         <item name="android:backgroundDimEnabled">false</item>
     </style>
+    <style name="Theme_BottomSheet_Crop" parent="Theme.Material3.DayNight.BottomSheetDialog">
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:navigationBarColor">@color/colorMainBackground</item>
+        <item name="bottomSheetStyle">@style/CropBottomSheetStyle</item>
+    </style>
+    <style name="CropBottomSheetStyle" parent="Widget.Material3.BottomSheet">
+        <item name="android:backgroundTint">@color/colorMainBackground</item>
+    </style>
 </resources>

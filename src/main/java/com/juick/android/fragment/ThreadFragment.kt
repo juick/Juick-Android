@@ -26,15 +26,14 @@ import android.text.style.StyleSpan
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.canhub.cropper.CropImageContract
-import com.canhub.cropper.CropImageContractOptions
-import com.canhub.cropper.CropImageOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -47,6 +46,7 @@ import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.android.screens.FeedAdapter
 import com.juick.android.service.isAuthenticated
+import com.juick.android.widget.CropBottomSheet
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.isReply
@@ -58,6 +58,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.FileNotFoundException
 
 /**
@@ -72,9 +73,41 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
     private var attachmentMime: String? = null
     private var mid = 0
     private var scrollToEnd = false
-    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
     private val messagePosted = MutableStateFlow<Result<PostResponse>?>(null)
     private val apiResponded = MutableStateFlow<Result<Post>?>(null)
+
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { showCropSheet(it) }
+    }
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) cameraUri?.let { showCropSheet(it) }
+    }
+    private var cameraUri: Uri? = null
+
+    private fun showImageSourcePicker() {
+        AlertDialog.Builder(requireContext())
+            .setItems(R.array.image_source_options) { _, which ->
+                when (which) {
+                    0 -> galleryLauncher.launch("image/*")
+                    1 -> launchCamera()
+                }
+            }
+            .show()
+    }
+
+    private fun launchCamera() {
+        val file = File(requireContext().filesDir, "camera_${System.currentTimeMillis()}.jpg")
+        cameraUri = FileProvider.getUriForFile(
+            requireContext(), "${requireContext().packageName}.provider", file
+        )
+        cameraLauncher.launch(cameraUri!!)
+    }
+
+    private fun showCropSheet(uri: Uri) {
+        val sheet = CropBottomSheet.newInstance(uri)
+        sheet.onCropResult = { croppedUri -> handleSelectedUri(croppedUri) }
+        sheet.show(childFragmentManager, CropBottomSheet.TAG)
+    }
 
     private fun handleSelectedUri(uri: Uri?) {
         if (uri != null) {
@@ -97,23 +130,6 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        attachmentMediaLauncher = registerForActivityResult(CropImageContract()) {
-            result ->
-            if (result.isSuccessful) {
-                // Use the returned uri.
-                val uriContent = result.uriContent
-                handleSelectedUri(uriContent)
-            } else {
-                // An error occurred.
-                val exception = result.error
-                Toast.makeText(
-                    activity,
-                    exception?.message ?: getText(R.string.Error),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -159,15 +175,7 @@ class ThreadFragment : BottomSheetDialogFragment(R.layout.fragment_thread) {
         }
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
-                attachmentMediaLauncher.launch(
-                    CropImageContractOptions(
-                        uri = null,
-                        cropImageOptions = CropImageOptions(
-                            imageSourceIncludeCamera = true,
-                            imageSourceIncludeGallery = true,
-                        ),
-                    ),
-                )
+                showImageSourcePicker()
             } else {
                 attachmentUri = null
                 attachmentMime = null

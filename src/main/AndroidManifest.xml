@@ -105,11 +105,6 @@
             android:exported="false"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             />
-        <!-- Theme is optional and only needed if default theme has no action bar. -->
-        <activity
-            android:name="com.canhub.cropper.CropImageActivity"
-            android:theme="@style/Base.Theme.AppCompat"
-            />
         <service
             android:name=".android.service.AuthenticationService"
             android:exported="true"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -21,26 +21,27 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
-import com.canhub.cropper.CropImageContract
-import com.canhub.cropper.CropImageContractOptions
-import com.canhub.cropper.CropImageOptions
 import com.juick.App
 import com.juick.R
 import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
+import com.juick.android.widget.CropBottomSheet
 import com.juick.api.model.PostResponse
 import com.juick.databinding.FragmentNewPostBinding
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 
@@ -52,27 +53,18 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
     private var attachmentMime: String? = null
 
     private val model by viewBinding(FragmentNewPostBinding::bind)
-    private lateinit var attachmentMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
     private val messagePosted = MutableStateFlow<Result<PostResponse>?>(null)
+
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { showCropSheet(it) }
+    }
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) cameraUri?.let { showCropSheet(it) }
+    }
+    private var cameraUri: Uri? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        attachmentMediaLauncher = registerForActivityResult(CropImageContract()) {
-                result ->
-            if (result.isSuccessful) {
-                // Use the returned uri.
-                val uriContent = result.uriContent
-                attachImage(uriContent)
-            } else {
-                // An error occurred.
-                val exception = result.error
-                Toast.makeText(
-                    activity,
-                    exception?.message ?: getText(R.string.Error),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
         model.buttonTags.setOnClickListener {
             val navController = findNavController(this)
             val tagState = navController.currentBackStackEntry
@@ -86,19 +78,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         }
         model.buttonAttachment.setOnClickListener {
             if (attachmentUri == null) {
-                try {
-                    attachmentMediaLauncher.launch(
-                        CropImageContractOptions(
-                            uri = null,
-                            cropImageOptions = CropImageOptions(
-                                imageSourceIncludeCamera = true,
-                                imageSourceIncludeGallery = true
-                            ),
-                        ),
-                    )
-                } catch (e: Exception) {
-                    Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
-                }
+                showImageSourcePicker()
             } else {
                 attachmentUri = null
                 attachmentMime = null
@@ -193,6 +173,31 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                 }
             }
         }
+    }
+
+    private fun showImageSourcePicker() {
+        AlertDialog.Builder(requireContext())
+            .setItems(R.array.image_source_options) { _, which ->
+                when (which) {
+                    0 -> galleryLauncher.launch("image/*")
+                    1 -> launchCamera()
+                }
+            }
+            .show()
+    }
+
+    private fun launchCamera() {
+        val file = File(requireContext().filesDir, "camera_${System.currentTimeMillis()}.jpg")
+        cameraUri = FileProvider.getUriForFile(
+            requireContext(), "${requireContext().packageName}.provider", file
+        )
+        cameraLauncher.launch(cameraUri!!)
+    }
+
+    private fun showCropSheet(uri: Uri) {
+        val sheet = CropBottomSheet.newInstance(uri)
+        sheet.onCropResult = { croppedUri -> attachImage(croppedUri) }
+        sheet.show(childFragmentManager, CropBottomSheet.TAG)
     }
 
     private fun applyTag(tag: String?) {

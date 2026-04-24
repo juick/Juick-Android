@@ -22,13 +22,12 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import com.canhub.cropper.CropImageContract
-import com.canhub.cropper.CropImageContractOptions
-import com.canhub.cropper.CropImageOptions
 import com.juick.App
 import com.juick.R
 import com.juick.android.Uris
@@ -36,14 +35,14 @@ import com.juick.android.Utils.getMimeTypeFor
 import com.juick.android.Utils.isImageTypeAllowed
 import com.juick.android.screens.FeedAdapter
 import com.juick.android.screens.FeedFragment
+import com.juick.android.widget.CropBottomSheet
 import com.juick.android.widget.util.load
-import com.juick.api.model.Post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.FileNotFoundException
+import java.io.File
 import java.io.IOException
 
 class BlogFragment : FeedFragment() {
@@ -53,23 +52,16 @@ class BlogFragment : FeedFragment() {
     private val isOwnBlog: Boolean
         get() = passedUname.isNullOrBlank() || passedUname == account.profile.value?.name
 
-    private lateinit var avatarMediaLauncher: ActivityResultLauncher<CropImageContractOptions>
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { showCropSheet(it) }
+    }
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) cameraUri?.let { showCropSheet(it) }
+    }
+    private var cameraUri: Uri? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        avatarMediaLauncher = registerForActivityResult(CropImageContract()) { result ->
-            if (result.isSuccessful) {
-                val uriContent = result.uriContent
-                uploadAvatar(uriContent)
-            } else {
-                val exception = result.error
-                Toast.makeText(
-                    activity,
-                    exception?.message ?: getText(R.string.Error),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
         ensureBlogUrl()
         account.profile.observe(viewLifecycleOwner) {
             ensureBlogUrl()
@@ -109,15 +101,7 @@ class BlogFragment : FeedFragment() {
                 binding.profileHeaderAvatar.setImageResource(R.drawable.av_96)
             }
             binding.profileHeaderEdit.setOnClickListener {
-                avatarMediaLauncher.launch(
-                    CropImageContractOptions(
-                        uri = null,
-                        cropImageOptions = CropImageOptions(
-                            imageSourceIncludeCamera = true,
-                            imageSourceIncludeGallery = true
-                        ),
-                    ),
-                )
+                showImageSourcePicker()
             }
         } else {
             binding.profileHeaderEdit.isVisible = false
@@ -128,6 +112,31 @@ class BlogFragment : FeedFragment() {
         binding.profileHeaderSettings.setOnClickListener { v ->
             showHeaderMenu(v)
         }
+    }
+
+    private fun showImageSourcePicker() {
+        AlertDialog.Builder(requireContext())
+            .setItems(R.array.image_source_options) { _, which ->
+                when (which) {
+                    0 -> galleryLauncher.launch("image/*")
+                    1 -> launchCamera()
+                }
+            }
+            .show()
+    }
+
+    private fun launchCamera() {
+        val file = File(requireContext().filesDir, "camera_${System.currentTimeMillis()}.jpg")
+        cameraUri = FileProvider.getUriForFile(
+            requireContext(), "${requireContext().packageName}.provider", file
+        )
+        cameraLauncher.launch(cameraUri!!)
+    }
+
+    private fun showCropSheet(uri: Uri) {
+        val sheet = CropBottomSheet.newInstance(uri)
+        sheet.onCropResult = { croppedUri -> uploadAvatar(croppedUri) }
+        sheet.show(childFragmentManager, CropBottomSheet.TAG)
     }
 
     private fun uploadAvatar(uri: Uri?) {

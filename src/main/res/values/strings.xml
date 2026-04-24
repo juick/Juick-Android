@@ -25,6 +25,7 @@
     <string name="Yes">Yes</string>
     <string name="Create">Create</string>
     <string name="Send">Send</string>
+    <string name="crop">Crop</string>
     <string name="Error">Error</string>
     <string name="blog">blog</string>
     <string name="settings">Settings</string>
@@ -129,4 +130,10 @@
     <string name="confirm_make_private">Make private?</string>
     <string name="feed_new_messages">New messages</string>
     <string name="avatar_change">Edit</string>
+    <string name="gallery">Gallery</string>
+    <string name="camera">Camera</string>
+    <string-array name="image_source_options">
+        <item>@string/gallery</item>
+        <item>@string/camera</item>
+    </string-array>
 </resources>
