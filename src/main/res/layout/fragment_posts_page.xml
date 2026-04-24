@@ -16,61 +16,135 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".android.MainActivity">
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/feed_list"
+        <LinearLayout
+            android:id="@+id/profile_header"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorMainBackground"
-            tools:listitem="@layout/item_post"
-            tools:itemCount="3"
-            android:scrollbars="vertical"
-            android:clipToPadding="false"
-            app:layoutManager="LinearLayoutManager" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:indeterminateOnly="true"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:background="@color/colorTextBackground"
+            android:padding="@dimen/activity_callout_margin"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/profile_header_avatar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="@string/Juick_profile"
+                android:src="@drawable/av_96"
+                android:scaleType="centerCrop"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/profile_header_username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold"
+                android:textColor="@color/colorText"
+                tools:text="jonny" />
+
+            <TextView
+                android:id="@+id/profile_header_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/colorDimmed"
+                tools:text="Blog" />
+
+            <TextView
+                android:id="@+id/profile_header_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/colorText"
+                tools:text="12 posts" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/profile_header_settings"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/settings"
+            android:src="@drawable/ic_ei_pencil"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/feed_refresh_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:backgroundTint="@color/colorPrimary"
-        android:contentDescription="@string/feed_new_messages"
-        android:tint="@color/white"
-        app:icon="@drawable/ei_arrow_up"
-        app:iconTint="@color/colorTextBackground"
-        android:text="@string/feed_new_messages"
-        android:textColor="@color/colorTextBackground"
-        app:backgroundTint="@color/colorAccent"
-        app:borderWidth="0dp"
-        tools:visibility="visible"
-        android:visibility="gone"
-        app:tint="@color/colorMainBackground"
-        tools:targetApi="lollipop" />
-    <TextView
-        android:id="@+id/error_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:padding="@dimen/activity_vertical_margin"
-        tools:text="@string/network_error" />
-</FrameLayout>
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/feed_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorMainBackground"
+                tools:listitem="@layout/item_post"
+                tools:itemCount="3"
+                android:scrollbars="vertical"
+                android:clipToPadding="false"
+                app:layoutManager="LinearLayoutManager" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:indeterminateOnly="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/feed_refresh_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:backgroundTint="@color/colorPrimary"
+            android:contentDescription="@string/feed_new_messages"
+            android:tint="@color/white"
+            app:icon="@drawable/ei_arrow_up"
+            app:iconTint="@color/colorTextBackground"
+            android:text="@string/feed_new_messages"
+            android:textColor="@color/colorTextBackground"
+            app:backgroundTint="@color/colorAccent"
+            app:borderWidth="0dp"
+            tools:visibility="visible"
+            android:visibility="gone"
+            app:tint="@color/colorMainBackground"
+            tools:targetApi="lollipop" />
+
+        <TextView
+            android:id="@+id/error_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:padding="@dimen/activity_vertical_margin"
+            tools:text="@string/network_error" />
+    </FrameLayout>
+</LinearLayout>

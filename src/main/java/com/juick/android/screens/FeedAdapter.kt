@@ -61,6 +61,7 @@ import kotlinx.coroutines.launch
 class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<Post, FeedAdapter.PostViewHolder>(DIFF_CALLBACK) {
     private var loadMoreRequestListener: OnLoadMoreRequestListener? = null
     private var itemClickListener: ((View?, Int) -> Unit)? = null
+    private var headerClickListener: ((Post) -> Unit)? = null
     private var itemMenuListener: OnItemClickListener? = null
     private var scrollListener: ((View?, Int, Int) -> Unit)? = null
     private var hasMoreData = true
@@ -230,6 +231,12 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
         } else {
             holder.replyToTextView?.visibility = View.INVISIBLE
         }
+        holder.upicImageView.setOnClickListener {
+            headerClickListener?.invoke(post)
+        }
+        holder.usernameTextView.setOnClickListener {
+            headerClickListener?.invoke(post)
+        }
         holder.menuImageView.setOnClickListener {
             itemMenuListener?.onItemClick(it, post)
         }
@@ -311,6 +318,10 @@ class FeedAdapter(private val showSubscriptions: Boolean = false) : ListAdapter<
 
     fun setOnItemClickListener(itemClickListener: (View?, Int) -> Unit) {
         this.itemClickListener = itemClickListener
+    }
+
+    fun setOnHeaderClickListener(headerClickListener: (Post) -> Unit) {
+        this.headerClickListener = headerClickListener
     }
 
     fun setOnMenuListener(listener: JuickMessageMenuListener) {

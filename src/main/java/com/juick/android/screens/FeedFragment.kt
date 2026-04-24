@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2025, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 open class FeedFragment : Fragment(R.layout.fragment_posts_page) {
     protected val vm by viewModels<FeedViewModel>()
     internal val account by activityViewModels<Account>()
-    private val binding by viewBinding(FragmentPostsPageBinding::bind)
+    protected val binding by viewBinding(FragmentPostsPageBinding::bind)
     private var firstPage = true
     private val _postsKey = "posts"
     private val messagePosted = MutableStateFlow<Result<PostResponse>?>(null)
@@ -66,6 +66,7 @@ open class FeedFragment : Fragment(R.layout.fragment_posts_page) {
                 findNavController(this).navigate(R.id.thread, threadArgs)
             }
         }
+        setupHeaderClickListener(adapter)
         adapter.setOnLoadMoreRequestListener(
             object : OnLoadMoreRequestListener {
                 override fun onLoadMore() {
@@ -238,6 +239,14 @@ open class FeedFragment : Fragment(R.layout.fragment_posts_page) {
         binding.feedList.visibility = View.GONE
         binding.errorText.visibility = View.VISIBLE
         binding.errorText.text = message
+    }
+
+    protected open fun setupHeaderClickListener(adapter: FeedAdapter) {
+        adapter.setOnHeaderClickListener { post ->
+            val args = Bundle()
+            args.putString("uname", post.user.uname)
+            findNavController(this).navigate(R.id.blog, args)
+        }
     }
 
     override fun onResume() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2025, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -99,10 +99,6 @@ class JuickMessageMenuListener(
         popupMenu.setForceShowIcon(true)
         if (me.uid == 0) {
             popupMenu.menu.add(
-                Menu.NONE, MENU_ACTION_BLOG, Menu.NONE,
-                "@${post.user.uname} ${context.getString(R.string.blog)}"
-            )
-            popupMenu.menu.add(
                 Menu.NONE, MENU_ACTION_SHARE, Menu.NONE,
                 context.getString(R.string.Share)
             )
@@ -137,10 +133,6 @@ class JuickMessageMenuListener(
             )
         } else {
             val userName = post.user.uname
-            popupMenu.menu.add(
-                Menu.NONE, MENU_ACTION_BLOG, Menu.NONE,
-                "@$userName ${view.context.getString(R.string.blog)}"
-            )
             popupMenu.menu.add(
                 Menu.NONE, MENU_ACTION_SUBSCRIBE, Menu.NONE,
                 context.resources.getString(R.string.Subscribe_to) + " @" + userName
@@ -180,13 +172,6 @@ class JuickMessageMenuListener(
             val rid = post.rid
             val uname = post.user.uname
             when (action) {
-                MENU_ACTION_BLOG -> {
-                    val navController = findNavController(fragment)
-                    val args = Bundle()
-                    args.putString("uname", uname)
-                    navController.navigate(R.id.blog, args)
-                    true
-                }
                 MENU_ACTION_SUBSCRIBE -> confirmAction(
                     activity,
                     R.string.Are_you_sure_subscribe
@@ -292,7 +277,6 @@ class JuickMessageMenuListener(
     }
 
     companion object {
-        private const val MENU_ACTION_BLOG = 2
         private const val MENU_ACTION_SUBSCRIBE = 3
         private const val MENU_ACTION_SHARE = 5
         private const val MENU_ACTION_DELETE_POST = 6

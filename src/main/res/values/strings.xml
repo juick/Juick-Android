@@ -27,6 +27,8 @@
     <string name="Send">Send</string>
     <string name="Error">Error</string>
     <string name="blog">blog</string>
+    <string name="settings">Settings</string>
+    <string name="blog_stats">%1$d posts</string>
     <string name="Share">Share</string>
     <string name="Replies">Replies</string>
     <string name="reply">Reply</string>
