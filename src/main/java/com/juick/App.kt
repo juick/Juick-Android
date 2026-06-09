@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -25,6 +25,9 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.juick.android.*
 import com.juick.android.service.accountData
 import com.juick.api.Api
@@ -113,6 +116,31 @@ class App : Application() {
             errorReporter = ErrorReporter(this, "support@juick.com", errorSubject)
         }
         ProcessLifecycleOwner.get().lifecycle.addObserver(AppLifecycleManager)
+        val coilHttpClient = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .header(
+                        "User-Agent",
+                        "${getString(R.string.Juick)}/${BuildConfig.VERSION_CODE} " +
+                                "okhttp/${OkHttp.VERSION} Android/${Build.VERSION.SDK_INT}"
+                    )
+                    .apply {
+                        if (accountData.isNotEmpty()) {
+                            addHeader("Authorization", "Juick $accountData")
+                        }
+                    }
+                    .build()
+                chain.proceed(request)
+            }
+            .cache(Cache(cacheDir, cacheSize))
+            .build()
+        SingletonImageLoader.setSafe {
+            ImageLoader.Builder(it)
+                .components {
+                    add(OkHttpNetworkFetcherFactory(coilHttpClient))
+                }
+                .build()
+        }
         init()
     }
 

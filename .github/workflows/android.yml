@@ -4,10 +4,6 @@ on:
   pull_request:
   push:
     branches: [master]
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   check:
     runs-on: ubuntu-24.04
@@ -21,4 +17,4 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v4
     - name: Build
-      run: ./gradlew assembleNext
+      run: ./gradlew assembleDebug

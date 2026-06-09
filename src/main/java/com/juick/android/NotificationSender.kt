@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -75,13 +75,13 @@ object NotificationSender {
                     if (jmsg.tags.isNotEmpty()) {
                         title = "$title: ${jmsg.tagsString}"
                     }
-                    val body = if (TextUtils.isEmpty(jmsg.text)) {
+                    val body = if (TextUtils.isEmpty(jmsg.getText())) {
                         "sent an image"
                     } else {
-                        if (jmsg.text.length > 64) {
-                            jmsg.text.substring(0, 60) + "..."
+                        if (jmsg.getText().length > 64) {
+                            jmsg.getText().substring(0, 60) + "..."
                         } else {
-                            jmsg.text
+                            jmsg.getText()
                         }
                     }
                     val contentIntent = PendingIntent.getActivity(
@@ -101,7 +101,7 @@ object NotificationSender {
                         .setGroupSummary(true)
                     notificationBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE)
                     notificationBuilder.setStyle(
-                        NotificationCompat.BigTextStyle().bigText(jmsg.text)
+                        NotificationCompat.BigTextStyle().bigText(jmsg.getText())
                     )
                     if (jmsg.user.uid > 0) {
                         notificationBuilder.addAction(

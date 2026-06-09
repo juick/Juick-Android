@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2025, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -18,7 +18,6 @@ package com.juick.api.model
 
 import android.os.Parcelable
 import com.juick.util.StringUtils
-import com.stfalcon.chatkit.commons.models.IMessage
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -31,12 +30,12 @@ import java.util.*
 @Parcelize
 @Serializable
 data class Post(
-    private var user: User,
+    var user: User,
     var mid: Int = 0,
     var rid: Int = 0,
     var subscribed: Boolean = false,
     var liked: Boolean = false
-) : IMessage, Parcelable {
+) : Parcelable {
     var replyto = 0
     var to: User? = null
     private var body: String? = null
@@ -54,6 +53,18 @@ data class Post(
     var isService = false
     var recommendations: List<User> = ArrayList()
 
+    @Serializable
+    data class Entity(
+        val start: Int = 0,
+        val end: Int = 0,
+        val text: String = "",
+        val type: String = "", // "a" = link, "q" = quote
+        val url: String? = null,
+    )
+
+    @kotlinx.parcelize.IgnoredOnParcel
+    var entities: List<Entity> = emptyList()
+
     @Transient
     var nextRid = 0
 
@@ -68,24 +79,16 @@ data class Post(
             return builder.toString()
         }
 
-    override fun getId(): String {
+    fun getId(): String {
         return mid.toString()
     }
 
-    override fun getText(): String {
+    fun getText(): String {
         return body ?: ""
     }
 
-    override fun getUser(): User {
-        return user
-    }
-
-    override fun getCreatedAt(): Date {
+    fun getCreatedAt(): Date {
         return timestamp ?: Date()
-    }
-
-    fun setUser(user: User) {
-        this.user = user
     }
 
     fun getBody(): String? {

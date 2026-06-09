@@ -84,7 +84,7 @@ class GoogleSignInProvider() : SignInProvider {
             } else {
                 return Result.success(
                     bundleOf(
-                        "nick" to data.user.name,
+                        "nick" to data.user.uname,
                         "hash" to (data.user.hash ?: "")
                     )
                 )
