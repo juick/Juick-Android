@@ -134,8 +134,6 @@ dependencies {
     implementation libs.runtime.livedata
     implementation libs.lifecycle.extensions
 
-    implementation libs.material
-
     // Sign in with Google
     googleImplementation libs.credentials.play.services.auth
     googleImplementation libs.play.services.auth
