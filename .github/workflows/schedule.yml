@@ -49,5 +49,5 @@ jobs:
         arch: x86_64
         target: google_apis
         force-avd-creation: false
-        emulator-build: 15261927
+        emulator-build: 13610412
         script: ./gradlew --no-daemon connectedFreeDebugAndroidTest
