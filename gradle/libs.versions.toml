@@ -4,10 +4,10 @@ androidImageCropper = "4.7.0"
 appcompat = "1.7.1"
 browser = "1.10.0"
 chatkit = "5e99a8bf3c"
+coil = "3.4.0"
 constraintlayoutCompose = "1.1.1"
 credentialsPlayServicesAuth = "1.6.0"
-espressoCore = "3.6.1"
-espressoIntents = "3.7.0"
+espresso = "3.7.0"
 firebaseBom = "34.14.1"
 composeBom = "2026.05.01"
 fragmentTesting = "1.8.9"
@@ -18,7 +18,7 @@ kotlinxSerializationJson = "1.11.0"
 coreKtx = "1.18.0"
 lifecycleVersion = "2.10.0"
 lifecycleExtensions = "2.2.0"
-material = "1.14.0"
+material3 = "1.4.0"
 navigationFragmentKtx = "2.9.8"
 okhttp = "5.4.0"
 oksse = "0.9.0"
@@ -41,13 +41,15 @@ android-image-cropper = { module = "com.vanniktech:android-image-cropper", versi
 browser = { module = "androidx.browser:browser", version.ref = "browser" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 chatkit = { module = "com.github.vitalyster:ChatKit", version.ref = "chatkit" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 converter-kotlinx-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofit" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espressoIntents" }
+espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
+espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espresso" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragmentTesting" }
@@ -56,11 +58,15 @@ googleid = { module = "com.google.android.libraries.identity.googleid:googleid",
 junit = { module = "androidx.test.ext:junit", version.ref = "junit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleVersion" }
+lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleVersion" }
+runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata" }
+compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 lifecycle-extensions = { module = "androidx.lifecycle:lifecycle-extensions", version.ref = "lifecycleExtensions" }
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
-material = { module = "com.google.android.material:material", version.ref = "material" }
-material3 = { module = "androidx.compose.material3:material3" }
+material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationFragmentKtx" }
 navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationFragmentKtx" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }

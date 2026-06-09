@@ -1,0 +1,130 @@
+/*
+ * Copyright (C) 2008-2026, Juick
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.juick.android.ui.screens.thread
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.juick.App
+import com.juick.R
+import com.juick.android.ui.screens.feed.PostCard
+import com.juick.api.model.Post
+import com.juick.api.model.PostResponse
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+
+@Composable
+fun ThreadScreen(
+    mid: Int,
+    scrollToEnd: Boolean = false,
+    onPostClick: (Post) -> Unit,
+    onUserClick: (String) -> Unit,
+    onMenuClick: (Post) -> Unit,
+    onLikeClick: (Post) -> Unit,
+    onLinkClick: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var posts by remember { mutableStateOf<List<Post>>(emptyList()) }
+    var replyText by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(true) }
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val colors = MaterialTheme.colorScheme
+
+    LaunchedEffect(mid) {
+        try { posts = App.instance.api.thread(mid) } catch (_: Exception) {}
+        isLoading = false
+        if (scrollToEnd && posts.isNotEmpty()) listState.animateScrollToItem(posts.size - 1)
+    }
+
+    val newMessages by App.instance.messages.collectAsStateWithLifecycle()
+    LaunchedEffect(newMessages) {
+        val relevant = newMessages.filter { it.mid == mid }
+        if (relevant.isNotEmpty()) posts = posts + relevant
+    }
+
+    Surface(color = colors.background) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            if (isLoading) {
+                LinearProgressIndicator(Modifier.fillMaxWidth())
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(state = listState, modifier = Modifier.weight(1f)) {
+                    items(posts, key = { "thread_${it.mid}_${it.rid}" }) { post ->
+                        PostCard(
+                            post = post,
+                            onPostClick = { onPostClick(post) },
+                            onUserClick = { onUserClick(post.user.uname) },
+                            onMenuClick = { onMenuClick(post) },
+                            onLikeClick = { onLikeClick(post) },
+                            onLinkClick = onLinkClick,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        )
+                    }
+                }
+            }
+
+            Surface(color = colors.surface, shadowElevation = 2.dp) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(12.dp).imePadding(),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, stringResource(R.string.Cancel), tint = colors.onSurfaceVariant)
+                    }
+                    OutlinedTextField(
+                        value = replyText,
+                        onValueChange = { replyText = it },
+                        placeholder = { Text(stringResource(R.string.reply)) },
+                        modifier = Modifier.weight(1f),
+                        maxLines = 3,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    IconButton(
+                        onClick = {
+                            if (replyText.isNotBlank()) {
+                                scope.launch {
+                                    try {
+                                        val receiver = MutableStateFlow<Result<PostResponse>?>(null)
+                                        App.instance.sendMessage(scope, receiver, replyText)
+                                        replyText = ""
+                                    } catch (_: Exception) {}
+                                }
+                            }
+                        },
+                        enabled = replyText.isNotBlank(),
+                    ) {
+                        Icon(Icons.Default.Send, stringResource(R.string.Send), tint = if (replyText.isNotBlank()) colors.primary else colors.onSurfaceVariant)
+                    }
+                }
+            }
+        }
+    }
+}
