@@ -19,6 +19,7 @@ package com.juick.android.ui.widget
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -136,6 +137,7 @@ private fun saveBitmapToFile(context: android.content.Context, bitmap: Bitmap?):
             file,
         )
     } catch (e: Exception) {
+        Log.e("CropSheet", "Failed to save cropped bitmap", e)
         null
     }
 }
