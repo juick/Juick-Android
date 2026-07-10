@@ -124,9 +124,10 @@ fun PostCard(
 
             val photo = post.photo
             val medium = photo?.medium
-            if (medium != null) {
+            val imageUrl = medium?.url
+            if (!imageUrl.isNullOrBlank()) {
                 Spacer(Modifier.height(12.dp))
-                AsyncImage(medium.url ?: "", null, Modifier.fillMaxWidth().height(200.dp), contentScale = ContentScale.FillWidth)
+                AsyncImage(imageUrl, null, Modifier.fillMaxWidth().height(200.dp), contentScale = ContentScale.FillWidth)
             }
 
             Spacer(Modifier.height(12.dp))
