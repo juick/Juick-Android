@@ -187,7 +187,13 @@ class JuickMessageMenuListener(
     }
 
     override fun onLinkClick(url: String) {
-        (activity as? MainActivity)?.processUri(url.toUri())
+        val mainActivity = activity as? MainActivity
+        if (mainActivity != null) {
+            mainActivity.processUri(url.toUri())
+        } else {
+            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+            activity.startActivity(intent)
+        }
     }
 
     private fun processCommand(command: String) {

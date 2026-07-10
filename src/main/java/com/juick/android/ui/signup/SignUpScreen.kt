@@ -69,6 +69,7 @@ fun SignUpScreen(
 
             Button(
                 onClick = { onSignUp(nick) },
+                enabled = nick.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(0.dp),
                 colors = ButtonDefaults.buttonColors(
