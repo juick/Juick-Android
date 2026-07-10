@@ -15,9 +15,9 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
-        targetSdkVersion 36
+        targetSdkVersion 37
         minSdkVersion 24
         versionCode 249
         versionName "3.2." + versionCode
