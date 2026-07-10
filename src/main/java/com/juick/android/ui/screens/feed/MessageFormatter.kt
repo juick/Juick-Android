@@ -108,10 +108,12 @@ fun formatPostBlocks(
 
     val segs = mutableListOf<Seg>()
     var ei = 0
+    var lastAcceptedEnd = 0
     for (i in p.entityStart.indices) {
         val e = sorted.getOrNull(ei) ?: break
-        if (e.start < (sorted.getOrNull(ei - 1)?.end ?: 0)) { ei++; continue }
+        if (e.start < lastAcceptedEnd) { ei++; continue }
         segs.add(Seg(p.entityStart[i], p.entityEnd[i], p.entityType[i]))
+        lastAcceptedEnd = e.end
         ei++
     }
 

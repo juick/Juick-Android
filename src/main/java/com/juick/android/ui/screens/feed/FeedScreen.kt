@@ -166,6 +166,7 @@ fun FeedScreen(
                                         onPostClick = { onPostClick(post) },
                                         onUserClick = { onUserClick(post.user.uname) },
                                         onMenuClick = { onMenuClick(post) },
+                                        onLikeClick = { onLikeClick(post) },
                                         onLinkClick = onLinkClick,
                                         modifier = Modifier.padding(vertical = 4.dp).padding(horizontal = 12.dp),
                                     )
@@ -196,6 +197,7 @@ fun ReplyCard(
     onPostClick: () -> Unit,
     onUserClick: () -> Unit,
     onMenuClick: () -> Unit,
+    onLikeClick: () -> Unit,
     onLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -216,7 +218,7 @@ fun ReplyCard(
             onPostClick = onPostClick,
             onUserClick = onUserClick,
             onMenuClick = onMenuClick,
-            onLikeClick = {},
+            onLikeClick = onLikeClick,
             onLinkClick = onLinkClick,
             modifier = Modifier.padding(start = 16.dp),
         )
