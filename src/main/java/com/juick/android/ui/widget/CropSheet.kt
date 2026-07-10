@@ -123,15 +123,19 @@ fun CropSheet(
 
 private fun saveBitmapToFile(context: android.content.Context, bitmap: Bitmap?): Uri? {
     if (bitmap == null) return null
-    val dir = File(context.filesDir, "cropped")
-    dir.mkdirs()
-    val file = File(dir, "crop_${System.currentTimeMillis()}.jpg")
-    FileOutputStream(file).use { out ->
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+    return try {
+        val dir = File(context.filesDir, "cropped")
+        dir.mkdirs()
+        val file = File(dir, "crop_${System.currentTimeMillis()}.jpg")
+        FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+        }
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            file,
+        )
+    } catch (e: Exception) {
+        null
     }
-    return FileProvider.getUriForFile(
-        context,
-        "${context.packageName}.provider",
-        file,
-    )
 }

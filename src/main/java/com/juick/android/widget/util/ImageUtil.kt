@@ -20,11 +20,14 @@ package com.juick.android.widget.util
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.juick.App
+import kotlinx.coroutines.CancellationException
 
 suspend fun loadImage(url: String): Bitmap? {
     return try {
         val responseBody = App.instance.api.download(url)
         responseBody.byteStream().use { BitmapFactory.decodeStream(it) }
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         null
     }

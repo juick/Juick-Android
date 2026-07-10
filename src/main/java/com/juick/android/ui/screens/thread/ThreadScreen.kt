@@ -52,12 +52,13 @@ fun ThreadScreen(
     var posts by remember { mutableStateOf<List<Post>>(emptyList()) }
     var replyText by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
+    var loadError by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
 
     LaunchedEffect(mid) {
-        try { posts = App.instance.api.thread(mid) } catch (_: Exception) {}
+        try { posts = App.instance.api.thread(mid) } catch (_: Exception) { loadError = true }
         isLoading = false
         if (scrollToEnd && posts.isNotEmpty()) listState.animateScrollToItem(posts.size - 1)
     }
@@ -74,6 +75,14 @@ fun ThreadScreen(
                 LinearProgressIndicator(Modifier.fillMaxWidth())
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
+                }
+            } else if (loadError) {
+                Box(Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) {
+                    Text(
+                        stringResource(R.string.network_error),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
                 }
             } else {
                 LazyColumn(state = listState, modifier = Modifier.weight(1f)) {

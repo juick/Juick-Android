@@ -18,7 +18,6 @@ package com.juick.android.ui.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
-import com.juick.BuildConfig
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -131,7 +130,7 @@ fun AppNavigation(
         ) { entry ->
             val query = entry.arguments?.getString("query") ?: ""
             FeedScreen(
-                initialUrl = Uri.parse("${BuildConfig.API_ENDPOINT}search/$query"),
+                initialUrl = Uris.search(query),
                 onPostClick = { onPostClick(it) },
                 onUserClick = { onUserClick(it) },
                 onMenuClick = { onMenuClick(it) },
