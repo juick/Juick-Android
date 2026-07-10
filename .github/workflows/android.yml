@@ -24,4 +24,4 @@ jobs:
       with:
         packages: 'platform-tools'
     - name: Build
-      run: ./gradlew assembleNext
+      run: ./gradlew assembleDebug
