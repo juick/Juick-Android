@@ -25,6 +25,7 @@ import androidx.lifecycle.lifecycleScope
 import com.juick.App
 import com.juick.android.ui.AppTheme
 import com.juick.android.ui.signup.SignUpScreen
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -48,6 +49,8 @@ class SignUpActivity : ComponentActivity() {
                                     setResult(RESULT_OK, successIntent)
                                     finish()
                                 }
+                            } catch (e: CancellationException) {
+                                throw e
                             } catch (e: Exception) {
                                 withContext(Dispatchers.Main) {
                                     Toast.makeText(
