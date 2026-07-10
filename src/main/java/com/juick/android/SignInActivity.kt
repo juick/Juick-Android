@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2025, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -23,17 +23,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.juick.App
 import com.juick.R
 import com.juick.android.service.account
 import com.juick.android.service.accountData
 import com.juick.android.service.isAuthenticated
-import com.juick.databinding.ActivityLoginBinding
+import com.juick.android.ui.AppTheme
+import com.juick.android.ui.signin.SignInScreen
 import com.juick.util.StringUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,23 +45,22 @@ import kotlinx.coroutines.withContext
  *
  * @author Ugnich Anton
  */
-class SignInActivity : AppCompatActivity() {
+class SignInActivity : ComponentActivity() {
     enum class SignInStatus {
         SIGNED_OUT, SIGN_IN_PROGRESS, SIGNED_IN
     }
 
     private var authenticatorResponse: AccountAuthenticatorResponse? = null
     private var currentAction = 0
-    private lateinit var model: ActivityLoginBinding
     private val application = App.instance
     private lateinit var signUpLauncher: ActivityResultLauncher<Intent>
+    private var googleSignInButton: android.view.View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         signUpLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 result.data?.extras?.let {
-                    // sign in with the new account after signup
                     updateAccount(it.getString("nick", ""),
                         it.getString("hash", ""), currentAction)
                 } ?: run {
@@ -72,45 +73,13 @@ class SignInActivity : AppCompatActivity() {
         authenticatorResponse =
             intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
         authenticatorResponse?.onRequestContinued()
-        model = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(model.root)
         currentAction = intent.getIntExtra(EXTRA_ACTION, ACTION_ACCOUNT_CREATE)
-        if (currentAction == ACTION_PASSWORD_UPDATE) {
-            model.juickNick.setText(App.instance.account?.name ?: "")
-            model.juickNick.isEnabled = false
-        } else {
-            model.juickNick.isEnabled = true
-        }
-        model.buttonSave.setOnClickListener {
-            val nick = model.juickNick.text.toString()
-            val password = model.juickPassword.text.toString()
-            if (nick.isEmpty() || password.isEmpty()) {
-                Toast.makeText(
-                    this@SignInActivity,
-                    R.string.Enter_nick_and_password,
-                    Toast.LENGTH_SHORT
-                ).show()
-                return@setOnClickListener
-            }
-            lifecycleScope.launch(Dispatchers.IO) {
-                try {
-                    val me = application.auth(nick, password)
-                    withContext(Dispatchers.Main) {
-                        updateAccount(nick, me.hash ?: "", currentAction)
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            this@SignInActivity,
-                            e.localizedMessage,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
-        }
-        application.signInProvider?.prepareSignIn(this, model.signInButtonPlaceholder)
+
+        // Prepare Google sign-in button (must be done before setContent)
+        val placeholder = android.widget.RelativeLayout(this)
+        application.signInProvider?.prepareSignIn(this, placeholder)
             ?.let { signInButton ->
+                googleSignInButton = signInButton
                 signInButton.setOnClickListener {
                     lifecycleScope.launch {
                         try {
@@ -127,12 +96,7 @@ class SignInActivity : AppCompatActivity() {
                                         signupIntent.putExtra("authCode", authCode)
                                         signUpLauncher.launch(signupIntent)
                                     } ?: run {
-                                        // update existing account
-                                        updateAccount(
-                                            nick,
-                                            hash,
-                                            currentAction
-                                        )
+                                        updateAccount(nick, hash, currentAction)
                                     }
                                 },
                                 onFailure = {
@@ -151,6 +115,13 @@ class SignInActivity : AppCompatActivity() {
                     }
                 }
             }
+
+        val initialNick = if (currentAction == ACTION_PASSWORD_UPDATE) {
+            App.instance.account?.name ?: ""
+        } else {
+            ""
+        }
+
         if (App.instance.isAuthenticated && currentAction != ACTION_PASSWORD_UPDATE) {
             val builder = AlertDialog.Builder(this)
             builder.setNeutralButton(android.R.string.ok) { _, _ ->
@@ -160,6 +131,42 @@ class SignInActivity : AppCompatActivity() {
             builder.setMessage(R.string.Only_one_account)
             builder.show()
         }
+
+        setContent {
+            AppTheme {
+                SignInScreen(
+                    currentAction = currentAction,
+                    initialNick = initialNick,
+                    googleSignInButton = googleSignInButton,
+                    onSignIn = { nick, password ->
+                        if (nick.isEmpty() || password.isEmpty()) {
+                            Toast.makeText(
+                                this,
+                                R.string.Enter_nick_and_password,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@SignInScreen
+                        }
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            try {
+                                val me = application.auth(nick, password)
+                                withContext(Dispatchers.Main) {
+                                    updateAccount(nick, me.hash ?: "", currentAction)
+                                }
+                            } catch (e: Exception) {
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        this@SignInActivity,
+                                        e.localizedMessage,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        }
+                    }
+                )
+            }
+        }
     }
 
     private fun updateAccount(nick: String, hash: String, action: Int) {
@@ -167,7 +174,7 @@ class SignInActivity : AppCompatActivity() {
         if (action == ACTION_PASSWORD_UPDATE) {
             val account = App.instance.account
             account?.let {
-                am.invalidateAuthToken(account.type,  App.instance.accountData)
+                am.invalidateAuthToken(account.type, App.instance.accountData)
                 am.setAuthToken(account, StringUtils.EMPTY, hash)
             } ?: run {
                 Log.d("Auth", "Account missing")
