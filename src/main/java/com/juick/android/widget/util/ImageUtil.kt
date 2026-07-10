@@ -14,37 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.juick.api.model
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.Serializable
+package com.juick.android.widget.util
 
-/**
- * Created by gerc on 10.02.2016.
- */
-@Parcelize
-@Serializable
-data class User(
-    val uid: Int = 0,
-    val uname: String
-) : Parcelable {
-    var unreadCount: Int = 0
-    val premium: Boolean = false
-    val admin: Boolean = false
-    val vip: List<User> = listOf()
-    val ignored: List<User> = listOf()
-    var hash: String? = null
-    var fullname: String? = null
-    var isBanned = false
-    var avatar = ""
-    var read: List<User>? = null
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import com.juick.App
 
-    fun getId(): String {
-        return uname
-    }
-
-    fun getName(): String {
-        return uname
+suspend fun loadImage(url: String): Bitmap? {
+    return try {
+        val responseBody = App.instance.api.download(url)
+        responseBody.byteStream().use { BitmapFactory.decodeStream(it) }
+    } catch (e: Exception) {
+        null
     }
 }

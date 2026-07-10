@@ -14,6 +14,15 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "androidx.concurrent" && requested.name == "concurrent-futures") {
+            useVersion("1.2.0")
+            because("conflict between compose BOM (1.1.0) and test deps (1.2.0)")
+        }
+    }
+}
+
 android {
     compileSdk = 37
     defaultConfig {
@@ -33,7 +42,6 @@ android {
         addConstant("INTENT_NEW_EVENT_ACTION", "com.juick.NEW_EVENT_ACTION")
 
         buildConfigField "boolean", "HIDE_NSFW", "false"
-        buildConfigField "boolean", "ENABLE_COMPOSE_UI", "false"
         buildConfigField "boolean", "ENABLE_UPDATER", "true"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -42,7 +50,6 @@ android {
     }
     buildFeatures {
         buildConfig true
-        viewBinding true
         compose true
     }
     compileOptions {
@@ -65,10 +72,6 @@ android {
         release {
             minifyEnabled false
             signingConfig signingConfigs.release
-        }
-        next {
-            initWith debug
-            buildConfigField "boolean", "ENABLE_COMPOSE_UI", "true"
         }
         store {
             initWith release
@@ -123,15 +126,12 @@ dependencies {
     implementation libs.core
     implementation libs.appcompat
     implementation libs.browser
-    implementation libs.navigation.fragment.ktx
-    implementation libs.navigation.ui.ktx
     implementation libs.savedstate.ktx
-    implementation libs.swiperefreshlayout
     implementation libs.lifecycle.viewmodel.compose
+    implementation libs.lifecycle.runtime.compose
+    implementation libs.runtime.livedata
     implementation libs.lifecycle.process
     implementation libs.lifecycle.service
-
-    implementation libs.material
 
     // Sign in with Google
     googleImplementation libs.credentials.play.services.auth
@@ -149,24 +149,27 @@ dependencies {
     implementation libs.retrofit
     implementation libs.converter.kotlinx.serialization
 
-    implementation libs.chatkit
     huaweiImplementation libs.push
-
-    implementation libs.fragmentviewbindingdelegate.kt
 
     implementation libs.android.image.cropper
 
     // Compose
-    nextImplementation libs.activity.compose
-    nextImplementation libs.constraintlayout.compose
-    nextImplementation platform(libs.compose.bom)
-    nextImplementation libs.ui
-    nextImplementation libs.ui.graphics
-    nextImplementation libs.ui.viewbinding
-    nextImplementation libs.ui.tooling.preview
-    nextImplementation libs.material.icons.extended
-    nextImplementation libs.material3
-    nextImplementation libs.ui.tooling
+    implementation libs.activity.compose
+    implementation libs.constraintlayout.compose
+    implementation platform(libs.compose.bom)
+    implementation libs.ui
+    implementation libs.ui.graphics
+    implementation libs.ui.tooling.preview
+    implementation libs.material.icons.extended
+    implementation libs.material3
+    debugImplementation libs.ui.tooling
+
+    // Navigation Compose
+    implementation libs.navigation.compose
+
+    // Coil for image loading
+    implementation libs.coil.compose
+    implementation libs.coil.network.okhttp
     // Core library
     androidTestImplementation libs.test.core.ktx
 
@@ -175,10 +178,11 @@ dependencies {
     androidTestImplementation libs.truth
 
     androidTestImplementation libs.espresso.core
-    // Espresso intents for intercepting ACTION_VIEW
-    androidTestImplementation libs.espresso.intents
-    // Fragment testing helpers (launchFragmentInContainer)
-    androidTestImplementation libs.fragment.testing
+
+    // Compose UI testing
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation libs.compose.ui.test.junit4
+    debugImplementation libs.compose.ui.test.manifest
     // UI Automator
     androidTestImplementation libs.uiautomator.v18
 }

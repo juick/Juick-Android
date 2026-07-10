@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2023, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -19,41 +19,46 @@ package com.juick.android
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
 import com.juick.App
-import com.juick.databinding.ActivitySignupBinding
+import com.juick.android.ui.AppTheme
+import com.juick.android.ui.signup.SignUpScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SignUpActivity : AppCompatActivity() {
-    private lateinit var model: ActivitySignupBinding
+class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        model = ActivitySignupBinding.inflate(layoutInflater)
-        setContentView(model.root)
         val authCode = intent.getStringExtra("authCode")
-        model.buttonCreate.setOnClickListener {
-            val nick = model.newNick.text.toString()
-            lifecycleScope.launch(Dispatchers.IO) {
-                try {
-                    val user = App.instance.api.signup(nick, authCode)
-                    withContext(Dispatchers.Main) {
-                        val successIntent = Intent()
-                        successIntent.putExtra("nick", nick)
-                        successIntent.putExtra("hash", user.hash)
-                        setResult(RESULT_OK, successIntent)
-                        finish()
+
+        setContent {
+            AppTheme {
+                SignUpScreen(
+                    onSignUp = { nick ->
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            try {
+                                val user = App.instance.api.signup(nick, authCode)
+                                withContext(Dispatchers.Main) {
+                                    val successIntent = Intent()
+                                    successIntent.putExtra("nick", nick)
+                                    successIntent.putExtra("hash", user.hash)
+                                    setResult(RESULT_OK, successIntent)
+                                    finish()
+                                }
+                            } catch (e: Exception) {
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        this@SignUpActivity,
+                                        "Username is not correct (already taken?)", Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        }
                     }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            this@SignUpActivity,
-                            "Username is not correct (already taken?)", Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
+                )
             }
         }
     }
