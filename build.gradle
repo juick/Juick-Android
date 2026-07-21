@@ -120,7 +120,7 @@ tasks.withType(JavaCompile).configureEach {
 
 dependencies {
     implementation libs.kotlinx.serialization.json
-    implementation libs.core.ktx
+    implementation libs.core
     implementation libs.appcompat
     implementation libs.browser
     implementation libs.navigation.fragment.ktx
