@@ -128,7 +128,8 @@ dependencies {
     implementation libs.savedstate.ktx
     implementation libs.swiperefreshlayout
     implementation libs.lifecycle.viewmodel.compose
-    implementation libs.lifecycle.extensions
+    implementation libs.lifecycle.process
+    implementation libs.lifecycle.service
 
     implementation libs.material
 
