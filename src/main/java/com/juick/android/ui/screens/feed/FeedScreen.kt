@@ -68,6 +68,7 @@ fun FeedScreen(
     onLinkClick: (String) -> Unit,
     showProfileHeader: Boolean = false,
     profileHeader: @Composable () -> Unit = {},
+    currentUser: com.juick.api.model.User? = null,
     modifier: Modifier = Modifier,
 ) {
     var apiUrl by remember { mutableStateOf(Uri.EMPTY) }
@@ -188,6 +189,8 @@ fun FeedScreen(
                                         onMenuClick = { onMenuClick(post) },
                                         onLikeClick = { onLikeClick(post) },
                                         onLinkClick = onLinkClick,
+                                        currentUid = currentUser?.uid ?: 0,
+                                        isPremiumOrAdmin = currentUser?.premium == true || currentUser?.admin == true,
                                         modifier = Modifier.padding(vertical = 4.dp).padding(horizontal = 12.dp),
                                     )
                                 } else {
