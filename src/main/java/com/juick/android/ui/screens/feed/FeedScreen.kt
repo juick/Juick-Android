@@ -33,12 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -51,7 +49,6 @@ import com.juick.api.model.Post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,26 +69,27 @@ fun FeedScreen(
     val listState = rememberLazyListState()
     var isRefreshing by remember { mutableStateOf(false) }
     var firstPage by remember { mutableStateOf(true) }
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(initialUrl) {
-        if (apiUrl == Uri.EMPTY) {
-            apiUrl = initialUrl
-        }
+        if (apiUrl == Uri.EMPTY) apiUrl = initialUrl
     }
 
     LaunchedEffect(apiUrl) {
         if (apiUrl != Uri.EMPTY) {
-            feedState = runCatching {
-                withContext(Dispatchers.IO) { App.instance.api.getPosts(apiUrl) }
-            }
+            feedState = runCatching { withContext(Dispatchers.IO) { App.instance.api.getPosts(apiUrl) } }
+        }
+    }
+
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            snapshotFlow { feedState }.distinctUntilChanged().collectLatest { if (it != null) isRefreshing = false }
         }
     }
 
     val shouldLoadMore by remember {
         derivedStateOf {
-            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-            lastVisibleItem != null && lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 3
+            val last = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+            last != null && last.index >= listState.layoutInfo.totalItemsCount - 3
         }
     }
 
@@ -102,12 +100,8 @@ fun FeedScreen(
                 val lastPost = posts.last()
                 val oldBeforeMid = apiUrl.getQueryParameter("before_mid")
                 if ("${lastPost.mid}" != oldBeforeMid) {
-                    val newUrl = Utils.buildUrl(apiUrl)
-                        .build()
-                        .replaceUriParameter("before_mid", lastPost.mid.toString())
-                        .replaceUriParameter("ts", "${System.currentTimeMillis()}")
+                    apiUrl = Utils.buildUrl(apiUrl).build().replaceUriParameter("before_mid", lastPost.mid.toString()).replaceUriParameter("ts", "${System.currentTimeMillis()}")
                     firstPage = false
-                    apiUrl = newUrl
                 }
             }
         }
@@ -118,20 +112,7 @@ fun FeedScreen(
         onRefresh = {
             isRefreshing = true
             firstPage = true
-            val newUrl = Utils.buildUrl(initialUrl)
-                .build()
-                .replaceUriParameter("before_mid", "")
-                .replaceUriParameter("ts", "${System.currentTimeMillis()}")
-            apiUrl = newUrl
-            scope.launch {
-                snapshotFlow { feedState }
-                    .distinctUntilChanged()
-                    .collectLatest { result ->
-                        if (result != null) {
-                            isRefreshing = false
-                        }
-                    }
-            }
+            apiUrl = Utils.buildUrl(initialUrl).build().replaceUriParameter("before_mid", "").replaceUriParameter("ts", "${System.currentTimeMillis()}")
         },
         modifier = modifier.fillMaxSize(),
     ) {
