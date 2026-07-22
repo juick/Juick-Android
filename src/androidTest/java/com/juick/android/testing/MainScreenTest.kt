@@ -19,10 +19,11 @@ package com.juick.android.testing
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.test.platform.app.InstrumentationRegistry
 import com.juick.R
 import com.juick.android.MainActivity
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -31,16 +32,22 @@ class MainScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
+    @Before
+    fun grantPermissions() {
+        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(
+            "pm grant ${composeTestRule.activity.packageName} android.permission.POST_NOTIFICATIONS"
+        )
+    }
+
     @Test
-    fun mainScreen_publicFeed_showsJuickTitle() {
-        // Unauthenticated — Public route with "Juick" title
+    fun publicFeed_showsJuickTitle() {
         composeTestRule.onNodeWithText(
             composeTestRule.activity.getString(R.string.Juick)
         ).assertIsDisplayed()
     }
 
     @Test
-    fun mainScreen_publicFeed_showsLoginButton() {
+    fun publicFeed_showsLoginButton() {
         composeTestRule.onNodeWithText(
             composeTestRule.activity.getString(R.string.login)
         ).assertIsDisplayed()
