@@ -16,6 +16,9 @@
  */
 package com.juick.android.ui.screens.thread
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,6 +31,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -56,9 +60,16 @@ fun ThreadScreen(
     var replyText by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
     var loadError by remember { mutableStateOf(false) }
+    var replyAttachmentUri by remember { mutableStateOf<Uri?>(null) }
+    var replyAttachmentMime by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
+    val context = LocalContext.current
+
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { replyAttachmentUri = it; replyAttachmentMime = "image/jpeg" }
+    }
 
     LaunchedEffect(mid) {
         try { posts = App.instance.api.thread(mid) } catch (_: Exception) { loadError = true }
@@ -124,15 +135,24 @@ fun ThreadScreen(
                         modifier = Modifier.weight(1f),
                         maxLines = 3,
                     )
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(4.dp))
+                    IconButton(onClick = {
+                        if (replyAttachmentUri != null) { replyAttachmentUri = null; replyAttachmentMime = null }
+                        else galleryLauncher.launch("image/*")
+                    }) {
+                        Text(if (replyAttachmentUri != null) "📎✓" else "📎", style = MaterialTheme.typography.bodyMedium)
+                    }
+                    Spacer(Modifier.width(4.dp))
                     IconButton(
                         onClick = {
-                            if (replyText.isNotBlank() && App.instance.isAuthenticated) {
+                            if ((replyText.isNotBlank() || replyAttachmentUri != null) && App.instance.isAuthenticated) {
                                 scope.launch {
                                     try {
                                         val receiver = MutableStateFlow<Result<PostResponse>?>(null)
-                                        App.instance.sendMessage(scope, receiver, "#$mid $replyText")
+                                        App.instance.sendMessage(scope, receiver, "#$mid $replyText", replyAttachmentUri, replyAttachmentMime)
                                         replyText = ""
+                                        replyAttachmentUri = null
+                                        replyAttachmentMime = null
                                     } catch (_: Exception) {}
                                 }
                             }
