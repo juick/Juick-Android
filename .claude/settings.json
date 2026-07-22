@@ -1,5 +1,12 @@
 {
   "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": ".claude/hooks/block-destructive-commands.sh"
+      }]
+    }],
     "PostToolUse": [{
       "matcher": "Write|Edit",
       "hooks": [{
