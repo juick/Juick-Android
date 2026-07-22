@@ -83,6 +83,7 @@ fun PostCard(
     showCounters: Boolean = true,
     currentUid: Int = 0,
     isPremiumOrAdmin: Boolean = false,
+    isAuthenticated: Boolean = false,
     onDeletePost: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {

@@ -59,6 +59,8 @@ fun ThreadScreen(
     onLikeClick: (Post) -> Unit,
     onLinkClick: (String) -> Unit,
     onDismiss: () -> Unit,
+    currentUid: Int = 0,
+    isPremiumOrAdmin: Boolean = false,
 ) {
     var posts by remember { mutableStateOf<List<Post>>(emptyList()) }
     var replyText by remember { mutableStateOf("") }
@@ -123,6 +125,8 @@ fun ThreadScreen(
                             onLikeClick = { onLikeClick(post) },
                             onLinkClick = onLinkClick,
                             showCounters = false,
+                            currentUid = currentUid,
+                            isPremiumOrAdmin = isPremiumOrAdmin,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         )
                     }

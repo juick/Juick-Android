@@ -121,13 +121,13 @@ fun AppNavigation(
             dialogProperties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
         ) { entry ->
             val route = entry.toRoute<Route.Thread>()
-            ThreadScreen(route.mid, route.scrollToEnd, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onDismiss = { navController.popBackStack() })
+            ThreadScreen(route.mid, route.scrollToEnd, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onDismiss = { navController.popBackStack() }, currentUid = currentProfile?.uid ?: 0, isPremiumOrAdmin = currentProfile?.premium == true || currentProfile?.admin == true)
         }
 
         composable<Route.Blog> { entry ->
             val uname = entry.toRoute<Route.Blog>().uname
             AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                FeedScreen(Uris.getUserPostsByName(uname), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, showProfileHeader = true, profileHeader = { ProfileHeader(uname = uname) })
+                FeedScreen(Uris.getUserPostsByName(uname), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile, showProfileHeader = true, profileHeader = { ProfileHeader(uname = uname) })
             }
         }
 
