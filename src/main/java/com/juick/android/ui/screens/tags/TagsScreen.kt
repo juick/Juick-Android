@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.juick.App
 import com.juick.R
 import com.juick.api.model.Tag
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -53,9 +54,9 @@ fun TagsScreen(
     var tagsResult by remember { mutableStateOf<Result<List<Tag>>?>(null) }
 
     LaunchedEffect(Unit) {
-        tagsResult = runCatching {
-            withContext(Dispatchers.IO) { App.instance.api.tags() }
-        }
+        try {
+            tagsResult = Result.success(withContext(Dispatchers.IO) { App.instance.api.tags() })
+        } catch (e: CancellationException) { throw e } catch (e: Exception) { tagsResult = Result.failure(e) }
     }
 
     Surface(modifier = modifier.fillMaxSize()) {

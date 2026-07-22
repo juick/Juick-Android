@@ -33,6 +33,7 @@ import coil3.compose.AsyncImage
 import com.juick.App
 import com.juick.R
 import com.juick.android.service.isAuthenticated
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.juick.android.ui.screens.noauth.NoAuthScreen
@@ -48,9 +49,9 @@ fun ChatsListScreen(
 
     LaunchedEffect(Unit) {
         if (App.instance.isAuthenticated) {
-            chatsState = runCatching {
-                withContext(Dispatchers.IO) { App.instance.api.groupsPms(10).pms }
-            }
+            try {
+                chatsState = Result.success(withContext(Dispatchers.IO) { App.instance.api.groupsPms(10).pms })
+            } catch (e: CancellationException) { throw e } catch (e: Exception) { chatsState = Result.failure(e) }
         } else {
             onNavigateToAuth()
         }
