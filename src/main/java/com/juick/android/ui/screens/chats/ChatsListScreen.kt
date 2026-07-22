@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,25 +47,33 @@ fun ChatsListScreen(
     onNavigateToAuth: () -> Unit,
 ) {
     var chatsState by remember { mutableStateOf<Result<List<Chat>>?>(null) }
+    var isRefreshing by remember { mutableStateOf(false) }
+    var refreshTrigger by remember { mutableStateOf(0) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(Unit, refreshTrigger) {
         if (App.instance.isAuthenticated) {
             try {
                 chatsState = Result.success(withContext(Dispatchers.IO) { App.instance.api.groupsPms(10).pms })
             } catch (e: CancellationException) { throw e } catch (e: Exception) { chatsState = Result.failure(e) }
+            isRefreshing = false
         } else {
             onNavigateToAuth()
         }
     }
 
-    when (val result = chatsState) {
-        null -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { isRefreshing = true; refreshTrigger++ },
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        when (val result = chatsState) {
+            null -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
-        }
 
-        else -> {
+            else -> {
             result.fold(
                 onSuccess = { chats ->
                     if (chats.isEmpty()) {
@@ -91,6 +100,7 @@ fun ChatsListScreen(
                     }
                 },
             )
+            }
         }
     }
 }
