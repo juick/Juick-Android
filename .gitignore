@@ -1,7 +1,6 @@
 out/*
 gen/*
 .idea/*
-!.idea/copyright/
 build/*
 .gradle/*
 keystore.properties

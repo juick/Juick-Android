@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Write|Edit",
+      "hooks": [{
+        "type": "command",
+        "command": ".claude/hooks/check-gpl.sh"
+      }]
+    }]
+  }
+}
