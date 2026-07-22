@@ -191,7 +191,7 @@ class MainActivity : ComponentActivity() {
                 }
                 val onMenuClick: (Post) -> Unit = { }
                 val onFabClick: () -> Unit = {
-                    if (App.instance.isAuthenticated) navController.navigate(Route.NewPost) else showLogin()
+                    if (App.instance.isAuthenticated) navController.navigate(Route.NewPost()) else showLogin()
                 }
 
                 AppNavigation(navController, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onSignInClick, onFabClick, profile, unreadCount)
@@ -227,9 +227,7 @@ class MainActivity : ComponentActivity() {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
             if (text.isNotEmpty()) {
                 intent.action = null // consume to prevent re-processing
-                navController?.navigate(
-                    "new_post?text=${Uri.encode(text)}"
-                )
+                navController?.navigate(Route.NewPost(Uri.encode(text)))
             }
         }
     }
