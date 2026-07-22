@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.juick.App
 import com.juick.R
+import com.juick.android.service.isAuthenticated
 import com.juick.android.ui.screens.feed.PostCard
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
@@ -63,6 +64,7 @@ fun ThreadScreen(
         try { posts = App.instance.api.thread(mid) } catch (_: Exception) { loadError = true }
         isLoading = false
         if (scrollToEnd && posts.isNotEmpty()) listState.animateScrollToItem(posts.size - 1)
+        posts.lastOrNull()?.let { App.instance.api.markRead(it.mid, it.rid) }
     }
 
     val newMessages by App.instance.messages.collectAsStateWithLifecycle()
@@ -125,11 +127,11 @@ fun ThreadScreen(
                     Spacer(Modifier.width(8.dp))
                     IconButton(
                         onClick = {
-                            if (replyText.isNotBlank()) {
+                            if (replyText.isNotBlank() && App.instance.isAuthenticated) {
                                 scope.launch {
                                     try {
                                         val receiver = MutableStateFlow<Result<PostResponse>?>(null)
-                                        App.instance.sendMessage(scope, receiver, replyText)
+                                        App.instance.sendMessage(scope, receiver, "#$mid $replyText")
                                         replyText = ""
                                     } catch (_: Exception) {}
                                 }
