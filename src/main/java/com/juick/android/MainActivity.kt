@@ -39,6 +39,7 @@ import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.service.isAuthenticated
+import com.juick.android.updater.Updater
 import androidx.navigation.compose.rememberNavController
 import com.juick.android.ui.AppTheme
 import com.juick.android.ui.navigation.AppNavigation
@@ -167,6 +168,25 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        App.instance.authorizationCallback = {
+            val intent = Intent(this, SignInActivity::class.java).apply {
+                putExtra(SignInActivity.EXTRA_ACTION, SignInActivity.ACTION_PASSWORD_UPDATE)
+            }
+            startActivity(intent)
+        }
+
+        account.refresh()
+
+        lifecycleScope.launch {
+            if (BuildConfig.ENABLE_UPDATER) {
+                Updater(this@MainActivity).checkUpdate()
+            }
+            try {
+                requestNotificationsPermission()
+                notificationManager = NotificationManager()
+            } catch (_: Exception) { }
+        }
+
         initialUri = intent?.data
 
         setContent {
@@ -221,15 +241,35 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        notificationManager?.onResume()
         account.refresh()
         val intent = intent
         if (Intent.ACTION_SEND == intent.action) {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
             if (text.isNotEmpty()) {
-                intent.action = null // consume to prevent re-processing
+                intent.action = null
                 navController?.navigate(Route.NewPost(Uri.encode(text)))
             }
         }
+        if (BuildConfig.INTENT_NEW_EVENT_ACTION == intent.action) {
+            handleNewEventIntent(intent)
+        }
+    }
+
+    override fun onPause() {
+        notificationManager?.onPause()
+        super.onPause()
+    }
+
+    private fun handleNewEventIntent(intent: Intent) {
+        intent.action = null
+        val msg = intent.getStringExtra(getString(R.string.notification_extra)) ?: return
+        try {
+            val post = App.instance.jsonMapper.decodeFromString<Post>(msg)
+            if (post.mid > 0) {
+                navController?.navigate(Route.Thread(post.mid))
+            }
+        } catch (_: Exception) { }
     }
 
     override fun onDestroy() {
