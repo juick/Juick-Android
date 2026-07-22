@@ -28,7 +28,7 @@ sealed interface Route {
     @Serializable data class Blog(val uname: String) : Route
     @Serializable data class Chat(val uname: String, val uid: Int) : Route
     @Serializable data class Search(val query: String? = null) : Route
-    @Serializable data class NewPost(val text: String? = null) : Route
+    @Serializable data class NewPost(val text: String? = null, val uri: String? = null) : Route
     @Serializable data object Tags : Route
     @Serializable data object NoAuth : Route
 }
