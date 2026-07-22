@@ -71,6 +71,12 @@ fun AppNavigation(
 ) {
     var pendingTag by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(isAuthenticated) {
+        if (isAuthenticated) {
+            navController.navigate(Route.Home) { popUpTo(0) { inclusive = true } }
+        }
+    }
+
     NavHost(navController = navController, startDestination = if (isAuthenticated) Route.Home else Route.Public) {
         composable<Route.Public> {
             Column(Modifier.fillMaxSize()) {
