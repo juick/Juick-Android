@@ -198,11 +198,12 @@ private fun entityStyle(type: String, primary: Color, dimmed: Color, onSurface: 
 fun buildUrlPositions(post: Post): List<UrlPosition> {
     val p = processBody(post)
     val sorted = post.entities.sortedBy { it.start }
-    var si = 0
+    var linkIdx = 0
     return p.entityStart.indices.mapNotNull { i ->
-        while (si < sorted.size && sorted[si].type != "a") si++
-        if (si >= sorted.size) return@mapNotNull null
-        val e = sorted[si++]
+        if (p.entityType[i] != "a") return@mapNotNull null
+        while (linkIdx < sorted.size && sorted[linkIdx].type != "a") linkIdx++
+        if (linkIdx >= sorted.size) return@mapNotNull null
+        val e = sorted[linkIdx++]
         if (e.url == null) return@mapNotNull null
         UrlPosition(p.entityStart[i], p.entityEnd[i], e.url)
     }
