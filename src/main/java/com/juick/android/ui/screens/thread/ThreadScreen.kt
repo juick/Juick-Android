@@ -23,10 +23,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -58,6 +62,7 @@ fun ThreadScreen(
 ) {
     var posts by remember { mutableStateOf<List<Post>>(emptyList()) }
     var replyText by remember { mutableStateOf("") }
+    var replyToPost by remember { mutableStateOf<Post?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var loadError by remember { mutableStateOf(false) }
     var replyAttachmentUri by remember { mutableStateOf<Uri?>(null) }
@@ -112,11 +117,12 @@ fun ThreadScreen(
                     items(posts, key = { "thread_${it.mid}_${it.rid}" }) { post ->
                         PostCard(
                             post = post,
-                            onPostClick = { onPostClick(post) },
+                            onPostClick = { replyToPost = post },
                             onUserClick = { onUserClick(post.user.uname) },
                             onMenuClick = { onMenuClick(post) },
                             onLikeClick = { onLikeClick(post) },
                             onLinkClick = onLinkClick,
+                            showCounters = false,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         )
                     }
@@ -124,6 +130,17 @@ fun ThreadScreen(
             }
 
             Surface(color = colors.surface, shadowElevation = 2.dp) {
+                replyToPost?.let { target ->
+                    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        AsyncImage(model = target.user.avatar, contentDescription = null, modifier = Modifier.size(20.dp).clip(CircleShape), contentScale = ContentScale.Crop)
+                        Spacer(Modifier.width(8.dp))
+                        Text("In reply to ${target.user.uname}", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                        Spacer(Modifier.weight(1f))
+                        IconButton(onClick = { replyToPost = null }, modifier = Modifier.size(20.dp)) {
+                            Icon(Icons.Default.Close, "Clear", tint = colors.onSurfaceVariant)
+                        }
+                    }
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(12.dp).imePadding(),
                     verticalAlignment = Alignment.Bottom,
