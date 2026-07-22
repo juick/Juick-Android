@@ -127,8 +127,8 @@ fun ChatBubble(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
-    val bgColor = colors.surfaceVariant
-    val textColor = colors.onSurfaceVariant
+    val bgColor = if (isOwn) colors.primary else colors.surfaceVariant
+    val textColor = if (isOwn) colors.onPrimary else colors.onSurfaceVariant
     val alignment = if (isOwn) Alignment.End else Alignment.Start
 
     val (annotatedText, urlPositions) = remember(post) {
