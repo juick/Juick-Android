@@ -19,7 +19,6 @@ package com.juick.android
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
@@ -28,10 +27,9 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
+
 import com.juick.App
 import com.juick.R
-import com.juick.android.screens.FeedAdapter
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.User
@@ -47,11 +45,12 @@ import kotlinx.coroutines.withContext
  */
 class JuickMessageMenuListener(
     private val activity: Context,
-    private val fragment: Fragment,
+    private val lifecycleOwner: LifecycleOwner,
     private val receiver: MutableStateFlow<Result<PostResponse>?>,
     private val postReceiver: MutableStateFlow<Result<Post>?>,
-    private val me: User
-) : FeedAdapter.OnItemClickListener {
+    private val me: User,
+    private val onDeletePostNavigate: () -> Unit = {},
+) : OnItemClickListener {
 
     private fun confirmAction(context: Context, resId: Int, action: Runnable): Boolean {
         val builder = AlertDialog.Builder(context)
@@ -71,16 +70,16 @@ class JuickMessageMenuListener(
     }
 
     private fun vipToggle(user: User, completion: ((Boolean) -> Unit)? = null) {
-        val scope = (activity as LifecycleOwner).lifecycleScope
-        val account = (activity as MainActivity).account
+        val scope = lifecycleOwner.lifecycleScope
+        val account = (activity as? MainActivity)?.account
         scope.launch {
-            val result = withContext(Dispatchers.IO) { App.instance.api.toggleVIP(user.name) }
+            val result = withContext(Dispatchers.IO) { App.instance.api.toggleVIP(user.uname) }
             completion?.invoke(result.isSuccessful)
-            account.refresh()
+            account?.refresh()
         }
     }
     private fun privacyToggle(post: Post, completion: ((Boolean) -> Unit)? = null) {
-        val scope = (activity as LifecycleOwner).lifecycleScope
+        val scope = lifecycleOwner.lifecycleScope
         scope.launch {
             val result = withContext(Dispatchers.IO) { App.instance.api.togglePrivacy(post.mid) }
             completion?.invoke(result.isSuccessful)
@@ -141,16 +140,7 @@ class JuickMessageMenuListener(
                 MENU_ACTION_DELETE_POST -> confirmAction(activity, R.string.Are_you_sure_delete) {
                     processCommand("D #" +
                             if (rid == 0) "$mid" else "$mid/$rid")
-                    val navController = findNavController(fragment)
-                    navController.popBackStack(R.id.home, false)
-                    if (rid > 0) {
-                        val args = Bundle()
-                        args.putInt("mid", mid)
-                        args.putBoolean("scrollToEnd", true)
-                        navController.navigate(R.id.thread, args)
-                    } else {
-                        navController.navigate(R.id.home)
-                    }
+                    onDeletePostNavigate()
                 }
                 MENU_ACTION_MAKE_PUBLIC -> {
                     confirmAction(activity, R.string.confirm_make_public) {
@@ -169,7 +159,7 @@ class JuickMessageMenuListener(
     }
 
     private fun handleLike(post: Post) {
-        val scope = (activity as LifecycleOwner).lifecycleScope
+        val scope = lifecycleOwner.lifecycleScope
         scope.launch {
             postReceiver.update {
                 likeMessage(post)
@@ -188,7 +178,7 @@ class JuickMessageMenuListener(
     }
 
     override fun onSubscribeToggleClick(post: Post) {
-        val scope = (activity as LifecycleOwner).lifecycleScope
+        val scope = lifecycleOwner.lifecycleScope
         scope.launch {
             postReceiver.update {
                 subscribeMessageToggle(post)
@@ -197,13 +187,17 @@ class JuickMessageMenuListener(
     }
 
     override fun onLinkClick(url: String) {
-        (activity as MainActivity).apply {
-            processUri(url.toUri())
+        val mainActivity = activity as? MainActivity
+        if (mainActivity != null) {
+            mainActivity.processUri(url.toUri())
+        } else {
+            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+            activity.startActivity(intent)
         }
     }
 
     private fun processCommand(command: String) {
-        val scope = (activity as LifecycleOwner).lifecycleScope
+        val scope = lifecycleOwner.lifecycleScope
         App.instance.sendMessage(scope = scope, receiver = receiver, txt = command)
     }
 

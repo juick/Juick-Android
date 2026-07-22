@@ -17,13 +17,12 @@
   -->
 
 <resources>
-    <style name="BaseTheme" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="BaseTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorPrimaryDark">@color/colorDimmed</item>
         <item name="android:colorBackground">@color/colorMainBackground</item>
         <item name="android:windowBackground">@color/colorMainBackground</item>
-        <item name="bottomSheetDialogTheme">@style/BottomSheetStyle</item>
     </style>
     <style name="AppTheme" parent="BaseTheme">
     </style>
@@ -31,16 +30,5 @@
         <item name="android:textColorPrimary">@color/colorPrimary</item>
         <item name="android:background">@color/colorTextBackground</item>
         <item name="iconTint">@color/colorText</item>
-    </style>
-    <style name="BottomSheetStyle" parent="Theme.Material3.DayNight.BottomSheetDialog">
-        <item name="android:backgroundDimEnabled">false</item>
-    </style>
-    <style name="Theme_BottomSheet_Crop" parent="Theme.Material3.DayNight.BottomSheetDialog">
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:navigationBarColor">@color/colorMainBackground</item>
-        <item name="bottomSheetStyle">@style/CropBottomSheetStyle</item>
-    </style>
-    <style name="CropBottomSheetStyle" parent="Widget.Material3.BottomSheet">
-        <item name="android:backgroundTint">@color/colorMainBackground</item>
     </style>
 </resources>

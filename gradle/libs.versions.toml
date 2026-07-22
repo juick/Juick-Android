@@ -4,20 +4,19 @@ androidImageCropper = "4.7.0"
 appcompat = "1.7.1"
 browser = "1.10.0"
 chatkit = "5e99a8bf3c"
+coil = "3.4.0"
 constraintlayoutCompose = "1.1.1"
 credentialsPlayServicesAuth = "1.6.0"
-espressoCore = "3.6.1"
-espressoIntents = "3.7.0"
+espresso = "3.7.0"
 firebaseBom = "34.16.0"
 composeBom = "2026.06.01"
 fragmentTesting = "1.8.9"
-fragmentviewbindingdelegateKt = "1.0.2"
 googleid = "1.2.0"
 junit = "1.3.0"
 kotlinxSerializationJson = "1.11.0"
 core = "1.19.0"
 lifecycleVersion = "2.11.0"
-material = "1.14.0"
+material3 = "1.4.0"
 navigationFragmentKtx = "2.9.8"
 okhttp = "5.4.0"
 oksse = "0.9.0"
@@ -25,7 +24,6 @@ playServicesAuth = "21.6.0"
 push = "6.13.0.301"
 retrofit = "3.0.0"
 savedstateKtx = "1.5.0"
-swiperefreshlayout = "1.2.0"
 truth = "1.7.0"
 uiautomatorV18 = "2.1.3"
 testVersion = "1.7.0"
@@ -40,35 +38,36 @@ android-image-cropper = { module = "com.vanniktech:android-image-cropper", versi
 browser = { module = "androidx.browser:browser", version.ref = "browser" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 chatkit = { module = "com.github.vitalyster:ChatKit", version.ref = "chatkit" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 converter-kotlinx-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofit" }
 core = { module = "androidx.core:core", version.ref = "core" }
 credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espressoIntents" }
+espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragmentTesting" }
-fragmentviewbindingdelegate-kt = { module = "com.github.Zhuinden:fragmentviewbindingdelegate-kt", version.ref = "fragmentviewbindingdelegateKt" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 junit = { module = "androidx.test.ext:junit", version.ref = "junit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleVersion" }
+lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleVersion" }
+runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata" }
+compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleVersion" }
 lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycleVersion" }
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
-material = { module = "com.google.android.material:material", version.ref = "material" }
-material3 = { module = "androidx.compose.material3:material3" }
+material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationFragmentKtx" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationFragmentKtx" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 oksse = { module = "com.github.heremaps:oksse", version.ref = "oksse" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 push = { module = "com.huawei.hms:push", version.ref = "push" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 savedstate-ktx = { module = "androidx.savedstate:savedstate-ktx", version.ref = "savedstateKtx" }
 truth = { module = "androidx.test.ext:truth", version.ref = "truth" }
 test-core-ktx = { module = "androidx.test:core-ktx", version.ref = "testVersion" }
@@ -76,7 +75,6 @@ ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 ui = { module = "androidx.compose.ui:ui" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-ui-viewbinding = { module = "androidx.compose.ui:ui-viewbinding" }
 uiautomator-v18 = { module = "com.android.support.test.uiautomator:uiautomator-v18", version.ref = "uiautomatorV18" }
 
 [plugins]

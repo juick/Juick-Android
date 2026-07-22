@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -16,8 +16,6 @@
  */
 package com.juick.api.model
 
-import com.stfalcon.chatkit.commons.models.IDialog
-import com.stfalcon.chatkit.commons.models.IUser
 import kotlinx.serialization.Serializable
 import java.util.Date
 
@@ -25,7 +23,7 @@ import java.util.Date
  * Created by gerc on 11.03.2016.
  */
 @Serializable
-data class Chat(val uname: String) : IDialog<Post> {
+data class Chat(val uname: String) {
     var uid = 0
     var avatar: String? = null
     var messagesCount = 0
@@ -34,38 +32,30 @@ data class Chat(val uname: String) : IDialog<Post> {
     var lastMessageTimestamp: Date? = null
     var lastMessageText: String? = null
     private var lastMessage: Post? = null
-    override fun getId(): String {
+    fun getId(): String {
         return uid.toString()
     }
 
-    override fun getDialogPhoto(): String {
-        return avatar!!
-    }
+    val dialogPhoto: String get() = avatar ?: ""
 
-    override fun getDialogName(): String {
-        return uname
-    }
+    val dialogName: String get() = uname
 
-    override fun getUsers(): List<IUser> {
-        return listOf(User(uid, uname))
-    }
+    val lastMessageOrNull: Post? get() = lastMessage
 
-    override fun getLastMessage(): Post {
+    fun getLastMessage(): Post {
         if (lastMessage != null) {
             return lastMessage as Post
         }
         val dummyPost: Post = Post.empty()
-        dummyPost.setUser(users[0] as User)
+        dummyPost.user = User(uid, uname)
         dummyPost.setBody(lastMessageText)
         dummyPost.setTimestamp(lastMessageTimestamp)
         return dummyPost
     }
 
-    override fun setLastMessage(message: Post) {
+    fun setLastMessage(message: Post) {
         lastMessage = message
     }
 
-    override fun getUnreadCount(): Int {
-        return messagesCount
-    }
+    val unreadCount: Int get() = messagesCount
 }
