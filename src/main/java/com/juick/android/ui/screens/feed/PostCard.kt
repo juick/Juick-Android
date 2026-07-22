@@ -73,6 +73,7 @@ fun PostCard(
     onMenuClick: () -> Unit,
     onLikeClick: () -> Unit,
     onLinkClick: (String) -> Unit,
+    showCounters: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -143,14 +144,16 @@ fun PostCard(
             }
 
             Spacer(Modifier.height(12.dp))
-            HorizontalDivider(color = colors.outlineVariant, thickness = 0.5.dp)
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                val likeColor = if (post.liked) colors.tertiary else colors.onSurfaceVariant
-                Icon(painterResource(R.drawable.ic_ei_heart), null, Modifier.size(18.dp).clickable { onLikeClick() }, tint = likeColor)
-                Text("${post.likes}", style = MaterialTheme.typography.labelSmall, color = likeColor)
-                Icon(painterResource(R.drawable.ic_ei_comment), null, Modifier.size(18.dp), tint = colors.onSurfaceVariant)
-                Text("${post.replies}", style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
+            if (showCounters) {
+                HorizontalDivider(color = colors.outlineVariant, thickness = 0.5.dp)
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                    val likeColor = if (post.liked) colors.tertiary else colors.onSurfaceVariant
+                    Icon(painterResource(R.drawable.ic_ei_heart), null, Modifier.size(18.dp).clickable { onLikeClick() }, tint = likeColor)
+                    Text("${post.likes}", style = MaterialTheme.typography.labelSmall, color = likeColor)
+                    Icon(painterResource(R.drawable.ic_ei_comment), null, Modifier.size(18.dp), tint = colors.onSurfaceVariant)
+                    Text("${post.replies}", style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
+                }
             }
         }
     }

@@ -50,6 +50,7 @@ import com.juick.android.ui.screens.post.NewPostScreen
 import com.juick.android.ui.screens.search.SearchScreen
 import com.juick.android.ui.screens.tags.TagsScreen
 import com.juick.android.ui.screens.thread.ThreadScreen
+import androidx.compose.ui.window.DialogProperties
 import com.juick.android.ui.AppScaffold
 import com.juick.android.Uris
 import com.juick.api.model.Post
@@ -116,7 +117,9 @@ fun AppNavigation(
             }
         }
 
-        composable<Route.Thread> { entry ->
+        dialog<Route.Thread>(
+            dialogProperties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+        ) { entry ->
             val route = entry.toRoute<Route.Thread>()
             ThreadScreen(route.mid, route.scrollToEnd, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onDismiss = { navController.popBackStack() })
         }
