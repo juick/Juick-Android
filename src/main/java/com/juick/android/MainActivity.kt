@@ -34,7 +34,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
@@ -42,6 +46,7 @@ import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.service.isAuthenticated
 import com.juick.android.ui.AppTheme
 import com.juick.android.ui.MainScreen
+import com.juick.android.ui.screens.thread.ThreadScreen
 import com.juick.api.model.Post
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -180,39 +185,71 @@ class MainActivity : ComponentActivity() {
                 val profile by account.profile.observeAsState()
                 val unreadCount = profile?.unreadCount ?: 0
 
-                MainScreen(
+                val onPostClick: (Post) -> Unit = { post ->
+                    navController.navigate("thread/${post.mid}")
+                }
+                val onUserClick: (String) -> Unit = { uname ->
+                    navController.navigate("blog/$uname")
+                }
+                val onLinkClick: (String) -> Unit = { url ->
+                    openUri(Uri.parse(url))
+                }
+                val onSignInClick: () -> Unit = { showLogin() }
+                val onLikeClick: (Post) -> Unit = { post ->
+                    lifecycleScope.launch {
+                        try {
+                            App.instance.api.like(post.mid)
+                            account.refresh()
+                        } catch (_: Exception) { }
+                    }
+                }
+                val onMenuClick: (Post) -> Unit = { /* dialog via JuickMessageMenuListener */ }
+
+                NavHost(
                     navController = navController,
-                    currentProfile = profile,
-                    unreadCount = unreadCount,
-                    onPostClick = { post ->
-                        navController.navigate("thread/${post.mid}")
-                    },
-                    onUserClick = { uname ->
-                        navController.navigate("blog/$uname")
-                    },
-                    onLinkClick = { url ->
-                        openUri(Uri.parse(url))
-                    },
-                    onSignInClick = { showLogin() },
-                    onFabClick = {
-                        if (App.instance.isAuthenticated) {
-                            navController.navigate("new_post")
-                        } else {
-                            showLogin()
-                        }
-                    },
-                    onMenuClick = { post ->
-                        // Menu logic handled via drop-down or dialog
-                    },
-                    onLikeClick = { post ->
-                        lifecycleScope.launch {
-                            try {
-                                App.instance.api.like(post.mid)
-                                account.refresh()
-                            } catch (_: Exception) { }
-                        }
-                    },
-                )
+                    startDestination = "main",
+                ) {
+                    composable("main") {
+                        MainScreen(
+                            navController = navController,
+                            currentProfile = profile,
+                            unreadCount = unreadCount,
+                            onPostClick = onPostClick,
+                            onUserClick = onUserClick,
+                            onMenuClick = onMenuClick,
+                            onLikeClick = onLikeClick,
+                            onLinkClick = onLinkClick,
+                            onSignInClick = onSignInClick,
+                            onFabClick = {
+                                if (App.instance.isAuthenticated) {
+                                    navController.navigate("new_post")
+                                } else {
+                                    showLogin()
+                                }
+                            },
+                        )
+                    }
+
+                    composable("thread/{mid}?scrollToEnd={scrollToEnd}",
+                        arguments = listOf(
+                            navArgument("mid") { type = NavType.IntType },
+                            navArgument("scrollToEnd") { type = NavType.BoolType; defaultValue = false },
+                        ),
+                    ) { entry ->
+                        val mid = entry.arguments?.getInt("mid") ?: 0
+                        val scrollToEnd = entry.arguments?.getBoolean("scrollToEnd") ?: false
+                        ThreadScreen(
+                            mid = mid,
+                            scrollToEnd = scrollToEnd,
+                            onPostClick = onPostClick,
+                            onUserClick = onUserClick,
+                            onMenuClick = onMenuClick,
+                            onLikeClick = onLikeClick,
+                            onLinkClick = onLinkClick,
+                            onDismiss = { navController.popBackStack() },
+                        )
+                    }
+                }
 
                 // Handle initial deep link
                 LaunchedEffect(Unit) {
