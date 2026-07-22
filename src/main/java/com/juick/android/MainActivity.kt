@@ -37,6 +37,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.juick.App
@@ -46,6 +47,13 @@ import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.service.isAuthenticated
 import com.juick.android.ui.AppTheme
 import com.juick.android.ui.MainScreen
+import com.juick.android.ui.screens.chat.ChatScreen
+import com.juick.android.ui.screens.feed.FeedScreen
+import com.juick.android.ui.screens.feed.ProfileHeader
+import com.juick.android.ui.screens.noauth.NoAuthScreen
+import com.juick.android.ui.screens.post.NewPostScreen
+import com.juick.android.ui.screens.search.SearchScreen
+import com.juick.android.ui.screens.tags.TagsScreen
 import com.juick.android.ui.screens.thread.ThreadScreen
 import com.juick.api.model.Post
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -248,6 +256,58 @@ class MainActivity : ComponentActivity() {
                             onLinkClick = onLinkClick,
                             onDismiss = { navController.popBackStack() },
                         )
+                    }
+
+                    composable("blog/{uname}",
+                        arguments = listOf(navArgument("uname") { type = NavType.StringType }),
+                    ) { entry ->
+                        val uname = entry.arguments?.getString("uname") ?: ""
+                        FeedScreen(
+                            initialUrl = Uris.getUserPostsByName(uname),
+                            onPostClick = onPostClick,
+                            onUserClick = onUserClick,
+                            onMenuClick = onMenuClick,
+                            onLikeClick = onLikeClick,
+                            onLinkClick = onLinkClick,
+                            showProfileHeader = true,
+                            profileHeader = { ProfileHeader(uname = uname) },
+                        )
+                    }
+
+                    composable("chat/{uname}/{uid}",
+                        arguments = listOf(navArgument("uname") { type = NavType.StringType }, navArgument("uid") { type = NavType.IntType }),
+                    ) { entry ->
+                        val uname = entry.arguments?.getString("uname") ?: ""
+                        ChatScreen(uname = uname, onUserClick = onUserClick, onLinkClick = onLinkClick)
+                    }
+
+                    composable("search") {
+                        SearchScreen(onSearch = { query -> navController.navigate("search/${Uri.encode(query)}") { popUpTo("search") { inclusive = true } } })
+                    }
+
+                    composable("search/{query}",
+                        arguments = listOf(navArgument("query") { type = NavType.StringType }),
+                    ) { entry ->
+                        val query = entry.arguments?.getString("query") ?: ""
+                        FeedScreen(initialUrl = Uris.search(query), onPostClick = onPostClick, onUserClick = onUserClick, onMenuClick = onMenuClick, onLikeClick = onLikeClick, onLinkClick = onLinkClick)
+                    }
+
+                    composable("discussions") {
+                        FeedScreen(initialUrl = Uris.discussions, onPostClick = onPostClick, onUserClick = onUserClick, onMenuClick = onMenuClick, onLikeClick = onLikeClick, onLinkClick = onLinkClick)
+                    }
+
+                    composable("no_auth") {
+                        NoAuthScreen(onSignInClick = { navController.popBackStack(); showLogin() })
+                    }
+
+                    composable("new_post?text={text}&uri={uri}",
+                        arguments = listOf(navArgument("text") { type = NavType.StringType; nullable = true; defaultValue = null }, navArgument("uri") { type = NavType.StringType; nullable = true; defaultValue = null }),
+                    ) { entry ->
+                        NewPostScreen(initialText = entry.arguments?.getString("text"), initialUri = entry.arguments?.getString("uri"), onTagsClick = { navController.navigate("tags") }, onAttachClick = {}, onAttachmentRemoved = {}, attachmentUri = null, hasAttachment = false, onNavigateToThread = { mid -> navController.popBackStack("new_post", true); navController.navigate("thread/$mid") }, onDismiss = { navController.popBackStack() })
+                    }
+
+                    dialog("tags") {
+                        TagsScreen(onTagSelected = { tag -> navController.previousBackStackEntry?.savedStateHandle?.set("tag", tag); navController.popBackStack() })
                     }
                 }
 
