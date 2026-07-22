@@ -34,27 +34,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.dialog
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.service.isAuthenticated
+import androidx.navigation.compose.rememberNavController
 import com.juick.android.ui.AppTheme
-import com.juick.android.ui.MainScreen
-import com.juick.android.ui.screens.chat.ChatScreen
-import com.juick.android.ui.screens.feed.FeedScreen
-import com.juick.android.ui.screens.feed.ProfileHeader
-import com.juick.android.ui.screens.noauth.NoAuthScreen
-import com.juick.android.ui.screens.post.NewPostScreen
-import com.juick.android.ui.screens.search.SearchScreen
-import com.juick.android.ui.screens.tags.TagsScreen
-import com.juick.android.ui.screens.thread.ThreadScreen
+import com.juick.android.ui.navigation.AppNavigation
+import com.juick.android.ui.navigation.Route
 import com.juick.api.model.Post
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -186,137 +174,30 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 this@MainActivity.navController = navController
                 processUriCallback = { mid ->
-                    navController.navigate("thread/$mid")
+                    navController.navigate(Route.Thread(mid))
                 }
 
-                // Observe account for user profile + unread count
                 val profile by account.profile.observeAsState()
                 val unreadCount = profile?.unreadCount ?: 0
 
-                val onPostClick: (Post) -> Unit = { post ->
-                    navController.navigate("thread/${post.mid}")
-                }
-                val onUserClick: (String) -> Unit = { uname ->
-                    navController.navigate("blog/$uname")
-                }
-                val onLinkClick: (String) -> Unit = { url ->
-                    openUri(Uri.parse(url))
-                }
+                val onPostClick: (Post) -> Unit = { post -> navController.navigate(Route.Thread(post.mid)) }
+                val onUserClick: (String) -> Unit = { uname -> navController.navigate(Route.Blog(uname)) }
+                val onLinkClick: (String) -> Unit = { url -> openUri(Uri.parse(url)) }
                 val onSignInClick: () -> Unit = { showLogin() }
                 val onLikeClick: (Post) -> Unit = { post ->
                     lifecycleScope.launch {
-                        try {
-                            App.instance.api.like(post.mid)
-                            account.refresh()
-                        } catch (_: Exception) { }
+                        try { App.instance.api.like(post.mid); account.refresh() } catch (_: Exception) { }
                     }
                 }
-                val onMenuClick: (Post) -> Unit = { /* dialog via JuickMessageMenuListener */ }
-
-                NavHost(
-                    navController = navController,
-                    startDestination = "main",
-                ) {
-                    composable("main") {
-                        MainScreen(
-                            navController = navController,
-                            currentProfile = profile,
-                            unreadCount = unreadCount,
-                            onPostClick = onPostClick,
-                            onUserClick = onUserClick,
-                            onMenuClick = onMenuClick,
-                            onLikeClick = onLikeClick,
-                            onLinkClick = onLinkClick,
-                            onSignInClick = onSignInClick,
-                            onFabClick = {
-                                if (App.instance.isAuthenticated) {
-                                    navController.navigate("new_post")
-                                } else {
-                                    showLogin()
-                                }
-                            },
-                        )
-                    }
-
-                    composable("thread/{mid}?scrollToEnd={scrollToEnd}",
-                        arguments = listOf(
-                            navArgument("mid") { type = NavType.IntType },
-                            navArgument("scrollToEnd") { type = NavType.BoolType; defaultValue = false },
-                        ),
-                    ) { entry ->
-                        val mid = entry.arguments?.getInt("mid") ?: 0
-                        val scrollToEnd = entry.arguments?.getBoolean("scrollToEnd") ?: false
-                        ThreadScreen(
-                            mid = mid,
-                            scrollToEnd = scrollToEnd,
-                            onPostClick = onPostClick,
-                            onUserClick = onUserClick,
-                            onMenuClick = onMenuClick,
-                            onLikeClick = onLikeClick,
-                            onLinkClick = onLinkClick,
-                            onDismiss = { navController.popBackStack() },
-                        )
-                    }
-
-                    composable("blog/{uname}",
-                        arguments = listOf(navArgument("uname") { type = NavType.StringType }),
-                    ) { entry ->
-                        val uname = entry.arguments?.getString("uname") ?: ""
-                        FeedScreen(
-                            initialUrl = Uris.getUserPostsByName(uname),
-                            onPostClick = onPostClick,
-                            onUserClick = onUserClick,
-                            onMenuClick = onMenuClick,
-                            onLikeClick = onLikeClick,
-                            onLinkClick = onLinkClick,
-                            showProfileHeader = true,
-                            profileHeader = { ProfileHeader(uname = uname) },
-                        )
-                    }
-
-                    composable("chat/{uname}/{uid}",
-                        arguments = listOf(navArgument("uname") { type = NavType.StringType }, navArgument("uid") { type = NavType.IntType }),
-                    ) { entry ->
-                        val uname = entry.arguments?.getString("uname") ?: ""
-                        ChatScreen(uname = uname, onUserClick = onUserClick, onLinkClick = onLinkClick)
-                    }
-
-                    composable("search") {
-                        SearchScreen(onSearch = { query -> navController.navigate("search/${Uri.encode(query)}") { popUpTo("search") { inclusive = true } } })
-                    }
-
-                    composable("search/{query}",
-                        arguments = listOf(navArgument("query") { type = NavType.StringType }),
-                    ) { entry ->
-                        val query = entry.arguments?.getString("query") ?: ""
-                        FeedScreen(initialUrl = Uris.search(query), onPostClick = onPostClick, onUserClick = onUserClick, onMenuClick = onMenuClick, onLikeClick = onLikeClick, onLinkClick = onLinkClick)
-                    }
-
-                    composable("discussions") {
-                        FeedScreen(initialUrl = Uris.discussions, onPostClick = onPostClick, onUserClick = onUserClick, onMenuClick = onMenuClick, onLikeClick = onLikeClick, onLinkClick = onLinkClick)
-                    }
-
-                    composable("no_auth") {
-                        NoAuthScreen(onSignInClick = { navController.popBackStack(); showLogin() })
-                    }
-
-                    composable("new_post?text={text}&uri={uri}",
-                        arguments = listOf(navArgument("text") { type = NavType.StringType; nullable = true; defaultValue = null }, navArgument("uri") { type = NavType.StringType; nullable = true; defaultValue = null }),
-                    ) { entry ->
-                        NewPostScreen(initialText = entry.arguments?.getString("text"), initialUri = entry.arguments?.getString("uri"), onTagsClick = { navController.navigate("tags") }, onAttachClick = {}, onAttachmentRemoved = {}, attachmentUri = null, hasAttachment = false, onNavigateToThread = { mid -> navController.popBackStack("new_post", true); navController.navigate("thread/$mid") }, onDismiss = { navController.popBackStack() })
-                    }
-
-                    dialog("tags") {
-                        TagsScreen(onTagSelected = { tag -> navController.previousBackStackEntry?.savedStateHandle?.set("tag", tag); navController.popBackStack() })
-                    }
+                val onMenuClick: (Post) -> Unit = { }
+                val onFabClick: () -> Unit = {
+                    if (App.instance.isAuthenticated) navController.navigate(Route.NewPost) else showLogin()
                 }
 
-                // Handle initial deep link
+                AppNavigation(navController, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onSignInClick, onFabClick, profile, unreadCount)
+
                 LaunchedEffect(Unit) {
-                    initialUri?.let { uri ->
-                        processUri(uri)
-                        initialUri = null
-                    }
+                    initialUri?.let { processUri(it); initialUri = null }
                 }
             }
         }
