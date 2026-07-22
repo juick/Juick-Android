@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -44,11 +45,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     uname: String,
     onUserClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
+    onBack: () -> Unit = {},
 ) {
     var messagesState by remember { mutableStateOf<Result<List<Post>>?>(null) }
     val messages = (messagesState?.getOrNull() ?: emptyList()).reversed()
@@ -77,6 +80,13 @@ fun ChatScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
+        TopAppBar(
+            title = { Text("@$uname") },
+            navigationIcon = {
+                IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, stringResource(R.string.Cancel)) }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
+        )
         LazyColumn(
             state = listState,
             modifier = Modifier.weight(1f),
