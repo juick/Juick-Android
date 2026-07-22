@@ -160,7 +160,7 @@ fun AppNavigation(
                     pendingTag = null
                 }
             }
-            NewPostScreen(initialText = initialText, onTagsClick = { navController.navigate(Route.Tags) }, onAttachClick = {}, onAttachmentRemoved = {}, attachmentUri = null, hasAttachment = false, onNavigateToThread = { mid -> navController.popBackStack<Route.NewPost>(false); navController.navigate(Route.Thread(mid)) }, onDismiss = { navController.popBackStack() })
+            NewPostScreen(initialText = initialText, onTagsClick = { navController.navigate(Route.Tags) }, onNavigateToThread = { mid -> navController.popBackStack<Route.NewPost>(false); navController.navigate(Route.Thread(mid)) }, onDismiss = { navController.popBackStack() })
         }
 
         dialog<Route.Tags> {
