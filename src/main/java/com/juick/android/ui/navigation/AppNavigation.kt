@@ -133,7 +133,7 @@ fun AppNavigation(
 
         composable<Route.Chat> { entry ->
             val route = entry.toRoute<Route.Chat>()
-            ChatScreen(route.uname, onUserClick, onLinkClick)
+            ChatScreen(route.uname, onUserClick, onLinkClick, onBack = { navController.popBackStack() })
         }
 
         composable<Route.Search> {
