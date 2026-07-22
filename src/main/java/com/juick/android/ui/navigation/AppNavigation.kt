@@ -81,11 +81,10 @@ fun AppNavigation(
         }
 
         composable<Route.Search> { entry ->
-            val route = entry.toRoute<Route.Search>()
-            route.query?.let {
-                AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                    FeedScreen(Uris.search(it), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick)
-                }
+            val query = entry.toRoute<Route.Search>().query
+            AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
+                if (query != null) FeedScreen(Uris.search(query), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick)
+                else SearchScreen(onSearch = { q -> navController.navigate(Route.Search(q)) { popUpTo<Route.Search> { inclusive = true } } })
             }
         }
 
