@@ -30,24 +30,33 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.juick.App
 import com.juick.R
-import com.juick.android.screens.post.TagsViewModel
 import com.juick.api.model.Tag
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun TagsScreen(
     onTagSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
-    vm: TagsViewModel = viewModel(),
 ) {
-    val tagsResult by vm.tags.observeAsState()
+    var tagsResult by remember { mutableStateOf<Result<List<Tag>>?>(null) }
+
+    LaunchedEffect(Unit) {
+        tagsResult = runCatching {
+            withContext(Dispatchers.IO) { App.instance.api.tags() }
+        }
+    }
 
     Surface(modifier = modifier.fillMaxSize()) {
         if (tagsResult == null) {

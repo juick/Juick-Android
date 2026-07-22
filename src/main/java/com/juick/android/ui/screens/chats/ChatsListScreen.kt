@@ -29,13 +29,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.juick.App
 import com.juick.R
-import com.juick.android.screens.chats.ChatsViewModel
 import com.juick.android.service.isAuthenticated
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.juick.android.ui.screens.noauth.NoAuthScreen
 import com.juick.api.model.Chat
 
@@ -44,13 +43,14 @@ import com.juick.api.model.Chat
 fun ChatsListScreen(
     onChatClick: (Chat) -> Unit,
     onNavigateToAuth: () -> Unit,
-    vm: ChatsViewModel = viewModel(),
 ) {
-    val chatsState by vm.chats.collectAsStateWithLifecycle()
+    var chatsState by remember { mutableStateOf<Result<List<Chat>>?>(null) }
 
     LaunchedEffect(Unit) {
         if (App.instance.isAuthenticated) {
-            vm.loadChats()
+            chatsState = runCatching {
+                withContext(Dispatchers.IO) { App.instance.api.groupsPms(10).pms }
+            }
         } else {
             onNavigateToAuth()
         }

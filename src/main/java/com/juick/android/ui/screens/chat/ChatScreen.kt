@@ -28,15 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juick.App
 import com.juick.R
-import com.juick.android.screens.chat.ChatViewModel
-import com.juick.android.screens.chat.ChatViewModelFactory
 import com.juick.android.ui.screens.feed.buildUrlPositions
 import com.juick.android.ui.screens.feed.formatPostText
 import com.juick.api.model.Post
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun ChatScreen(
@@ -44,15 +43,16 @@ fun ChatScreen(
     onUserClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
 ) {
-    val vm: ChatViewModel = viewModel(factory = ChatViewModelFactory(uname))
-    val messagesState by vm.messages.collectAsStateWithLifecycle()
+    var messagesState by remember { mutableStateOf<Result<List<Post>>?>(null) }
     val messages = (messagesState?.getOrNull() ?: emptyList()).reversed()
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        vm.loadMessages()
+    LaunchedEffect(uname) {
+        messagesState = runCatching {
+            withContext(Dispatchers.IO) { App.instance.api.pm(uname) }
+        }
     }
 
     LaunchedEffect(messages) {
