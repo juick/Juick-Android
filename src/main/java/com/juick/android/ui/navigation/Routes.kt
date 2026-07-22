@@ -19,6 +19,7 @@ package com.juick.android.ui.navigation
 import kotlinx.serialization.Serializable
 
 sealed interface Route {
+    @Serializable data object Public : Route
     @Serializable data object Home : Route
     @Serializable data object Discover : Route
     @Serializable data object Chats : Route

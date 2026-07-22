@@ -67,6 +67,7 @@ fun FeedScreen(
 ) {
     var apiUrl by remember { mutableStateOf(Uri.EMPTY) }
     var feedState by remember { mutableStateOf<Result<List<Post>>?>(null) }
+    var allPosts by remember { mutableStateOf<List<Post>>(emptyList()) }
     val listState = rememberLazyListState()
     var isRefreshing by remember { mutableStateOf(false) }
     var firstPage by remember { mutableStateOf(true) }
@@ -78,7 +79,10 @@ fun FeedScreen(
     LaunchedEffect(apiUrl) {
         if (apiUrl != Uri.EMPTY) {
             try {
-                feedState = Result.success(withContext(Dispatchers.IO) { App.instance.api.getPosts(apiUrl) })
+                val posts = withContext(Dispatchers.IO) { App.instance.api.getPosts(apiUrl) }
+                if (firstPage) allPosts = posts
+                else allPosts = allPosts + posts
+                feedState = Result.success(allPosts)
             } catch (e: CancellationException) { throw e } catch (e: Exception) { feedState = Result.failure(e) }
         }
     }

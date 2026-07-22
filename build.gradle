@@ -169,6 +169,8 @@ dependencies {
     implementation libs.coil.compose
     implementation libs.coil.network.okhttp
     // Core library
+    testImplementation libs.junit
+
     androidTestImplementation libs.test.core.ktx
 
     // Assertions

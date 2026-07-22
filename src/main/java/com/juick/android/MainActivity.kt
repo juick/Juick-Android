@@ -214,7 +214,7 @@ class MainActivity : ComponentActivity() {
                     if (App.instance.isAuthenticated) navController.navigate(Route.NewPost()) else showLogin()
                 }
 
-                AppNavigation(navController, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onSignInClick, onFabClick, profile, unreadCount)
+                AppNavigation(navController, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onSignInClick, onFabClick, profile, unreadCount, App.instance.isAuthenticated)
 
                 LaunchedEffect(Unit) {
                     initialUri?.let { processUri(it); initialUri = null }

@@ -16,6 +16,16 @@
  */
 package com.juick.android.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,6 +33,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.juick.R
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -41,6 +54,7 @@ import com.juick.android.ui.AppScaffold
 import com.juick.android.Uris
 import com.juick.api.model.Post
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController,
@@ -53,10 +67,25 @@ fun AppNavigation(
     onFabClick: () -> Unit,
     currentProfile: com.juick.api.model.User?,
     unreadCount: Int,
+    isAuthenticated: Boolean,
 ) {
     var pendingTag by remember { mutableStateOf<String?>(null) }
 
-    NavHost(navController = navController, startDestination = Route.Home) {
+    NavHost(navController = navController, startDestination = if (isAuthenticated) Route.Home else Route.Public) {
+        composable<Route.Public> {
+            Column(Modifier.fillMaxSize()) {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.Juick)) },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
+                    actions = {
+                        TextButton(onClick = onSignInClick) { Text(stringResource(R.string.login)) }
+                    },
+                )
+                Box(Modifier.fillMaxSize().padding()) {
+                    FeedScreen(Uris.top, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick)
+                }
+            }
+        }
         composable<Route.Home> {
             AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
                 FeedScreen(Uris.home, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick)
