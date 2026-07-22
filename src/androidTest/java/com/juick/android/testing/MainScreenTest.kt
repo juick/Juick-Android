@@ -19,10 +19,14 @@ package com.juick.android.testing
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.platform.app.InstrumentationRegistry
+import com.juick.App
 import com.juick.R
 import com.juick.android.MainActivity
+import com.juick.android.service.isAuthenticated
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -50,6 +54,28 @@ class MainScreenTest {
     fun publicFeed_showsLoginButton() {
         composeTestRule.onNodeWithText(
             composeTestRule.activity.getString(R.string.login)
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun authenticated_showsBottomNavigation_withThreeTabs() {
+        assumeTrue(App.instance.isAuthenticated)
+        composeTestRule.onNodeWithText(
+            composeTestRule.activity.getString(R.string.Subscriptions)
+        ).assertIsDisplayed()
+        composeTestRule.onNodeWithText(
+            composeTestRule.activity.getString(R.string.Discover)
+        ).assertIsDisplayed()
+        composeTestRule.onNodeWithText(
+            composeTestRule.activity.getString(R.string.PMs)
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun authenticated_showsSearchButton_inTopAppBar() {
+        assumeTrue(App.instance.isAuthenticated)
+        composeTestRule.onNodeWithContentDescription(
+            composeTestRule.activity.getString(R.string.search)
         ).assertIsDisplayed()
     }
 }
