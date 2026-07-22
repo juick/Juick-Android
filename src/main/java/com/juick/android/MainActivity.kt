@@ -124,8 +124,8 @@ class MainActivity : ComponentActivity() {
                 // home
             }
             1 -> {
-                // user profile → open in browser
-                openUri(data)
+                // user profile → navigate in-app
+                navController?.navigate(Route.Blog(segments[0]))
                 return true
             }
             2 -> {
