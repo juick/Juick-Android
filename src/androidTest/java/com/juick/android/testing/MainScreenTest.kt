@@ -32,32 +32,17 @@ class MainScreenTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun mainScreen_showsBottomNavigation_withThreeTabs() {
-        composeTestRule.onNodeWithText(
-            composeTestRule.activity.getString(R.string.Subscriptions)
-        ).assertIsDisplayed()
-
-        composeTestRule.onNodeWithText(
-            composeTestRule.activity.getString(R.string.Discover)
-        ).assertIsDisplayed()
-
-        composeTestRule.onNodeWithText(
-            composeTestRule.activity.getString(R.string.PMs)
-        ).assertIsDisplayed()
-    }
-
-    @Test
-    fun mainScreen_showsSearchButton_inTopAppBar() {
-        composeTestRule.onNodeWithContentDescription(
-            composeTestRule.activity.getString(R.string.search)
-        ).assertIsDisplayed()
-    }
-
-    @Test
-    fun mainScreen_defaultStartDestination_isHome() {
-        // Home is the start destination — title shows "Juick"
+    fun mainScreen_publicFeed_showsJuickTitle() {
+        // Unauthenticated — Public route with "Juick" title
         composeTestRule.onNodeWithText(
             composeTestRule.activity.getString(R.string.Juick)
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun mainScreen_publicFeed_showsLoginButton() {
+        composeTestRule.onNodeWithText(
+            composeTestRule.activity.getString(R.string.login)
         ).assertIsDisplayed()
     }
 }
