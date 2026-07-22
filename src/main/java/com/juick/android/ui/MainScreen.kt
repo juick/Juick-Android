@@ -65,14 +65,13 @@ fun MainScreen(
     val currentRoute = navBackStackEntry?.destination?.route
     val borderLine = @Composable { BorderLine() }
 
-    val bottomNavVisible = currentRoute !in listOf(
+    val fullScreenRoutes = listOf(
         "thread/{mid}?scrollToEnd={scrollToEnd}",
         "chat/{uname}/{uid}",
         "new_post?text={text}&uri={uri}",
-        "tags",
-        "no_auth",
-        "search",
     )
+    val bottomNavVisible = currentRoute !in (fullScreenRoutes + listOf("tags", "no_auth", "search"))
+    val topBarVisible = currentRoute !in fullScreenRoutes
     val fabVisible = currentRoute in listOf("home", "discover")
 
     val blogArgs = navBackStackEntry?.arguments

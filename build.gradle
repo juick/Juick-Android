@@ -126,8 +126,6 @@ dependencies {
     implementation libs.core
     implementation libs.appcompat
     implementation libs.browser
-    implementation libs.savedstate.ktx
-    implementation libs.lifecycle.viewmodel.compose
     implementation libs.lifecycle.runtime.compose
     implementation libs.runtime.livedata
     implementation libs.lifecycle.process

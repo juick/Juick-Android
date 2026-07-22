@@ -157,26 +157,6 @@ fun AppNavigation(
             })
         }
 
-        dialog("thread/{mid}?scrollToEnd={scrollToEnd}",
-            arguments = listOf(
-                navArgument("mid") { type = NavType.IntType },
-                navArgument("scrollToEnd") { type = NavType.BoolType; defaultValue = false },
-            ),
-        ) { entry ->
-            val mid = entry.arguments?.getInt("mid") ?: 0
-            val scrollToEnd = entry.arguments?.getBoolean("scrollToEnd") ?: false
-            ThreadScreen(
-                mid = mid,
-                scrollToEnd = scrollToEnd,
-                onPostClick = { onPostClick(it) },
-                onUserClick = { onUserClick(it) },
-                onMenuClick = { onMenuClick(it) },
-                onLikeClick = { onLikeClick(it) },
-                onLinkClick = { onLinkClick(it) },
-                onDismiss = { navController.popBackStack() },
-            )
-        }
-
         dialog("tags") {
             TagsScreen(
                 onTagSelected = { tag ->

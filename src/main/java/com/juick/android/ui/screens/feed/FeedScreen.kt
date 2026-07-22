@@ -44,14 +44,15 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.juick.App
 import com.juick.android.Utils
 import com.juick.android.Utils.replaceUriParameter
-import com.juick.android.screens.FeedViewModel
 import com.juick.api.model.Post
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,22 +66,28 @@ fun FeedScreen(
     showProfileHeader: Boolean = false,
     profileHeader: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
-    vm: FeedViewModel = viewModel(),
 ) {
-    val feedState by vm.feed.collectAsState()
+    var apiUrl by remember { mutableStateOf(Uri.EMPTY) }
+    var feedState by remember { mutableStateOf<Result<List<Post>>?>(null) }
     val listState = rememberLazyListState()
     var isRefreshing by remember { mutableStateOf(false) }
     var firstPage by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
 
-    
     LaunchedEffect(initialUrl) {
-        if (vm.apiUrl.value == Uri.EMPTY) {
-            vm.apiUrl.value = initialUrl
+        if (apiUrl == Uri.EMPTY) {
+            apiUrl = initialUrl
         }
     }
 
-    
+    LaunchedEffect(apiUrl) {
+        if (apiUrl != Uri.EMPTY) {
+            feedState = runCatching {
+                withContext(Dispatchers.IO) { App.instance.api.getPosts(apiUrl) }
+            }
+        }
+    }
+
     val shouldLoadMore by remember {
         derivedStateOf {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
@@ -93,14 +100,14 @@ fun FeedScreen(
             val posts = feedState!!.getOrNull() ?: return@LaunchedEffect
             if (posts.isNotEmpty()) {
                 val lastPost = posts.last()
-                val oldBeforeMid = vm.apiUrl.value.getQueryParameter("before_mid")
+                val oldBeforeMid = apiUrl.getQueryParameter("before_mid")
                 if ("${lastPost.mid}" != oldBeforeMid) {
-                    val newUrl = Utils.buildUrl(vm.apiUrl.value)
+                    val newUrl = Utils.buildUrl(apiUrl)
                         .build()
                         .replaceUriParameter("before_mid", lastPost.mid.toString())
                         .replaceUriParameter("ts", "${System.currentTimeMillis()}")
                     firstPage = false
-                    vm.apiUrl.value = newUrl
+                    apiUrl = newUrl
                 }
             }
         }
@@ -115,7 +122,7 @@ fun FeedScreen(
                 .build()
                 .replaceUriParameter("before_mid", "")
                 .replaceUriParameter("ts", "${System.currentTimeMillis()}")
-            vm.apiUrl.value = newUrl
+            apiUrl = newUrl
             scope.launch {
                 snapshotFlow { feedState }
                     .distinctUntilChanged()

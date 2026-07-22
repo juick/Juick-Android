@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -38,6 +39,7 @@ import com.juick.api.model.PostResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThreadScreen(
     mid: Int,
@@ -71,6 +73,14 @@ fun ThreadScreen(
 
     Surface(color = colors.background) {
         Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                title = { Text("Thread") },
+                navigationIcon = {
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.ArrowBack, stringResource(R.string.Cancel))
+                    }
+                },
+            )
             if (isLoading) {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -105,9 +115,6 @@ fun ThreadScreen(
                     modifier = Modifier.fillMaxWidth().padding(12.dp).imePadding(),
                     verticalAlignment = Alignment.Bottom,
                 ) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, stringResource(R.string.Cancel), tint = colors.onSurfaceVariant)
-                    }
                     OutlinedTextField(
                         value = replyText,
                         onValueChange = { replyText = it },
