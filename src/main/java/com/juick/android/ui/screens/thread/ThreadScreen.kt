@@ -17,6 +17,7 @@
 package com.juick.android.ui.screens.thread
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -75,14 +76,14 @@ fun ThreadScreen(
     val context = LocalContext.current
 
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { replyAttachmentUri = it; replyAttachmentMime = "image/jpeg" }
+        uri?.let { replyAttachmentUri = it; replyAttachmentMime = context.contentResolver.getType(it) ?: "image/jpeg" }
     }
 
     LaunchedEffect(mid) {
         try { posts = App.instance.api.thread(mid) } catch (_: Exception) { loadError = true }
         isLoading = false
         if (scrollToEnd && posts.isNotEmpty()) listState.animateScrollToItem(posts.size - 1)
-        posts.lastOrNull()?.let { App.instance.api.markRead(it.mid, it.rid) }
+        posts.lastOrNull()?.let { try { App.instance.api.markRead(it.mid, it.rid) } catch (e: Exception) { Log.e("ThreadScreen", "markRead failed", e) } }
     }
 
     val newMessages by App.instance.messages.collectAsStateWithLifecycle()
