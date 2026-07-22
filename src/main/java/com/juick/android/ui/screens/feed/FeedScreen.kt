@@ -46,6 +46,7 @@ import com.juick.App
 import com.juick.android.Utils
 import com.juick.android.Utils.replaceUriParameter
 import com.juick.api.model.Post
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -76,7 +77,9 @@ fun FeedScreen(
 
     LaunchedEffect(apiUrl) {
         if (apiUrl != Uri.EMPTY) {
-            feedState = runCatching { withContext(Dispatchers.IO) { App.instance.api.getPosts(apiUrl) } }
+            try {
+                feedState = Result.success(withContext(Dispatchers.IO) { App.instance.api.getPosts(apiUrl) })
+            } catch (e: CancellationException) { throw e } catch (e: Exception) { feedState = Result.failure(e) }
         }
     }
 

@@ -33,6 +33,7 @@ import com.juick.R
 import com.juick.android.ui.screens.feed.buildUrlPositions
 import com.juick.android.ui.screens.feed.formatPostText
 import com.juick.api.model.Post
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -50,9 +51,9 @@ fun ChatScreen(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(uname) {
-        messagesState = runCatching {
-            withContext(Dispatchers.IO) { App.instance.api.pm(uname) }
-        }
+        try {
+            messagesState = Result.success(withContext(Dispatchers.IO) { App.instance.api.pm(uname) })
+        } catch (e: CancellationException) { throw e } catch (e: Exception) { messagesState = Result.failure(e) }
     }
 
     LaunchedEffect(messages) {
