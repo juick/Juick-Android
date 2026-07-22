@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2008-2026, Juick
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.juick.android.ui
 
 import androidx.compose.foundation.background
@@ -70,16 +86,16 @@ fun AppScaffold(
                     title = { Text(screenTitle) },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface),
                     actions = {
-                        IconButton(onClick = { navController.navigate(Route.Search(null)) }) {
+                        IconButton(onClick = { navController.navigate(Route.Search(null)) { launchSingleTop = true } }) {
                             Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        IconButton(onClick = { navController.navigate(Route.Discussions) }) {
+                        IconButton(onClick = { navController.navigate(Route.Discussions) { launchSingleTop = true } }) {
                             BadgedBox(badge = { if (unreadCount > 0) Badge { Text("$unreadCount") } }) {
                                 Icon(Icons.Default.Notifications, contentDescription = "Discussions", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                         if (currentProfile != null) {
-                            IconButton(onClick = { navController.navigate(Route.Blog(currentProfile.uname)) }) {
+                            IconButton(onClick = { navController.navigate(Route.Blog(currentProfile.uname)) { launchSingleTop = true } }) {
                                 AsyncImage(model = currentProfile.avatar, contentDescription = stringResource(R.string.Me), modifier = Modifier.size(28.dp).clip(CircleShape), contentScale = ContentScale.Crop)
                             }
                         }
