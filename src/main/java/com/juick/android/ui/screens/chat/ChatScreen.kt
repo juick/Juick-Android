@@ -16,7 +16,9 @@
  */
 package com.juick.android.ui.screens.chat
 
+import android.text.style.URLSpan
 import androidx.compose.foundation.layout.*
+import androidx.core.text.getSpans
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -32,8 +34,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.juick.App
 import com.juick.R
-import com.juick.android.ui.screens.feed.buildUrlPositions
-import com.juick.android.ui.screens.feed.formatPostText
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import com.juick.android.ui.screens.feed.UrlPosition
 import com.juick.api.model.Post
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -132,7 +136,18 @@ fun ChatBubble(
     val alignment = if (isOwn) Alignment.End else Alignment.Start
 
     val (annotatedText, urlPositions) = remember(post) {
-        formatPostText(post, colors.primary, colors.onSurfaceVariant, textColor) to buildUrlPositions(post)
+        val body = post.getBody() ?: ""
+        val spannable = android.text.SpannableString(body)
+        android.text.util.Linkify.addLinks(spannable, android.text.util.Linkify.ALL)
+        val urls = mutableListOf<UrlPosition>()
+        for (span in spannable.getSpans<android.text.style.URLSpan>()) {
+            urls.add(UrlPosition(spannable.getSpanStart(span), spannable.getSpanEnd(span), span.url))
+        }
+        val annotString = buildAnnotatedString {
+            append(body)
+            for (url in urls) addStyle(SpanStyle(color = if (isOwn) colors.onPrimary else colors.primary, textDecoration = TextDecoration.Underline), url.start, url.end)
+        }
+        annotString to urls
     }
 
     Column(
