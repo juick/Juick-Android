@@ -23,6 +23,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.juick.App
 import com.juick.R
@@ -43,12 +45,12 @@ fun NewPostScreen(
     onNavigateToThread: (Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var text by remember { mutableStateOf(initialText ?: "") }
+    var textFieldValue by remember(initialText) { mutableStateOf(TextFieldValue(initialText ?: "", TextRange((initialText?.length ?: 0)))) }
     val scope = rememberCoroutineScope()
     val messagePosted = remember { MutableStateFlow<Result<PostResponse>?>(null) }
     var isSending by remember { mutableStateOf(false) }
 
-    val sendEnabled = text.length >= 3 || attachmentUri != null
+    val sendEnabled = textFieldValue.text.length >= 3 || attachmentUri != null
 
     LaunchedEffect(messagePosted) {
         messagePosted.collect { response ->
@@ -87,8 +89,8 @@ fun NewPostScreen(
         Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
+            value = textFieldValue,
+            onValueChange = { textFieldValue = it },
             placeholder = { Text(stringResource(R.string.Enter_a_message)) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -123,7 +125,7 @@ fun NewPostScreen(
                     if (sendEnabled && !isSending) {
                         isSending = true
                         scope.launch {
-                            App.instance.sendMessage(scope, messagePosted, text, attachmentUri, attachmentMime)
+                            App.instance.sendMessage(scope, messagePosted, textFieldValue.text, attachmentUri, attachmentMime)
                         }
                     }
                 },

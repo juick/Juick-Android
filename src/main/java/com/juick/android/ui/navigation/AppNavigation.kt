@@ -17,6 +17,12 @@
 package com.juick.android.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,6 +54,8 @@ fun AppNavigation(
     currentProfile: com.juick.api.model.User?,
     unreadCount: Int,
 ) {
+    var pendingTag by remember { mutableStateOf<String?>(null) }
+
     NavHost(navController = navController, startDestination = Route.Home) {
         composable<Route.Home> {
             AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
@@ -109,12 +117,19 @@ fun AppNavigation(
         }
 
         composable<Route.NewPost> { entry ->
-            val text = entry.toRoute<Route.NewPost>().text
-            NewPostScreen(initialText = text, onTagsClick = { navController.navigate(Route.Tags) }, onAttachClick = {}, onAttachmentRemoved = {}, attachmentUri = null, hasAttachment = false, onNavigateToThread = { mid -> navController.popBackStack<Route.NewPost>(false); navController.navigate(Route.Thread(mid)) }, onDismiss = { navController.popBackStack() })
+            val text = entry.toRoute<Route.NewPost>().text ?: ""
+            var initialText by remember { mutableStateOf(text) }
+            LaunchedEffect(pendingTag) {
+                pendingTag?.let { tag ->
+                    initialText = if (initialText.isNotEmpty()) "$initialText #$tag " else "#$tag "
+                    pendingTag = null
+                }
+            }
+            NewPostScreen(initialText = initialText, onTagsClick = { navController.navigate(Route.Tags) }, onAttachClick = {}, onAttachmentRemoved = {}, attachmentUri = null, hasAttachment = false, onNavigateToThread = { mid -> navController.popBackStack<Route.NewPost>(false); navController.navigate(Route.Thread(mid)) }, onDismiss = { navController.popBackStack() })
         }
 
         dialog<Route.Tags> {
-            TagsScreen(onTagSelected = { tag -> navController.previousBackStackEntry?.savedStateHandle?.set("tag", tag); navController.popBackStack() })
+            TagsScreen(onTagSelected = { tag -> pendingTag = tag; navController.popBackStack() })
         }
     }
 }
