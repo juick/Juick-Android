@@ -93,22 +93,15 @@ fun CropSheet(
 
                 TextButton(
                     onClick = {
+                        val view = cropImageView ?: return@TextButton
                         if (isCropping) return@TextButton
                         isCropping = true
-                        cropImageView?.setOnCropImageCompleteListener { _, result ->
+                        view.setOnCropImageCompleteListener { _, result ->
                             isCropping = false
-                            val uri = if (result.isSuccessful) {
-                                try {
-                                    saveBitmapToFile(context, result.bitmap)
-                                } catch (e: Exception) {
-                                    null
-                                }
-                            } else {
-                                null
-                            }
+                            val uri = if (result.isSuccessful) saveBitmapToFile(context, result.bitmap) else null
                             onCropResult(uri)
                         }
-                        cropImageView?.croppedImageAsync()
+                        view.croppedImageAsync()
                     },
                     modifier = Modifier.padding(start = 8.dp),
                 ) {

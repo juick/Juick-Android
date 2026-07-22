@@ -55,6 +55,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,7 +113,10 @@ fun FeedScreen(
 
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
-            snapshotFlow { feedState }.distinctUntilChanged().collectLatest { if (it != null) isRefreshing = false }
+            val refreshUrl = apiUrl
+            snapshotFlow { apiUrl to feedState }
+                .filter { (url, _) -> url == refreshUrl }
+                .collectLatest { (_, state) -> if (state != null) isRefreshing = false }
         }
     }
 
