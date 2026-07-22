@@ -20,11 +20,13 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +39,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -49,6 +52,7 @@ import com.juick.api.model.Post
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 
@@ -71,6 +75,23 @@ fun FeedScreen(
     val listState = rememberLazyListState()
     var isRefreshing by remember { mutableStateOf(false) }
     var firstPage by remember { mutableStateOf(true) }
+    var newPostsCount by remember { mutableStateOf(0) }
+    var maxMid by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(allPosts) {
+        val posts = allPosts
+        if (posts.isNotEmpty()) maxMid = maxOf(maxMid, posts.maxOf { it.mid })
+    }
+
+    LaunchedEffect(Unit) {
+        App.instance.messages.collect { newMessages ->
+            if (maxMid > 0) {
+                val newCount = newMessages.count { it.mid > maxMid && it.rid == 0 }
+                if (newCount > 0) newPostsCount += newCount
+            }
+        }
+    }
 
     LaunchedEffect(initialUrl) {
         if (apiUrl == Uri.EMPTY) apiUrl = initialUrl
@@ -136,6 +157,19 @@ fun FeedScreen(
                 result.fold(
                     onSuccess = { posts ->
                         LazyColumn(state = listState) {
+                            if (newPostsCount > 0 && !firstPage) {
+                                item(key = "new_posts") {
+                                    Button(onClick = {
+                                        newPostsCount = 0
+                                        isRefreshing = true
+                                        firstPage = true
+                                        apiUrl = Utils.buildUrl(initialUrl).build().replaceUriParameter("before_mid", "").replaceUriParameter("ts", "${System.currentTimeMillis()}")
+                                        scope.launch { listState.animateScrollToItem(0) }
+                                    }, modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                                        Text("$newPostsCount new posts")
+                                    }
+                                }
+                            }
                             if (showProfileHeader) {
                                 item(key = "profile_header") {
                                     profileHeader()
