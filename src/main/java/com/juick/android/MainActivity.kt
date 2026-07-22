@@ -66,12 +66,14 @@ class MainActivity : ComponentActivity() {
     private var browserClient: CustomTabsClient? = null
     private var browserSession: CustomTabsSession? = null
     private var browserSessionSupported = MutableLiveData<Boolean?>(null)
+    private var customTabsBound = false
     private var initialUri: Uri? = null
 
     private var browserConnection = object : CustomTabsServiceConnection() {
         override fun onServiceDisconnected(name: ComponentName?) {
             browserClient = null
             browserSession = null
+            customTabsBound = false
         }
         override fun onCustomTabsServiceConnected(name: ComponentName, client: CustomTabsClient) {
             client.warmup(0)
@@ -82,10 +84,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun bindCustomTabService(context: Context) {
-        if (browserClient != null) return
+        if (customTabsBound) return
         val packageName = CustomTabsClient.getPackageName(context, null)
         packageName?.let {
-            CustomTabsClient.bindCustomTabsService(context, it, browserConnection)
+            customTabsBound = CustomTabsClient.bindCustomTabsService(context, it, browserConnection)
         }
     }
 
@@ -255,8 +257,9 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        browserClient?.let {
+        if (customTabsBound) {
             unbindService(browserConnection)
+            customTabsBound = false
         }
         browserClient = null
         browserSession = null
