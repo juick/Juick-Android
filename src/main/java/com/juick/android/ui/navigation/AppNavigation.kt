@@ -89,18 +89,18 @@ fun AppNavigation(
                     },
                 )
                 Box(Modifier.fillMaxSize().padding()) {
-                    FeedScreen(Uris.top, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick)
+                    FeedScreen(Uris.top, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile)
                 }
             }
         }
         composable<Route.Home> {
             AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                FeedScreen(Uris.home, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick)
+                FeedScreen(Uris.home, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile)
             }
         }
         composable<Route.Discover> {
             AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                FeedScreen(Uris.last, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick)
+                FeedScreen(Uris.last, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile)
             }
         }
         composable<Route.Chats> {
@@ -113,7 +113,7 @@ fun AppNavigation(
         }
         composable<Route.Discussions> {
             AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                FeedScreen(Uris.discussions, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick)
+                FeedScreen(Uris.discussions, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile)
             }
         }
 
@@ -145,7 +145,7 @@ fun AppNavigation(
         composable<Route.Search> { entry ->
             val query = entry.toRoute<Route.Search>().query
             AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                if (query != null) FeedScreen(Uris.search(query), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick)
+                if (query != null) FeedScreen(Uris.search(query), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile)
                 else SearchScreen(onSearch = { q -> navController.navigate(Route.Search(q)) { popUpTo<Route.Search> { inclusive = true } } })
             }
         }

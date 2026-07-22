@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,13 +53,19 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.juick.App
 import com.juick.R
 import com.juick.api.model.Post
+import com.juick.api.model.PostResponse
 import com.juick.util.MessageUtils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 private val quoteColor = Color(0xFF666666)
 
@@ -74,10 +81,15 @@ fun PostCard(
     onLikeClick: () -> Unit,
     onLinkClick: (String) -> Unit,
     showCounters: Boolean = true,
+    currentUid: Int = 0,
+    isPremiumOrAdmin: Boolean = false,
+    onDeletePost: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
     var menuExpanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     Surface(
         modifier = modifier.fillMaxWidth().clickable { onPostClick() },
@@ -96,7 +108,31 @@ fun PostCard(
                         Icon(Icons.Default.MoreVert, null, Modifier.size(16.dp), tint = colors.onSurfaceVariant)
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                        DropdownMenuItem(text = { Text("Share") }, onClick = { menuExpanded = false; onMenuClick() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.Share)) }, onClick = {
+                            menuExpanded = false
+                            val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(android.content.Intent.EXTRA_TEXT, "https://juick.com/m/${post.mid}")
+                            }
+                            context.startActivity(intent)
+                        })
+                        if (post.user.uid == currentUid) {
+                            if (isPremiumOrAdmin && post.rid == 0) {
+                                val label = if (post.friendsOnly) R.string.make_public else R.string.make_private
+                                DropdownMenuItem(text = { Text(stringResource(label)) }, onClick = {
+                                    menuExpanded = false
+                                    scope.launch { App.instance.api.togglePrivacy(post.mid) }
+                                })
+                            }
+                            val deleteLabel = if (post.rid == 0) R.string.DeletePost else R.string.DeleteComment
+                            DropdownMenuItem(text = { Text(stringResource(deleteLabel)) }, onClick = {
+                                menuExpanded = false
+                                val cmd = if (post.rid == 0) "D #${post.mid}" else "D #${post.mid}/${post.rid}"
+                                val receiver = MutableStateFlow<Result<PostResponse>?>(null)
+                                App.instance.sendMessage(scope, receiver, cmd)
+                                onDeletePost()
+                            })
+                        }
                     }
                 }
             }
