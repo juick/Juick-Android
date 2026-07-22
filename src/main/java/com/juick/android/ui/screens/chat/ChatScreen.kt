@@ -60,6 +60,15 @@ fun ChatScreen(
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
     }
 
+    LaunchedEffect(uname) {
+        App.instance.messages.collect { newMessages ->
+            newMessages.filter { it.user.uname == uname || it.to?.uname == uname }.forEach { msg ->
+                val current = messagesState?.getOrNull() ?: emptyList()
+                messagesState = Result.success(current + msg)
+            }
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             state = listState,
