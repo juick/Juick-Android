@@ -25,9 +25,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.juick.App
 import com.juick.R
 import com.juick.android.ui.screens.feed.buildUrlPositions
@@ -49,6 +49,7 @@ fun ChatScreen(
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(uname) {
         try {
@@ -105,6 +106,7 @@ fun ChatScreen(
                         try {
                             App.instance.api.postPm(uname, inputText)
                             inputText = ""
+                            focusManager.clearFocus()
                         } catch (_: Exception) { }
                     }
                 }
