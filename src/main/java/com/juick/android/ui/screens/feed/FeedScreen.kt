@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -73,8 +74,8 @@ fun FeedScreen(
     var feedState by remember { mutableStateOf<Result<List<Post>>?>(null) }
     var allPosts by remember { mutableStateOf<List<Post>>(emptyList()) }
     val listState = rememberLazyListState()
-    var isRefreshing by remember { mutableStateOf(false) }
-    var firstPage by remember { mutableStateOf(true) }
+    var isRefreshing by rememberSaveable { mutableStateOf(false) }
+    var firstPage by rememberSaveable { mutableStateOf(true) }
     var newPostsCount by remember { mutableStateOf(0) }
     var maxMid by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
