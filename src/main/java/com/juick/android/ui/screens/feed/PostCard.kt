@@ -116,7 +116,7 @@ fun PostCard(
                             }
                             context.startActivity(intent)
                         })
-                        if (post.user.uid == currentUid) {
+                        if (currentUid > 0 && post.user.uid == currentUid) {
                             if (isPremiumOrAdmin && post.rid == 0) {
                                 val label = if (post.friendsOnly) R.string.make_public else R.string.make_private
                                 DropdownMenuItem(text = { Text(stringResource(label)) }, onClick = {
