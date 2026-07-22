@@ -9,6 +9,7 @@ const stores = {
   appgallery: './lib/publish/appgallery.mjs',
   rustore: './lib/publish/rustore.mjs',
   galaxystore: './lib/publish/galaxystore.mjs',
+  github: './lib/publish/github.mjs',
 };
 
 if (!store || !stores[store]) {

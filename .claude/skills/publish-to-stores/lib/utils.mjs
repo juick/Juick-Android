@@ -46,10 +46,11 @@ export function b64url(buf) {
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-export function buildApk(variant, flavor = 'google', buildType = 'store') {
+export function buildApk(variant, buildType = 'store') {
   console.log('=== Building APK ===');
-  const variantName = variant.charAt(0).toUpperCase() + variant.slice(1);
-  exec(`./gradlew assemble${variantName}`);
+  const v = variant.charAt(0).toUpperCase() + variant.slice(1);
+  const t = buildType.charAt(0).toUpperCase() + buildType.slice(1);
+  exec(`./gradlew assemble${v}${t}`);
   const dir = `build/outputs/apk/${variant}/${buildType}`;
   const path = exec(`ls ${dir}/*.apk | head -1`);
   console.log(`APK: ${path}`);
