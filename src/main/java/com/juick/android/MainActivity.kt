@@ -246,9 +246,11 @@ class MainActivity : ComponentActivity() {
         val intent = intent
         if (Intent.ACTION_SEND == intent.action) {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
-            if (text.isNotEmpty()) {
+            val stream = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+            if (text.isNotEmpty() || stream != null) {
                 intent.action = null
-                navController?.navigate(Route.NewPost(Uri.encode(text)))
+                val uriParam = stream?.let { Uri.encode(it.toString()) } ?: ""
+                navController?.navigate(Route.NewPost(text = Uri.encode(text), uri = uriParam))
             }
         }
         if (BuildConfig.INTENT_NEW_EVENT_ACTION == intent.action) {
