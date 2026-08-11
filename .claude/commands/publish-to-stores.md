@@ -1,6 +1,7 @@
 ---
 name: publish-to-stores
 description: Build and publish to AppGallery, RuStore, or Galaxy Store.
+user_invocable: true
 ---
 
 # Publish to Stores
@@ -10,7 +11,7 @@ Builds APK and publishes to the selected store via REST API.
 ## Usage
 
 ```bash
-source .env && node .claude/skills/publish-to-stores/publish-to-stores.mjs <store>
+source .env && node .claude/commands/publish-to-stores/publish-to-stores.mjs <store>
 ```
 
 Where `<store>` is `appgallery`, `rustore`, or `galaxystore`.
