@@ -19,6 +19,7 @@ package com.juick.android.testing
 
 import android.R
 import android.content.Intent
+import android.view.View
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -38,6 +39,9 @@ import com.juick.api.model.User
 import com.stfalcon.chatkit.messages.MessagesList
 import com.stfalcon.chatkit.messages.MessagesListAdapter
 import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.Description
+import org.hamcrest.Matcher
+import org.hamcrest.TypeSafeMatcher
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -64,46 +68,47 @@ class ChatLinkClickTest {
         // fragment is not replaced by async home setup
         onView(withId(com.juick.R.id.main_layout)).check(matches(isDisplayed()))
 
+        scenario.onActivity { activity ->
+            activity.supportFragmentManager.beginTransaction()
+                .replace(R.id.content, ChatFragment(), "testChat")
+                .commitNow()
+        }
+
+        // wait until the profile observer installs the production adapter
+        onView(allOf(withId(com.juick.R.id.messagesList), withAdapterInstalled()))
+            .check(matches(isDisplayed()))
+
+        // add fixture message through the production adapter; the child-attach
+        // listener linkifies it
         val post = Post(user = User(0, "test")).apply {
             setBody("Check https://example.com")
             mid = 0
             to = null
         }
-
-        scenario.onActivity { activity ->
-            val frag = ChatFragment()
-            activity.supportFragmentManager.beginTransaction()
-                .replace(R.id.content, frag, "testChat")
-                .commitNow()
-        }
-
-        // chat fragment must be attached before we touch its list
-        onView(withId(com.juick.R.id.messagesList)).check(matches(isDisplayed()))
-
         scenario.onActivity { activity ->
             val frag = activity.supportFragmentManager.findFragmentByTag("testChat") as ChatFragment
-            val messagesList = frag.view?.findViewById<MessagesList>(com.juick.R.id.messagesList)
-            val adapter = MessagesListAdapter<Post>("test") { _, _, _ -> }
-            messagesList?.setAdapter(adapter)
-            adapter.addToEnd(listOf(post), true)
-            messagesList?.scrollToPosition(0)
+            val list = frag.view?.findViewById<MessagesList>(com.juick.R.id.messagesList)
+            @Suppress("UNCHECKED_CAST")
+            (list?.adapter as MessagesListAdapter<Post>).addToEnd(listOf(post), true)
+            list.scrollToPosition(0)
         }
 
         // wait for RecyclerView to bind the message item
         onView(allOf(withId(com.stfalcon.chatkit.R.id.messageText), withText("Check https://example.com")))
             .check(matches(isDisplayed()))
 
-        // linkify after the item is bound, so links are actually clickable
-        scenario.onActivity { activity ->
-            val frag = activity.supportFragmentManager.findFragmentByTag("testChat") as ChatFragment
-            val method = frag.javaClass.getDeclaredMethod("applyLinkifyToVisibleMessages")
-            method.isAccessible = true
-            method.invoke(frag)
-        }
-
         onView(allOf(withId(com.stfalcon.chatkit.R.id.messageText), withText("Check https://example.com")))
             .perform(click())
 
         intended(allOf(hasAction(Intent.ACTION_VIEW), hasData("https://example.com")))
+    }
+
+    private fun withAdapterInstalled(): Matcher<View> = object : TypeSafeMatcher<View>() {
+        override fun matchesSafely(view: View) =
+            (view as? MessagesList)?.adapter is MessagesListAdapter<*>
+
+        override fun describeTo(description: Description) {
+            description.appendText("MessagesList with production adapter installed")
+        }
     }
 }
