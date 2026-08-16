@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2025, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -20,13 +20,16 @@ package com.juick.android.testing
 import android.R
 import android.content.Intent
 import androidx.test.core.app.ActivityScenario
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
-import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.juick.android.MainActivity
 import com.juick.android.screens.chat.ChatFragment
@@ -34,7 +37,7 @@ import com.juick.api.model.Post
 import com.juick.api.model.User
 import com.stfalcon.chatkit.messages.MessagesList
 import com.stfalcon.chatkit.messages.MessagesListAdapter
-import org.hamcrest.CoreMatchers
+import org.hamcrest.CoreMatchers.allOf
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -56,48 +59,51 @@ class ChatLinkClickTest {
     @Test
     fun messageLink_opensBrowser_byInvokingURLSpan() {
         val scenario = ActivityScenario.launch(MainActivity::class.java)
+
+        // wait until MainActivity finished its initial navigation, so our
+        // fragment is not replaced by async home setup
+        onView(withId(com.juick.R.id.main_layout)).check(matches(isDisplayed()))
+
+        val post = Post(user = User(0, "test")).apply {
+            setBody("Check https://example.com")
+            mid = 0
+            to = null
+        }
+
         scenario.onActivity { activity ->
             val frag = ChatFragment()
             activity.supportFragmentManager.beginTransaction()
                 .replace(R.id.content, frag, "testChat")
                 .commitNow()
-
-            val post = Post(user = User(0, "test")).apply {
-                setBody("Check https://example.com")
-                mid = 0
-                to = null
-            }
-            val adapter = MessagesListAdapter<Post>("test") { imageView, url, _ -> }
-            // set adapter on the MessagesList inside fragment view
-            val messagesList = frag.view?.findViewById<MessagesList>(com.juick.R.id.messagesList)
-            messagesList?.setAdapter(adapter)
-            adapter.addToEnd(listOf(post), true)
-            // try to force RecyclerView to create/bind the view
-            activity.runOnUiThread {
-                messagesList?.scrollToPosition(0)
-            }
-
-            // ensure linkify helper ran
-            try {
-                val method = frag::class.java.getDeclaredMethod("applyLinkifyToVisibleMessages")
-                method.isAccessible = true
-                method.invoke(frag)
-            } catch (_: Exception) {
-            }
-
-            // wait for the adapter to create and attach the message view, then find messageText inside it
-            // Let Espresso find the created message TextView and click it. Espresso
-            // will wait for the view to be present and idle.
         }
 
-        // Use Espresso to click the message text (synchronized)
-        Espresso.onView(
-            CoreMatchers.allOf(
-                ViewMatchers.withId(com.stfalcon.chatkit.R.id.messageText),
-                ViewMatchers.withText("Check https://example.com")
-            )
-        ).perform(ViewActions.click())
+        // chat fragment must be attached before we touch its list
+        onView(withId(com.juick.R.id.messagesList)).check(matches(isDisplayed()))
 
-        intended(CoreMatchers.allOf(hasAction(Intent.ACTION_VIEW), hasData("https://example.com")))
+        scenario.onActivity { activity ->
+            val frag = activity.supportFragmentManager.findFragmentByTag("testChat") as ChatFragment
+            val messagesList = frag.view?.findViewById<MessagesList>(com.juick.R.id.messagesList)
+            val adapter = MessagesListAdapter<Post>("test") { _, _, _ -> }
+            messagesList?.setAdapter(adapter)
+            adapter.addToEnd(listOf(post), true)
+            messagesList?.scrollToPosition(0)
+        }
+
+        // wait for RecyclerView to bind the message item
+        onView(allOf(withId(com.stfalcon.chatkit.R.id.messageText), withText("Check https://example.com")))
+            .check(matches(isDisplayed()))
+
+        // linkify after the item is bound, so links are actually clickable
+        scenario.onActivity { activity ->
+            val frag = activity.supportFragmentManager.findFragmentByTag("testChat") as ChatFragment
+            val method = frag.javaClass.getDeclaredMethod("applyLinkifyToVisibleMessages")
+            method.isAccessible = true
+            method.invoke(frag)
+        }
+
+        onView(allOf(withId(com.stfalcon.chatkit.R.id.messageText), withText("Check https://example.com")))
+            .perform(click())
+
+        intended(allOf(hasAction(Intent.ACTION_VIEW), hasData("https://example.com")))
     }
 }
