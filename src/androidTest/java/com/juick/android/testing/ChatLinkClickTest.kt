@@ -19,7 +19,10 @@ package com.juick.android.testing
 
 import android.R
 import android.content.Intent
+import android.text.Spanned
+import android.text.style.URLSpan
 import android.view.View
+import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -61,41 +64,44 @@ class ChatLinkClickTest {
     }
 
     @Test
-    fun messageLink_opensBrowser_byInvokingURLSpan() {
+    fun messageLink_click_opensBrowser() {
         val scenario = ActivityScenario.launch(MainActivity::class.java)
 
         // wait until MainActivity finished its initial navigation, so our
         // fragment is not replaced by async home setup
         onView(withId(com.juick.R.id.main_layout)).check(matches(isDisplayed()))
 
+        var chatFragment: ChatFragment? = null
         scenario.onActivity { activity ->
+            val frag = ChatFragment()
+            chatFragment = frag
             activity.supportFragmentManager.beginTransaction()
-                .replace(R.id.content, ChatFragment(), "testChat")
+                .replace(R.id.content, frag, "testChat")
                 .commitNow()
         }
+
+        onView(withId(com.juick.R.id.messagesList)).check(matches(isDisplayed()))
 
         // wait until the profile observer installs the production adapter
         onView(allOf(withId(com.juick.R.id.messagesList), withAdapterInstalled()))
             .check(matches(isDisplayed()))
 
-        // add fixture message through the production adapter; the child-attach
-        // listener linkifies it
+        // add fixture message through the production adapter
         val post = Post(user = User(0, "test")).apply {
             setBody("Check https://example.com")
             mid = 0
             to = null
         }
-        scenario.onActivity { activity ->
-            val frag = activity.supportFragmentManager.findFragmentByTag("testChat") as ChatFragment
-            val list = frag.view?.findViewById<MessagesList>(com.juick.R.id.messagesList)
+        scenario.onActivity {
+            val list = chatFragment!!.requireView().findViewById<MessagesList>(com.juick.R.id.messagesList)
             @Suppress("UNCHECKED_CAST")
-            (list?.adapter as MessagesListAdapter<Post>).addToEnd(listOf(post), true)
+            (list.adapter as MessagesListAdapter<Post>).addToEnd(listOf(post), true)
             list.scrollToPosition(0)
         }
 
-        // wait for RecyclerView to bind the message item
+        // message is rendered and the link is a real URLSpan
         onView(allOf(withId(com.stfalcon.chatkit.R.id.messageText), withText("Check https://example.com")))
-            .check(matches(isDisplayed()))
+            .check(matches(allOf(isDisplayed(), withUrlSpan("https://example.com"))))
 
         onView(allOf(withId(com.stfalcon.chatkit.R.id.messageText), withText("Check https://example.com")))
             .perform(click())
@@ -109,6 +115,17 @@ class ChatLinkClickTest {
 
         override fun describeTo(description: Description) {
             description.appendText("MessagesList with production adapter installed")
+        }
+    }
+
+    private fun withUrlSpan(url: String): Matcher<View> = object : TypeSafeMatcher<View>() {
+        override fun matchesSafely(view: View): Boolean {
+            val text = (view as? TextView)?.text as? Spanned ?: return false
+            return text.getSpans(0, text.length, URLSpan::class.java).any { it.url == url }
+        }
+
+        override fun describeTo(description: Description) {
+            description.appendText("TextView with URLSpan $url")
         }
     }
 }
