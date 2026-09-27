@@ -45,6 +45,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -67,12 +68,15 @@ import coil3.request.transformations
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
+import com.juick.api.model.LinkPreview
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.util.MessageUtils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 private val quoteColor = Color(0xFF666666)
 
@@ -219,6 +223,20 @@ fun PostCard(
                     Modifier.fillMaxWidth().height(200.dp).clickable { onLinkClick(photo?.url ?: imageUrl) },
                     contentScale = ContentScale.FillWidth,
                 )
+            } else {
+                val preview by produceState<LinkPreview?>(null, post.mid, post.rid) {
+                    val text = post.getText()
+                    val previewer = App.instance.previewers.firstOrNull { it.hasViewableContent(text) }
+                        ?: return@produceState
+                    value = suspendCancellableCoroutine { cont -> previewer.getPreviewUrl(text) { cont.resume(it) } }
+                }
+                preview?.let { link ->
+                    Spacer(Modifier.height(12.dp))
+                    Column(Modifier.fillMaxWidth().clickable { onLinkClick(link.source) }) {
+                        AsyncImage(link.url, null, Modifier.fillMaxWidth().height(200.dp), contentScale = ContentScale.Crop)
+                        Text(link.description, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
+                    }
+                }
             }
 
             Spacer(Modifier.height(12.dp))
