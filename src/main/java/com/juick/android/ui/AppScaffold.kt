@@ -75,7 +75,7 @@ fun AppScaffold(
     val screenTitle = when (route) {
         Route.Discover::class.qualifiedName -> stringResource(R.string.Discover)
         Route.Chats::class.qualifiedName -> stringResource(R.string.PMs)
-        Route.Discussions::class.qualifiedName -> "Discussions"
+        Route.Discussions::class.qualifiedName -> stringResource(R.string.Discussions)
         else -> stringResource(R.string.Juick)
     }
 
@@ -91,7 +91,7 @@ fun AppScaffold(
                         }
                         IconButton(onClick = { navController.navigate(Route.Discussions) { launchSingleTop = true } }) {
                             BadgedBox(badge = { if (unreadCount > 0) Badge { Text("$unreadCount") } }) {
-                                Icon(Icons.Default.Notifications, contentDescription = "Discussions", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(Icons.Default.Notifications, contentDescription = stringResource(R.string.Discussions), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                         if (currentProfile != null) {
