@@ -17,6 +17,7 @@
 package com.juick.android.ui.screens.post
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -37,23 +38,35 @@ import com.juick.R
 import com.juick.android.ui.widget.CropSheet
 import com.juick.api.model.PostResponse
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileNotFoundException
 
 @Composable
 fun NewPostScreen(
     initialText: String? = null,
+    initialAttachment: Uri? = null,
+    pendingTag: String? = null,
+    onTagConsumed: () -> Unit = {},
     onTagsClick: () -> Unit,
     onNavigateToThread: (Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    var textFieldValue by remember(initialText) { mutableStateOf(TextFieldValue(initialText ?: "", TextRange((initialText?.length ?: 0)))) }
+    var textFieldValue by remember { mutableStateOf(TextFieldValue(initialText ?: "", TextRange((initialText?.length ?: 0)))) }
     val scope = rememberCoroutineScope()
     val messagePosted = remember { MutableStateFlow<Result<PostResponse>?>(null) }
     var isSending by remember { mutableStateOf(false) }
-    var attachmentUri by remember { mutableStateOf<Uri?>(null) }
-    var attachmentMime by remember { mutableStateOf<String?>(null) }
+    var attachmentUri by remember { mutableStateOf(initialAttachment) }
+    var attachmentMime by remember { mutableStateOf(initialAttachment?.let { context.contentResolver.getType(it) }) }
+
+    LaunchedEffect(pendingTag) {
+        val tag = pendingTag ?: return@LaunchedEffect
+        val text = textFieldValue.text
+        val insert = if (text.isEmpty() || text.endsWith(' ') || text.endsWith('\n')) "#$tag " else " #$tag "
+        val newText = text + insert
+        textFieldValue = TextFieldValue(newText, TextRange(newText.length))
+        onTagConsumed()
+    }
     var showSourcePicker by remember { mutableStateOf(false) }
     var showCrop by remember { mutableStateOf<Uri?>(null) }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
@@ -68,7 +81,10 @@ fun NewPostScreen(
                         isSending = false
                         postResponse.newMessage?.let { post -> onNavigateToThread(post.mid) }
                     },
-                    onFailure = { isSending = false },
+                    onFailure = {
+                        isSending = false
+                        Toast.makeText(context, R.string.network_error, Toast.LENGTH_LONG).show()
+                    },
                 )
                 messagePosted.value = null
             }
@@ -156,8 +172,11 @@ fun NewPostScreen(
                 onClick = {
                     if (sendEnabled && !isSending) {
                         isSending = true
-                        scope.launch {
+                        try {
                             App.instance.sendMessage(scope, messagePosted, textFieldValue.text, attachmentUri, attachmentMime)
+                        } catch (e: FileNotFoundException) {
+                            isSending = false
+                            Toast.makeText(context, "Attachment error: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
                 },

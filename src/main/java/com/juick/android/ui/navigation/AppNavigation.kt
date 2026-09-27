@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.core.net.toUri
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.juick.R
@@ -152,15 +153,8 @@ fun AppNavigation(
         }
 
         composable<Route.NewPost> { entry ->
-            val text = entry.toRoute<Route.NewPost>().text ?: ""
-            var initialText by remember { mutableStateOf(text) }
-            LaunchedEffect(pendingTag) {
-                pendingTag?.let { tag ->
-                    initialText = if (initialText.isNotEmpty()) "$initialText #$tag " else "#$tag "
-                    pendingTag = null
-                }
-            }
-            NewPostScreen(initialText = initialText, onTagsClick = { navController.navigate(Route.Tags) }, onNavigateToThread = { mid -> navController.popBackStack<Route.NewPost>(inclusive = true); navController.navigate(Route.Thread(mid)) }, onDismiss = { navController.popBackStack() })
+            val route = entry.toRoute<Route.NewPost>()
+            NewPostScreen(initialText = route.text, initialAttachment = route.uri?.toUri(), pendingTag = pendingTag, onTagConsumed = { pendingTag = null }, onTagsClick = { navController.navigate(Route.Tags) }, onNavigateToThread = { mid -> navController.popBackStack<Route.NewPost>(inclusive = true); navController.navigate(Route.Thread(mid)) }, onDismiss = { navController.popBackStack() })
         }
 
         dialog<Route.Tags> {
