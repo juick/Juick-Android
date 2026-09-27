@@ -62,7 +62,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.transformations
 import com.juick.App
+import com.juick.BuildConfig
 import com.juick.R
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
@@ -204,8 +207,18 @@ fun PostCard(
             val medium = photo?.medium
             val imageUrl = medium?.url
             if (!imageUrl.isNullOrBlank()) {
+                val hideNsfw = BuildConfig.HIDE_NSFW && MessageUtils.haveNSFWContent(post)
+                val request = remember(imageUrl, hideNsfw) {
+                    ImageRequest.Builder(context).data(imageUrl)
+                        .apply { if (hideNsfw) transformations(PixelateTransformation()) }
+                        .build()
+                }
                 Spacer(Modifier.height(12.dp))
-                AsyncImage(imageUrl, null, Modifier.fillMaxWidth().height(200.dp), contentScale = ContentScale.FillWidth)
+                AsyncImage(
+                    request, null,
+                    Modifier.fillMaxWidth().height(200.dp).clickable { onLinkClick(photo?.url ?: imageUrl) },
+                    contentScale = ContentScale.FillWidth,
+                )
             }
 
             Spacer(Modifier.height(12.dp))
