@@ -18,6 +18,7 @@ package com.juick.android.ui.screens.thread
 
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -46,8 +47,9 @@ import com.juick.android.service.isAuthenticated
 import com.juick.android.ui.screens.feed.PostCard
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
+import java.io.FileNotFoundException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,16 +81,39 @@ fun ThreadScreen(
         uri?.let { replyAttachmentUri = it; replyAttachmentMime = context.contentResolver.getType(it) ?: "image/jpeg" }
     }
 
-    LaunchedEffect(mid) {
-        try { posts = App.instance.api.thread(mid) } catch (_: Exception) { loadError = true }
+    var reloadTrigger by remember { mutableIntStateOf(0) }
+    val messagePosted = remember { MutableStateFlow<Result<PostResponse>?>(null) }
+    var isSending by remember { mutableStateOf(false) }
+
+    LaunchedEffect(mid, reloadTrigger) {
+        try { posts = App.instance.api.thread(mid); loadError = false } catch (e: CancellationException) { throw e } catch (_: Exception) { loadError = true }
         isLoading = false
-        if (scrollToEnd && posts.isNotEmpty()) listState.animateScrollToItem(posts.size - 1)
-        posts.lastOrNull()?.let { try { App.instance.api.markRead(it.mid, it.rid) } catch (e: Exception) { Log.e("ThreadScreen", "markRead failed", e) } }
+        if ((scrollToEnd || reloadTrigger > 0) && posts.isNotEmpty()) listState.animateScrollToItem(posts.size - 1)
+        posts.lastOrNull()?.let { try { App.instance.api.markRead(it.mid, it.rid) } catch (e: CancellationException) { throw e } catch (e: Exception) { Log.e("ThreadScreen", "markRead failed", e) } }
+    }
+
+    LaunchedEffect(messagePosted) {
+        messagePosted.collect { response ->
+            response ?: return@collect
+            isSending = false
+            response.fold(
+                onSuccess = {
+                    replyText = ""
+                    replyToPost = null
+                    replyAttachmentUri = null
+                    replyAttachmentMime = null
+                    reloadTrigger++
+                },
+                onFailure = { Toast.makeText(context, R.string.network_error, Toast.LENGTH_LONG).show() },
+            )
+            messagePosted.value = null
+        }
     }
 
     val newMessages by App.instance.messages.collectAsStateWithLifecycle()
     LaunchedEffect(newMessages) {
-        val relevant = newMessages.filter { it.mid == mid }
+        val known = posts.mapTo(HashSet()) { it.rid }
+        val relevant = newMessages.filter { it.mid == mid && it.rid > 0 && it.rid !in known }
         if (relevant.isNotEmpty()) posts = posts + relevant
     }
 
@@ -165,23 +190,24 @@ fun ThreadScreen(
                         Text(if (replyAttachmentUri != null) "📎✓" else "📎", style = MaterialTheme.typography.bodyMedium)
                     }
                     Spacer(Modifier.width(4.dp))
+                    val canSend = (replyText.isNotBlank() || replyAttachmentUri != null) && !isSending
                     IconButton(
                         onClick = {
-                            if ((replyText.isNotBlank() || replyAttachmentUri != null) && App.instance.isAuthenticated) {
-                                scope.launch {
-                                    try {
-                                        val receiver = MutableStateFlow<Result<PostResponse>?>(null)
-                                        App.instance.sendMessage(scope, receiver, "#$mid $replyText", replyAttachmentUri, replyAttachmentMime)
-                                        replyText = ""
-                                        replyAttachmentUri = null
-                                        replyAttachmentMime = null
-                                    } catch (_: Exception) {}
+                            if (canSend && App.instance.isAuthenticated) {
+                                val rid = replyToPost?.rid ?: 0
+                                val target = if (rid > 0) "#$mid/$rid" else "#$mid"
+                                isSending = true
+                                try {
+                                    App.instance.sendMessage(scope, messagePosted, "$target $replyText", replyAttachmentUri, replyAttachmentMime)
+                                } catch (e: FileNotFoundException) {
+                                    isSending = false
+                                    Toast.makeText(context, "Attachment error: ${e.message}", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         },
-                        enabled = replyText.isNotBlank(),
+                        enabled = canSend,
                     ) {
-                        Icon(Icons.Default.Send, stringResource(R.string.Send), tint = if (replyText.isNotBlank()) colors.primary else colors.onSurfaceVariant)
+                        Icon(Icons.Default.Send, stringResource(R.string.Send), tint = if (canSend) colors.primary else colors.onSurfaceVariant)
                     }
                 }
             }
