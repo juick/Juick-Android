@@ -31,6 +31,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import android.widget.Toast
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -39,6 +41,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +67,7 @@ import com.juick.R
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.util.MessageUtils
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -91,6 +95,25 @@ fun PostCard(
     var menuExpanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var confirmDelete by remember { mutableStateOf(false) }
+
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            text = { Text(stringResource(R.string.Are_you_sure_delete)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDelete = false
+                    val cmd = if (post.rid == 0) "D #${post.mid}" else "D #${post.mid}/${post.rid}"
+                    App.instance.sendMessage(scope, MutableStateFlow<Result<PostResponse>?>(null), cmd)
+                    onDeletePost()
+                }) { Text(stringResource(android.R.string.ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.Cancel)) }
+            },
+        )
+    }
 
     Surface(
         modifier = modifier.fillMaxWidth().clickable { onPostClick() },
@@ -122,16 +145,21 @@ fun PostCard(
                                 val label = if (post.friendsOnly) R.string.make_public else R.string.make_private
                                 DropdownMenuItem(text = { Text(stringResource(label)) }, onClick = {
                                     menuExpanded = false
-                                    scope.launch { App.instance.api.togglePrivacy(post.mid) }
+                                    scope.launch {
+                                        try {
+                                            App.instance.api.togglePrivacy(post.mid)
+                                        } catch (e: CancellationException) {
+                                            throw e
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, R.string.network_error, Toast.LENGTH_LONG).show()
+                                        }
+                                    }
                                 })
                             }
                             val deleteLabel = if (post.rid == 0) R.string.DeletePost else R.string.DeleteComment
                             DropdownMenuItem(text = { Text(stringResource(deleteLabel)) }, onClick = {
                                 menuExpanded = false
-                                val cmd = if (post.rid == 0) "D #${post.mid}" else "D #${post.mid}/${post.rid}"
-                                val receiver = MutableStateFlow<Result<PostResponse>?>(null)
-                                App.instance.sendMessage(scope, receiver, cmd)
-                                onDeletePost()
+                                confirmDelete = true
                             })
                         }
                     }
