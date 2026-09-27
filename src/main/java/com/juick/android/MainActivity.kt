@@ -5,6 +5,14 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.juick.android
 
@@ -16,7 +24,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -32,21 +39,20 @@ import androidx.browser.customtabs.CustomTabsSession
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.MutableLiveData
+import androidx.core.content.IntentCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.service.isAuthenticated
-import com.juick.android.updater.Updater
-import androidx.navigation.compose.rememberNavController
 import com.juick.android.ui.AppTheme
 import com.juick.android.ui.navigation.AppNavigation
 import com.juick.android.ui.navigation.Route
+import com.juick.android.updater.Updater
 import com.juick.api.model.Post
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -67,9 +73,8 @@ class MainActivity : ComponentActivity() {
 
     private var browserClient: CustomTabsClient? = null
     private var browserSession: CustomTabsSession? = null
-    private var browserSessionSupported = MutableLiveData<Boolean?>(null)
     private var customTabsBound = false
-    private var initialUri: Uri? = null
+    private var navController: NavHostController? = null
 
     private var browserConnection = object : CustomTabsServiceConnection() {
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -81,7 +86,6 @@ class MainActivity : ComponentActivity() {
             client.warmup(0)
             browserSession = client.newSession(CustomTabsCallback())
             browserClient = client
-            browserSessionSupported.value = true
         }
     }
 
@@ -116,47 +120,47 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun processUri(data: Uri): Boolean {
-        val path = data.path ?: return false
-        val segments = path.split("/").filter { it.isNotEmpty() }
-        when (segments.size) {
-            0 -> {
-                // home
-            }
-            1 -> {
-                // user profile → navigate in-app
-                navController?.navigate(Route.Blog(segments[0]))
-                return true
-            }
-            2 -> {
-                if (segments[0] == "m") {
-                    val mid = segments[1].toIntOrNull() ?: return false
-                    // Navigate to thread via callback
-                    processUriCallback?.invoke(mid)
-                    return true
-                }
-            }
-            else -> {
-                if (segments.size > 2 && segments[0] == "i") {
-                    openUri(data)
-                    return true
-                }
-            }
+    /**
+     * Opens juick.com links in-app when a screen exists for them, everything else in a browser.
+     */
+    fun processUri(data: Uri) {
+        val nav = navController
+        if (nav == null || data.host != "juick.com") {
+            openUri(data)
+            return
         }
-        return false
+        val segments = data.pathSegments
+        when {
+            segments.isEmpty() -> nav.navigate(Route.Home)
+            segments.size == 1 -> nav.navigate(Route.Blog(segments[0]))
+            segments.size == 2 && segments[1].toIntOrNull() != null ->
+                nav.navigate(Route.Thread(segments[1].toInt()))
+            else -> openUri(data)
+        }
     }
 
-    internal var processUriCallback: ((Int) -> Unit)? = null
-    private var navController: androidx.navigation.NavHostController? = null
+    private fun initNotifications() {
+        if (notificationManager != null || !App.instance.isAuthenticated) return
+        lifecycleScope.launch {
+            if (requestNotificationsPermission()) {
+                notificationManager = NotificationManager()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState != null) {
+            // the restored back stack already reflects the launch intent
+            intent.action = null
+        }
 
         loginLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == RESULT_OK) {
                 account.refresh()
+                initNotifications()
             }
         }
 
@@ -176,37 +180,31 @@ class MainActivity : ComponentActivity() {
         }
 
         account.refresh()
+        initNotifications()
 
-        lifecycleScope.launch {
-            if (BuildConfig.ENABLE_UPDATER) {
+        if (BuildConfig.ENABLE_UPDATER) {
+            lifecycleScope.launch {
                 Updater(this@MainActivity).checkUpdate()
             }
-            try {
-                requestNotificationsPermission()
-                notificationManager = NotificationManager()
-            } catch (_: Exception) { }
         }
-
-        initialUri = intent?.data
 
         setContent {
             AppTheme {
                 val navController = rememberNavController()
                 this@MainActivity.navController = navController
-                processUriCallback = { mid ->
-                    navController.navigate(Route.Thread(mid))
-                }
 
                 val profile by account.profile.observeAsState()
                 val unreadCount = profile?.unreadCount ?: 0
 
                 val onPostClick: (Post) -> Unit = { post -> navController.navigate(Route.Thread(post.mid)) }
                 val onUserClick: (String) -> Unit = { uname -> navController.navigate(Route.Blog(uname)) }
-                val onLinkClick: (String) -> Unit = { url -> openUri(Uri.parse(url)) }
+                val onLinkClick: (String) -> Unit = { url -> processUri(Uri.parse(url)) }
                 val onSignInClick: () -> Unit = { showLogin() }
                 val onLikeClick: (Post) -> Unit = { post ->
                     lifecycleScope.launch {
-                        try { App.instance.api.like(post.mid); account.refresh() } catch (_: Exception) { }
+                        try { App.instance.api.like(post.mid); account.refresh() } catch (e: Exception) {
+                            Log.e("MainActivity", "like failed", e)
+                        }
                     }
                 }
                 val onMenuClick: (Post) -> Unit = { }
@@ -216,46 +214,40 @@ class MainActivity : ComponentActivity() {
 
                 AppNavigation(navController, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onSignInClick, onFabClick, profile, unreadCount, App.instance.isAuthenticated)
 
-                LaunchedEffect(Unit) {
-                    initialUri?.let { processUri(it); initialUri = null }
-                }
+                // onResume runs before the first composition, so a cold-start intent is handled here
+                LaunchedEffect(Unit) { handleIntent() }
             }
         }
     }
 
-    private fun handleIntent(intent: Intent?) {
-        intent?.let {
-            if (Intent.ACTION_VIEW == it.action) {
-                it.data?.let { data ->
-                    processUri(data)
+    private fun handleIntent() {
+        val nav = navController ?: return
+        val intent = intent
+        when (intent.action) {
+            Intent.ACTION_VIEW -> intent.data?.let { processUri(it) }
+            Intent.ACTION_SEND -> {
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                val stream = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+                if (!text.isNullOrEmpty() || stream != null) {
+                    nav.navigate(Route.NewPost(text = text, uri = stream?.toString()))
                 }
             }
+            BuildConfig.INTENT_NEW_EVENT_ACTION -> handleNewEventIntent(nav, intent)
+            else -> return
         }
+        intent.action = null
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        handleIntent(intent)
     }
 
     override fun onResume() {
         super.onResume()
         notificationManager?.onResume()
         account.refresh()
-        val intent = intent
-        if (Intent.ACTION_SEND == intent.action) {
-            val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
-            val stream = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
-            if ((text.isNotEmpty() || stream != null) && navController != null) {
-                val uriParam = stream?.let { Uri.encode(it.toString()) } ?: ""
-                navController?.navigate(Route.NewPost(text = Uri.encode(text), uri = uriParam))
-                intent.action = null
-            }
-        }
-        if (BuildConfig.INTENT_NEW_EVENT_ACTION == intent.action) {
-            handleNewEventIntent(intent)
-        }
+        handleIntent()
     }
 
     override fun onPause() {
@@ -263,15 +255,18 @@ class MainActivity : ComponentActivity() {
         super.onPause()
     }
 
-    private fun handleNewEventIntent(intent: Intent) {
-        intent.action = null
+    private fun handleNewEventIntent(nav: NavHostController, intent: Intent) {
         val msg = intent.getStringExtra(getString(R.string.notification_extra)) ?: return
         try {
             val post = App.instance.jsonMapper.decodeFromString<Post>(msg)
-            if (post.mid > 0) {
-                navController?.navigate(Route.Thread(post.mid))
+            when {
+                post.user.uid == 0 -> nav.navigate(Route.Discussions)
+                post.mid == 0 -> nav.navigate(Route.Chat(post.user.uname, post.user.uid))
+                else -> nav.navigate(Route.Thread(post.mid, scrollToEnd = true))
             }
-        } catch (_: Exception) { }
+        } catch (e: Exception) {
+            Log.d("MainActivity", "Invalid notification data", e)
+        }
     }
 
     override fun onDestroy() {
