@@ -160,54 +160,56 @@ fun ThreadScreen(
             }
 
             Surface(color = colors.surface, shadowElevation = 2.dp) {
-                replyToPost?.let { target ->
-                    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        AsyncImage(model = target.user.avatar, contentDescription = null, modifier = Modifier.size(20.dp).clip(CircleShape), contentScale = ContentScale.Crop)
-                        Spacer(Modifier.width(8.dp))
-                        Text("In reply to ${target.user.uname}", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                        Spacer(Modifier.weight(1f))
-                        IconButton(onClick = { replyToPost = null }, modifier = Modifier.size(20.dp)) {
-                            Icon(Icons.Default.Close, "Clear", tint = colors.onSurfaceVariant)
+                Column(Modifier.windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime).only(WindowInsetsSides.Bottom))) {
+                    replyToPost?.let { target ->
+                        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                            AsyncImage(model = target.user.avatar, contentDescription = null, modifier = Modifier.size(20.dp).clip(CircleShape), contentScale = ContentScale.Crop)
+                            Spacer(Modifier.width(8.dp))
+                            Text("In reply to ${target.user.uname}", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                            Spacer(Modifier.weight(1f))
+                            IconButton(onClick = { replyToPost = null }, modifier = Modifier.size(20.dp)) {
+                                Icon(Icons.Default.Close, "Clear", tint = colors.onSurfaceVariant)
+                            }
                         }
                     }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(12.dp).imePadding(),
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    OutlinedTextField(
-                        value = replyText,
-                        onValueChange = { replyText = it },
-                        placeholder = { Text(stringResource(R.string.reply)) },
-                        modifier = Modifier.weight(1f),
-                        maxLines = 3,
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    IconButton(onClick = {
-                        if (replyAttachmentUri != null) { replyAttachmentUri = null; replyAttachmentMime = null }
-                        else galleryLauncher.launch("image/*")
-                    }) {
-                        Text(if (replyAttachmentUri != null) "📎✓" else "📎", style = MaterialTheme.typography.bodyMedium)
-                    }
-                    Spacer(Modifier.width(4.dp))
-                    val canSend = (replyText.isNotBlank() || replyAttachmentUri != null) && !isSending
-                    IconButton(
-                        onClick = {
-                            if (canSend && App.instance.isAuthenticated) {
-                                val rid = replyToPost?.rid ?: 0
-                                val target = if (rid > 0) "#$mid/$rid" else "#$mid"
-                                isSending = true
-                                try {
-                                    App.instance.sendMessage(scope, messagePosted, "$target $replyText", replyAttachmentUri, replyAttachmentMime)
-                                } catch (e: FileNotFoundException) {
-                                    isSending = false
-                                    Toast.makeText(context, "Attachment error: ${e.message}", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        },
-                        enabled = canSend,
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(12.dp),
+                        verticalAlignment = Alignment.Bottom,
                     ) {
-                        Icon(Icons.Default.Send, stringResource(R.string.Send), tint = if (canSend) colors.primary else colors.onSurfaceVariant)
+                        OutlinedTextField(
+                            value = replyText,
+                            onValueChange = { replyText = it },
+                            placeholder = { Text(stringResource(R.string.reply)) },
+                            modifier = Modifier.weight(1f),
+                            maxLines = 3,
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        IconButton(onClick = {
+                            if (replyAttachmentUri != null) { replyAttachmentUri = null; replyAttachmentMime = null }
+                            else galleryLauncher.launch("image/*")
+                        }) {
+                            Text(if (replyAttachmentUri != null) "📎✓" else "📎", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Spacer(Modifier.width(4.dp))
+                        val canSend = (replyText.isNotBlank() || replyAttachmentUri != null) && !isSending
+                        IconButton(
+                            onClick = {
+                                if (canSend && App.instance.isAuthenticated) {
+                                    val rid = replyToPost?.rid ?: 0
+                                    val target = if (rid > 0) "#$mid/$rid" else "#$mid"
+                                    isSending = true
+                                    try {
+                                        App.instance.sendMessage(scope, messagePosted, "$target $replyText", replyAttachmentUri, replyAttachmentMime)
+                                    } catch (e: FileNotFoundException) {
+                                        isSending = false
+                                        Toast.makeText(context, "Attachment error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            },
+                            enabled = canSend,
+                        ) {
+                            Icon(Icons.Default.Send, stringResource(R.string.Send), tint = if (canSend) colors.primary else colors.onSurfaceVariant)
+                        }
                     }
                 }
             }
