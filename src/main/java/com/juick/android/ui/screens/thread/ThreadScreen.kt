@@ -62,6 +62,7 @@ fun ThreadScreen(
     onLikeClick: (Post) -> Unit,
     onLinkClick: (String) -> Unit,
     onDismiss: () -> Unit,
+    onPostDeleted: () -> Unit = onDismiss,
     currentUid: Int = 0,
     isPremiumOrAdmin: Boolean = false,
 ) {
@@ -153,6 +154,7 @@ fun ThreadScreen(
                             showCounters = false,
                             currentUid = currentUid,
                             isPremiumOrAdmin = isPremiumOrAdmin,
+                            onDeletePost = { if (post.rid == 0) onPostDeleted() else reloadTrigger++ },
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         )
                     }

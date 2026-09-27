@@ -28,6 +28,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,7 @@ import androidx.core.net.toUri
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.juick.R
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -57,6 +59,12 @@ import androidx.compose.ui.window.DialogProperties
 import com.juick.android.ui.AppScaffold
 import com.juick.android.Uris
 import com.juick.api.model.Post
+
+private const val DELETED_MID = "deletedMid"
+
+@Composable
+private fun NavBackStackEntry.deletedMid(): Int =
+    savedStateHandle.getStateFlow(DELETED_MID, 0).collectAsState().value
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +95,7 @@ fun AppNavigation(
     }
 
     NavHost(navController = navController, startDestination = if (isAuthenticated) Route.Home else Route.Public) {
-        composable<Route.Public> {
+        composable<Route.Public> { entry ->
             Column(Modifier.fillMaxSize()) {
                 TopAppBar(
                     title = { Text(stringResource(R.string.Juick)) },
@@ -97,18 +105,18 @@ fun AppNavigation(
                     },
                 )
                 Box(Modifier.fillMaxSize().padding()) {
-                    FeedScreen(Uris.top, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile)
+                    FeedScreen(Uris.top, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid())
                 }
             }
         }
-        composable<Route.Home> {
+        composable<Route.Home> { entry ->
             AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
-                FeedScreen(Uris.home, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile)
+                FeedScreen(Uris.home, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid())
             }
         }
-        composable<Route.Discover> {
+        composable<Route.Discover> { entry ->
             AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
-                FeedScreen(Uris.last, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile)
+                FeedScreen(Uris.last, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid())
             }
         }
         composable<Route.Chats> {
@@ -119,9 +127,9 @@ fun AppNavigation(
                 )
             }
         }
-        composable<Route.Discussions> {
+        composable<Route.Discussions> { entry ->
             AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
-                FeedScreen(Uris.discussions, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile)
+                FeedScreen(Uris.discussions, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid())
             }
         }
 
@@ -129,13 +137,16 @@ fun AppNavigation(
             dialogProperties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
         ) { entry ->
             val route = entry.toRoute<Route.Thread>()
-            ThreadScreen(route.mid, route.scrollToEnd, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onDismiss = { navController.popBackStack() }, currentUid = profile?.uid ?: 0, isPremiumOrAdmin = profile?.premium == true || profile?.admin == true)
+            ThreadScreen(route.mid, route.scrollToEnd, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onDismiss = { navController.popBackStack() }, onPostDeleted = {
+                navController.previousBackStackEntry?.savedStateHandle?.set(DELETED_MID, route.mid)
+                navController.popBackStack()
+            }, currentUid = profile?.uid ?: 0, isPremiumOrAdmin = profile?.premium == true || profile?.admin == true)
         }
 
         composable<Route.Blog> { entry ->
             val uname = entry.toRoute<Route.Blog>().uname
             AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
-                FeedScreen(Uris.getUserPostsByName(uname), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, showProfileHeader = true, profileHeader = { ProfileHeader(uname = uname) })
+                FeedScreen(Uris.getUserPostsByName(uname), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid(), showProfileHeader = true, profileHeader = { ProfileHeader(uname = uname) })
             }
         }
 
@@ -147,7 +158,7 @@ fun AppNavigation(
         composable<Route.Search> { entry ->
             val query = entry.toRoute<Route.Search>().query
             AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
-                if (query != null) FeedScreen(Uris.search(query), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile)
+                if (query != null) FeedScreen(Uris.search(query), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid())
                 else SearchScreen(onSearch = { q -> navController.navigate(Route.Search(q)) { popUpTo<Route.Search> { inclusive = true } } })
             }
         }

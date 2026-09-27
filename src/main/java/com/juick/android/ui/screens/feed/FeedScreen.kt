@@ -71,6 +71,7 @@ fun FeedScreen(
     showProfileHeader: Boolean = false,
     profileHeader: @Composable () -> Unit = {},
     currentUser: com.juick.api.model.User? = null,
+    deletedMid: Int = 0,
     modifier: Modifier = Modifier,
 ) {
     var apiUrl by remember { mutableStateOf(Uri.EMPTY) }
@@ -95,6 +96,15 @@ fun FeedScreen(
                 if (newCount > 0) newPostsCount += newCount
             }
         }
+    }
+
+    fun removePost(mid: Int, rid: Int) {
+        allPosts = allPosts.filterNot { it.mid == mid && (rid == 0 || it.rid == rid) }
+        if (feedState?.isSuccess == true) feedState = Result.success(allPosts)
+    }
+
+    LaunchedEffect(deletedMid) {
+        if (deletedMid > 0) removePost(deletedMid, 0)
     }
 
     LaunchedEffect(initialUrl) {
@@ -199,6 +209,7 @@ fun FeedScreen(
                                         onLinkClick = onLinkClick,
                                         currentUid = currentUser?.uid ?: 0,
                                         isPremiumOrAdmin = currentUser?.premium == true || currentUser?.admin == true,
+                                        onDeletePost = { removePost(post.mid, post.rid) },
                                         modifier = Modifier.padding(vertical = 4.dp).padding(horizontal = 12.dp),
                                     )
                                 } else {

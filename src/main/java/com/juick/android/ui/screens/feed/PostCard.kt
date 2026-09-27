@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -74,6 +75,8 @@ import com.juick.api.model.PostResponse
 import com.juick.util.MessageUtils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -103,6 +106,7 @@ fun PostCard(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var confirmDelete by remember { mutableStateOf(false) }
+    val currentOnDeletePost by rememberUpdatedState(onDeletePost)
 
     if (confirmDelete) {
         AlertDialog(
@@ -112,8 +116,14 @@ fun PostCard(
                 TextButton(onClick = {
                     confirmDelete = false
                     val cmd = if (post.rid == 0) "D #${post.mid}" else "D #${post.mid}/${post.rid}"
-                    App.instance.sendMessage(scope, MutableStateFlow<Result<PostResponse>?>(null), cmd)
-                    onDeletePost()
+                    val result = MutableStateFlow<Result<PostResponse>?>(null)
+                    App.instance.sendMessage(scope, result, cmd)
+                    scope.launch {
+                        result.filterNotNull().first().fold(
+                            onSuccess = { currentOnDeletePost() },
+                            onFailure = { Toast.makeText(context, R.string.network_error, Toast.LENGTH_LONG).show() },
+                        )
+                    }
                 }) { Text(stringResource(android.R.string.ok)) }
             },
             dismissButton = {
