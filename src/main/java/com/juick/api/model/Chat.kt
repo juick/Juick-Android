@@ -40,8 +40,6 @@ data class Chat(val uname: String) {
 
     val dialogName: String get() = uname
 
-    val lastMessageOrNull: Post? get() = lastMessage
-
     fun getLastMessage(): Post {
         if (lastMessage != null) {
             return lastMessage as Post

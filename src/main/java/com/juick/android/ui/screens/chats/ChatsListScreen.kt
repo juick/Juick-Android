@@ -132,7 +132,7 @@ private fun ChatListItem(
                 style = MaterialTheme.typography.titleSmall,
             )
             Text(
-                text = chat.lastMessageOrNull?.getBody() ?: "",
+                text = chat.getLastMessage().getBody() ?: "",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
