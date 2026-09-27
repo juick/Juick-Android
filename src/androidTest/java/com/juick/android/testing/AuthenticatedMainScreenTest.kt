@@ -33,15 +33,17 @@ import org.junit.Test
 class AuthenticatedMainScreenTest {
 
     companion object {
+        private var testAccount: Account? = null
+
         @JvmStatic
         @BeforeClass
         fun setupAccount() {
             val ctx = InstrumentationRegistry.getInstrumentation().targetContext
             val am = AccountManager.get(ctx)
-            am.addAccountExplicitly(
-                Account("test", ctx.getString(R.string.applicationId)),
-                "test_hash", null
-            )
+            if (am.getAccountsByType(ctx.getString(R.string.applicationId)).isEmpty()) {
+                testAccount = Account("test", ctx.getString(R.string.applicationId))
+                am.addAccountExplicitly(testAccount, "test_hash", null)
+            }
             InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(
                 "pm grant ${ctx.packageName} android.permission.POST_NOTIFICATIONS"
             )
@@ -51,9 +53,8 @@ class AuthenticatedMainScreenTest {
         @AfterClass
         fun cleanup() {
             val ctx = InstrumentationRegistry.getInstrumentation().targetContext
-            AccountManager.get(ctx).getAccountsByType(ctx.getString(R.string.applicationId)).forEach {
-                AccountManager.get(ctx).removeAccountExplicitly(it)
-            }
+            testAccount?.let { AccountManager.get(ctx).removeAccountExplicitly(it) }
+            testAccount = null
         }
     }
 
