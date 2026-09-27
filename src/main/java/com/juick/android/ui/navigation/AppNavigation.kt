@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
@@ -74,6 +75,9 @@ fun AppNavigation(
 ) {
     var pendingTag by remember { mutableStateOf<String?>(null) }
 
+    val profile by rememberUpdatedState(currentProfile)
+    val unread by rememberUpdatedState(unreadCount)
+
     var wasAuthenticated by rememberSaveable { mutableStateOf(isAuthenticated) }
     LaunchedEffect(isAuthenticated) {
         if (isAuthenticated && !wasAuthenticated) {
@@ -93,22 +97,22 @@ fun AppNavigation(
                     },
                 )
                 Box(Modifier.fillMaxSize().padding()) {
-                    FeedScreen(Uris.top, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile)
+                    FeedScreen(Uris.top, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile)
                 }
             }
         }
         composable<Route.Home> {
-            AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                FeedScreen(Uris.home, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile)
+            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+                FeedScreen(Uris.home, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile)
             }
         }
         composable<Route.Discover> {
-            AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                FeedScreen(Uris.last, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile)
+            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+                FeedScreen(Uris.last, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile)
             }
         }
         composable<Route.Chats> {
-            AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
+            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
                 ChatsListScreen(
                     onChatClick = { chat -> navController.navigate(Route.Chat(chat.dialogName, chat.uid)) },
                     onNavigateToAuth = { navController.navigate(Route.NoAuth) },
@@ -116,8 +120,8 @@ fun AppNavigation(
             }
         }
         composable<Route.Discussions> {
-            AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                FeedScreen(Uris.discussions, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile)
+            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+                FeedScreen(Uris.discussions, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile)
             }
         }
 
@@ -125,13 +129,13 @@ fun AppNavigation(
             dialogProperties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
         ) { entry ->
             val route = entry.toRoute<Route.Thread>()
-            ThreadScreen(route.mid, route.scrollToEnd, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onDismiss = { navController.popBackStack() }, currentUid = currentProfile?.uid ?: 0, isPremiumOrAdmin = currentProfile?.premium == true || currentProfile?.admin == true)
+            ThreadScreen(route.mid, route.scrollToEnd, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onDismiss = { navController.popBackStack() }, currentUid = profile?.uid ?: 0, isPremiumOrAdmin = profile?.premium == true || profile?.admin == true)
         }
 
         composable<Route.Blog> { entry ->
             val uname = entry.toRoute<Route.Blog>().uname
-            AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                FeedScreen(Uris.getUserPostsByName(uname), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile, showProfileHeader = true, profileHeader = { ProfileHeader(uname = uname) })
+            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+                FeedScreen(Uris.getUserPostsByName(uname), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, showProfileHeader = true, profileHeader = { ProfileHeader(uname = uname) })
             }
         }
 
@@ -142,8 +146,8 @@ fun AppNavigation(
 
         composable<Route.Search> { entry ->
             val query = entry.toRoute<Route.Search>().query
-            AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                if (query != null) FeedScreen(Uris.search(query), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = currentProfile)
+            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+                if (query != null) FeedScreen(Uris.search(query), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile)
                 else SearchScreen(onSearch = { q -> navController.navigate(Route.Search(q)) { popUpTo<Route.Search> { inclusive = true } } })
             }
         }
