@@ -16,7 +16,7 @@
  */
 package com.juick.android.ui.screens.chat
 
-import android.text.style.URLSpan
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.core.text.getSpans
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,6 +30,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -59,6 +60,7 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     LaunchedEffect(uname) {
         try {
@@ -70,12 +72,17 @@ fun ChatScreen(
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
     }
 
+    fun prepend(incoming: List<Post>) {
+        val current = messagesState?.getOrNull() ?: return
+        val fresh = incoming.filter { msg ->
+            current.none { it.getTimestamp() == msg.getTimestamp() && it.getBody() == msg.getBody() }
+        }
+        if (fresh.isNotEmpty()) messagesState = Result.success(fresh.reversed() + current)
+    }
+
     LaunchedEffect(uname) {
         App.instance.messages.collect { newMessages ->
-            newMessages.filter { it.user.uname == uname || it.to?.uname == uname }.forEach { msg ->
-                val current = messagesState?.getOrNull() ?: emptyList()
-                messagesState = Result.success(current + msg)
-            }
+            prepend(newMessages.filter { it.mid == 0 && (it.user.uname == uname || it.to?.uname == uname) })
         }
     }
 
@@ -91,7 +98,7 @@ fun ChatScreen(
             state = listState,
             modifier = Modifier.weight(1f),
         ) {
-            items(messages, key = { it.getTimestamp()?.time ?: it.hashCode() }) { post ->
+            items(messages) { post ->
                 ChatBubble(
                     post = post,
                     isOwn = post.user.uname != uname,
@@ -120,10 +127,14 @@ fun ChatScreen(
                 if (inputText.isNotBlank()) {
                     scope.launch {
                         try {
-                            App.instance.api.postPm(uname, inputText)
+                            prepend(listOf(App.instance.api.postPm(uname, inputText)))
                             inputText = ""
                             focusManager.clearFocus()
-                        } catch (_: Exception) { }
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (_: Exception) {
+                            Toast.makeText(context, R.string.network_error, Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
             }) {
