@@ -17,6 +17,7 @@
 package com.juick.android.ui.screens.feed
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -76,7 +77,7 @@ fun FeedScreen(
     var feedState by remember { mutableStateOf<Result<List<Post>>?>(null) }
     var allPosts by remember { mutableStateOf<List<Post>>(emptyList()) }
     val listState = rememberLazyListState()
-    var isRefreshing by rememberSaveable { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
     var firstPage by rememberSaveable { mutableStateOf(true) }
     var newPostsCount by remember { mutableStateOf(0) }
     var maxMid by remember { mutableStateOf(0) }
@@ -105,9 +106,12 @@ fun FeedScreen(
             try {
                 val posts = withContext(Dispatchers.IO) { App.instance.api.getPosts(apiUrl) }
                 if (firstPage) allPosts = posts
-                else allPosts = allPosts + posts
+                else allPosts = (allPosts + posts).distinctBy { it.mid to it.rid }
                 feedState = Result.success(allPosts)
-            } catch (e: CancellationException) { throw e } catch (e: Exception) { feedState = Result.failure(e) }
+            } catch (e: CancellationException) { throw e } catch (e: Exception) {
+                if (firstPage) feedState = Result.failure(e)
+                else Log.e("FeedScreen", "Failed to load next page", e)
+            }
         }
     }
 
