@@ -17,79 +17,54 @@
 package com.juick.android
 
 import android.Manifest
-import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.ImageView
-import android.widget.Toast
-import androidx.activity.result.ActivityResult
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsCallback
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsServiceConnection
 import androidx.browser.customtabs.CustomTabsSession
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.toBitmap
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.core.content.IntentCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI.onNavDestinationSelected
-import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
-import androidx.navigation.ui.NavigationUI.setupWithNavController
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.badge.BadgeDrawable
-import com.google.android.material.badge.BadgeUtils
-import com.google.android.material.badge.ExperimentalBadgeUtils
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.juick.App
 import com.juick.BuildConfig
 import com.juick.R
 import com.juick.android.SignInActivity.SignInStatus
 import com.juick.android.service.isAuthenticated
+import com.juick.android.ui.AppTheme
+import com.juick.android.ui.navigation.AppNavigation
+import com.juick.android.ui.navigation.Route
 import com.juick.android.updater.Updater
-import com.juick.android.widget.util.loadImage
 import com.juick.api.model.Post
-import com.juick.databinding.ActivityMainBinding
-import com.juick.util.StringUtils
 import kotlinx.coroutines.launch
-import java.io.IOException
 
-/**
- * @author Ugnich Anton
- */
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     val account by viewModels<Account>()
-    private lateinit var model: ActivityMainBinding
     private var notificationManager: NotificationManager? = null
     private lateinit var loginLauncher: ActivityResultLauncher<Intent>
+
     private fun showLogin() {
         if (!App.instance.isAuthenticated) {
             loginLauncher.launch(Intent(this, SignInActivity::class.java))
         }
     }
-
-    private var avatar: Bitmap? = null
-    private lateinit var badge: BadgeDrawable
-    private lateinit var appBarConfiguration: AppBarConfiguration
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private var requestNotificationsPermission = RequestPermission(
@@ -98,255 +73,169 @@ class MainActivity : AppCompatActivity() {
 
     private var browserClient: CustomTabsClient? = null
     private var browserSession: CustomTabsSession? = null
-
-    private var browserSessionSupported = MutableLiveData<Boolean?>(null)
-    private var initialUri: Uri? = null
+    private var customTabsBound = false
+    private var navController: NavHostController? = null
 
     private var browserConnection = object : CustomTabsServiceConnection() {
         override fun onServiceDisconnected(name: ComponentName?) {
             browserClient = null
             browserSession = null
+            customTabsBound = false
         }
-
         override fun onCustomTabsServiceConnected(name: ComponentName, client: CustomTabsClient) {
             client.warmup(0)
             browserSession = client.newSession(CustomTabsCallback())
             browserClient = client
-            browserSessionSupported.value = true
         }
-
     }
 
     private fun bindCustomTabService(context: Context) {
-        // Check for an existing connection
-        if (browserClient != null) {
-            // Do nothing if there is an existing service connection
-            return
-        }
-        // Get the default browser package name, this will be null if
-        // the default browser does not provide a CustomTabsService
+        if (customTabsBound) return
         val packageName = CustomTabsClient.getPackageName(context, null)
         packageName?.let {
-            CustomTabsClient.bindCustomTabsService(context, it, browserConnection)
-        } ?: run {
-            browserSessionSupported.value = false
-            return
+            customTabsBound = CustomTabsClient.bindCustomTabsService(context, it, browserConnection)
         }
     }
 
+    private fun openUri(uri: Uri) {
+        try {
+            val colorScheme = CustomTabColorSchemeParams.Builder()
+                .setToolbarColor(getColor(R.color.colorMainBackground))
+                .build()
+            val builder = CustomTabsIntent.Builder()
+                .setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_SYSTEM, colorScheme)
+                .setSendToExternalDefaultHandlerEnabled(true)
+            browserSession?.let { builder.setSession(it) }
+            builder.build().launchUrl(this, uri)
+        } catch (e: Exception) {
+            openUriFallback(uri)
+        }
+    }
 
-    @ExperimentalBadgeUtils
-    public override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        model = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(model.root)
-        val toolbar = model.toolbar
-        //toolbar.inflateMenu(R.menu.toolbar);
-        setSupportActionBar(toolbar)
+    private fun openUriFallback(uri: Uri) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Cannot open URL: $uri", e)
+        }
+    }
 
-        //CollapsingToolbarLayout layout = model.collapsingToolbarLayout;
-        val navView = model.bottomNav
-        val fab = model.fab
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        appBarConfiguration = AppBarConfiguration.Builder(
-            R.id.home,
-            R.id.discover,
-            R.id.chats,
-            R.id.no_auth,
-            R.id.new_post,
-            R.id.discussions
-        )
-            .build()
-        val navHostFragment = model.navHost.getFragment<NavHostFragment>()
-        val navController = navHostFragment.navController
-        setupActionBarWithNavController(this, navController, appBarConfiguration)
-        //NavigationUI.setupWithNavController(toolbar, navController);
-        setupWithNavController(navView, navController)
-        navController.addOnDestinationChangedListener { _, destination, args ->
-            val id = destination.id
-            var scrollFlags = (AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
-                    or AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS)
-            if (shouldHideNavView(id)) {
-                navView.visibility = View.GONE
-                scrollFlags = 0
-            } else {
-                navView.visibility = View.VISIBLE
+    /**
+     * Opens juick.com links in-app when a screen exists for them, everything else in a browser.
+     */
+    fun processUri(data: Uri) {
+        val nav = navController
+        if (nav == null || data.host != "juick.com") {
+            openUri(data)
+            return
+        }
+        val segments = data.pathSegments
+        when {
+            segments.isEmpty() -> nav.navigate(Route.Home)
+            segments.size == 1 -> nav.navigate(Route.Blog(segments[0]))
+            segments.size == 2 && segments[1].toIntOrNull() != null ->
+                nav.navigate(Route.Thread(segments[1].toInt()))
+            else -> openUri(data)
+        }
+    }
+
+    private fun initNotifications() {
+        if (notificationManager != null || !App.instance.isAuthenticated) return
+        lifecycleScope.launch {
+            if (requestNotificationsPermission()) {
+                notificationManager = NotificationManager()
             }
-            (toolbar.layoutParams as AppBarLayout.LayoutParams).scrollFlags = scrollFlags
-            val fabVisibility = if (shouldViewFab(id)) View.VISIBLE else View.GONE
-            fab.visibility = fabVisibility
-            if (id == R.id.blog) {
-                val uname = args?.getString("uname") ?: ""
-                title = uname.ifEmpty { getString(R.string.Me) }
-                supportActionBar?.title = title
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState != null) {
+            // the restored back stack already reflects the launch intent
+            intent.action = null
+        }
+
+        loginLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                account.refresh()
+                initNotifications()
+            }
+        }
+
+        bindCustomTabService(this)
+
+        account.signInStatus.observe(this) { status ->
+            if (status == SignInStatus.SIGN_IN_PROGRESS) {
+                showLogin()
             }
         }
 
         App.instance.authorizationCallback = {
-            val updatePasswordIntent = Intent(this, SignInActivity::class.java)
-            updatePasswordIntent.putExtra(
-                SignInActivity.EXTRA_ACTION,
-                SignInActivity.ACTION_PASSWORD_UPDATE
-            )
-            loginLauncher.launch(updatePasswordIntent)
-        }
-        loginLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { response: ActivityResult ->
-                if (response.resultCode == RESULT_OK) {
-                    val intent = intent
-                    finish()
-                    startActivity(intent)
-                }
+            val intent = Intent(this, SignInActivity::class.java).apply {
+                putExtra(SignInActivity.EXTRA_ACTION, SignInActivity.ACTION_PASSWORD_UPDATE)
             }
-        model.fab.setOnClickListener {
-            if (App.instance.isAuthenticated) {
-                navController.navigate(R.id.new_post)
-            } else {
-                showLogin()
-            }
+            startActivity(intent)
         }
-        lifecycleScope.launch {
-            if (App.instance.isAuthenticated) {
-                if (requestNotificationsPermission()) {
-                    notificationManager = NotificationManager()
-                }
-                refresh()
-            }
-            if (BuildConfig.ENABLE_UPDATER) {
-                Updater(this@MainActivity)
-                    .checkUpdate()
-            }
-        }
-        account.refresh()
-        account.signInStatus.observe(this) { signInStatus: SignInStatus ->
-            if (signInStatus == SignInStatus.SIGN_IN_PROGRESS) {
-                showLogin()
-            }
-        }
-        badge = BadgeDrawable.create(this)
-        badge.isVisible = false
-        badge.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
-        badge.badgeTextColor = ContextCompat.getColor(this, R.color.colorMainBackground)
-        model.toolbar.viewTreeObserver.addOnGlobalLayoutListener {
-            BadgeUtils.attachBadgeDrawable(
-                badge,
-                model.toolbar,
-                R.id.discussions
-            )
-        }
-        account.profile.observe(this) { user ->
-            when (user) {
-                null -> {
-                    avatar =
-                        ResourcesCompat.getDrawable(resources, R.drawable.av_96, null)!!
-                            .toBitmap()
-                }
 
-                else -> {
-                    val avatarUrl: String = user.avatar
-                    lifecycleScope.launch {
-                        avatar = loadImage(avatarUrl)
-                        invalidateOptionsMenu()
-                    }
-                    if (user.unreadCount > 0) {
-                        badge.isVisible = true
-                        badge.number = user.unreadCount
-                    } else {
-                        badge.isVisible = false
-                    }
-                }
+        account.refresh()
+        initNotifications()
+
+        if (BuildConfig.ENABLE_UPDATER) {
+            lifecycleScope.launch {
+                Updater(this@MainActivity).checkUpdate()
             }
         }
-        bindCustomTabService(this)
-        browserSessionSupported.observe(this) { supported ->
-            when (supported) {
-                null -> {}
-                else -> {
-                    if (supported) {
-                        initialUri?.let {
-                            openUri(it)
+
+        setContent {
+            AppTheme {
+                val navController = rememberNavController()
+                this@MainActivity.navController = navController
+
+                val profile by account.profile.observeAsState()
+                val unreadCount = profile?.unreadCount ?: 0
+
+                val onPostClick: (Post) -> Unit = { post -> navController.navigate(Route.Thread(post.mid)) }
+                val onUserClick: (String) -> Unit = { uname -> navController.navigate(Route.Blog(uname)) }
+                val onLinkClick: (String) -> Unit = { url -> processUri(Uri.parse(url)) }
+                val onSignInClick: () -> Unit = { showLogin() }
+                val onLikeClick: (Post) -> Unit = { post ->
+                    lifecycleScope.launch {
+                        try { App.instance.api.like(post.mid); account.refresh() } catch (e: Exception) {
+                            Log.e("MainActivity", "like failed", e)
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private fun shouldHideNavView(view: Int): Boolean {
-        when (view) {
-            R.id.thread, R.id.PMFragment, R.id.new_post, R.id.tags -> return true
-        }
-        return false
-    }
-
-    private fun shouldViewFab(view: Int): Boolean {
-        return view == R.id.home || view == R.id.discover
-    }
-
-    override fun onResume() {
-        super.onResume()
-        notificationManager?.onResume()
-        val intent = intent
-        val action = StringUtils.defaultString(intent.action)
-        if (action == BuildConfig.INTENT_NEW_EVENT_ACTION) {
-            intent.action = ""
-            val msg = intent.getStringExtra(getString(R.string.notification_extra)) ?: ""
-            try {
-                val jmsg = App.instance.jsonMapper.decodeFromString<Post>(msg)
-                if (jmsg.user.uid == 0) {
-                    setTitle(R.string.Discussions)
-                    //replaceFragment(FeedBuilder.feedFor(UrlBuilder.getDiscussions()));
-                } else {
-                    if (jmsg.mid == 0) {
-                        val navHostFragment = model.navHost.getFragment<NavHostFragment>()
-                        val navController = navHostFragment.navController
-                        navController.popBackStack(R.id.chats, true)
-                        navController.navigate(R.id.chats)
-                        val chatAction = Bundle()
-                        chatAction.putString("uname", jmsg.user.uname)
-                        chatAction.putInt("uid", jmsg.user.uid)
-                        navController.navigate(R.id.PMFragment, chatAction)
-                    } else {
-                        val navHostFragment = model.navHost.getFragment<NavHostFragment>()
-                        val navController = navHostFragment.navController
-                        navController.popBackStack(R.id.home, false)
-                        val discoverAction = Bundle()
-                        discoverAction.putInt("mid", jmsg.mid)
-                        discoverAction.putBoolean("scrollToEnd", true)
-                        navController.navigate(R.id.thread, discoverAction)
-                    }
+                val onMenuClick: (Post) -> Unit = { }
+                val onFabClick: () -> Unit = {
+                    if (App.instance.isAuthenticated) navController.navigate(Route.NewPost()) else showLogin()
                 }
-            } catch (e: IOException) {
-                Log.d(this.javaClass.simpleName, "Invalid JSON data", e)
+
+                AppNavigation(navController, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onSignInClick, onFabClick, profile, unreadCount, App.instance.isAuthenticated)
+
+                // onResume runs before the first composition, so a cold-start intent is handled here
+                LaunchedEffect(Unit) { handleIntent() }
             }
-        }
-        if (action == Intent.ACTION_SEND) {
-            val mime = intent.type
-            val extras = intent.extras as Bundle
-            val postArgs = Bundle()
-            if (mime == "text/plain") {
-                postArgs.putString("text", extras.getString(Intent.EXTRA_TEXT))
-            } else {
-                postArgs.putString("uri", extras.getString(Intent.EXTRA_STREAM))
-            }
-            val navHostFragment = model.navHost.getFragment<NavHostFragment>()
-            val navController = navHostFragment.navController
-            navController.navigate(R.id.new_post, postArgs)
-            intent.action = ""
-        }
-        if (action == Intent.ACTION_VIEW) {
-            intent.setFlags(0)
-            intent.data?.let {
-                processUri(it)
-            }
-            intent.action = ""
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        notificationManager?.onPause()
+    private fun handleIntent() {
+        val nav = navController ?: return
+        val intent = intent
+        when (intent.action) {
+            Intent.ACTION_VIEW -> intent.data?.let { processUri(it) }
+            Intent.ACTION_SEND -> {
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                val stream = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+                if (!text.isNullOrEmpty() || stream != null) {
+                    nav.navigate(Route.NewPost(text = text, uri = stream?.toString()))
+                }
+            }
+            BuildConfig.INTENT_NEW_EVENT_ACTION -> handleNewEventIntent(nav, intent)
+            else -> return
+        }
+        intent.action = null
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -354,135 +243,39 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.toolbar, menu)
-        val searchView = menu.findItem(R.id.action_search).actionView as SearchView
-        searchView.isSubmitButtonEnabled = true
-        searchView.setOnQueryTextListener(object : OnQueryTextListener {
-            override fun onQueryTextSubmit(s: String): Boolean {
-                model.toolbar.collapseActionView()
-                val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
-                val navController = navHostFragment.navController
-                val args = Bundle()
-                args.putString("search", s)
-                navController.navigate(R.id.search, args)
-                return true
-            }
-
-            override fun onQueryTextChange(s: String): Boolean {
-                return true
-            }
-        })
-        val profileItem = menu.findItem(R.id.blog)
-        account.profile.value?.let {
-            profileItem.isVisible = it.uid > 0
-            if (profileItem.isVisible) {
-                profileItem.actionView?.setOnClickListener {
-                    onOptionsItemSelected(profileItem)
-                }
-            }
-        }
-        if (avatar != null) {
-            profileItem.actionView?.findViewById<ImageView>(R.id.profile_image)
-                ?.setImageBitmap(avatar)
-        }
-        val discussionsItem = menu.findItem(R.id.discussions)
-        if (discussionsItem != null) {
-            discussionsItem.actionView?.setOnClickListener {
-                onOptionsItemSelected(discussionsItem)
-            }
-        }
-        return super.onCreateOptionsMenu(menu)
+    override fun onResume() {
+        super.onResume()
+        notificationManager?.onResume()
+        account.refresh()
+        handleIntent()
     }
 
-    fun processUri(data: Uri) {
-        if (data.host == "juick.com") {
-            val pathSegments = data.pathSegments
-            val navHostFragment = model.navHost.getFragment<Fragment>() as NavHostFragment
-            val navController = navHostFragment.navController
-            when (pathSegments.size) {
-                0 -> {
-                    navController.navigate(R.id.home)
-                }
-                1 -> {
-                    openUri(data)
-                }
-
-                2 -> {
-                    // thread
-                    val threadId = pathSegments[1].toIntOrNull() ?: 0
-                    if (threadId > 0) {
-                        val args = Bundle()
-                        args.putInt("mid", threadId)
-                        navController.popBackStack(R.id.home, false)
-                        navController.navigate(R.id.thread, args)
-                    } else {
-                        // e.g. /i/video.mp4
-                        openUri(data)
-                    }
-                }
-
-                else ->
-                    if (pathSegments[0] == "i") {
-                        // images (/i/p/1.jpg)
-                        openUri(data)
-                    } else {
-                        // discover
-                        navController.navigate(R.id.home)
-                    }
-            }
-        } else {
-            openUri(data)
-        }
+    override fun onPause() {
+        notificationManager?.onPause()
+        super.onPause()
     }
 
-    private fun openUri(uri: Uri) {
-        val handleDeepLinks = uri.host == "juick.com"
-        browserSession?.let {
-            val intent = CustomTabsIntent.Builder()
-                .setSession(it)
-                .setSendToExternalDefaultHandlerEnabled(handleDeepLinks)
-                .setDefaultColorSchemeParams(
-                    CustomTabColorSchemeParams.Builder().setToolbarColor(
-                        ResourcesCompat.getColor(
-                            resources, R.color.colorMainBackground, null
-                        )
-                    ).build()
-                ).build()
-            try {
-                intent.launchUrl(this, uri)
-            } catch (e: ActivityNotFoundException) {
-                Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
-            }
-        } ?: run {
-            if (browserSessionSupported.value == true) {
-                initialUri = uri
-            } else {
-                openUriFallback(uri)
-            }
-        }
-    }
-
-    private fun openUriFallback(uri: Uri) {
+    private fun handleNewEventIntent(nav: NavHostController, intent: Intent) {
+        val msg = intent.getStringExtra(getString(R.string.notification_extra)) ?: return
         try {
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            startActivity(intent)
-        } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
+            val post = App.instance.jsonMapper.decodeFromString<Post>(msg)
+            when {
+                post.user.uid == 0 -> nav.navigate(Route.Discussions)
+                post.mid == 0 -> nav.navigate(Route.Chat(post.user.uname, post.user.uid))
+                else -> nav.navigate(Route.Thread(post.mid, scrollToEnd = true))
+            }
+        } catch (e: Exception) {
+            Log.d("MainActivity", "Invalid notification data", e)
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navHostFragment = model.navHost.getFragment<NavHostFragment>()
-        val navController = navHostFragment.navController
-        return navController.navigateUp() || super.onSupportNavigateUp()
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val navHostFragment = model.navHost.getFragment<NavHostFragment>()
-        val navController = navHostFragment.navController
-        return (onNavDestinationSelected(item, navController)
-                || super.onOptionsItemSelected(item))
+    override fun onDestroy() {
+        if (customTabsBound) {
+            unbindService(browserConnection)
+            customTabsBound = false
+        }
+        browserClient = null
+        browserSession = null
+        super.onDestroy()
     }
 }

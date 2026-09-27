@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024, Juick
+ * Copyright (C) 2008-2026, Juick
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -17,15 +17,10 @@
 
 package com.juick.android.testing
 
-import android.text.style.ClickableSpan
-import android.text.style.QuoteSpan
-import androidx.core.text.getSpans
-import androidx.core.text.toSpanned
-import androidx.test.core.app.launchActivity
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
@@ -34,13 +29,14 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.juick.App
-import com.juick.R
 import com.juick.android.MainActivity
 import com.juick.android.NotificationSender
-import com.juick.android.screens.FeedAdapter
+import com.juick.android.ui.screens.feed.formatPostText
 import com.juick.api.model.Post
+import com.juick.api.model.User
 import com.juick.util.getString
 import org.junit.Assume.assumeTrue
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -48,13 +44,14 @@ import org.junit.runner.RunWith
 @LargeTest
 internal class UITest {
 
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<MainActivity>()
+
     @Test
     fun isDisplayed_MainActivity() {
-        launchActivity<MainActivity>().use {
-            onView(withId(R.id.main_layout))
-                .check(matches(isDisplayed()))
-        }
+        composeTestRule.onRoot().assertExists()
     }
+
     @Test
     fun isCorrectNotification_NotificationSender() {
         val notificationData = this.javaClass.getResourceAsStream("/test_notification.json")
@@ -69,14 +66,31 @@ internal class UITest {
 
     @Test
     fun formatMessage_spans() {
-        val msg = "> quote\n> quote 2\n" +
-                "text [link](http://ya.ru)"
-        val post = Post.empty()
-        post.tags = arrayListOf("tag")
-        post.setBody(msg)
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        val formatted = FeedAdapter.formatMessageText(appContext, post).toSpanned()
-        assertThat(formatted.getSpans<QuoteSpan>().size).isEqualTo(1)
-        assertThat(formatted.getSpans<ClickableSpan>().size).isEqualTo(2)
+        val post = Post(User(0, "test")).apply {
+            tags = arrayListOf("tag")
+            setBody("> quote\n> quote 2\ntext link")
+            entities = listOf(
+                Post.Entity(2, 7, "quote", "q"),
+                Post.Entity(10, 15, "quote 2", "q"),
+                Post.Entity(21, 25, "link", "a", "http://ya.ru"),
+            )
+        }
+        val primary = Color(0xFF2A6090)
+        val dimmed = Color(0xFF6D6D6D)
+        val onSurface = Color(0xFF222222)
+        val quote = Color(0xFF666666)
+        val formatted = formatPostText(post, primary, dimmed, onSurface, quote)
+
+        assertThat(formatted.text).contains("quote")
+        assertThat(formatted.text).contains("link")
+        assertThat(formatted.text).contains("#tag")
+
+        val linkStart = formatted.text.indexOf("link")
+        val hasLinkStyle = formatted.spanStyles.any { it.start <= linkStart && it.end >= linkStart + 4 && it.item.color == primary }
+        assertThat(hasLinkStyle).isTrue()
+
+        val quoteStart = formatted.text.indexOf("quote")
+        val hasQuoteStyle = formatted.spanStyles.any { it.start <= quoteStart && it.end >= quoteStart + 5 && it.item.color == quote }
+        assertThat(hasQuoteStyle).isTrue()
     }
 }
