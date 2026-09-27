@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -72,10 +73,12 @@ fun AppNavigation(
 ) {
     var pendingTag by remember { mutableStateOf<String?>(null) }
 
+    var wasAuthenticated by rememberSaveable { mutableStateOf(isAuthenticated) }
     LaunchedEffect(isAuthenticated) {
-        if (isAuthenticated) {
+        if (isAuthenticated && !wasAuthenticated) {
             navController.navigate(Route.Home) { popUpTo(0) { inclusive = true } }
         }
+        wasAuthenticated = isAuthenticated
     }
 
     NavHost(navController = navController, startDestination = if (isAuthenticated) Route.Home else Route.Public) {
@@ -134,12 +137,6 @@ fun AppNavigation(
         composable<Route.Chat> { entry ->
             val route = entry.toRoute<Route.Chat>()
             ChatScreen(route.uname, onUserClick, onLinkClick, onBack = { navController.popBackStack() })
-        }
-
-        composable<Route.Search> {
-            AppScaffold(navController, currentProfile, unreadCount, onSignInClick, onFabClick) {
-                SearchScreen(onSearch = { query -> navController.navigate(Route.Search(query)) { popUpTo<Route.Search> { inclusive = true } } })
-            }
         }
 
         composable<Route.Search> { entry ->
