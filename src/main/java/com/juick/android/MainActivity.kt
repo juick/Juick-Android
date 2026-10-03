@@ -142,6 +142,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun onSignedIn() {
+        account.refresh(force = true)
+        navController?.navigate(Route.Home) { popUpTo(0) { inclusive = true } }
+    }
+
     private fun initNotifications() {
         if (notificationManager != null || !App.instance.isAuthenticated) return
         lifecycleScope.launch {
@@ -162,7 +167,7 @@ class MainActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == RESULT_OK) {
-                account.refresh(force = true)
+                onSignedIn()
                 initNotifications()
             }
         }
@@ -172,7 +177,7 @@ class MainActivity : ComponentActivity() {
         ) { result ->
             passwordUpdateShown.set(false)
             if (result.resultCode == RESULT_OK) {
-                account.refresh(force = true)
+                onSignedIn()
             }
         }
 
