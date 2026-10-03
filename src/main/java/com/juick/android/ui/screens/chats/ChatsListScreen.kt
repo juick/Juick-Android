@@ -16,11 +16,18 @@
  */
 package com.juick.android.ui.screens.chats
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import com.juick.android.ui.JuickTheme
+import java.text.SimpleDateFormat
+import java.util.Locale
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
@@ -68,9 +75,7 @@ fun ChatsListScreen(
     ) {
         when (val result = chatsState) {
             null -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+                LinearProgressIndicator(Modifier.fillMaxWidth())
             }
 
             else -> {
@@ -110,33 +115,46 @@ private fun ChatListItem(
     chat: Chat,
     onClick: () -> Unit,
 ) {
+    val colors = JuickTheme.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .clickable { onClick() },
     ) {
         AsyncImage(
             model = chat.dialogPhoto,
             contentDescription = null,
             modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape),
+                .padding(16.dp)
+                .size(56.dp)
+                .clip(RoundedCornerShape(30)),
             contentScale = ContentScale.Crop,
         )
-        Spacer(Modifier.width(12.dp))
-        Column {
-            Text(
-                text = chat.dialogName,
-                style = MaterialTheme.typography.titleSmall,
-            )
+        Column(Modifier.weight(1f)) {
+            Row(Modifier.padding(top = 16.dp, end = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = chat.dialogName,
+                    fontSize = 16.sp,
+                    color = colors.text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                chat.getLastMessage().getTimestamp()?.let {
+                    Text(timeFormat.format(it), fontSize = 16.sp, color = colors.darkerGray)
+                }
+            }
             Text(
                 text = chat.getLastMessage().getBody() ?: "",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 16.sp,
+                color = colors.darkerGray,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 2.dp, end = 16.dp, bottom = 16.dp),
             )
+            Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFE0E0E0)))
         }
     }
 }
+
+private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())

@@ -17,29 +17,31 @@
 package com.juick.android.ui.screens.feed
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.juick.App
 import com.juick.R
 import com.juick.android.Utils
+import com.juick.android.ui.JuickTheme
 import com.juick.android.ui.widget.rememberImagePicker
 import com.juick.api.model.User
 import kotlinx.coroutines.CancellationException
@@ -102,42 +104,53 @@ fun ProfileHeader(
         }
     }
 
+    val colors = JuickTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .background(colors.textBackground)
+            .padding(32.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val ownAvatar = currentUser?.avatar.orEmpty()
-        val avatar = if (isOwnBlog && ownAvatar.isNotEmpty()) ownAvatar else blogAvatar
-        AsyncImage(
-            model = if (avatar != null && avatarVersion > 0) "$avatar?v=$avatarVersion" else avatar,
-            contentDescription = null,
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop,
-        )
-        Spacer(Modifier.width(16.dp))
+        Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            val ownAvatar = currentUser?.avatar.orEmpty()
+            val avatar = if (isOwnBlog && ownAvatar.isNotEmpty()) ownAvatar else blogAvatar
+            AsyncImage(
+                model = if (avatar != null && avatarVersion > 0) "$avatar?v=$avatarVersion" else avatar,
+                contentDescription = stringResource(R.string.Juick_profile),
+                placeholder = painterResource(R.drawable.av_96),
+                error = painterResource(R.drawable.av_96),
+                modifier = Modifier.size(48.dp),
+                contentScale = ContentScale.Crop,
+            )
+            if (isOwnBlog) {
+                TextButton(
+                    onClick = { imagePicker.pick() },
+                    contentPadding = PaddingValues(horizontal = 4.dp),
+                ) {
+                    Icon(painterResource(R.drawable.ic_ei_pencil), null, Modifier.size(18.dp), tint = colors.accent)
+                    Spacer(Modifier.width(2.dp))
+                    Text(stringResource(R.string.avatar_change).uppercase(), fontSize = 12.sp, color = colors.accent)
+                }
+            }
+        }
         Column(Modifier.weight(1f)) {
             Text(
-                text = "@$uname",
-                style = MaterialTheme.typography.titleLarge,
+                text = uname,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = colors.text,
             )
             Text(
                 text = stringResource(R.string.blog),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 14.sp,
+                color = colors.dimmed,
             )
         }
-        if (isOwnBlog) {
-            IconButton(onClick = { imagePicker.pick() }) {
-                Icon(Icons.Default.Edit, null)
-            }
-        } else if (signedIn && currentUser != null) {
-            Box {
-                IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Default.MoreVert, null)
+        if (!isOwnBlog && signedIn && currentUser != null) {
+            Box(Modifier.padding(start = 16.dp)) {
+                IconButton(onClick = { menuExpanded = true }, modifier = Modifier.size(36.dp)) {
+                    Icon(Icons.Default.MoreVert, stringResource(R.string.context_menu), tint = colors.text)
                 }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                     DropdownMenuItem(

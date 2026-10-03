@@ -111,17 +111,17 @@ fun AppNavigation(
             }
         }
         composable<Route.Home> { entry ->
-            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+            AppScaffold(navController, profile, unread, "Home", onFabClick, showFab = true) {
                 FeedScreen(Uris.home, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid())
             }
         }
         composable<Route.Discover> { entry ->
-            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+            AppScaffold(navController, profile, unread, "Discover", onFabClick, showFab = true) {
                 FeedScreen(Uris.last, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid())
             }
         }
         composable<Route.Chats> {
-            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+            AppScaffold(navController, profile, unread, "Chats", onFabClick) {
                 ChatsListScreen(
                     onChatClick = { chat -> navController.navigate(Route.Chat(chat.dialogName, chat.uid)) },
                     onNavigateToAuth = { navController.navigate(Route.NoAuth) },
@@ -129,7 +129,7 @@ fun AppNavigation(
             }
         }
         composable<Route.Discussions> { entry ->
-            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+            AppScaffold(navController, profile, unread, "Discussions", onFabClick) {
                 FeedScreen(Uris.discussions, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid())
             }
         }
@@ -146,31 +146,37 @@ fun AppNavigation(
 
         composable<Route.Blog> { entry ->
             val uname = entry.toRoute<Route.Blog>().uname
-            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+            AppScaffold(navController, profile, unread, if (uname == profile?.uname) stringResource(R.string.Me) else uname, onFabClick, showBack = true) {
                 FeedScreen(Uris.getUserPostsByName(uname), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid(), showProfileHeader = true, profileHeader = { ProfileHeader(uname = uname, currentUser = profile, onProfileChanged = onProfileChanged) })
             }
         }
 
         composable<Route.Chat> { entry ->
             val route = entry.toRoute<Route.Chat>()
-            ChatScreen(route.uname, onUserClick, onLinkClick, onBack = { navController.popBackStack() })
+            AppScaffold(navController, profile, unread, route.uname, onFabClick, showBack = true, showBottomBar = false) {
+                ChatScreen(route.uname, onUserClick, onLinkClick)
+            }
         }
 
         composable<Route.Search> { entry ->
             val query = entry.toRoute<Route.Search>().query
-            AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
+            AppScaffold(navController, profile, unread, query.orEmpty(), onFabClick, showBack = true) {
                 if (query != null) FeedScreen(Uris.search(query), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid())
                 else SearchScreen(onSearch = { q -> navController.navigate(Route.Search(q)) { popUpTo<Route.Search> { inclusive = true } } })
             }
         }
 
         composable<Route.NoAuth> {
-            NoAuthScreen(onSignInClick = { navController.popBackStack(); onSignInClick() })
+            AppScaffold(navController, profile, unread, "Chats", onFabClick) {
+                NoAuthScreen(onSignInClick = { navController.popBackStack(); onSignInClick() })
+            }
         }
 
         composable<Route.NewPost> { entry ->
             val route = entry.toRoute<Route.NewPost>()
-            NewPostScreen(initialText = route.text, initialAttachment = route.uri?.toUri(), pendingTag = pendingTag, onTagConsumed = { pendingTag = null }, onTagsClick = { navController.navigate(Route.Tags) }, onNavigateToThread = { mid -> navController.popBackStack<Route.NewPost>(inclusive = true); navController.navigate(Route.Thread(mid)) }, onDismiss = { navController.popBackStack() })
+            AppScaffold(navController, profile, unread, stringResource(R.string.New_message), onFabClick, showBottomBar = false) {
+                NewPostScreen(initialText = route.text, initialAttachment = route.uri?.toUri(), pendingTag = pendingTag, onTagConsumed = { pendingTag = null }, onTagsClick = { navController.navigate(Route.Tags) }, onNavigateToThread = { mid -> navController.popBackStack<Route.NewPost>(inclusive = true); navController.navigate(Route.Thread(mid)) })
+            }
         }
 
         dialog<Route.Tags> {

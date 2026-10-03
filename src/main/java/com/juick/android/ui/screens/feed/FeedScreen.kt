@@ -27,11 +27,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -46,8 +45,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.juick.App
+import com.juick.R
+import com.juick.android.ui.JuickTheme
 import com.juick.android.Utils
 import com.juick.android.Utils.replaceUriParameter
 import com.juick.api.model.Post
@@ -167,29 +170,14 @@ fun FeedScreen(
         when (val result = feedState) {
             null -> {
                 if (firstPage) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+                    LinearProgressIndicator(Modifier.fillMaxWidth().align(Alignment.TopCenter))
                 }
             }
 
             else -> {
                 result.fold(
                     onSuccess = { posts ->
-                        LazyColumn(state = listState) {
-                            if (newPostsCount > 0 && !firstPage) {
-                                item(key = "new_posts") {
-                                    Button(onClick = {
-                                        newPostsCount = 0
-                                        isRefreshing = true
-                                        firstPage = true
-                                        apiUrl = Utils.buildUrl(initialUrl).build().replaceUriParameter("before_mid", "").replaceUriParameter("ts", "${System.currentTimeMillis()}")
-                                        scope.launch { listState.animateScrollToItem(0) }
-                                    }, modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                                        Text("$newPostsCount new posts")
-                                    }
-                                }
-                            }
+                        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                             if (showProfileHeader) {
                                 item(key = "profile_header") {
                                     profileHeader()
@@ -199,31 +187,34 @@ fun FeedScreen(
                                 items = posts,
                                 key = { post -> "post_${post.mid}_${post.rid}" },
                             ) { post ->
-                                if (post.rid == 0) {
-                                    PostCard(
-                                        post = post,
-                                        onPostClick = { onPostClick(post) },
-                                        onUserClick = { onUserClick(post.user.uname) },
-                                        onMenuClick = { onMenuClick(post) },
-                                        onLikeClick = { onLikeClick(post) },
-                                        onLinkClick = onLinkClick,
-                                        currentUid = currentUser?.uid ?: 0,
-                                        isPremiumOrAdmin = currentUser?.premium == true || currentUser?.admin == true,
-                                        onDeletePost = { removePost(post.mid, post.rid) },
-                                        modifier = Modifier.padding(vertical = 4.dp).padding(horizontal = 12.dp),
-                                    )
-                                } else {
-                                    ReplyCard(
-                                        post = post,
-                                        onPostClick = { onPostClick(post) },
-                                        onUserClick = { onUserClick(post.user.uname) },
-                                        onMenuClick = { onMenuClick(post) },
-                                        onLikeClick = { onLikeClick(post) },
-                                        onLinkClick = onLinkClick,
-                                        modifier = Modifier.padding(vertical = 4.dp).padding(horizontal = 12.dp),
-                                    )
-                                }
+                                PostCard(
+                                    post = post,
+                                    onPostClick = { onPostClick(post) },
+                                    onUserClick = { onUserClick(post.user.uname) },
+                                    onMenuClick = { onMenuClick(post) },
+                                    onLikeClick = { onLikeClick(post) },
+                                    onLinkClick = onLinkClick,
+                                    currentUid = currentUser?.uid ?: 0,
+                                    isPremiumOrAdmin = currentUser?.premium == true || currentUser?.admin == true,
+                                    onDeletePost = { removePost(post.mid, post.rid) },
+                                )
                             }
+                        }
+                        if (newPostsCount > 0) {
+                            ExtendedFloatingActionButton(
+                                onClick = {
+                                    newPostsCount = 0
+                                    isRefreshing = true
+                                    firstPage = true
+                                    apiUrl = Utils.buildUrl(initialUrl).build().replaceUriParameter("before_mid", "").replaceUriParameter("ts", "${System.currentTimeMillis()}")
+                                    scope.launch { listState.animateScrollToItem(0) }
+                                },
+                                icon = { Icon(painterResource(R.drawable.ei_arrow_up), null) },
+                                text = { Text(stringResource(R.string.feed_new_messages)) },
+                                containerColor = JuickTheme.colors.accent,
+                                contentColor = JuickTheme.colors.textBackground,
+                                modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp),
+                            )
                         }
                     },
                     onFailure = {
@@ -231,8 +222,8 @@ fun FeedScreen(
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Text(
                                     text = it.message ?: "Error",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.error,
+                                    color = JuickTheme.colors.text,
+                                    modifier = Modifier.padding(16.dp),
                                 )
                             }
                         }
@@ -240,39 +231,5 @@ fun FeedScreen(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun ReplyCard(
-    post: Post,
-    onPostClick: () -> Unit,
-    onUserClick: () -> Unit,
-    onMenuClick: () -> Unit,
-    onLikeClick: () -> Unit,
-    onLinkClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    
-    
-    Column(modifier = modifier) {
-        val replyTo = post.to
-        if (replyTo != null) {
-            Text(
-                text = "↳ ${replyTo.uname}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 16.dp),
-            )
-        }
-        PostCard(
-            post = post,
-            onPostClick = onPostClick,
-            onUserClick = onUserClick,
-            onMenuClick = onMenuClick,
-            onLikeClick = onLikeClick,
-            onLinkClick = onLinkClick,
-            modifier = Modifier.padding(start = 16.dp),
-        )
     }
 }

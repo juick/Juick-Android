@@ -77,7 +77,8 @@ fun formatPostText(
     val p = processBody(post)
     return buildAnnotatedString {
         for (tag in post.tags) {
-            withStyle(SpanStyle(color = dimmedColor)) { append("#$tag ") }
+            withStyle(linkStyle(dimmedColor)) { append("#$tag") }
+            append(" ")
         }
         var pos = 0
         for (i in p.entityStart.indices) {
@@ -132,7 +133,7 @@ fun formatPostBlocks(
 
     if (all.isNotEmpty() && all[0].type == "q") {
         val tBuilder = buildAnnotatedString {
-            for (tag in post.tags) withStyle(SpanStyle(color = dimmedColor)) { append("#$tag ") }
+            for (tag in post.tags) { withStyle(linkStyle(dimmedColor)) { append("#$tag") }; append(" ") }
         }
         if (post.tags.isNotEmpty()) blocks.add(TextBlock.Regular(tBuilder, emptyList()))
         tagsRendered = true
@@ -157,7 +158,7 @@ fun formatPostBlocks(
         } else {
             val rBuilder = buildAnnotatedString {
                 if (!tagsRendered) {
-                    for (tag in post.tags) withStyle(SpanStyle(color = dimmedColor)) { append("#$tag ") }
+                    for (tag in post.tags) { withStyle(linkStyle(dimmedColor)) { append("#$tag") }; append(" ") }
                     tagsRendered = true
                 }
                 while (i < all.size && all[i].type != "q") {
@@ -180,14 +181,16 @@ fun formatPostBlocks(
         }
     }
     if (blocks.isEmpty() && post.tags.isNotEmpty()) {
-        val t = buildAnnotatedString { for (tag in post.tags) withStyle(SpanStyle(color = dimmedColor)) { append("#$tag ") } }
+        val t = buildAnnotatedString { for (tag in post.tags) { withStyle(linkStyle(dimmedColor)) { append("#$tag") }; append(" ") } }
         blocks.add(TextBlock.Regular(t, emptyList()))
     }
     return blocks
 }
 
+private fun linkStyle(color: Color) = SpanStyle(color = color, textDecoration = TextDecoration.Underline)
+
 private fun entityStyle(type: String, primary: Color, dimmed: Color, onSurface: Color, quote: Color = dimmed): SpanStyle = when (type) {
-    "a" -> SpanStyle(color = primary)
+    "a" -> linkStyle(primary)
     "q" -> SpanStyle(color = quote)
     "b" -> SpanStyle(fontWeight = FontWeight.Bold)
     "i" -> SpanStyle(fontStyle = FontStyle.Italic)
@@ -210,8 +213,10 @@ fun buildUrlPositions(post: Post): List<UrlPosition> {
 }
 
 sealed class TextBlock {
-    data class Regular(val annotatedString: AnnotatedString, val urlPositions: List<UrlPosition>) : TextBlock()
-    data class Quote(val annotatedString: AnnotatedString, val urlPositions: List<UrlPosition>) : TextBlock()
+    abstract val annotatedString: AnnotatedString
+    abstract val urlPositions: List<UrlPosition>
+    data class Regular(override val annotatedString: AnnotatedString, override val urlPositions: List<UrlPosition>) : TextBlock()
+    data class Quote(override val annotatedString: AnnotatedString, override val urlPositions: List<UrlPosition>) : TextBlock()
 }
 
 data class UrlPosition(val start: Int, val end: Int, val url: String)

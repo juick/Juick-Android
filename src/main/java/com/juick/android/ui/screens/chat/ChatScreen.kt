@@ -17,25 +17,36 @@
 package com.juick.android.ui.screens.chat
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.core.text.getSpans
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.juick.App
 import com.juick.R
+import com.juick.android.ui.JuickTheme
+import java.text.SimpleDateFormat
+import java.util.Locale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
@@ -52,7 +63,6 @@ fun ChatScreen(
     uname: String,
     onUserClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
-    onBack: () -> Unit = {},
 ) {
     var messagesState by remember { mutableStateOf<Result<List<Post>>?>(null) }
     val messages = (messagesState?.getOrNull() ?: emptyList()).reversed()
@@ -86,24 +96,31 @@ fun ChatScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("@$uname") },
-            navigationIcon = {
-                IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, stringResource(R.string.Cancel)) }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
-        )
+    val colors = JuickTheme.colors
+    Column(modifier = Modifier.fillMaxSize().background(colors.mainBackground)) {
         LazyColumn(
             state = listState,
             modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(vertical = 8.dp),
         ) {
-            items(messages) { post ->
+            itemsIndexed(messages) { index, post ->
+                val day = post.getTimestamp()?.let { dayFormat.format(it) }
+                val previousDay = messages.getOrNull(index - 1)?.getTimestamp()?.let { dayFormat.format(it) }
+                if (day != null && day != previousDay) {
+                    Text(
+                        day,
+                        fontSize = 16.sp,
+                        color = colors.darkerGray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    )
+                }
                 ChatBubble(
                     post = post,
                     isOwn = post.user.uname != uname,
                     onLinkClick = onLinkClick,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                    onUserClick = onUserClick,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                 )
             }
         }
@@ -112,18 +129,38 @@ fun ChatScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime).only(WindowInsetsSides.Bottom))
-                .padding(8.dp),
-            verticalAlignment = Alignment.Bottom,
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            OutlinedTextField(
+            TextField(
                 value = inputText,
                 onValueChange = { inputText = it },
-                placeholder = { Text(stringResource(R.string.Enter_a_message)) },
+                placeholder = { Text(stringResource(R.string.Enter_a_message), color = colors.darkerGray) },
                 modifier = Modifier.weight(1f),
                 maxLines = 3,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    cursorColor = colors.accent,
+                    focusedTextColor = colors.text,
+                    unfocusedTextColor = colors.text,
+                ),
             )
             Spacer(Modifier.width(8.dp))
-            IconButton(onClick = {
+            val canSend = inputText.isNotBlank()
+            IconButton(
+                enabled = canSend,
+                modifier = Modifier.size(40.dp),
+                shape = RoundedCornerShape(30),
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = colors.accent,
+                    contentColor = Color.White,
+                    disabledContainerColor = Color(0xFFDDDDDD),
+                    disabledContentColor = Color(0xFF888888),
+                ),
+                onClick = {
                 if (inputText.isNotBlank()) {
                     scope.launch {
                         try {
@@ -138,23 +175,28 @@ fun ChatScreen(
                     }
                 }
             }) {
-                Icon(Icons.Default.Send, stringResource(R.string.Send))
+                Icon(Icons.AutoMirrored.Filled.Send, stringResource(R.string.Send), Modifier.size(20.dp))
             }
         }
     }
 }
+
+private val dayFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
+private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
 @Composable
 fun ChatBubble(
     post: Post,
     isOwn: Boolean,
     onLinkClick: (String) -> Unit,
+    onUserClick: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val colors = MaterialTheme.colorScheme
-    val bgColor = if (isOwn) colors.primary else colors.surfaceVariant
-    val textColor = if (isOwn) colors.onPrimary else colors.onSurfaceVariant
-    val alignment = if (isOwn) Alignment.End else Alignment.Start
+    val juick = JuickTheme.colors
+    val bgColor = if (isOwn) juick.accent else juick.textBackground
+    val textColor = if (isOwn) Color.White else juick.text
+    val timeColor = if (isOwn) Color.White.copy(alpha = 0.6f) else juick.darkerGray
+    val shape = if (isOwn) RoundedCornerShape(20.dp, 20.dp, 0.dp, 20.dp) else RoundedCornerShape(20.dp, 20.dp, 20.dp, 0.dp)
 
     val (annotatedText, urlPositions) = remember(post) {
         val body = post.getBody() ?: ""
@@ -166,30 +208,44 @@ fun ChatBubble(
         }
         val annotString = buildAnnotatedString {
             append(body)
-            for (url in urls) addStyle(SpanStyle(color = if (isOwn) colors.onPrimary else colors.primary, textDecoration = TextDecoration.Underline), url.start, url.end)
+            for (url in urls) addStyle(SpanStyle(color = if (isOwn) Color.White else juick.primary, textDecoration = TextDecoration.Underline), url.start, url.end)
         }
         annotString to urls
     }
 
-    Column(
+    Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = alignment,
+        horizontalArrangement = if (isOwn) Arrangement.End else Arrangement.Start,
+        verticalAlignment = Alignment.Bottom,
     ) {
-        Surface(
-            shape = MaterialTheme.shapes.medium,
-            color = bgColor,
-            modifier = Modifier.widthIn(max = 280.dp),
+        if (isOwn) {
+            Spacer(Modifier.width(64.dp))
+        } else {
+            AsyncImage(
+                post.user.avatar, null,
+                Modifier.size(40.dp).clip(RoundedCornerShape(4.dp)).clickable { onUserClick(post.user.uname) },
+                contentScale = ContentScale.Crop,
+            )
+            Spacer(Modifier.width(8.dp))
+        }
+        Row(
+            modifier = Modifier.weight(1f, fill = false).clip(shape).background(bgColor).padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.Bottom,
         ) {
             ClickableText(
                 text = annotatedText,
                 style = MaterialTheme.typography.bodyMedium.copy(color = textColor),
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.weight(1f, fill = false),
                 onClick = { offset ->
                     urlPositions
                         .firstOrNull { it.start <= offset && offset < it.end }
                         ?.let { onLinkClick(it.url) }
                 },
             )
+            post.getTimestamp()?.let {
+                Text(timeFormat.format(it), style = MaterialTheme.typography.bodyMedium, color = timeColor, modifier = Modifier.padding(start = 8.dp))
+            }
         }
+        if (!isOwn) Spacer(Modifier.width(64.dp))
     }
 }

@@ -18,20 +18,27 @@ package com.juick.android.ui.screens.post
 
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.juick.App
 import com.juick.R
+import com.juick.android.ui.JuickTheme
 import com.juick.android.ui.widget.rememberImagePicker
 import com.juick.api.model.PostResponse
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,7 +52,6 @@ fun NewPostScreen(
     onTagConsumed: () -> Unit = {},
     onTagsClick: () -> Unit,
     onNavigateToThread: (Int) -> Unit,
-    onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
     var textFieldValue by remember { mutableStateOf(TextFieldValue(initialText ?: "", TextRange((initialText?.length ?: 0)))) }
@@ -88,35 +94,58 @@ fun NewPostScreen(
         attachmentMime = "image/jpeg"
     }
 
-    Column(modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.Cancel)) }
-            Text(stringResource(R.string.New_message), style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.width(64.dp))
+    val colors = JuickTheme.colors
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime).only(WindowInsetsSides.Bottom)),
+    ) {
+        if (isSending) LinearProgressIndicator(Modifier.fillMaxWidth())
+        Column(Modifier.weight(1f).fillMaxWidth()) {
+            OutlinedTextField(
+                value = textFieldValue,
+                onValueChange = { textFieldValue = it },
+                modifier = Modifier.fillMaxWidth().padding(8.dp).focusRequester(focusRequester),
+                minLines = 7,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colors.primary,
+                    cursorColor = colors.primary,
+                    focusedTextColor = colors.text,
+                    unfocusedTextColor = colors.text,
+                ),
+            )
+            attachmentUri?.let {
+                AsyncImage(
+                    it, stringResource(R.string.Attach),
+                    Modifier.fillMaxWidth().weight(1f),
+                    contentScale = ContentScale.Fit,
+                )
+            }
         }
 
-        Spacer(Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = textFieldValue,
-            onValueChange = { textFieldValue = it },
-            placeholder = { Text(stringResource(R.string.Enter_a_message)) },
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            minLines = 7,
-        )
-
-        if (isSending) LinearProgressIndicator(Modifier.fillMaxWidth())
-
-        Spacer(Modifier.height(8.dp))
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            IconButton(onClick = onTagsClick) { Text("#", style = MaterialTheme.typography.titleMedium) }
+        Row(
+            modifier = Modifier.fillMaxWidth().background(colors.mainBackground).padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onTagsClick) {
+                Icon(painterResource(R.drawable.ic_code_tags_black_24dp), stringResource(R.string.tags_button), tint = colors.text)
+            }
+            Spacer(Modifier.width(5.dp))
             IconButton(onClick = {
                 if (attachmentUri != null) { attachmentUri = null; attachmentMime = null }
                 else imagePicker.pick()
             }) {
-                Text(if (attachmentUri != null) "📎✓" else "📎", style = MaterialTheme.typography.titleMedium)
+                Icon(
+                    painterResource(R.drawable.ic_button_attachment),
+                    stringResource(R.string.attach_photo),
+                    tint = if (attachmentUri != null) colors.accent else colors.text,
+                )
             }
+            Spacer(Modifier.weight(1f))
             IconButton(
                 onClick = {
                     if (sendEnabled && !isSending) {
@@ -129,8 +158,8 @@ fun NewPostScreen(
                         }
                     }
                 },
-                enabled = sendEnabled && !isSending,
-            ) { Icon(Icons.Default.Send, stringResource(R.string.Send)) }
+                enabled = !isSending,
+            ) { Icon(painterResource(R.drawable.ic_send_black_24dp), stringResource(R.string.send_button), tint = colors.text) }
         }
     }
 }
