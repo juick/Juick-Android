@@ -61,6 +61,17 @@ fun ProfileHeader(
     val isOwnBlog = signedIn && currentUser?.uname == uname
     var menuExpanded by remember { mutableStateOf(false) }
     var avatarVersion by remember { mutableIntStateOf(0) }
+    var blogAvatar by remember(uname) { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(uname) {
+        blogAvatar = try {
+            App.instance.api.info(uname).avatar
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     fun runAction(action: suspend () -> Unit) {
         scope.launch {
@@ -98,9 +109,9 @@ fun ProfileHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val ownAvatar = currentUser?.avatar.orEmpty()
-        val avatar = if (isOwnBlog && ownAvatar.isNotEmpty()) ownAvatar else "https://juick.com/a/$uname"
+        val avatar = if (isOwnBlog && ownAvatar.isNotEmpty()) ownAvatar else blogAvatar
         AsyncImage(
-            model = if (avatarVersion > 0) "$avatar?v=$avatarVersion" else avatar,
+            model = if (avatar != null && avatarVersion > 0) "$avatar?v=$avatarVersion" else avatar,
             contentDescription = null,
             modifier = Modifier
                 .size(64.dp)

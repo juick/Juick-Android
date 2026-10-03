@@ -33,6 +33,8 @@ import java.net.URL
 interface Api {
     @GET("me")
     suspend fun me(): User
+    @GET("info/{uname}")
+    suspend fun info(@Path("uname") uname: String): User
     @POST("users/wl")
     suspend fun toggleVIP(@Query("name") userName: String): Response<Void>
     @POST("messages/set_privacy")
