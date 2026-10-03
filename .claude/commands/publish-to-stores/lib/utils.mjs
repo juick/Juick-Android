@@ -9,7 +9,7 @@ export function exec(cmd, opts = {}) {
 export async function fetchWithRetry(url, opts = {}, retries = 3) {
   const { body, headers, method = 'GET' } = opts;
   const fetchOpts = { method, headers };
-  if (body) fetchOpts.body = typeof body === 'string' ? body : JSON.stringify(body);
+  if (body) fetchOpts.body = typeof body === 'string' || body instanceof FormData ? body : JSON.stringify(body);
 
   let lastError;
   for (let i = 0; i < retries; i++) {

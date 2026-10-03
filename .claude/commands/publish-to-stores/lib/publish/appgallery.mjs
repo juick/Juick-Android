@@ -63,9 +63,9 @@ export async function publish() {
     console.log(JSON.stringify(result));
     if (result.ret?.code === 0) {
       console.log('=== Submitted successfully ===');
-    } else if (result.ret?.code === 204144660) {
-      console.log('=== Build still processing, waiting 2 min ===');
-      await new Promise(r => setTimeout(r, 120000));
+    } else if (result.ret?.code === 204144660 || result.ret?.code === 204144727) {
+      console.log('=== Build still processing, waiting 5 min ===');
+      await new Promise(r => setTimeout(r, 300000));
       const retry = await fetchWithRetry(`${API_BASE}/publish/v2/app-submit?appId=${appId}`, {
         method: 'POST',
         headers: { client_id: clientId, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
