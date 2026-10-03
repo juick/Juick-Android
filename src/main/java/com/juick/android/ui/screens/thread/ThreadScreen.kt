@@ -19,8 +19,6 @@ package com.juick.android.ui.screens.thread
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -45,6 +43,8 @@ import com.juick.App
 import com.juick.R
 import com.juick.android.service.isAuthenticated
 import com.juick.android.ui.screens.feed.PostCard
+import com.juick.android.ui.widget.rememberImagePicker
+import kotlinx.coroutines.launch
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import kotlinx.coroutines.CancellationException
@@ -78,9 +78,11 @@ fun ThreadScreen(
     val colors = MaterialTheme.colorScheme
     val context = LocalContext.current
 
-    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { replyAttachmentUri = it; replyAttachmentMime = context.contentResolver.getType(it) ?: "image/jpeg" }
+    val imagePicker = rememberImagePicker { croppedUri ->
+        replyAttachmentUri = croppedUri
+        replyAttachmentMime = "image/jpeg"
     }
+    var subscribing by remember { mutableStateOf(false) }
 
     var reloadTrigger by remember { mutableIntStateOf(0) }
     val messagePosted = remember { MutableStateFlow<Result<PostResponse>?>(null) }
@@ -125,6 +127,31 @@ fun ThreadScreen(
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.ArrowBack, stringResource(R.string.Cancel))
+                    }
+                },
+                actions = {
+                    val head = posts.firstOrNull()
+                    if (head != null && App.instance.isAuthenticated) {
+                        TextButton(
+                            enabled = !subscribing,
+                            onClick = {
+                                subscribing = true
+                                scope.launch {
+                                    try {
+                                        val updated = App.instance.api.subscribe(mid)
+                                        posts = listOf(head.copy(subscribed = updated.subscribed)) + posts.drop(1)
+                                    } catch (e: CancellationException) {
+                                        throw e
+                                    } catch (_: Exception) {
+                                        Toast.makeText(context, R.string.network_error, Toast.LENGTH_LONG).show()
+                                    } finally {
+                                        subscribing = false
+                                    }
+                                }
+                            },
+                        ) {
+                            Text(stringResource(if (head.subscribed) R.string.subscribed else R.string.subscribe))
+                        }
                     }
                 },
             )
@@ -188,7 +215,7 @@ fun ThreadScreen(
                         Spacer(Modifier.width(4.dp))
                         IconButton(onClick = {
                             if (replyAttachmentUri != null) { replyAttachmentUri = null; replyAttachmentMime = null }
-                            else galleryLauncher.launch("image/*")
+                            else imagePicker.pick()
                         }) {
                             Text(if (replyAttachmentUri != null) "📎✓" else "📎", style = MaterialTheme.typography.bodyMedium)
                         }

@@ -18,8 +18,6 @@ package com.juick.android.ui.screens.post
 
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
@@ -32,13 +30,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import com.juick.App
 import com.juick.R
-import com.juick.android.ui.widget.CropSheet
+import com.juick.android.ui.widget.rememberImagePicker
 import com.juick.api.model.PostResponse
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.io.File
 import java.io.FileNotFoundException
 
 @Composable
@@ -67,10 +63,6 @@ fun NewPostScreen(
         textFieldValue = TextFieldValue(newText, TextRange(newText.length))
         onTagConsumed()
     }
-    var showSourcePicker by remember { mutableStateOf(false) }
-    var showCrop by remember { mutableStateOf<Uri?>(null) }
-    var cameraUri by remember { mutableStateOf<Uri?>(null) }
-
     val sendEnabled = textFieldValue.text.length >= 3 || attachmentUri != null
 
     LaunchedEffect(messagePosted) {
@@ -91,52 +83,9 @@ fun NewPostScreen(
         }
     }
 
-    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { showCrop = it }
-    }
-
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success) cameraUri?.let { showCrop = it }
-    }
-
-    fun launchCamera() {
-        val file = File(context.filesDir, "camera_${System.currentTimeMillis()}.jpg")
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-        cameraUri = uri
-        cameraLauncher.launch(uri)
-    }
-
-    showCrop?.let { sourceUri ->
-        CropSheet(
-            imageUri = sourceUri,
-            onCropResult = { croppedUri ->
-                showCrop = null
-                if (croppedUri != null) {
-                    attachmentUri = croppedUri
-                    attachmentMime = "image/jpeg"
-                }
-            },
-            onDismiss = { showCrop = null },
-        )
-    }
-
-    if (showSourcePicker) {
-        AlertDialog(
-            onDismissRequest = { showSourcePicker = false },
-            title = { Text("") },
-            text = {
-                Column {
-                    TextButton(onClick = { showSourcePicker = false; galleryLauncher.launch("image/*") }) {
-                        Text(stringResource(R.string.gallery))
-                    }
-                    TextButton(onClick = { showSourcePicker = false; launchCamera() }) {
-                        Text(stringResource(R.string.camera))
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = { TextButton(onClick = { showSourcePicker = false }) { Text(stringResource(R.string.Cancel)) } },
-        )
+    val imagePicker = rememberImagePicker { croppedUri ->
+        attachmentUri = croppedUri
+        attachmentMime = "image/jpeg"
     }
 
     Column(modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp)) {
@@ -164,7 +113,7 @@ fun NewPostScreen(
             IconButton(onClick = onTagsClick) { Text("#", style = MaterialTheme.typography.titleMedium) }
             IconButton(onClick = {
                 if (attachmentUri != null) { attachmentUri = null; attachmentMime = null }
-                else showSourcePicker = true
+                else imagePicker.pick()
             }) {
                 Text(if (attachmentUri != null) "📎✓" else "📎", style = MaterialTheme.typography.titleMedium)
             }
