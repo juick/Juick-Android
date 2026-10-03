@@ -16,6 +16,7 @@
  */
 package com.juick.android
 
+import android.os.SystemClock
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -24,6 +25,7 @@ import com.juick.App
 import com.juick.api.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class Account: ViewModel() {
     val signInStatus = MutableLiveData(SignInActivity.SignInStatus.SIGNED_OUT)
@@ -31,14 +33,27 @@ class Account: ViewModel() {
     private val _profile = MutableLiveData<User?>(null)
     val profile: LiveData<User?> get() = _profile
 
-    fun refresh() {
+    private var refreshing = false
+    private var lastRefresh = 0L
+
+    fun refresh(force: Boolean = false) {
+        val now = SystemClock.elapsedRealtime()
+        if (refreshing || (!force && now - lastRefresh < MIN_REFRESH_INTERVAL_MS)) return
+        refreshing = true
+        lastRefresh = now
         _profile.postValue(null)
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _profile.postValue(App.instance.api.me())
             } catch (e: Exception) {
                 _profile.postValue(anonymous)
+            } finally {
+                withContext(Dispatchers.Main) { refreshing = false }
             }
         }
+    }
+
+    companion object {
+        private const val MIN_REFRESH_INTERVAL_MS = 30_000L
     }
 }

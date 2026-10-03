@@ -54,11 +54,14 @@ import com.juick.android.ui.navigation.Route
 import com.juick.android.updater.Updater
 import com.juick.api.model.Post
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 class MainActivity : ComponentActivity() {
     val account by viewModels<Account>()
     private var notificationManager: NotificationManager? = null
     private lateinit var loginLauncher: ActivityResultLauncher<Intent>
+    private lateinit var passwordUpdateLauncher: ActivityResultLauncher<Intent>
+    private val passwordUpdateShown = AtomicBoolean(false)
 
     private fun showLogin() {
         if (!App.instance.isAuthenticated) {
@@ -159,8 +162,17 @@ class MainActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == RESULT_OK) {
-                account.refresh()
+                account.refresh(force = true)
                 initNotifications()
+            }
+        }
+
+        passwordUpdateLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            passwordUpdateShown.set(false)
+            if (result.resultCode == RESULT_OK) {
+                account.refresh(force = true)
             }
         }
 
@@ -173,10 +185,14 @@ class MainActivity : ComponentActivity() {
         }
 
         App.instance.authorizationCallback = {
-            val intent = Intent(this, SignInActivity::class.java).apply {
-                putExtra(SignInActivity.EXTRA_ACTION, SignInActivity.ACTION_PASSWORD_UPDATE)
+            if (passwordUpdateShown.compareAndSet(false, true)) {
+                runOnUiThread {
+                    val intent = Intent(this, SignInActivity::class.java).apply {
+                        putExtra(SignInActivity.EXTRA_ACTION, SignInActivity.ACTION_PASSWORD_UPDATE)
+                    }
+                    passwordUpdateLauncher.launch(intent)
+                }
             }
-            startActivity(intent)
         }
 
         account.refresh()
@@ -202,7 +218,7 @@ class MainActivity : ComponentActivity() {
                 val onSignInClick: () -> Unit = { showLogin() }
                 val onLikeClick: (Post) -> Unit = { post ->
                     lifecycleScope.launch {
-                        try { App.instance.api.like(post.mid); account.refresh() } catch (e: Exception) {
+                        try { App.instance.api.like(post.mid); account.refresh(force = true) } catch (e: Exception) {
                             Log.e("MainActivity", "like failed", e)
                         }
                     }
