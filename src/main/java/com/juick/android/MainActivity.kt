@@ -228,7 +228,7 @@ class MainActivity : ComponentActivity() {
                     if (App.instance.isAuthenticated) navController.navigate(Route.NewPost()) else showLogin()
                 }
 
-                AppNavigation(navController, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onSignInClick, onFabClick, profile, unreadCount, App.instance.isAuthenticated)
+                AppNavigation(navController, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onSignInClick, onFabClick, profile, unreadCount, App.instance.isAuthenticated, onProfileChanged = { account.refresh(force = true) })
 
                 // onResume runs before the first composition, so a cold-start intent is handled here
                 LaunchedEffect(Unit) { handleIntent() }

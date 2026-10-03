@@ -80,6 +80,7 @@ fun AppNavigation(
     currentProfile: com.juick.api.model.User?,
     unreadCount: Int,
     isAuthenticated: Boolean,
+    onProfileChanged: () -> Unit,
 ) {
     var pendingTag by remember { mutableStateOf<String?>(null) }
 
@@ -146,7 +147,7 @@ fun AppNavigation(
         composable<Route.Blog> { entry ->
             val uname = entry.toRoute<Route.Blog>().uname
             AppScaffold(navController, profile, unread, onSignInClick, onFabClick) {
-                FeedScreen(Uris.getUserPostsByName(uname), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid(), showProfileHeader = true, profileHeader = { ProfileHeader(uname = uname) })
+                FeedScreen(Uris.getUserPostsByName(uname), onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, currentUser = profile, deletedMid = entry.deletedMid(), showProfileHeader = true, profileHeader = { ProfileHeader(uname = uname, currentUser = profile, onProfileChanged = onProfileChanged) })
             }
         }
 
