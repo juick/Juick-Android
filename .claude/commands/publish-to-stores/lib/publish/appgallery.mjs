@@ -10,7 +10,7 @@ export async function publish() {
   let appId = process.env.HUAWEI_APP_ID;
 
   // 1. Build
-  const apkPath = buildApk('huawei', 'huawei', 'store');
+  const apkPath = buildApk('huawei', 'store');
 
   // 2. Auth
   console.log('=== Getting access token ===');

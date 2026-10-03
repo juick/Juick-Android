@@ -15,7 +15,7 @@ export async function publish() {
   const whatsNew = requireFile('release notes', whatsNewFile);
 
   // 1. Build
-  const apkPath = buildApk('google', 'google', 'store');
+  const apkPath = buildApk('google', 'store');
 
   // 2. Auth
   console.log('=== Getting access token ===');
