@@ -140,7 +140,10 @@ fun NewPostScreen(
                 else imagePicker.pick()
             }) {
                 Icon(
-                    painterResource(R.drawable.ic_button_attachment),
+                    painterResource(
+                        if (attachmentUri != null) R.drawable.ic_attach_file_black_24dp_on
+                        else R.drawable.ic_attach_file_black_24dp
+                    ),
                     stringResource(R.string.attach_photo),
                     tint = if (attachmentUri != null) colors.accent else colors.text,
                 )

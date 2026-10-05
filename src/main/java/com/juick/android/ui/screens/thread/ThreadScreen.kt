@@ -201,7 +201,10 @@ fun ThreadScreen(
                     else imagePicker.pick()
                 }) {
                     Icon(
-                        painterResource(R.drawable.ic_button_attachment),
+                        painterResource(
+                            if (replyAttachmentUri != null) R.drawable.ic_attach_file_black_24dp_on
+                            else R.drawable.ic_attach_file_black_24dp
+                        ),
                         stringResource(R.string.Attach),
                         tint = if (replyAttachmentUri != null) colors.accent else colors.text,
                     )
