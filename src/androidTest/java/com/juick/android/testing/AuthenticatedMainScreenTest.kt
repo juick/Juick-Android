@@ -64,9 +64,9 @@ class AuthenticatedMainScreenTest {
     @Test
     fun showsBottomNavigation_withThreeTabs() {
         val s = composeTestRule.activity
-        composeTestRule.onNodeWithText(s.getString(R.string.Subscriptions)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(s.getString(R.string.Discover)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(s.getString(R.string.PMs)).assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(s.getString(R.string.Subscriptions)).assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(s.getString(R.string.Discover)).assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(s.getString(R.string.PMs)).assertIsDisplayed()
     }
 
     @Test
