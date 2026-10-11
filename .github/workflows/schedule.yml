@@ -24,7 +24,7 @@ jobs:
         continue-on-error: true
         name: Check latest commit is less than a day
         if: ${{ github.event_name == 'schedule' }}
-        run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "should_run=false" >> $GITHUB_ENV
+        run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "should_run=false" >> $GITHUB_OUTPUT
   connectedCheck:
     needs: check_date
     if: ${{ needs.check_date.outputs.should_run != 'false' }}
@@ -51,3 +51,11 @@ jobs:
         force-avd-creation: true
         emulator-build: 13610412
         script: ./gradlew --no-daemon connectedFreeDebugAndroidTest
+    - name: Upload test reports
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: connected-test-reports
+        path: |
+          build/reports/androidTests/
+          build/outputs/androidTest-results/
