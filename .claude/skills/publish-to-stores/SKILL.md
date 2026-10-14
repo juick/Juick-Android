@@ -1,7 +1,6 @@
 ---
 name: publish-to-stores
-description: Build and publish to AppGallery, RuStore, or Galaxy Store.
-user_invocable: true
+description: Build and publish to AppGallery, RuStore, Galaxy Store, or a GitHub release.
 ---
 
 # Publish to Stores
@@ -11,10 +10,10 @@ Builds APK and publishes to the selected store via REST API.
 ## Usage
 
 ```bash
-source .env && node .claude/commands/publish-to-stores/publish-to-stores.mjs <store>
+source .env && node .claude/skills/publish-to-stores/publish-to-stores.mjs <store>
 ```
 
-Where `<store>` is `appgallery`, `rustore`, or `galaxystore`.
+Where `<store>` is `appgallery`, `rustore`, `galaxystore`, or `github`.
 
 ## Prerequisites
 
@@ -23,6 +22,7 @@ Where `<store>` is `appgallery`, `rustore`, or `galaxystore`.
 | AppGallery | `HUAWEI_CLIENT_ID`, `HUAWEI_CLIENT_SECRET`, `HUAWEI_APP_ID` (optional) |
 | RuStore | `RUSTORE_KEY_ID`, `RUSTORE_PRIVATE_KEYFILE`, `WHATS_NEW_RU_FILE` (/tmp/rustore-whatsnew-ru.txt) |
 | Galaxy Store | `GALAXY_SERVICE_ACCOUNT_ID`, `GALAXY_PRIVATE_KEYFILE`, `GALAXY_CONTENT_ID`, `WHATS_NEW_FILE` (/tmp/galaxystore-whatsnew.txt) |
+| GitHub | `gh` authenticated for `juick/Juick-Android`, `WHATS_NEW_FILE` (/tmp/github-whatsnew.txt) |
 
 Requires Node.js 20+.
 
@@ -34,19 +34,22 @@ Before publishing, prepare release notes:
 # RuStore (Russian only)
 echo "Исправления ошибок и улучшение производительности" > /tmp/rustore-whatsnew-ru.txt
 
-# Galaxy Store (English)
+# Galaxy Store and GitHub (English)
 echo "Bug fixes and performance improvements" > /tmp/galaxystore-whatsnew.txt
+echo "Bug fixes and performance improvements" > /tmp/github-whatsnew.txt
 ```
 
 ## Structure
 
 ```
 publish-to-stores/
+  SKILL.md
   publish-to-stores.mjs          # entry: node publish-to-stores.mjs <store>
   lib/
     utils.mjs                    # shared: build, auth helpers, HTTP retry
     publish/
-      appgallery.mjs             # Huawei AppGallery
-      rustore.mjs                # RuStore (VK)
-      galaxystore.mjs            # Samsung Galaxy Store
+      appgallery.mjs             # Huawei AppGallery (huawei/store build)
+      rustore.mjs                # RuStore (VK) (google/store build)
+      galaxystore.mjs            # Samsung Galaxy Store (google/store build)
+      github.mjs                 # GitHub release with google and free release APKs
 ```
