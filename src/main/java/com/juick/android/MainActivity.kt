@@ -105,9 +105,10 @@ class MainActivity : ComponentActivity() {
             val colorScheme = CustomTabColorSchemeParams.Builder()
                 .setToolbarColor(getColor(R.color.colorMainBackground))
                 .build()
+            val handleDeepLinks = uri.host == "juick.com"
             val builder = CustomTabsIntent.Builder()
-                .setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_SYSTEM, colorScheme)
-                .setSendToExternalDefaultHandlerEnabled(true)
+                .setDefaultColorSchemeParams(colorScheme)
+                .setSendToExternalDefaultHandlerEnabled(handleDeepLinks)
             browserSession?.let { builder.setSession(it) }
             builder.build().launchUrl(this, uri)
         } catch (e: Exception) {
@@ -123,22 +124,25 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Opens juick.com links in-app when a screen exists for them, everything else in a browser.
-     */
     fun processUri(data: Uri) {
         val nav = navController
-        if (nav == null || data.host != "juick.com") {
+        val isJuickLink = data.host == "juick.com"
+        if (nav == null || !isJuickLink) {
             openUri(data)
             return
         }
         val segments = data.pathSegments
+        val isRootPath = segments.isEmpty()
+        val isUserPath = segments.size == 1
+        val threadId = segments.getOrNull(1)?.toIntOrNull() ?: 0
+        val isThreadPath = segments.size == 2 && threadId > 0
+        val isImagePath = segments.firstOrNull() == "i"
         when {
-            segments.isEmpty() -> nav.navigate(Route.Home)
-            segments.size == 1 -> nav.navigate(Route.Blog(segments[0]))
-            segments.size == 2 && segments[1].toIntOrNull() != null ->
-                nav.navigate(Route.Thread(segments[1].toInt()))
-            else -> openUri(data)
+            isRootPath -> nav.navigate(Route.Home)
+            isUserPath -> nav.navigate(Route.Blog(segments[0]))
+            isThreadPath -> nav.navigate(Route.Thread(threadId))
+            isImagePath -> openUri(data)
+            else -> nav.navigate(Route.Home)
         }
     }
 
