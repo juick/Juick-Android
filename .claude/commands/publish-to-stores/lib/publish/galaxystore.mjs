@@ -86,7 +86,13 @@ export async function publish() {
   const status = info[0]?.contentStatus;
   console.log(`Status: ${status}`);
   if (status === 'UPDATING' || status === 'REGISTERING') {
-    console.log('=== Published successfully ===');
+    console.log('=== Submitting for review ===');
+    await fetchWithRetry(`${API_BASE}/contentSubmit`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'service-account-id': serviceAccountId, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contentId }),
+    }, 1);
+    console.log('=== Submitted for review ===');
   } else {
     console.log(`=== Unexpected status: ${status} ===`);
     process.exit(1);
