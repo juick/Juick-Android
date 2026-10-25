@@ -7,6 +7,9 @@ YEAR=$(date +%Y)
 
 [[ "$EXT" =~ ^(kt|java|xml)$ ]] || exit 0
 [ -f "$FILE" ] || exit 0
+NORM_FILE="${FILE//\\//}"
+NORM_DIR="${CLAUDE_PROJECT_DIR//\\//}"
+[[ "$NORM_FILE" == "$NORM_DIR"/* ]] || exit 0
 
 if [ "$EXT" = "xml" ]; then
   HEADER="<!--
