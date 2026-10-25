@@ -19,32 +19,42 @@ package com.juick.android.ui.screens.thread
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.juick.App
 import com.juick.R
 import com.juick.android.service.isAuthenticated
+import com.juick.android.ui.JuickDivider
 import com.juick.android.ui.JuickTheme
 import com.juick.android.ui.screens.feed.PostCard
+import com.juick.android.ui.screens.post.Composer
 import com.juick.android.ui.widget.rememberImagePicker
 import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
@@ -68,8 +78,9 @@ fun ThreadScreen(
     isPremiumOrAdmin: Boolean = false,
 ) {
     var posts by remember { mutableStateOf<List<Post>>(emptyList()) }
-    var replyText by remember { mutableStateOf("") }
+    var replyText by remember { mutableStateOf(TextFieldValue()) }
     var replyToPost by remember { mutableStateOf<Post?>(null) }
+    var composing by rememberSaveable { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
     var loadError by remember { mutableStateOf(false) }
     var replyAttachmentUri by remember { mutableStateOf<Uri?>(null) }
@@ -102,8 +113,9 @@ fun ThreadScreen(
             isSending = false
             response.fold(
                 onSuccess = {
-                    replyText = ""
+                    replyText = TextFieldValue()
                     replyToPost = null
+                    composing = false
                     replyAttachmentUri = null
                     replyAttachmentMime = null
                     reloadTrigger++
@@ -144,13 +156,30 @@ fun ThreadScreen(
         }
     }
 
+    Box(Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.mainBackground)
             .windowInsetsPadding(WindowInsets.statusBars.union(WindowInsets.navigationBars).union(WindowInsets.ime)),
     ) {
-        if (isLoading || isSending) LinearProgressIndicator(Modifier.fillMaxWidth())
+        Row(
+            Modifier.fillMaxWidth().height(56.dp).background(colors.mainBackground).padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onDismiss) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.Cancel), tint = colors.primary)
+            }
+            Text(
+                stringResource(R.string.Message),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.text,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        JuickDivider()
+        if (isLoading || isSending) LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.accent, trackColor = colors.border)
         Box(Modifier.weight(1f).fillMaxWidth()) {
             if (loadError) {
                 Text(
@@ -159,11 +188,26 @@ fun ThreadScreen(
                     modifier = Modifier.align(Alignment.Center).padding(16.dp),
                 )
             } else {
-                LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                    items(posts, key = { "thread_${it.mid}_${it.rid}" }) { post ->
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+                ) {
+                    itemsIndexed(posts, key = { _, it -> "thread_${it.mid}_${it.rid}" }) { index, post ->
                         PostCard(
                             post = post,
-                            onPostClick = { replyToPost = post },
+                            onPostClick = {
+                                if (App.instance.isAuthenticated) {
+                                    replyToPost = post
+                                    composing = true
+                                }
+                            },
+                            onReplyClick = {
+                                if (App.instance.isAuthenticated) {
+                                    replyToPost = post
+                                    composing = true
+                                }
+                            },
                             onUserClick = { onUserClick(post.user.uname) },
                             onMenuClick = { onMenuClick(post) },
                             onLikeClick = { onLikeClick(post) },
@@ -176,78 +220,48 @@ fun ThreadScreen(
                                 val index = posts.indexOfFirst { it.rid == rid }
                                 if (index >= 0) scope.launch { listState.animateScrollToItem(index) }
                             },
+                            modifier = if (index == 1) Modifier.padding(top = 12.dp) else Modifier,
+                            inThread = true,
+                            panelTop = index == 1,
+                            panelBottom = index == posts.lastIndex,
                         )
                     }
                 }
             }
         }
 
-        Box(Modifier.fillMaxWidth().height(1.dp).background(colors.border))
-        Column(Modifier.fillMaxWidth().background(colors.mainBackground)) {
-            val target = replyToPost
-            if (target != null && target.rid > 0) {
-                val inReplyTo = stringResource(R.string.In_reply_to_) + " "
-                Text(
-                    buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(inReplyTo) }
-                        append(target.getText())
-                    },
-                    color = colors.text,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp),
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(onClick = {
-                    if (replyAttachmentUri != null) { replyAttachmentUri = null; replyAttachmentMime = null }
-                    else imagePicker.pick()
-                }) {
-                    Icon(
-                        painterResource(
-                            if (replyAttachmentUri != null) R.drawable.ic_attach_file_black_24dp_on
-                            else R.drawable.ic_attach_file_black_24dp
-                        ),
-                        stringResource(R.string.Attach),
-                        tint = if (replyAttachmentUri != null) colors.accent else colors.text,
-                    )
+    }
+
+    AnimatedVisibility(
+        visible = composing,
+        enter = slideInVertically { it } + fadeIn(),
+        exit = slideOutVertically { it } + fadeOut(),
+    ) {
+        BackHandler(enabled = !isSending) { composing = false }
+        val target = replyToPost ?: posts.firstOrNull()
+        Composer(
+            title = stringResource(R.string.reply) + (target?.let { " @${it.user.uname}" } ?: ""),
+            text = replyText,
+            onTextChange = { replyText = it },
+            attachment = replyAttachmentUri,
+            onAttachClick = { imagePicker.pick() },
+            onRemoveAttachment = { replyAttachmentUri = null; replyAttachmentMime = null },
+            sendEnabled = replyText.text.isNotBlank() || replyAttachmentUri != null,
+            isSending = isSending,
+            onSend = {
+                val rid = replyToPost?.rid ?: 0
+                val to = if (rid > 0) "#$mid/$rid" else "#$mid"
+                isSending = true
+                try {
+                    App.instance.sendMessage(scope, messagePosted, "$to ${replyText.text}", replyAttachmentUri, replyAttachmentMime)
+                } catch (e: FileNotFoundException) {
+                    isSending = false
+                    Toast.makeText(context, "Attachment error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
-                OutlinedTextField(
-                    value = replyText,
-                    onValueChange = { replyText = it },
-                    modifier = Modifier.weight(1f),
-                    maxLines = 5,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = colors.primary,
-                        cursorColor = colors.primary,
-                        focusedTextColor = colors.text,
-                        unfocusedTextColor = colors.text,
-                    ),
-                )
-                val canSend = (replyText.isNotBlank() || replyAttachmentUri != null) && !isSending
-                IconButton(
-                    onClick = {
-                        if (canSend && App.instance.isAuthenticated) {
-                            val rid = replyToPost?.rid ?: 0
-                            val to = if (rid > 0) "#$mid/$rid" else "#$mid"
-                            isSending = true
-                            try {
-                                App.instance.sendMessage(scope, messagePosted, "$to $replyText", replyAttachmentUri, replyAttachmentMime)
-                            } catch (e: FileNotFoundException) {
-                                isSending = false
-                                Toast.makeText(context, "Attachment error: ${e.message}", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    },
-                    enabled = !isSending,
-                ) {
-                    Icon(painterResource(R.drawable.ic_send_black_24dp), stringResource(R.string.Send), tint = colors.text)
-                }
-            }
-        }
+            },
+            onCancel = { composing = false },
+            replyTo = target,
+        )
+    }
     }
 }

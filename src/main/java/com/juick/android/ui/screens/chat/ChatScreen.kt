@@ -16,48 +16,65 @@
  */
 package com.juick.android.ui.screens.chat
 
+import android.content.Context
+import android.text.format.DateFormat
+import android.text.format.DateUtils
 import android.widget.Toast
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.core.text.getSpans
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.getSpans
 import coil3.compose.AsyncImage
 import com.juick.App
 import com.juick.R
+import com.juick.android.ui.AvatarShape
 import com.juick.android.ui.JuickTheme
-import java.text.SimpleDateFormat
-import java.util.Locale
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextDecoration
 import com.juick.android.ui.screens.feed.UrlPosition
 import com.juick.api.model.Post
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Calendar
+import java.util.Date
 
-@OptIn(ExperimentalMaterial3Api::class)
+private const val GROUP_GAP_MS = 5 * 60 * 1000L
+private val BubbleRadius = 20.dp
+private val BubbleJoin = 6.dp
+private val OwnBubbleEnd = Color(0xFF8E5CFF)
+
 @Composable
 fun ChatScreen(
     uname: String,
@@ -65,12 +82,13 @@ fun ChatScreen(
     onLinkClick: (String) -> Unit,
 ) {
     var messagesState by remember { mutableStateOf<Result<List<Post>>?>(null) }
-    val messages = (messagesState?.getOrNull() ?: emptyList()).reversed()
+    val messages = (messagesState?.getOrNull() ?: emptyList()).distinctBy(::messageKey)
     var inputText by remember { mutableStateOf("") }
+    var isSending by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val focusManager = LocalFocusManager.current
     val context = LocalContext.current
+    val colors = JuickTheme.colors
 
     LaunchedEffect(uname) {
         try {
@@ -78,16 +96,15 @@ fun ChatScreen(
         } catch (e: CancellationException) { throw e } catch (e: Exception) { messagesState = Result.failure(e) }
     }
 
-    LaunchedEffect(messages) {
-        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
-    }
-
     fun prepend(incoming: List<Post>) {
         val current = messagesState?.getOrNull() ?: return
         val fresh = incoming.filter { msg ->
             current.none { it.getTimestamp() == msg.getTimestamp() && it.getBody() == msg.getBody() }
         }
-        if (fresh.isNotEmpty()) messagesState = Result.success(fresh.reversed() + current)
+        if (fresh.isNotEmpty()) {
+            messagesState = Result.success(fresh.reversed() + current)
+            scope.launch { listState.animateScrollToItem(0) }
+        }
     }
 
     LaunchedEffect(uname) {
@@ -96,93 +113,173 @@ fun ChatScreen(
         }
     }
 
-    val colors = JuickTheme.colors
-    Column(modifier = Modifier.fillMaxSize().background(colors.mainBackground)) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(vertical = 8.dp),
-        ) {
-            itemsIndexed(messages) { index, post ->
-                val day = post.getTimestamp()?.let { dayFormat.format(it) }
-                val previousDay = messages.getOrNull(index - 1)?.getTimestamp()?.let { dayFormat.format(it) }
-                if (day != null && day != previousDay) {
-                    Text(
-                        day,
-                        fontSize = 16.sp,
-                        color = colors.darkerGray,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                    )
-                }
-                ChatBubble(
-                    post = post,
-                    isOwn = post.user.uname != uname,
-                    onLinkClick = onLinkClick,
-                    onUserClick = onUserClick,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                )
+    fun send() {
+        val text = inputText.trim()
+        if (text.isEmpty() || isSending) return
+        isSending = true
+        scope.launch {
+            try {
+                prepend(listOf(App.instance.api.postPm(uname, text)))
+                inputText = ""
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                Toast.makeText(context, R.string.network_error, Toast.LENGTH_LONG).show()
+            } finally {
+                isSending = false
             }
         }
+    }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime).only(WindowInsetsSides.Bottom))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            TextField(
-                value = inputText,
-                onValueChange = { inputText = it },
-                placeholder = { Text(stringResource(R.string.Enter_a_message), color = colors.darkerGray) },
-                modifier = Modifier.weight(1f),
-                maxLines = 3,
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = colors.accent,
-                    focusedTextColor = colors.text,
-                    unfocusedTextColor = colors.text,
-                ),
-            )
-            Spacer(Modifier.width(8.dp))
-            val canSend = inputText.isNotBlank()
-            IconButton(
-                enabled = canSend,
-                modifier = Modifier.size(40.dp),
-                shape = RoundedCornerShape(30),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = colors.accent,
-                    contentColor = Color.White,
-                    disabledContainerColor = Color(0xFFDDDDDD),
-                    disabledContentColor = Color(0xFF888888),
-                ),
-                onClick = {
-                if (inputText.isNotBlank()) {
-                    scope.launch {
-                        try {
-                            prepend(listOf(App.instance.api.postPm(uname, inputText)))
-                            inputText = ""
-                            focusManager.clearFocus()
-                        } catch (e: CancellationException) {
-                            throw e
-                        } catch (_: Exception) {
-                            Toast.makeText(context, R.string.network_error, Toast.LENGTH_LONG).show()
+    Column(modifier = Modifier.fillMaxSize().background(colors.mainBackground)) {
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            when {
+                messagesState == null -> CircularProgressIndicator(Modifier.align(Alignment.Center), color = colors.accent)
+                messagesState?.isFailure == true -> Text(
+                    stringResource(R.string.network_error),
+                    color = colors.dimmed,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+                messages.isEmpty() -> EmptyChat(uname, Modifier.align(Alignment.Center))
+                else -> LazyColumn(
+                    state = listState,
+                    reverseLayout = true,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+                ) {
+                    itemsIndexed(messages, key = { _, post -> messageKey(post) }) { index, post ->
+                        val older = messages.getOrNull(index + 1)
+                        val newer = messages.getOrNull(index - 1)
+                        val startsGroup = older == null || !sameGroup(older, post)
+                        val endsGroup = newer == null || !sameGroup(post, newer)
+                        Column(Modifier.animateItem()) {
+                            val date = post.getTimestamp()
+                            if (date != null && (older?.getTimestamp()?.let { !sameDay(it, date) } != false)) {
+                                DayChip(dayLabel(context, date))
+                            }
+                            ChatBubble(
+                                post = post,
+                                isOwn = post.user.uname != uname,
+                                startsGroup = startsGroup,
+                                endsGroup = endsGroup,
+                                onLinkClick = onLinkClick,
+                                onUserClick = onUserClick,
+                                modifier = Modifier.padding(top = if (startsGroup) 10.dp else 2.dp),
+                            )
                         }
                     }
                 }
-            }) {
-                Icon(Icons.AutoMirrored.Filled.Send, stringResource(R.string.Send), Modifier.size(20.dp))
+            }
+        }
+
+        InputBar(
+            text = inputText,
+            onTextChange = { inputText = it },
+            isSending = isSending,
+            onSend = ::send,
+        )
+    }
+}
+
+@Composable
+private fun InputBar(text: String, onTextChange: (String) -> Unit, isSending: Boolean, onSend: () -> Unit) {
+    val colors = JuickTheme.colors
+    val canSend = text.isNotBlank() && !isSending
+    val buttonFallback by animateColorAsState(if (canSend) colors.accent else colors.border, label = "send")
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime).only(WindowInsetsSides.Bottom))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(
+            Modifier
+                .weight(1f)
+                .shadow(3.dp, RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.12f), spotColor = Color.Black.copy(alpha = 0.12f))
+                .clip(RoundedCornerShape(24.dp))
+                .background(colors.textBackground)
+                .border(1.dp, colors.border, RoundedCornerShape(24.dp))
+                .padding(horizontal = 18.dp, vertical = 13.dp),
+        ) {
+            BasicTextField(
+                value = text,
+                onValueChange = onTextChange,
+                maxLines = 5,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text),
+                cursorBrush = SolidColor(colors.accent),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            if (text.isEmpty()) {
+                Text(stringResource(R.string.Enter_a_message), style = MaterialTheme.typography.bodyLarge, color = colors.dimmed)
+            }
+        }
+        Box(
+            Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(
+                    if (canSend) Brush.linearGradient(listOf(colors.accent, OwnBubbleEnd))
+                    else SolidColor(buttonFallback)
+                )
+                .clickable(enabled = canSend, onClick = onSend),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (isSending) {
+                CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+            } else {
+                Icon(
+                    Icons.Default.ArrowUpward,
+                    stringResource(R.string.Send),
+                    Modifier.size(22.dp),
+                    tint = if (canSend) Color.White else colors.dimmed,
+                )
             }
         }
     }
 }
 
-private val dayFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
-private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+@Composable
+private fun EmptyChat(uname: String, modifier: Modifier = Modifier) {
+    val colors = JuickTheme.colors
+    Column(modifier.padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            Modifier
+                .size(88.dp)
+                .clip(CircleShape)
+                .background(Brush.linearGradient(listOf(colors.accent.copy(alpha = 0.18f), OwnBubbleEnd.copy(alpha = 0.18f)))),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("👋", fontSize = 40.sp)
+        }
+        Text(
+            "@$uname",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = colors.text,
+            modifier = Modifier.padding(top = 16.dp),
+        )
+    }
+}
+
+@Composable
+private fun DayChip(label: String) {
+    val colors = JuickTheme.colors
+    Box(Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 6.dp), contentAlignment = Alignment.Center) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = colors.dimmed,
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(colors.border.copy(alpha = 0.6f))
+                .padding(horizontal = 12.dp, vertical = 5.dp),
+        )
+    }
+}
 
 @Composable
 fun ChatBubble(
@@ -191,27 +288,34 @@ fun ChatBubble(
     onLinkClick: (String) -> Unit,
     onUserClick: (String) -> Unit = {},
     modifier: Modifier = Modifier,
+    startsGroup: Boolean = true,
+    endsGroup: Boolean = true,
 ) {
-    val juick = JuickTheme.colors
-    val bgColor = if (isOwn) juick.accent else juick.textBackground
-    val textColor = if (isOwn) Color.White else juick.text
-    val timeColor = if (isOwn) Color.White.copy(alpha = 0.6f) else juick.darkerGray
-    val shape = if (isOwn) RoundedCornerShape(20.dp, 20.dp, 0.dp, 20.dp) else RoundedCornerShape(20.dp, 20.dp, 20.dp, 0.dp)
+    val colors = JuickTheme.colors
+    val context = LocalContext.current
+    val body = post.getBody().orEmpty()
+    val emojiOnly = remember(body) { isEmojiOnly(body) }
+    val textColor = if (isOwn) Color.White else colors.text
 
-    val (annotatedText, urlPositions) = remember(post) {
-        val body = post.getBody() ?: ""
+    val (annotatedText, urlPositions) = remember(post, isOwn, colors) {
         val spannable = android.text.SpannableString(body)
         android.text.util.Linkify.addLinks(spannable, android.text.util.Linkify.ALL)
-        val urls = mutableListOf<UrlPosition>()
-        for (span in spannable.getSpans<android.text.style.URLSpan>()) {
-            urls.add(UrlPosition(spannable.getSpanStart(span), spannable.getSpanEnd(span), span.url))
+        val urls = spannable.getSpans<android.text.style.URLSpan>().map {
+            UrlPosition(spannable.getSpanStart(it), spannable.getSpanEnd(it), it.url)
         }
-        val annotString = buildAnnotatedString {
+        buildAnnotatedString {
             append(body)
-            for (url in urls) addStyle(SpanStyle(color = if (isOwn) Color.White else juick.primary, textDecoration = TextDecoration.Underline), url.start, url.end)
-        }
-        annotString to urls
+            for (url in urls) addStyle(SpanStyle(color = if (isOwn) Color.White else colors.primary, textDecoration = TextDecoration.Underline), url.start, url.end)
+        } to urls
     }
+
+    val join = { inner: Boolean -> if (inner) BubbleJoin else BubbleRadius }
+    val shape = if (isOwn) {
+        RoundedCornerShape(BubbleRadius, join(!startsGroup), join(!endsGroup), BubbleRadius)
+    } else {
+        RoundedCornerShape(join(!startsGroup), BubbleRadius, BubbleRadius, join(!endsGroup))
+    }
+    val time = post.getTimestamp()?.let { DateFormat.getTimeFormat(context).format(it) }
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -219,33 +323,103 @@ fun ChatBubble(
         verticalAlignment = Alignment.Bottom,
     ) {
         if (isOwn) {
-            Spacer(Modifier.width(64.dp))
+            Spacer(Modifier.width(56.dp))
         } else {
-            AsyncImage(
-                post.user.avatar, null,
-                Modifier.size(40.dp).clip(RoundedCornerShape(4.dp)).clickable { onUserClick(post.user.uname) },
-                contentScale = ContentScale.Crop,
-            )
+            Box(Modifier.size(32.dp)) {
+                if (endsGroup) {
+                    AsyncImage(
+                        post.user.avatar, null,
+                        Modifier.fillMaxSize().clip(AvatarShape).background(colors.feed).clickable { onUserClick(post.user.uname) },
+                        placeholder = painterResource(R.drawable.av_96),
+                        error = painterResource(R.drawable.av_96),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+            }
             Spacer(Modifier.width(8.dp))
         }
-        Row(
-            modifier = Modifier.weight(1f, fill = false).clip(shape).background(bgColor).padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            ClickableText(
-                text = annotatedText,
-                style = MaterialTheme.typography.bodyMedium.copy(color = textColor),
-                modifier = Modifier.weight(1f, fill = false),
-                onClick = { offset ->
-                    urlPositions
-                        .firstOrNull { it.start <= offset && offset < it.end }
-                        ?.let { onLinkClick(it.url) }
-                },
-            )
-            post.getTimestamp()?.let {
-                Text(timeFormat.format(it), style = MaterialTheme.typography.bodyMedium, color = timeColor, modifier = Modifier.padding(start = 8.dp))
+
+        if (emojiOnly) {
+            Column(horizontalAlignment = if (isOwn) Alignment.End else Alignment.Start) {
+                Text(body, fontSize = 44.sp, lineHeight = 52.sp)
+                if (endsGroup && time != null) {
+                    Text(time, style = MaterialTheme.typography.labelSmall, color = colors.dimmed)
+                }
+            }
+        } else {
+            val background = if (isOwn) {
+                Modifier.background(Brush.linearGradient(listOf(colors.accent, OwnBubbleEnd)), shape)
+            } else {
+                Modifier.background(colors.border, shape)
+            }
+            Column(
+                Modifier
+                    .weight(1f, fill = false)
+                    .clip(shape)
+                    .then(background)
+                    .padding(start = 14.dp, end = 14.dp, top = 9.dp, bottom = if (endsGroup) 6.dp else 9.dp),
+                horizontalAlignment = Alignment.End,
+            ) {
+                ClickableText(
+                    text = annotatedText,
+                    style = MaterialTheme.typography.bodyLarge.copy(color = textColor, lineHeight = 22.sp),
+                    onClick = { offset ->
+                        urlPositions.firstOrNull { it.start <= offset && offset < it.end }?.let { onLinkClick(it.url) }
+                    },
+                )
+                if (endsGroup && time != null) {
+                    Text(
+                        time,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isOwn) Color.White.copy(alpha = 0.75f) else colors.dimmed,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
             }
         }
-        if (!isOwn) Spacer(Modifier.width(64.dp))
+
+        if (!isOwn) Spacer(Modifier.width(56.dp))
     }
+}
+
+private fun messageKey(post: Post) = "${post.getTimestamp()?.time}_${post.user.uname}_${post.getBody()}"
+
+private fun sameGroup(older: Post, newer: Post): Boolean {
+    if (older.user.uname != newer.user.uname) return false
+    val a = older.getTimestamp() ?: return true
+    val b = newer.getTimestamp() ?: return true
+    return b.time - a.time < GROUP_GAP_MS
+}
+
+private fun sameDay(a: Date, b: Date): Boolean {
+    val ca = Calendar.getInstance().apply { time = a }
+    val cb = Calendar.getInstance().apply { time = b }
+    return ca.get(Calendar.YEAR) == cb.get(Calendar.YEAR) && ca.get(Calendar.DAY_OF_YEAR) == cb.get(Calendar.DAY_OF_YEAR)
+}
+
+private fun dayLabel(context: Context, date: Date): String {
+    val time = date.time
+    return if (DateUtils.isToday(time) || DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS)) {
+        DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.DAY_IN_MILLIS).toString()
+    } else {
+        DateUtils.formatDateTime(context, time, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
+    }
+}
+
+private fun isEmojiOnly(text: String): Boolean {
+    val trimmed = text.trim()
+    if (trimmed.isEmpty() || trimmed.length > 8) return false
+    var hasSymbol = false
+    var i = 0
+    while (i < trimmed.length) {
+        val cp = trimmed.codePointAt(i)
+        when (Character.getType(cp)) {
+            Character.OTHER_SYMBOL.toInt() -> hasSymbol = true
+            Character.NON_SPACING_MARK.toInt(), Character.FORMAT.toInt(), Character.SPACE_SEPARATOR.toInt(),
+            Character.MODIFIER_SYMBOL.toInt(), Character.ENCLOSING_MARK.toInt() -> {}
+            else -> return false
+        }
+        i += Character.charCount(cp)
+    }
+    return hasSymbol
 }

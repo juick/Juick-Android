@@ -18,6 +18,7 @@ package com.juick.android.ui
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -42,7 +43,10 @@ data class JuickColors(
     val mainBackground: Color,
     val textBackground: Color,
     val border: Color,
-    val darkerGray: Color = Color(0xFFAAAAAA),
+    val feed: Color,
+    val tag: Color,
+    val quote: Color,
+    val darkerGray: Color = dimmed,
     val premium: Color = Color(0xFF669900),
 )
 
@@ -50,21 +54,30 @@ private val LightJuickColors = JuickColors(
     primary = Color(0xFF3C77AA),
     accent = Color(0xFFFF339A),
     text = Color(0xFF222222),
-    dimmed = Color(0xFF88859D),
-    mainBackground = Color(0xFFF8F8F8),
+    dimmed = Color(0xFF88958D),
+    mainBackground = Color(0xFFFDFDFE),
     textBackground = Color(0xFFFFFFFF),
     border = Color(0xFFEEEEEE),
+    feed = Color(0xFFF8F8F8),
+    tag = Color(0xFF5D6B62),
+    quote = Color(0xFF666666),
 )
 
 private val DarkJuickColors = JuickColors(
     primary = Color(0xFFC38855),
-    accent = Color(0xFFFF339A),
-    text = Color(0xFFCCCCCC),
-    dimmed = Color(0xFF88859D),
-    mainBackground = Color(0xFF333333),
+    accent = Color(0xFFFF5CA8),
+    text = Color(0xFFFFFFFF),
+    dimmed = Color(0xFFC0C0C0),
+    mainBackground = Color(0xFF222222),
     textBackground = Color(0xFF383838),
-    border = Color(0xFF4C4C4C),
+    border = Color(0xFF48484A),
+    feed = Color(0xFF333333),
+    tag = Color(0xFF9EAE9E),
+    quote = Color(0xFFA2A2A2),
 )
+
+val CardShape = RoundedCornerShape(12.dp)
+val AvatarShape = RoundedCornerShape(percent = 28)
 
 private val LocalJuickColors = staticCompositionLocalOf { LightJuickColors }
 
@@ -79,6 +92,14 @@ private fun JuickColors.lightScheme() = lightColorScheme(
     onBackground = text,
     surface = mainBackground,
     onSurface = text,
+    onSurfaceVariant = dimmed,
+    surfaceContainerLowest = textBackground,
+    surfaceContainerLow = textBackground,
+    surfaceContainer = textBackground,
+    surfaceContainerHigh = textBackground,
+    surfaceContainerHighest = feed,
+    outline = border,
+    outlineVariant = border,
 )
 
 private fun JuickColors.darkScheme() = darkColorScheme(
@@ -87,6 +108,14 @@ private fun JuickColors.darkScheme() = darkColorScheme(
     onBackground = text,
     surface = mainBackground,
     onSurface = text,
+    onSurfaceVariant = dimmed,
+    surfaceContainerLowest = textBackground,
+    surfaceContainerLow = textBackground,
+    surfaceContainer = textBackground,
+    surfaceContainerHigh = textBackground,
+    surfaceContainerHighest = feed,
+    outline = border,
+    outlineVariant = border,
 )
 
 @Composable

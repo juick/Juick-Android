@@ -174,9 +174,7 @@ fun AppNavigation(
 
         composable<Route.NewPost> { entry ->
             val route = entry.toRoute<Route.NewPost>()
-            AppScaffold(navController, profile, unread, stringResource(R.string.New_message), onFabClick, showBottomBar = false) {
-                NewPostScreen(initialText = route.text, initialAttachment = route.uri?.toUri(), pendingTag = pendingTag, onTagConsumed = { pendingTag = null }, onTagsClick = { navController.navigate(Route.Tags) }, onNavigateToThread = { mid -> navController.popBackStack<Route.NewPost>(inclusive = true); navController.navigate(Route.Thread(mid)) })
-            }
+            NewPostScreen(initialText = route.text, initialAttachment = route.uri?.toUri(), pendingTag = pendingTag, onTagConsumed = { pendingTag = null }, onTagsClick = { navController.navigate(Route.Tags) }, onNavigateToThread = { mid -> navController.popBackStack<Route.NewPost>(inclusive = true); navController.navigate(Route.Thread(mid)) }, onCancel = { navController.popBackStack() })
         }
 
         dialog<Route.Tags> {

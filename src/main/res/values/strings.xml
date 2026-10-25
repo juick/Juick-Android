@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2008-2022, Juick
+  ~ Copyright (C) 2008-2026, Juick
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as
@@ -33,6 +33,8 @@
     <string name="Share">Share</string>
     <string name="Replies">Replies</string>
     <string name="reply">Reply</string>
+    <string name="read_all">Read all</string>
+    <string name="Message">Message</string>
     <string name="recommend">Recommend</string>
     <string name="Enter_a_message">Enter a message</string>
     <string name="Message_posted">Message posted</string>

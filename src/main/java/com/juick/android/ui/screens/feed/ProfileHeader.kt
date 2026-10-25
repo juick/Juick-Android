@@ -18,6 +18,7 @@ package com.juick.android.ui.screens.feed
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -30,6 +31,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -41,6 +43,8 @@ import coil3.compose.AsyncImage
 import com.juick.App
 import com.juick.R
 import com.juick.android.Utils
+import com.juick.android.ui.AvatarShape
+import com.juick.android.ui.CardShape
 import com.juick.android.ui.JuickTheme
 import com.juick.android.ui.widget.rememberImagePicker
 import com.juick.api.model.User
@@ -108,11 +112,14 @@ fun ProfileHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 12.dp)
+            .clip(CardShape)
             .background(colors.textBackground)
-            .padding(32.dp),
+            .border(1.dp, colors.border, CardShape)
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(Modifier.padding(end = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             val ownAvatar = currentUser?.avatar.orEmpty()
             val avatar = if (isOwnBlog && ownAvatar.isNotEmpty()) ownAvatar else blogAvatar
             AsyncImage(
@@ -120,7 +127,7 @@ fun ProfileHeader(
                 contentDescription = stringResource(R.string.Juick_profile),
                 placeholder = painterResource(R.drawable.av_96),
                 error = painterResource(R.drawable.av_96),
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(64.dp).clip(AvatarShape),
                 contentScale = ContentScale.Crop,
             )
             if (isOwnBlog) {

@@ -17,6 +17,7 @@
 package com.juick.android.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -55,15 +57,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -101,7 +106,7 @@ fun JuickTopBar(
         }
     }
 
-    Column(Modifier.background(colors.textBackground)) {
+    Column(Modifier.background(colors.mainBackground)) {
         Row(
             modifier = Modifier.fillMaxWidth().height(64.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -142,7 +147,8 @@ fun JuickTopBar(
                 Text(
                     title,
                     style = MaterialTheme.typography.titleLarge,
-                    color = colors.primary,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.text,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f).padding(start = if (onBack != null) 8.dp else 0.dp),
@@ -153,7 +159,7 @@ fun JuickTopBar(
             }
             IconButton(onClick = { navController.navigate(Route.Discussions) { launchSingleTop = true } }) {
                 BadgedBox(badge = {
-                    if (unreadCount > 0) Badge(containerColor = colors.accent, contentColor = colors.mainBackground) { Text("$unreadCount") }
+                    if (unreadCount > 0) Badge(containerColor = colors.accent, contentColor = Color.White) { Text("$unreadCount") }
                 }) {
                     Icon(painterResource(R.drawable.ic_ei_bell), stringResource(R.string.Discussions), Modifier.size(28.dp), tint = colors.text)
                 }
@@ -168,8 +174,8 @@ fun JuickTopBar(
                         contentDescription = stringResource(R.string.Me),
                         placeholder = painterResource(R.drawable.av_96),
                         error = painterResource(R.drawable.av_96),
-                        modifier = Modifier.size(36.dp),
-                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(34.dp).clip(CircleShape).border(1.dp, colors.border, CircleShape),
+                        contentScale = ContentScale.Crop,
                     )
                 }
                 Spacer(Modifier.width(4.dp))
@@ -188,6 +194,7 @@ fun JuickBottomBar(navController: NavHostController, selected: BottomTab) {
             val navColors = NavigationBarItemDefaults.colors(
                 selectedIconColor = colors.accent,
                 unselectedIconColor = colors.dimmed,
+                indicatorColor = colors.accent.copy(alpha = 0.12f),
             )
             fun go(route: Route) = navController.navigate(route) {
                 popUpTo(Route.Home) { inclusive = route == Route.Home }
@@ -247,7 +254,7 @@ fun AppScaffold(
     Scaffold(
         containerColor = colors.mainBackground,
         topBar = {
-            Box(Modifier.background(colors.textBackground).statusBarsPadding()) {
+            Box(Modifier.background(colors.mainBackground).statusBarsPadding()) {
                 JuickTopBar(title, navController, currentProfile, unreadCount, onBack = if (showBack) ({ navController.popBackStack() }) else null)
             }
         },
@@ -256,7 +263,7 @@ fun AppScaffold(
         },
         floatingActionButton = {
             if (showFab) {
-                FloatingActionButton(onClick = onFabClick, containerColor = colors.accent, contentColor = colors.mainBackground) {
+                FloatingActionButton(onClick = onFabClick, shape = CircleShape, containerColor = colors.accent, contentColor = Color.White) {
                     Icon(painterResource(R.drawable.ic_ei_pencil), contentDescription = stringResource(R.string.Create), modifier = Modifier.size(24.dp))
                 }
             }

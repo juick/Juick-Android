@@ -3,7 +3,6 @@ activityCompose = "1.13.0"
 androidImageCropper = "4.7.0"
 appcompat = "1.8.0"
 browser = "1.10.0"
-chatkit = "5e99a8bf3c"
 coil = "3.6.3"
 constraintlayoutCompose = "1.1.2"
 credentialsPlayServicesAuth = "1.6.0"
@@ -37,7 +36,6 @@ activity-compose = { module = "androidx.activity:activity-compose", version.ref 
 android-image-cropper = { module = "com.vanniktech:android-image-cropper", version.ref = "androidImageCropper" }
 browser = { module = "androidx.browser:browser", version.ref = "browser" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
-chatkit = { module = "com.github.vitalyster:ChatKit", version.ref = "chatkit" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
