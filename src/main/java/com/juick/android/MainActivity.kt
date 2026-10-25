@@ -39,6 +39,9 @@ import androidx.browser.customtabs.CustomTabsSession
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
@@ -51,10 +54,13 @@ import com.juick.android.service.isAuthenticated
 import com.juick.android.ui.AppTheme
 import com.juick.android.ui.navigation.AppNavigation
 import com.juick.android.ui.navigation.Route
+import com.juick.android.ui.screens.feed.LikeConfirmDialog
 import com.juick.android.updater.Updater
 import com.juick.api.model.Post
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
+
+private const val LIKE_REACTION_ID = 1
 
 class MainActivity : ComponentActivity() {
     val account by viewModels<Account>()
@@ -225,9 +231,15 @@ class MainActivity : ComponentActivity() {
                 val onUserClick: (String) -> Unit = { uname -> navController.navigate(Route.Blog(uname)) }
                 val onLinkClick: (String) -> Unit = { url -> processUri(Uri.parse(url)) }
                 val onSignInClick: () -> Unit = { showLogin() }
-                val onLikeClick: (Post) -> Unit = { post ->
+                var likeConfirmPost by remember { mutableStateOf<Post?>(null) }
+                val onLikeClick: (Post) -> Unit = { post -> likeConfirmPost = post }
+                val onLikeConfirmed: (Post) -> Unit = { post ->
                     lifecycleScope.launch {
-                        try { App.instance.api.like(post.mid); account.refresh(force = true) } catch (e: Exception) {
+                        try {
+                            val updated = if (post.liked) App.instance.api.like(post.mid) else App.instance.api.react(post.mid, LIKE_REACTION_ID)
+                            App.instance.postUpdates.emit(updated)
+                            account.refresh(force = true)
+                        } catch (e: Exception) {
                             Log.e("MainActivity", "like failed", e)
                         }
                     }
@@ -238,6 +250,17 @@ class MainActivity : ComponentActivity() {
                 }
 
                 AppNavigation(navController, onPostClick, onUserClick, onMenuClick, onLikeClick, onLinkClick, onSignInClick, onFabClick, profile, unreadCount, App.instance.isAuthenticated, onProfileChanged = { account.refresh(force = true) })
+
+                likeConfirmPost?.let { post ->
+                    LikeConfirmDialog(
+                        post = post,
+                        onConfirm = {
+                            likeConfirmPost = null
+                            onLikeConfirmed(post)
+                        },
+                        onDismiss = { likeConfirmPost = null },
+                    )
+                }
 
                 // onResume runs before the first composition, so a cold-start intent is handled here
                 LaunchedEffect(Unit) { handleIntent() }

@@ -61,6 +61,12 @@ interface Api {
         @Query("mid") mid: Int
     ): Post
 
+    @POST("react")
+    suspend fun react(
+        @Query("mid") mid: Int,
+        @Query("reactionId") reactionId: Int,
+    ): Post
+
     @POST("subscribe")
     suspend fun subscribe(
         @Query("mid") mid: Int

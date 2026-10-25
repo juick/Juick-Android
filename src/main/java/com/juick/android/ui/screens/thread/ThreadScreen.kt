@@ -121,6 +121,12 @@ fun ThreadScreen(
         if (relevant.isNotEmpty()) posts = posts + relevant
     }
 
+    LaunchedEffect(Unit) {
+        App.instance.postUpdates.collect { updated ->
+            posts = posts.map { post -> if (post.mid == updated.mid && post.rid == 0) updated else post }
+        }
+    }
+
     fun toggleSubscription(head: Post) {
         if (subscribing || !App.instance.isAuthenticated) return
         subscribing = true

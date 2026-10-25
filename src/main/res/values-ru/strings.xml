@@ -62,7 +62,11 @@
     <string name="Recommended">Рекомендовано</string>
     <string name="Subscribed">Подписано</string>
     <string name="added_to_ignore_list">Добавлено в игнорируемые</string>
-    <string name="Are_you_sure_recommend">Вы уверены, что хотите рекомендовать?</string>
+    <string name="Recommend_post">Рекомендовать пост?</string>
+    <string name="Remove_recommendation">Убрать рекомендацию?</string>
+    <string name="recommendation_will_be_public">Ваша рекомендация поста @%1$s будет публичной.</string>
+    <string name="recommendation_will_be_removed">Ваша рекомендация будет убрана.</string>
+    <string name="remove">Убрать</string>
     <string name="Are_you_sure_subscribe">Вы уверены, что хотите подписаться?</string>
     <string name="Are_you_sure_blacklist">Вы уверены, что хотите добавить в черный список?</string>
 

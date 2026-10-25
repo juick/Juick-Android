@@ -101,6 +101,13 @@ fun FeedScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        App.instance.postUpdates.collect { updated ->
+            allPosts = allPosts.map { post -> if (post.mid == updated.mid && post.rid == 0) updated else post }
+            if (feedState?.isSuccess == true) feedState = Result.success(allPosts)
+        }
+    }
+
     fun removePost(mid: Int, rid: Int) {
         allPosts = allPosts.filterNot { it.mid == mid && (rid == 0 || it.rid == rid) }
         if (feedState?.isSuccess == true) feedState = Result.success(allPosts)

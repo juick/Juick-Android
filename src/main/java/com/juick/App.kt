@@ -36,6 +36,7 @@ import com.juick.api.model.Post
 import com.juick.api.model.PostResponse
 import com.juick.api.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -237,6 +238,7 @@ class App : Application() {
 
     var signInProvider: SignInProvider? = null
     val messages = MutableStateFlow<List<Post>>(listOf())
+    val postUpdates = MutableSharedFlow<Post>(extraBufferCapacity = 8)
 
     companion object {
         init {

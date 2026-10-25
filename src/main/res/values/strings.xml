@@ -66,7 +66,11 @@
     <string name="Recommended">Recommended</string>
     <string name="Subscribed">Subscribed</string>
     <string name="added_to_ignore_list">Added to ignore list</string>
-    <string name="Are_you_sure_recommend">Are you sure you want to recommend?</string>
+    <string name="Recommend_post">Recommend post?</string>
+    <string name="Remove_recommendation">Remove recommendation?</string>
+    <string name="recommendation_will_be_public">Your recommendation of @%1$s\'s post will be public.</string>
+    <string name="recommendation_will_be_removed">Your recommendation will be removed.</string>
+    <string name="remove">Remove</string>
     <string name="Are_you_sure_subscribe">Are you sure you want to subscribe?</string>
     <string name="Are_you_sure_blacklist">Are you sure you want to blacklist?</string>
 
