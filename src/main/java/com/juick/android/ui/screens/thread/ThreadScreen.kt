@@ -145,7 +145,7 @@ fun ThreadScreen(
         scope.launch {
             try {
                 val updated = App.instance.api.subscribe(mid)
-                posts = listOf(head.copy(subscribed = updated.subscribed)) + posts.drop(1)
+                posts = listOf(head.copyFull(subscribed = updated.subscribed)) + posts.drop(1)
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {

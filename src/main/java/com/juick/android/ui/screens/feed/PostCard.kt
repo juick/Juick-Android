@@ -241,14 +241,34 @@ fun PostCard(
                 shape = RoundedCornerShape(14.dp),
                 containerColor = colors.textBackground,
             ) {
-                DropdownMenuItem(text = { Text(stringResource(R.string.Share)) }, onClick = {
-                    menuExpanded = false
-                    val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(android.content.Intent.EXTRA_TEXT, "https://juick.com/m/${post.mid}")
-                    }
-                    context.startActivity(intent)
-                })
+                onSubscribeToggle?.let { toggle ->
+                    DropdownMenuItem(
+                        text = { Text(stringResource(if (post.subscribed) R.string.subscribed else R.string.subscribe)) },
+                        leadingIcon = {
+                            Icon(
+                                painterResource(if (post.subscribed) R.drawable.ic_ei_check else R.drawable.ic_ei_eye),
+                                null,
+                                tint = if (post.subscribed) colors.primary else colors.tag,
+                            )
+                        },
+                        onClick = {
+                            menuExpanded = false
+                            toggle()
+                        },
+                    )
+                }
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.Share)) },
+                    leadingIcon = { Icon(painterResource(R.drawable.ic_ei_share), null, tint = colors.dimmed) },
+                    onClick = {
+                        menuExpanded = false
+                        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(android.content.Intent.EXTRA_TEXT, "https://juick.com/m/${post.mid}")
+                        }
+                        context.startActivity(intent)
+                    },
+                )
                 if (currentUid > 0 && post.user.uid == currentUid) {
                     if (isPremiumOrAdmin && post.rid == 0) {
                         val label = if (post.friendsOnly) R.string.make_public else R.string.make_private
@@ -516,7 +536,7 @@ fun PostCard(
         }
         body()
         media()
-        if (showCounters || onSubscribeToggle != null) {
+        if (showCounters) {
             Row(Modifier.fillMaxWidth().padding(top = 4.dp)) {
                 ActionLabel(
                     icon = R.drawable.ic_ei_heart,
@@ -525,23 +545,13 @@ fun PostCard(
                     onClick = onLikeClick,
                     modifier = Modifier.weight(1f),
                 )
-                if (onSubscribeToggle != null) {
-                    ActionLabel(
-                        icon = if (post.subscribed) R.drawable.ic_ei_check else R.drawable.ic_ei_eye,
-                        text = stringResource(if (post.subscribed) R.string.subscribed else R.string.subscribe),
-                        color = if (post.subscribed) colors.primary else colors.tag,
-                        onClick = onSubscribeToggle,
-                        modifier = Modifier.weight(1f),
-                    )
-                } else {
-                    ActionLabel(
-                        icon = R.drawable.ic_ei_comment,
-                        text = if (post.replies > 0) "${post.replies}" else stringResource(R.string.reply),
-                        color = colors.tag,
-                        onClick = onReplyClick ?: onPostClick,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+                ActionLabel(
+                    icon = R.drawable.ic_ei_comment,
+                    text = if (!inThread && post.replies > 0) "${post.replies}" else stringResource(R.string.reply),
+                    color = colors.tag,
+                    onClick = onReplyClick ?: onPostClick,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }

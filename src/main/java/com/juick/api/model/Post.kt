@@ -95,6 +95,31 @@ data class Post(
         return body
     }
 
+    /**
+     * The generated data-class copy() only carries constructor properties, so it drops
+     * body, timestamp, tags, entities, counters and attachment — use this when
+     * changing [subscribed] or [liked] on a post received from the API.
+     */
+    fun copyFull(subscribed: Boolean = this.subscribed, liked: Boolean = this.liked): Post =
+        Post(user, mid, rid, subscribed, liked).also { post ->
+            post.replyto = replyto
+            post.to = to
+            post.body = body
+            post.timestamp = timestamp
+            post.tags = tags
+            post.replies = replies
+            post.likes = likes
+            post.repliesby = repliesby
+            post.replyQuote = replyQuote
+            post.photo = photo
+            post.friendsOnly = friendsOnly
+            post.isService = isService
+            post.recommendations = recommendations
+            post.entities = entities
+            post.nextRid = nextRid
+            post.prevRid = prevRid
+        }
+
     fun setBody(body: String?) {
         this.body = body
     }
